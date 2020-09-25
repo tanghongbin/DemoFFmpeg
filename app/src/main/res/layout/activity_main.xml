@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <com.example.democ.CustomSurfaceView
+        android:layout_width="match_parent"
+        android:id="@+id/mSurface"
+        android:layout_height="300dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开始" />
+
+        <Button
+            android:id="@+id/stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="结束" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/nativeRecordStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="native录音开始" />
+
+        <Button
+            android:id="@+id/nativeRecordStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="native录音结束" />
+
+        <Button
+            android:id="@+id/mOpenGlEs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OpenGL ES" />
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/nativePlayStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="native播放开始" />
+
+        <Button
+            android:id="@+id/nativePlayStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="native播放结束" />
+
+    </LinearLayout>
+
+    <SurfaceView
+        android:layout_weight="1"
+        android:id="@+id/mBottomSurface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+</LinearLayout>
