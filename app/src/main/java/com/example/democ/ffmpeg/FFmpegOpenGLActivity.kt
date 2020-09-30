@@ -19,6 +19,7 @@ class FFmpegOpenGLActivity : AppCompatActivity() {
         init()
     }
 
+
     private fun init() {
         val activityManager: ActivityManager =
             getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
