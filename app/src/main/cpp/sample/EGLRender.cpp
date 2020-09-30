@@ -2,7 +2,7 @@
 // Created by ByteFlow on 2019/7/17.
 //
 
-#include <GLUtils.h>
+#include <CustomGLUtils.h>
 #include "EGLRender.h"
 
 #define VERTEX_POS_LOC  0

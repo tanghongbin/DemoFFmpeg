@@ -8,7 +8,7 @@
 #include <EGLRender.h>
 #include "utils.h"
 #include "test/MyGLRenderContext.h"
-#include "GLUtils.h"
+#include "utils/CustomGLUtils.h"
 //com.example.democ.opengles
 #define NATIVE_RENDER_CLASS_NAME "com/example/democ/opengles/NativeRender"
 

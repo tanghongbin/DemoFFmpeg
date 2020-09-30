@@ -5,7 +5,7 @@
 
 #include "TextureSample.h"
 #include <GLES3/gl3.h>
-#include "../utils/GLUtils.h"
+#include "CustomGLUtils.h"
 #include "ImageDef.h"
 
 void TextureSample::init() {

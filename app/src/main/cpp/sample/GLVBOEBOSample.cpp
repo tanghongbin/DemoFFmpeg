@@ -2,7 +2,7 @@
 // Created by Admin on 2020/8/26.
 //
 
-#include <GLUtils.h>
+#include <CustomGLUtils.h>
 #include "GLVBOEBOSample.h"
 
 /**

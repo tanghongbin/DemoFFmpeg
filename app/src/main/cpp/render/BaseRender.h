@@ -11,9 +11,13 @@ extern "C" {
 };
 
 #include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/jni.h"
+#include "VideoRenderInterface.h"
 
 class BaseRender {
+
 public:
+    VideoRenderInterface* mRenderInterface;
+
     virtual void init(AVCodecContext *pContext, JNIEnv *pEnv, _jobject *pJobject) = 0;
 
     virtual void draw_frame(AVCodecContext *pContext, AVFrame *pFrame, JNIEnv *pEnv, _jobject *pJobject) = 0;

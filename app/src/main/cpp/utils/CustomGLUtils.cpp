@@ -16,6 +16,7 @@
 #include <BaseRender.h>
 #include <VideoRender.h>
 #include <AudioRender.h>
+#include <YuvToImageRender.h>
 
 
 extern "C" {
@@ -127,14 +128,9 @@ void testLocalThread() {
 const char *encodeYuvToImageUtils(const char *filePath) {
 
     const char *IN_VALID_RESULT = "";
-    LOGCATE("打印yuv图片地址:%s",filePath);
+    LOGCATE("打印yuv图片地址:%s", filePath);
 
     AVFormatContext *pFormatContext;
-    AVOutputFormat *fmt;
-    AVStream *video_st;
-    AVCodecContext *pCodecCtx;
-    AVCodec *pCodec;
-    AVCodecParameters* avCodecParameters;
 
     uint8_t *picture_buf;
     AVFrame *picture;
@@ -149,84 +145,87 @@ const char *encodeYuvToImageUtils(const char *filePath) {
     const char *outfile = "/storage/emulated/0/test_out_file.jpg";
     in_file = fopen(filePath, "r+b");
 
-    av_register_all();
     pFormatContext = avformat_alloc_context();
-    fmt = av_guess_format("mjpeg", NULL, NULL);
-    pFormatContext->oformat = fmt;
+    pFormatContext->oformat = av_guess_format("mjpeg", NULL, NULL);
     if (avio_open(&pFormatContext->pb, outfile, AVIO_FLAG_READ_WRITE) < 0) {
         LOGCATE("can't open file");
         return IN_VALID_RESULT;
     }
-    video_st = avformat_new_stream(pFormatContext, 0);
+    AVStream *video_st = avformat_new_stream(pFormatContext, 0);
     if (video_st == NULL) {
         LOGCATE("create new stream failed ");
         return IN_VALID_RESULT;
     }
-    pCodec = avcodec_find_encoder(fmt->video_codec);
-    if (!pCodec) {
-        LOGCATE("can't find encoder");
+    //5. 根据流找到解码器id,因为流里面有对应的编码信息
+    AVCodecParameters *code_params = video_st->codecpar;
+    AVCodec *encoder = avcodec_find_decoder(AV_CODEC_ID_MJPEG);
+    if (encoder == nullptr) {
+        LOGCATE("can't find decoder");
         return IN_VALID_RESULT;
     }
-    LOGCATE("prepare fill codec params");
 
-    pCodecCtx = avcodec_alloc_context3(pCodec);
-//    pCodecCtx->codec_id = fmt->video_codec;
-//    pCodecCtx->codec_type = AVMEDIA_TYPE_VIDEO;
-//    pCodecCtx->pix_fmt = AV_PIX_FMT_YUV420P;
-//
-//    pCodecCtx->width = width;
-//    pCodecCtx->height = height;
-//
-//    pCodecCtx->time_base.num = 1;
-//    pCodecCtx->time_base.den = 25;
-//    if (avcodec_parameters_to_context(pCodecCtx, avCodecParameters) != 0) {
-//        LOGCATE("avcodec_parameters_to_context failed");
-//        return IN_VALID_RESULT;
-//    }
-//    av_dump_format(pFormatContext, 0, outfile, 1);
-
-    if (avcodec_open2(pCodecCtx,pCodec,NULL) < 0){
-        LOGCATE("open encoder failed");
+    //6.创建解码器上下文
+    AVCodecContext *pCodecCtx = avcodec_alloc_context3(encoder);
+    if (avcodec_parameters_to_context(pCodecCtx, code_params) != 0) {
+        LOGCATE("avcodec_parameters_to_context failed");
         return IN_VALID_RESULT;
     }
+    pCodecCtx->codec_id = AV_CODEC_ID_MJPEG;
+    pCodecCtx->codec_type = AVMEDIA_TYPE_VIDEO;
+    pCodecCtx->pix_fmt = AV_PIX_FMT_YUV420P;
+
+    pCodecCtx->width = width;
+    pCodecCtx->height = height;
+
+    pCodecCtx->time_base.num = 1;
+    pCodecCtx->time_base.den = 25;
+
+    // 7.打开解码器
+    int openResult = avcodec_open2(pCodecCtx, encoder, NULL);
+    if (openResult < 0) {
+        LOGCATE("open codec failed : %d", openResult);
+        return IN_VALID_RESULT;
+    }
+
     picture = av_frame_alloc();
-    size = av_image_get_buffer_size(pCodecCtx->pix_fmt,pCodecCtx->width,pCodecCtx->height,1);
-    picture_buf = (uint8_t *)av_malloc(size);
-    if (!picture_buf){
+    size = av_image_get_buffer_size(pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height, 1);
+    picture_buf = (uint8_t *) av_malloc(size);
+    if (!picture_buf) {
         LOGCATE("picture_buf malloc failed");
         return IN_VALID_RESULT;
     }
 
-    avpicture_fill(reinterpret_cast<AVPicture *>(picture), picture_buf, pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height);
+    avpicture_fill(reinterpret_cast<AVPicture *>(picture), picture_buf, pCodecCtx->pix_fmt,
+                   pCodecCtx->width, pCodecCtx->height);
 
-    avformat_write_header(pFormatContext,NULL);
+    avformat_write_header(pFormatContext, NULL);
     y_size = pCodecCtx->width * pCodecCtx->height;
-    av_new_packet(pkt,y_size*3);
+    av_new_packet(pkt, y_size * 3);
     //read yuv
-    if (fread(picture_buf,1,y_size*3/2,in_file) < 0){
+    if (fread(picture_buf, 1, y_size * 3 / 2, in_file) < 0) {
         LOGCATE("can't open input file");
         return IN_VALID_RESULT;
     }
     picture->data[0] = picture_buf;
     picture->data[0] = picture_buf + y_size;
-    picture->data[0] = picture_buf + y_size*5/4;
+    picture->data[0] = picture_buf + y_size * 5 / 4;
 
     // encode
-    ret = avcodec_encode_video2(pCodecCtx,pkt,picture,&got_picture);
+    ret = avcodec_encode_video2(pCodecCtx, pkt, picture, &got_picture);
     if (ret < 0) {
         LOGCATE("encode error");
         return IN_VALID_RESULT;
     }
-    if (got_picture == 1){
+    if (got_picture == 1) {
         pkt->stream_index = video_st->index;
-        ret = av_write_frame(pFormatContext,pkt);
+        ret = av_write_frame(pFormatContext, pkt);
     }
 
     av_free_packet(pkt);
     av_write_trailer(pFormatContext);
 
     LOGCATE("encode successful");
-    if (video_st){
+    if (video_st) {
         avcodec_close(pCodecCtx);
         av_free((picture));
         av_free(picture_buf);
@@ -353,8 +352,17 @@ void createThreadForPlay(JNIEnv *jniEnv, _jstring *url, _jobject *pJobject, jint
 }
 
 BaseRender *getRender(jint type) {
-    if (type == 1) return new AudioRender();
-    return new VideoRender;
+    // 1-音频，2-视频-nativeWindow，3-视频-opengl
+    BaseRender* render;
+    switch(type){
+        case 1: render = new AudioRender();
+            break;
+        case 2: render = new VideoRender();
+            break;
+        case 3: render = new YuvToImageRender();
+            break;
+    }
+    return render;
 }
 
 void *test(void *params) {

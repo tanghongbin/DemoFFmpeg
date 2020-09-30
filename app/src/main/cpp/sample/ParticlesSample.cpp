@@ -3,7 +3,7 @@
 //
 
 #include <cstdlib>
-#include <GLUtils.h>
+#include <CustomGLUtils.h>
 #include <gtc/matrix_transform.hpp>
 #include "ParticlesSample.h"
 

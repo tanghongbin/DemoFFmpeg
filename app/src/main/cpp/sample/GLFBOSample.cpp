@@ -2,7 +2,7 @@
 // Created by Admin on 2020/8/27.
 //
 
-#include <GLUtils.h>
+#include <CustomGLUtils.h>
 #include <MyGLRenderContext.h>
 #include "GLFBOSample.h"
 

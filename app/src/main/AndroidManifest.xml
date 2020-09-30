@@ -22,22 +22,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ffmpeg.FFmpegEncodeActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".ffmpeg.FFmpegOpenGLActivity"
+            >
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity>
-        <activity android:name=".activity.ThreadTestActivity"></activity>
+        <activity android:name=".ffmpeg.FFmpegEncodeActivity">
+
+        </activity>
+        <activity android:name=".activity.ThreadTestActivity" />
         <activity
             android:name=".ffmpeg.FFmpegVideoActivity"
             android:configChanges="keyboard|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+             <intent-filter>
+             <action android:name="android.intent.action.MAIN" />
+
+
+             <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
         </activity>
         <activity android:name=".opengles.OpenGLImageReaderActivity">
 

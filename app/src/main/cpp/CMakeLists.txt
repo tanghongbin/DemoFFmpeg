@@ -11,6 +11,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
+set(libName native-render)
 
 include_directories(
         sample
@@ -22,7 +23,7 @@ include_directories(
 
 
 file(GLOB src-files
-        ${CMAKE_SOURCE_DIR}/*.cpp
+        ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
         ${CMAKE_SOURCE_DIR}/render/*.cpp
         ${CMAKE_SOURCE_DIR}/test/*.cpp
@@ -37,7 +38,7 @@ file(GLOB src-files
 # completing its build.
 
 add_library( # Sets the name of the library.
-        native-render
+        ${libName}
 
         # Sets the library as a shared library.
         SHARED
@@ -80,7 +81,7 @@ set(third-party-libs
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
-target_link_libraries(native-render
+target_link_libraries(${libName}
         ${OpenSLES-lib}
         ${log-lib}
         ${third-party-libs}

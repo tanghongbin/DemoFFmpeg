@@ -7,7 +7,7 @@ extern "C" {
 }
 
 #include "AudioRender.h"
-#include "GLUtils.h"
+#include "CustomGLUtils.h"
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 

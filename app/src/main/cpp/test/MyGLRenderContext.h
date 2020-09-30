@@ -11,7 +11,7 @@
 #include <GLYuvSample.h>
 #include <GLVBOEBOSample.h>
 #include "utils.h"
-#include "../utils/GLUtils.h"
+#include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include <GLFBOSample.h>
 #include <GLEglSample.h>
@@ -28,7 +28,7 @@ private:
 
     ~MyGLRenderContext();
 
-    TextureSample *m_Sample;
+    GLBaseSample *m_Sample;
 
 
     static MyGLRenderContext *m_pContext;
@@ -49,6 +49,7 @@ public:
 
     static void DestroyInstance();
 
+    GLBaseSample *generateSample(int type);
 };
 
 #endif //DEMOC_MYGLRENDERCONTEXT_H

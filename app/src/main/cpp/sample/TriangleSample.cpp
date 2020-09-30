@@ -1,7 +1,7 @@
 //
 // Created by Admin on 2020/8/24.
 //
-#include "GLUtils.h"
+#include "CustomGLUtils.h"
 #include "TriangleSample.h"
 
 

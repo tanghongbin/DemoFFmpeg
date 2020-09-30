@@ -11,7 +11,7 @@ extern "C"{
 #include <unistd.h>
 #include <ImageDef.h>
 #include <time.h>
-#include <GLUtils.h>
+#include <CustomGLUtils.h>
 #include "VideoRender.h"
 #include "utils.h"
 

@@ -7,7 +7,7 @@
 #include <GLFBOSample.h>
 #include <GLEglSample.h>
 #include <CoordinateSystemSample.h>
-#include "../utils/GLUtils.h"
+#include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
 #include "TextureSample.h"
@@ -17,7 +17,35 @@
 MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
-    m_Sample = new TextureSample();
+    m_Sample = generateSample(2);
+}
+
+GLBaseSample *MyGLRenderContext::generateSample(int type) {
+    GLBaseSample *sample;
+    switch (type) {
+        case 1:
+            sample = new TriangleSample();
+            break;
+        case 2:
+            sample = new TextureSample();
+            break;
+        case 3:
+            sample = new ParticlesSample();
+            break;
+        case 4:
+            sample = new GLYuvSample();
+            break;
+        case 5:
+            sample = new GLVBOEBOSample();
+            break;
+        case 6:
+            sample = new GLFBOSample();
+            break;
+        case 7:
+            sample = new CoordinateSystemSample();
+            break;
+    }
+    return sample;
 }
 
 MyGLRenderContext::~MyGLRenderContext() {
@@ -62,8 +90,8 @@ void MyGLRenderContext::OnSurfaceChanged(int width, int height) {
     glViewport(0, 0, width, height);
     MyGLRenderContext::width = width;
     MyGLRenderContext::height = height;
-    m_Sample -> screenWidth = width;
-    m_Sample -> screenHeight = height;
+    m_Sample->screenWidth = width;
+    m_Sample->screenHeight = height;
 }
 
 void MyGLRenderContext::OnDrawFrame() {

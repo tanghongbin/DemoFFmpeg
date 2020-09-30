@@ -3,7 +3,7 @@
 //
 
 #include "GLYuvSample.h"
-#include "../utils/GLUtils.h"
+#include "CustomGLUtils.h"
 #include <GLES3/gl3.h>
 #include <string>
 #include "string.h"
