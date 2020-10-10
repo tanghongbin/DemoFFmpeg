@@ -16,11 +16,12 @@ extern "C" {
 class BaseRender {
 
 public:
+
     VideoRenderInterface* mRenderInterface;
 
-    virtual void init(AVCodecContext *pContext, JNIEnv *pEnv, _jobject *pJobject) = 0;
+    virtual void init(AVCodecContext *pContext, _jobject *instance, _jobject *pJobject) = 0;
 
-    virtual void draw_frame(AVCodecContext *pContext, AVFrame *pFrame, JNIEnv *pEnv, _jobject *pJobject) = 0;
+    virtual void draw_frame(AVCodecContext *pContext, AVFrame *pFrame, _jobject *pJobject) = 0;
 
     virtual void unInit() = 0;
 

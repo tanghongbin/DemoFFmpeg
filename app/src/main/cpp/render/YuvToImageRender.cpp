@@ -14,7 +14,7 @@ extern "C" {
 int YuvToImageRender::mWindowWidth = 0;
 int YuvToImageRender::mWindowHeight = 0;
 
-void YuvToImageRender::init(AVCodecContext *pContext, JNIEnv *pEnv, _jobject *pJobject) {
+void YuvToImageRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *pJobject) {
     mCodeCtx = pContext;
     LOGCATE("prepare draw each frame");
     m_VideoWidth = pContext->width;
@@ -75,7 +75,7 @@ void YuvToImageRender::unInit() {
     }
 }
 
-void YuvToImageRender::draw_frame(AVCodecContext *pContext, AVFrame *frame, JNIEnv *pEnv,
+void YuvToImageRender::draw_frame(AVCodecContext *pContext, AVFrame *frame,
                              _jobject *pJobject)  {
 
     NativeImage image;

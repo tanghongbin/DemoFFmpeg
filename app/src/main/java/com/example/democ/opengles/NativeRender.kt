@@ -2,10 +2,13 @@ package com.example.democ.opengles
 
 import android.graphics.BitmapFactory
 import android.opengl.GLSurfaceView
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Surface
 import com.example.democ.R
 import com.example.democ.getAppContext
+import com.example.democ.interfaces.MsgCallback
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -17,11 +20,14 @@ class NativeRender
     : GLSurfaceView.Renderer
 {
 
+    private var mCall: MsgCallback? = null
 
     val IMAGE_FORMAT_RGBA = 0x01
     val IMAGE_FORMAT_NV21 = 0x02
     val IMAGE_FORMAT_NV12 = 0x03
     val IMAGE_FORMAT_I420 = 0x04
+
+    private val mHandler = Handler(Looper.getMainLooper())
 
     companion object {
         // Used to load the 'native-lib' library on application startup.
@@ -34,6 +40,10 @@ class NativeRender
         fun log(str: String) {
             Log.d(TAG, str)
         }
+    }
+
+    fun setMsgCall(block:MsgCallback){
+        mCall = block
     }
 
 
@@ -89,6 +99,14 @@ class NativeRender
         }
     }
 
+    private fun nativeMsgCallback(type: Int){
+        log("java layer has received msg:${type} call:${mCall}")
+
+        mHandler.post {
+            mCall?.callback(type)
+        }
+    }
+
     /**
      * {"native_OnInit",           "()V",      (void *) (native_OnInit)},
     {"native_OnUnInit",         "()V",      (void *) (native_OnUnInit)},
@@ -125,6 +143,10 @@ class NativeRender
 
     external fun testThread()
 
-    external fun playMP4(url:String,surface: Surface,type: Int)
+    external fun playMP4(url:String,surface: Surface?)
+
+    external fun native_getVideoWidth():Int
+
+    external fun native_getVideoHeight():Int
 
 }

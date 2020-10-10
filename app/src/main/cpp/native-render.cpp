@@ -6,6 +6,8 @@
 #include <jni.h>
 #include <android/log.h>
 #include <EGLRender.h>
+#include <VideoRender.h>
+#include <PlayMp4Instance.h>
 #include "utils.h"
 #include "test/MyGLRenderContext.h"
 #include "utils/CustomGLUtils.h"
@@ -76,6 +78,24 @@ JNIEXPORT jstring JNICALL getAvCodeInfo(JNIEnv *env, jobject instance) {
     return env -> NewStringUTF(result.c_str());
 }
 
+/*
+ * Class:     com_byteflow_app_MyNativeRender
+ * Method:    native_OnSurfaceCreated
+ * Signature: ()V
+ */
+JNIEXPORT jint JNICALL native_getVideoWidth(JNIEnv *env, jobject instance) {
+    return VideoRender::m_RenderWidth;
+}
+
+/*
+ * Class:     com_byteflow_app_MyNativeRender
+ * Method:    native_OnSurfaceCreated
+ * Signature: ()V
+ */
+JNIEXPORT jint JNICALL native_getVideoHeight(JNIEnv *env, jobject instance) {
+    return VideoRender::m_RenderHeight;
+}
+
 JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jstring url) {
     const char * result = env->GetStringUTFChars(url, 0);
     std::string encodedPath = encodeYuvToImageUtils(result);
@@ -88,16 +108,24 @@ JNIEXPORT void JNICALL testThread(JNIEnv *env, jobject instance) {
 
 }
 
-
+PlayMp4Instance* playMp4Instance;
 
 /**
  * 播放本地MP4文件
  * @param env
  * @param instance
  */
-JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface,jint type) {
+JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface) {
     LOGCATE("prepare play mp4");
-    createThreadForPlay(env, url, surface,type);
+    if (playMp4Instance != nullptr){
+        playMp4Instance->unInit();
+        delete playMp4Instance;
+        playMp4Instance = nullptr;
+    }
+    playMp4Instance = new PlayMp4Instance();
+    const char * playUrl = env->GetStringUTFChars(url,0);
+    LOGCATE("prepare init mp4 , detected address %s",playUrl);
+    playMp4Instance->init(playUrl,env,instance,surface);
 }
 
 
@@ -163,6 +191,8 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
         {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
+        {"native_getVideoWidth",      "()I",      (void *) (native_getVideoWidth)},
+        {"native_getVideoHeight",      "()I",      (void *) (native_getVideoHeight)},
         {"native_eglInit",      "()V",      (void *) (native_eglInit)},
         {"testThread",      "()V",      (void *) (testThread)},
         {"native_eglDraw",      "()V",      (void *) (native_eglDraw)},
@@ -170,7 +200,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_eglSetImageData",     "(II[B)V", (void *) (native_eglSetImageData)},
         {"getAvCodeInfo",     "()Ljava/lang/String;", (void *) (getAvCodeInfo)},
         {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
-        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;I)V", (void *) (playMP4)}
+        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
 };
 
 static int RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum)

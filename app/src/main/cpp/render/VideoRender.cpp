@@ -4,28 +4,32 @@
 
 extern "C"{
 #include <libavutil/imgutils.h>
+#include <libavformat/avformat.h>
 }
 
-#include <android/native_window.h>
-#include <android/native_window_jni.h>
 #include <unistd.h>
 #include <ImageDef.h>
 #include <time.h>
 #include <CustomGLUtils.h>
 #include "VideoRender.h"
 #include "utils.h"
+#include "PlayMp4Instance.h"
 
+int VideoRender::m_RenderWidth = 0;
+int VideoRender::m_RenderHeight = 0;
 
-void VideoRender::init(AVCodecContext *pContext, JNIEnv *pEnv, _jobject *pJobject) {
+void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *pJobject) {
 
     LOGCATE("prepare draw each frame");
     m_VideoWidth = pContext->width;
     m_VideoHeight = pContext->height;
     LOGCATE("video width:%d  height:%d", m_VideoWidth, m_VideoHeight);
 
-
+    bool isAttach = false;
+    JNIEnv* jniEnv = PlayMp4Instance::GetEnv(&isAttach);
     //1. 利用 Java 层 SurfaceView 传下来的 Surface 对象，获取 ANativeWindow
-    m_NativeWindow = ANativeWindow_fromSurface(pEnv, pJobject);
+    m_NativeWindow = ANativeWindow_fromSurface(jniEnv, pJobject);
+    if (isAttach) PlayMp4Instance::detachCurrentThread();
 
     int windowWidth = ANativeWindow_getWidth(m_NativeWindow);
     int windowHeight = ANativeWindow_getHeight(m_NativeWindow);
@@ -56,6 +60,8 @@ void VideoRender::init(AVCodecContext *pContext, JNIEnv *pEnv, _jobject *pJobjec
     av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize, m_FrameBuffer, AV_PIX_FMT_RGBA,
                          m_VideoWidth, m_VideoHeight, 1);
 
+    PlayMp4Instance::sendMsg(MSG_TYPE_READY);
+
     LOGCATE("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth, windowHeight, m_RenderWidth, m_RenderHeight);
 
 }
@@ -80,9 +86,10 @@ void VideoRender::unInit() {
     //4. 释放 ANativeWindow
     if (m_NativeWindow)
         ANativeWindow_release(m_NativeWindow);
+
 }
 
-void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame, JNIEnv *pEnv,
+void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
                              _jobject *pJobject)  {
 
     // 如果当前视频帧不符合要求，直接返回
@@ -131,20 +138,21 @@ bool VideoRender::checkFrameValid(AVFrame *pFrame) {
 
     while (true){
         int64_t differ = pFrame->pts - GLUtilC::master_audio_clock;
-        LOGCATE("当前视频帧值:%jd  音频帧值%jd   当前差值differ:%jd",pFrame->pts,GLUtilC::master_audio_clock,differ);
+//        LOGCATE("当前视频帧值:%jd  音频帧值%jd   当前差值differ:%jd",pFrame->pts,GLUtilC::master_audio_clock,differ);
         if (abs(differ) <= STANDRAD_VALUE){
             break;
         }
         if (differ > 0){
-            LOGCATE("当前超前了，需要等待");
+//            LOGCATE("当前超前了，需要等待");
             usleep(10 * 1000);
             continue;
         }
         if (differ < 0 && abs(differ) > 25 * 1000) {
-            LOGCATE("当前视频滞后了");
+//            LOGCATE("当前视频滞后了");
             return false;
         }
     }
 
     return true;
 }
+

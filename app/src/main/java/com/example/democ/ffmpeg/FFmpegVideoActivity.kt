@@ -7,16 +7,22 @@ import android.view.WindowManager
 import com.example.democ.R
 import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_BIG_PATH
 import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_PATH
+import com.example.democ.audio.log
+import com.example.democ.interfaces.MsgCallback
 import com.example.democ.opengles.NativeRender
 import com.example.democ.requestPermissions
+import com.example.democ.utils.MSG_TYPE_ONREADY
 import com.tbruyelle.rxpermissions2.RxPermissions
 import kotlinx.android.synthetic.main.activity_f_fmpeg_video.*
 
-class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback {
+class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallback {
 
+    lateinit var mNativeRender: NativeRender
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_video)
+        mNativeRender = NativeRender()
+        mNativeRender.setMsgCall(this)
         mSurface.holder.addCallback(this)
         keepScreenOn()
     }
@@ -34,16 +40,29 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
 
-        val url = MP4_PLAY_PATH
-//        val url = MP4_PLAY_BIG_PATH
+//        val url = MP4_PLAY_PATH
+        val url = MP4_PLAY_BIG_PATH
         // 1-音频，2-视频
-        Thread{
-            holder?.let { NativeRender().playMP4(url,holder.surface,1) }
-        }.start()
-        Thread{
-            holder?.let { NativeRender().playMP4(url,holder.surface,2) }
-        }.start()
 
+        mNativeRender.playMP4(url,holder?.surface)
+
+
+    }
+
+    override fun callback(type: Int) {
+        when(type){
+            MSG_TYPE_ONREADY -> changeSize()
+        }
+    }
+
+    private fun changeSize() {
+        log("java layer current thread:${Thread.currentThread().name}")
+        val params = mSurface.layoutParams
+        params.width = mNativeRender.native_getVideoWidth()
+        params.height = mNativeRender.native_getVideoHeight()
+        mSurface.layoutParams = params
+        mSurface.requestLayout()
+        log("java layer chang size success ,width:${params.width}  height:${params.height}")
     }
 }
 

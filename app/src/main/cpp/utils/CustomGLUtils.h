@@ -17,18 +17,18 @@ public:
     static int64_t master_audio_clock;
 };
 
-struct ThreadParams{
+typedef struct thread_parmas_struct{
     _jstring *pJstring;
     _jobject *pJobject;
-};
+} ThreadParams;
 
-struct TestParams{
+typedef struct test_params_struct{
     int age;
     char * bookName;
     char * bookTitle;
-};
+} TestParams;
 
-void createThreadForPlay(JNIEnv *pEnv, _jstring *pJstring, _jobject *pJobject,jint type);
+void createThreadForPlay( _jobject *instance, const char *localUrl, _jobject *pJobject,jint type);
 
 void CheckGLError(const char *pGLOperation);
 

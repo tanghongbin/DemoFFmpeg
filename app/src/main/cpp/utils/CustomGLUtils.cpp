@@ -117,12 +117,27 @@ void CheckGLError(const char *pGLOperation) {
     }
 }
 
-void testParams(int age) {
-    LOGCATE("打印书的年龄:%d 名字: 标题:", age);
+std::thread* thread;
+
+void testParams(int age,const char * name,const char * title) {
+    int count = 0;
+    while (true){
+        count++;
+        LOGCATE("打印书的年龄:%d 名字:%s 标题:%s 当前次数:%d",age,name,title,count);
+        if (count > 10){
+            break;
+        }
+        sleep(1);
+    }
+//    LOGCATE("print thread id:%d",thread->get_id());
+//    delete thread;
+//    LOGCATE("after print thread id:%d",thread->get_id());
+    LOGCATE("testParams has finished");
 }
 
+
 void testLocalThread() {
-    std::thread(testParams, 1);
+    thread = new std::thread(testParams,1,"23232","adfasdfsfs");
 }
 
 const char *encodeYuvToImageUtils(const char *filePath) {
@@ -238,10 +253,8 @@ const char *encodeYuvToImageUtils(const char *filePath) {
 }
 
 
-void createThreadForPlay(JNIEnv *jniEnv, _jstring *url, _jobject *pJobject, jint type) {
+void createThreadForPlay( _jobject *instance, const char *localUrl, _jobject *pJobject, jint type) {
 
-    LOGCATE("thread start success");
-    const char *localUrl = jniEnv->GetStringUTFChars(url, 0);
     LOGCATE("播放地址:%s", localUrl);
 
     time_t t;
@@ -305,7 +318,15 @@ void createThreadForPlay(JNIEnv *jniEnv, _jstring *url, _jobject *pJobject, jint
     AVFrame *frame = av_frame_alloc();
 
     BaseRender *baseRender = getRender(type);
-    baseRender->init(decode_context, jniEnv, pJobject);
+    baseRender->init(decode_context, instance,pJobject);
+
+    // 直接跳转到中间位置
+    int64_t seek_target = static_cast<int64_t>(120 * 1000000);//微秒
+    int seekResult = avformat_seek_file(mFormatContext,m_StreamIndex,INT64_MIN,seek_target,INT64_MAX,0);
+    LOGCATE("seek result:%d",seekResult);
+    if (seekResult == 0){
+        avcodec_flush_buffers(decode_context);
+    }
 
     //9.解码循环
     while (av_read_frame(mFormatContext, packet) >= 0) { // 读取帧
@@ -316,7 +337,7 @@ void createThreadForPlay(JNIEnv *jniEnv, _jstring *url, _jobject *pJobject, jint
             baseRender->eachPacket(packet, decode_context);
             while (avcodec_receive_frame(decode_context, frame) == 0) {
                 //获取到 m_Frame 解码数据，在这里进行格式转换，然后进行渲染，下一节介绍 ANativeWindow 渲染过程
-                baseRender->draw_frame(decode_context, frame, jniEnv, pJobject);
+                baseRender->draw_frame(decode_context, frame, pJobject);
             }
         }
         av_packet_unref(packet);

@@ -5,13 +5,16 @@
 #ifndef DEMOC_VIDEORENDER_H
 #define DEMOC_VIDEORENDER_H
 
-#define STANDRAD_VALUE  25 * 1000
-
 #include "BaseRender.h"
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
 extern "C" {
 #include <libswscale/swscale.h>
 }
+
+#define STANDRAD_VALUE  25 * 1000
+
 
 class VideoRender : public BaseRender {
 
@@ -19,8 +22,6 @@ private:
     SwsContext *m_SwsContext;
     int m_VideoWidth;
     int m_VideoHeight;
-    int m_RenderWidth;
-    int m_RenderHeight;
     ANativeWindow *m_NativeWindow;
     ANativeWindow_Buffer m_NativeWindowBuffer;
 
@@ -28,11 +29,15 @@ private:
     uint8_t *m_FrameBuffer;
     time_t lastTime;
 
+
 public:
 
-    void init(AVCodecContext *pContext, JNIEnv *pEnv, _jobject *pJobject);
+    static int m_RenderWidth;
+    static int m_RenderHeight;
 
-    void draw_frame(AVCodecContext *pContext, AVFrame *pFrame, JNIEnv *pEnv, _jobject *pJobject);
+    void init(AVCodecContext *codeCtx, _jobject *instance, _jobject *pJobject);
+
+    void draw_frame(AVCodecContext *pContext, AVFrame *pFrame, _jobject *pJobject);
 
     void unInit();
 
@@ -41,6 +46,8 @@ public:
     bool checkFrameValid(AVFrame *pFrame);
 
     void eachPacket(AVPacket *packet, AVCodecContext *pContext);
+
+
 };
 
 

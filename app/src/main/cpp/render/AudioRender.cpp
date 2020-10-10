@@ -11,7 +11,7 @@ extern "C" {
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 
-void AudioRender::init(AVCodecContext *codeCtx, JNIEnv *pEnv, _jobject *pJobject) {
+void AudioRender::init(AVCodecContext *codeCtx, _jobject *instance, _jobject *pJobject) {
     //1. 生成 resample 上下文，设置输入和输出的通道数、采样率以及采样格式，初始化上下文
     m_SwrContext = swr_alloc();
 
@@ -45,12 +45,12 @@ void AudioRender::eachPacket(AVPacket *packet, AVCodecContext *pContext) {
     double bufferSizeEverySecond =
             2 * pContext->channels * pContext->sample_rate * pContext->sample_fmt;
     int64_t playTime =(int64_t)(packet->size / bufferSizeEverySecond * AV_TIME_BASE);
-    LOGCATE("每个packet的播放时间:%jd微妙  packet的时间戳:%jd",playTime,packet->pts);
+//    LOGCATE("每个packet的播放时间:%jd微妙  packet的时间戳:%jd",playTime,packet->pts);
     GLUtilC::master_audio_clock = packet->pts + playTime;
-    LOGCATE("每次音频的帧值:%jd",GLUtilC::master_audio_clock);
+//    LOGCATE("每次音频的帧值:%jd",GLUtilC::master_audio_clock);
 }
 
-void AudioRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame, JNIEnv *pEnv,
+void AudioRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
                              _jobject *pJobject) {
 
     // 2.申请输出buffer
