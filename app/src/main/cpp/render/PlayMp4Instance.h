@@ -7,6 +7,7 @@
 
 #include <thread>
 #include <jni.h>
+#include "BaseRender.h"
 
 #define MSG_TYPE_ERROR  0
 #define MSG_TYPE_READY  1
@@ -25,7 +26,10 @@ private:
     static jobject mNativeRender;
     jobject mSurfaceInstance;
 
+
 public:
+
+    static long totalDuration;
 
     void init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface);
 
@@ -36,6 +40,16 @@ public:
     static void sendMsg(int i);
 
     static void detachCurrentThread();
+
+    void seekPosition(int position);
+
+    static void createThreadForPlay(PlayMp4Instance* selefInstance, _jobject *instance, const char *localUrl, _jobject *pJobject,jint type);
+
+    void
+    decodeLoop(PlayMp4Instance *pInstance, AVFormatContext *mFormatContext,
+               AVCodecContext *decode_context,
+               AVPacket *packet, AVFrame *frame,BaseRender* baseRender,
+               jobject pJobject,int m_StreamIndex);
 };
 
 

@@ -50,6 +50,8 @@ public:
     void unInit();
 
     void eachPacket(AVPacket *packet, AVCodecContext *pContext);
+
+
 };
 
 

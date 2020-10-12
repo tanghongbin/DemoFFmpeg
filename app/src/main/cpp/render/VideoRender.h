@@ -47,6 +47,10 @@ public:
 
     void eachPacket(AVPacket *packet, AVCodecContext *pContext);
 
+    int getRenderType(){
+        return 1;
+    }
+
 
 };
 

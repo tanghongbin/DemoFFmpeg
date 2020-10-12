@@ -2,7 +2,7 @@
 // Created by Admin on 2020/9/16.
 //
 
-extern "C"{
+extern "C" {
 #include <libavutil/imgutils.h>
 #include <libavformat/avformat.h>
 }
@@ -18,6 +18,7 @@ extern "C"{
 int VideoRender::m_RenderWidth = 0;
 int VideoRender::m_RenderHeight = 0;
 
+
 void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *pJobject) {
 
     LOGCATE("prepare draw each frame");
@@ -26,7 +27,7 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     LOGCATE("video width:%d  height:%d", m_VideoWidth, m_VideoHeight);
 
     bool isAttach = false;
-    JNIEnv* jniEnv = PlayMp4Instance::GetEnv(&isAttach);
+    JNIEnv *jniEnv = PlayMp4Instance::GetEnv(&isAttach);
     //1. 利用 Java 层 SurfaceView 传下来的 Surface 对象，获取 ANativeWindow
     m_NativeWindow = ANativeWindow_fromSurface(jniEnv, pJobject);
     if (isAttach) PlayMp4Instance::detachCurrentThread();
@@ -62,7 +63,8 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
 
     PlayMp4Instance::sendMsg(MSG_TYPE_READY);
 
-    LOGCATE("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth, windowHeight, m_RenderWidth, m_RenderHeight);
+    LOGCATE("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
+            windowHeight, m_RenderWidth, m_RenderHeight);
 
 }
 
@@ -90,13 +92,13 @@ void VideoRender::unInit() {
 }
 
 void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
-                             _jobject *pJobject)  {
+                             _jobject *pJobject) {
 
     // 如果当前视频帧不符合要求，直接返回
-    if (!checkFrameValid(pFrame)){
-//        LOGCATE("当前视频镇不合格:%d",pFrame->key_frame);
-        return;
-    }
+//    if (!checkFrameValid(pFrame)){
+////        LOGCATE("当前视频镇不合格:%d",pFrame->key_frame);
+//        return;
+//    }
 //3. 格式转换
     sws_scale(m_SwsContext, pFrame->data, pFrame->linesize, 0, m_VideoHeight, m_RGBAFrame->data,
               m_RGBAFrame->linesize);
@@ -104,7 +106,7 @@ void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
 //    LOGCATE("log every frame timestamp:%jd",(pFrame->pts));
 //    LOGCATE("log every frame best timestamp:%jd",(pFrame->best_effort_timestamp));
 
-//    usleep(16 * 1000);
+    usleep(16 * 1000);
 }
 
 void VideoRender::displayToSurface(AVFrame *pFrame) {
@@ -136,13 +138,13 @@ void VideoRender::eachPacket(AVPacket *packet, AVCodecContext *pContext) {
 
 bool VideoRender::checkFrameValid(AVFrame *pFrame) {
 
-    while (true){
+    while (true) {
         int64_t differ = pFrame->pts - GLUtilC::master_audio_clock;
 //        LOGCATE("当前视频帧值:%jd  音频帧值%jd   当前差值differ:%jd",pFrame->pts,GLUtilC::master_audio_clock,differ);
-        if (abs(differ) <= STANDRAD_VALUE){
+        if (abs(differ) <= STANDRAD_VALUE) {
             break;
         }
-        if (differ > 0){
+        if (differ > 0) {
 //            LOGCATE("当前超前了，需要等待");
             usleep(10 * 1000);
             continue;

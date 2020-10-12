@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#ffffff"
+    android:orientation="vertical"
     tools:context=".ffmpeg.FFmpegVideoActivity">
 
     <SurfaceView
@@ -12,5 +13,12 @@
         android:id="@+id/mSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:layout_width="match_parent"
+        android:id="@+id/mSeekBar"
+        android:layout_gravity="bottom"
+        android:layout_height="50dp"/>
+
 
 </FrameLayout>

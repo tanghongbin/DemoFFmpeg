@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
 import android.view.WindowManager
+import android.widget.SeekBar
 import com.example.democ.R
 import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_BIG_PATH
 import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_PATH
@@ -24,6 +25,19 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
         mNativeRender = NativeRender()
         mNativeRender.setMsgCall(this)
         mSurface.holder.addCallback(this)
+        mSeekBar.setOnSeekBarChangeListener(object :SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                log("java -current progress ${seekBar?.progress}")
+                mNativeRender.native_seekPosition(seekBar?.progress ?: 0)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+        })
         keepScreenOn()
     }
 
@@ -56,7 +70,8 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
     }
 
     private fun changeSize() {
-        log("java layer current thread:${Thread.currentThread().name}")
+        mSeekBar?.max = mNativeRender.native_getTotalDuration()?.toInt()
+        log("java layer current thread:${Thread.currentThread().name} max progress:${mNativeRender.native_getTotalDuration()}")
         val params = mSurface.layoutParams
         params.width = mNativeRender.native_getVideoWidth()
         params.height = mNativeRender.native_getVideoHeight()

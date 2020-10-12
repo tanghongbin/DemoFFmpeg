@@ -28,8 +28,6 @@ typedef struct test_params_struct{
     char * bookTitle;
 } TestParams;
 
-void createThreadForPlay( _jobject *instance, const char *localUrl, _jobject *pJobject,jint type);
-
 void CheckGLError(const char *pGLOperation);
 
 void CheckGLError(const char *pGLOperation);

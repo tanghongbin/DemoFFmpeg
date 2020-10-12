@@ -38,6 +38,10 @@ public:
     void unInit();
 
     void eachPacket(AVPacket *packet, AVCodecContext *pContext);
+
+    int getRenderType(){
+        return 0;
+    }
 };
 
 

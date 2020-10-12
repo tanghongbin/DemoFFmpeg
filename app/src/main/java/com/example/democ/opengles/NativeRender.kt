@@ -149,4 +149,8 @@ class NativeRender
 
     external fun native_getVideoHeight():Int
 
+    external fun native_getTotalDuration():Long
+
+    external fun native_seekPosition(position:Int)
+
 }

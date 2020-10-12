@@ -141,6 +141,22 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged
 
 /*
  * Class:     com_byteflow_app_MyNativeRender
+ * Method:    native_OnSurfaceChanged
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL native_seekPosition
+        (JNIEnv *env, jobject instance, jint position) {
+    playMp4Instance->seekPosition(position);
+}
+
+JNIEXPORT jlong JNICALL native_getTotalDuration
+        (JNIEnv *env, jobject instance, jint position) {
+    return playMp4Instance->totalDuration;
+}
+
+
+/*
+ * Class:     com_byteflow_app_MyNativeRender
  * Method:    native_OnDrawFrame
  * Signature: ()V
  */
@@ -193,8 +209,10 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
         {"native_getVideoWidth",      "()I",      (void *) (native_getVideoWidth)},
         {"native_getVideoHeight",      "()I",      (void *) (native_getVideoHeight)},
+        {"native_getTotalDuration",      "()J",      (void *) (native_getTotalDuration)},
         {"native_eglInit",      "()V",      (void *) (native_eglInit)},
         {"testThread",      "()V",      (void *) (testThread)},
+        {"native_seekPosition",      "(I)V",      (void *) (native_seekPosition)},
         {"native_eglDraw",      "()V",      (void *) (native_eglDraw)},
         {"native_eglUnInit",      "()V",      (void *) (native_eglUnInit)},
         {"native_eglSetImageData",     "(II[B)V", (void *) (native_eglSetImageData)},
