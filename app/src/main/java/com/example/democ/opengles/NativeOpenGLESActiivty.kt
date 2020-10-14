@@ -16,7 +16,7 @@ class NativeOpenGLESActiivty : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_native_open_g_l_e_s_actiivty)
         val render = NativeRender()
-//        render.playMP4(MuxerManager.MP4_PLAY_PATH,mSurface)
+        mSurface.init(render)
     }
 
 }

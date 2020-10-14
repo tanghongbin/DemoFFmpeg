@@ -125,7 +125,7 @@ JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject
     playMp4Instance = new PlayMp4Instance();
     const char * playUrl = env->GetStringUTFChars(url,0);
     LOGCATE("prepare init mp4 , detected address %s",playUrl);
-    playMp4Instance->init(playUrl,env,instance,surface);
+    playMp4Instance->init(playUrl,env,instance,surface,2);
 }
 
 
@@ -188,6 +188,15 @@ JNIEXPORT void JNICALL native_eglUnInit(JNIEnv *env, jobject instance) {
 
 }
 
+JNIEXPORT void JNICALL native_pause(JNIEnv *env, jobject instance) {
+    playMp4Instance->pauseManual();
+
+}
+
+JNIEXPORT void JNICALL native_resume(JNIEnv *env, jobject instance) {
+    playMp4Instance->resume();
+}
+
 JNIEXPORT void JNICALL native_eglSetImageData(JNIEnv *env, jobject instance,  jint width, jint height,
                                               jbyteArray imageData) {
     int len = env->GetArrayLength(imageData);
@@ -211,6 +220,8 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_getVideoHeight",      "()I",      (void *) (native_getVideoHeight)},
         {"native_getTotalDuration",      "()J",      (void *) (native_getTotalDuration)},
         {"native_eglInit",      "()V",      (void *) (native_eglInit)},
+        {"native_pause",      "()V",      (void *) (native_pause)},
+        {"native_resume",      "()V",      (void *) (native_resume)},
         {"testThread",      "()V",      (void *) (testThread)},
         {"native_seekPosition",      "(I)V",      (void *) (native_seekPosition)},
         {"native_eglDraw",      "()V",      (void *) (native_eglDraw)},

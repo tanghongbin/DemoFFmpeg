@@ -64,7 +64,7 @@ class NativeRender
     private fun setImageByType(type:Int) {
         when(type){
             1 -> {
-                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.mipmap.small_program)
+                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.leg)
                 val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
                 bitmap.copyPixelsToBuffer(byteBuffer)
                 native_SetImageData(IMAGE_FORMAT_RGBA, bitmap.width, bitmap.height, byteBuffer.array())
@@ -152,5 +152,9 @@ class NativeRender
     external fun native_getTotalDuration():Long
 
     external fun native_seekPosition(position:Int)
+
+    external fun native_pause()
+
+    external fun native_resume()
 
 }

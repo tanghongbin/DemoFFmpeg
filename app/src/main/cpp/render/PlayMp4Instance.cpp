@@ -8,13 +8,14 @@
 #include "BaseRender.h"
 #include "AudioRender.h"
 #include "YuvToImageRender.h"
+#include "OpenGLFFmpegDecoder.h"
 
 JavaVM *PlayMp4Instance::mJavaVm = nullptr;
 jobject PlayMp4Instance::mNativeRender = nullptr;
 long PlayMp4Instance::totalDuration = 0;
 
 
-void PlayMp4Instance::init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface) {
+void PlayMp4Instance::init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface,int videoType) {
     LOGCATE("init has started");
     strcpy(mPlayUrl, url);
     LOGCATE("init has reached address playUrl:%s", mPlayUrl);
@@ -24,7 +25,7 @@ void PlayMp4Instance::init(const char *url, JNIEnv *jniEnv, jobject nativeRender
     mSurfaceInstance = jniEnv->NewGlobalRef(surface);
     LOGCATE("prepare created short thread");
     audio = new thread(createThreadForPlay, this, mNativeRender, url, mSurfaceInstance, 1);
-    video = new thread(createThreadForPlay, this, mNativeRender, url, mSurfaceInstance, 2);
+    video = new thread(createThreadForPlay, this, mNativeRender, url, mSurfaceInstance, videoType);
     LOGCATE("thread has started");
 }
 
@@ -96,6 +97,9 @@ BaseRender *getRender(jint type) {
             break;
         case 3:
             render = new YuvToImageRender();
+            break;
+        case 4:
+            render = new OpenGLFFmpegDecoder();
             break;
     }
     return render;
@@ -214,6 +218,17 @@ void PlayMp4Instance::decodeLoop(PlayMp4Instance *pInstance, AVFormatContext *mF
 
     for (;;) {
 
+        // 先对视频做播放和暂停
+        if (m_StreamIndex == 0 && mPlayStatus == PAUSE){
+            LOGCATE("has prepare pause streamindex:%d",m_StreamIndex);
+            pauseManual();
+            std::unique_lock<std::mutex> lock(mMutex);
+            signal.wait(lock);
+            LOGCATE("lock has relased ,programs is going on");
+        }
+        if (m_StreamIndex == 0){
+//            LOGCATE("i'm decoding video");
+        }
         baseRender->seekPositionFunc(m_StreamIndex, mFormatContext, decode_context);
 
         int result = av_read_frame(mFormatContext, packet);
@@ -242,6 +257,16 @@ void PlayMp4Instance::decodeLoop(PlayMp4Instance *pInstance, AVFormatContext *mF
     }
 
     LOGCATE("decode done");
+}
+
+void PlayMp4Instance::resume() {
+    mPlayStatus = RESUME;
+    std::unique_lock<std::mutex> lock(mMutex);
+    signal.notify_all();
+}
+
+void PlayMp4Instance::pauseManual() {
+    mPlayStatus = PAUSE;
 }
 
 

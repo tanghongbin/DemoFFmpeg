@@ -11,7 +11,7 @@ import com.example.democ.audio.log
 import com.example.democ.render.FFmpegOpenGLRender
 import kotlinx.android.synthetic.main.activity_f_fmpeg_open_g_l.*
 
-class FFmpegOpenGLActivity : AppCompatActivity() {
+class FFmpegTextureActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

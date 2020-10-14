@@ -7,6 +7,7 @@ import android.view.WindowManager
 import android.widget.SeekBar
 import com.example.democ.R
 import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_BIG_PATH
+import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_BIG_TEST_5_PATH
 import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_PATH
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
@@ -19,6 +20,7 @@ import kotlinx.android.synthetic.main.activity_f_fmpeg_video.*
 class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallback {
 
     lateinit var mNativeRender: NativeRender
+    var isResume = true
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_video)
@@ -39,6 +41,15 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
             }
         })
         keepScreenOn()
+        mPause.setOnClickListener {
+            if (isResume){
+                mNativeRender.native_pause()
+            } else {
+                mNativeRender.native_resume()
+            }
+            isResume = !isResume
+            mPause.setImageResource(if (isResume) R.mipmap.live_pause else R.mipmap.live_resume)
+        }
     }
 
 
@@ -56,6 +67,8 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
 
 //        val url = MP4_PLAY_PATH
         val url = MP4_PLAY_BIG_PATH
+//        val url = MP4_PLAY_BIG_TEST_5_PATH
+
         // 1-音频，2-视频
 
         mNativeRender.playMP4(url,holder?.surface)

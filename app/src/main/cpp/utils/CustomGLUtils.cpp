@@ -31,6 +31,7 @@ GLuint LoadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = 0;
     shader = glCreateShader(shaderType);
     if (shader) {
+//        LOGCATE("createshader success");
         glShaderSource(shader, 1, &pSource, nullptr);
         glCompileShader(shader);
         GLint compiled = 0;
@@ -54,13 +55,30 @@ GLuint LoadShader(GLenum shaderType, const char *pSource) {
     return shader;
 }
 
+
+
+GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource) {
+    GLuint vertexShaderHandle, fragShaderHandle;
+    return CreateProgram(pVertexShaderSource, pFragShaderSource, vertexShaderHandle, fragShaderHandle);
+}
+
+long long GetSysCurrentTime()
+{
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    long long curTime = ((long long)(time.tv_sec))*1000+time.tv_usec/1000;
+    return curTime;
+}
+
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,
                      GLuint &vertexShaderHandle, GLuint &fragShaderHandle) {
     GLuint program = 0;
     vertexShaderHandle = LoadShader(GL_VERTEX_SHADER, pVertexShaderSource);
+//    LOGCATE("GLUtils::CreateProgram vertexShaderHandle = %d", vertexShaderHandle);
     if (!vertexShaderHandle) return program;
 
     fragShaderHandle = LoadShader(GL_FRAGMENT_SHADER, pFragShaderSource);
+    LOGCATE("GLUtils::CreateProgram fragShaderHandle = %d", fragShaderHandle);
     if (!fragShaderHandle) return program;
 
     program = glCreateProgram();
@@ -94,6 +112,7 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
             program = 0;
         }
     }
+    LOGCATE("GLUtils::CreateProgram program = %d", program);
     return program;
 }
 

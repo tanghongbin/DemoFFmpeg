@@ -36,7 +36,7 @@ public:
     static void setupSeekPosition(int position, int type) {
         if (type == 1) {
             mSeekAudioPosition = position;
-        } else if (type == 2) {
+        } else {
             mSeekVideoPosition = position;
         }
         LOGCATE("current type:%d seekPosition:%d",type,position);

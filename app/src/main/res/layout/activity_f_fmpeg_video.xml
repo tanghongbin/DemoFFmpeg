@@ -21,4 +21,18 @@
         android:layout_height="50dp"/>
 
 
+    <FrameLayout
+        android:layout_marginBottom="50dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="#cccccc"
+        android:layout_width="50dp"
+        android:layout_height="50dp">
+        <ImageView
+            android:id="@+id/mPause"
+            android:src="@mipmap/live_pause"
+            android:scaleType="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </FrameLayout>
+
 </FrameLayout>

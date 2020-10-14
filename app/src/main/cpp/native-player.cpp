@@ -6,6 +6,8 @@
 #include <CustomGLUtils.h>
 #include <YuvToImageRender.h>
 #include <OpenGLFFmpegRender.h>
+#include <PlayMp4Instance.h>
+#include <VideoGLRender.h>
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegOpenGLRender"
 
@@ -19,7 +21,7 @@ extern "C" {
  * Signature: ()V
  */
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-    OpenGLFFmpegRender::getInstance() -> onSurfaceCreated();
+    VideoGLRender::GetInstance() -> OnSurfaceCreated();
 }
 
 /*
@@ -29,9 +31,10 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
  */
 JNIEXPORT void JNICALL native_OnSurfaceChanged
         (JNIEnv *env, jobject instance, jint width, jint height) {
-    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
-    YuvToImageRender::mWindowWidth = width;
-    YuvToImageRender::mWindowHeight = height;
+    VideoGLRender::GetInstance() -> OnSurfaceChanged(width,height);
+//    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
+//    YuvToImageRender::mWindowWidth = width;
+//    YuvToImageRender::mWindowHeight = height;
 }
 
 /*
@@ -40,8 +43,10 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged
  * Signature: ()V
  */
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
-    OpenGLFFmpegRender::getInstance() -> onDrawFrame();
+    VideoGLRender::GetInstance() -> OnDrawFrame();
 }
+
+PlayMp4Instance* playMp4Instance;
 
 /**
  * 播放本地MP4文件
@@ -50,7 +55,16 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
  */
 JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface,jint type) {
     LOGCATE("prepare play mp4");
-    createThreadForPlay(env, url, surface,type);
+    LOGCATE("prepare play mp4");
+    if (playMp4Instance != nullptr){
+        playMp4Instance->unInit();
+        delete playMp4Instance;
+        playMp4Instance = nullptr;
+    }
+    playMp4Instance = new PlayMp4Instance();
+    const char * playUrl = env->GetStringUTFChars(url,0);
+    LOGCATE("prepare init mp4 , detected address %s",playUrl);
+    playMp4Instance->init(playUrl,env,instance,surface,type);
 }
 
 JNIEXPORT void JNICALL native_SetImageData

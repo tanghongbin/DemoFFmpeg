@@ -9,9 +9,11 @@
 #include <__mutex_base>
 #include <GLES3/gl3.h>
 #include <detail/type_mat.hpp>
+#include <GLBaseSample.h>
 #include "VideoRenderInterface.h"
+#include "OpenGLImageDef.h"
 
-class OpenGLFFmpegRender : public VideoRenderInterface {
+class OpenGLFFmpegRender {
 
 private:
     OpenGLFFmpegRender();
@@ -20,24 +22,24 @@ private:
 
     static std::mutex m_Mutex;
     static OpenGLFFmpegRender *s_Instance;
-    GLuint m_ProgramObj = GL_NONE;
+    NativeOpenGLImage m_RenderImage;
+    GLuint m_ProgramObj;
     GLuint m_TextureId;
-    GLuint m_VaoId;
-    GLuint m_VboIds[3];
-    NativeImage m_RenderImage;
-//    glm::mat4 m_MVPMatrix;//变换矩阵
-    int mFrameIndex;
+    GLuint m_VertexShader;
+    GLuint m_FragmentShader;
     GLint m_SamplerLoc;
-    GLuint m_VertexShader,m_FragmentShader;
 
 public:
-    static OpenGLFFmpegRender* getInstance();
+
+    static int mWindowWidth;
+
+    static int mWindowHeight;
+
+    static OpenGLFFmpegRender *getInstance();
 
     static void destroyInstance();
 
     void init(int width, int height);
-
-    void render_video(NativeImage *nativeImage);
 
     void unInit();
 
@@ -47,10 +49,9 @@ public:
 
     void onSurfaceChanged(int width, int height);
 
-    void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY);
-
     void SetImageData(int format, int width, int height, uint8_t *pData);
 
+    void setupImage(NativeOpenGLImage* image);
 
 };
 

@@ -35,13 +35,19 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     int windowWidth = ANativeWindow_getWidth(m_NativeWindow);
     int windowHeight = ANativeWindow_getHeight(m_NativeWindow);
 
-    if (windowWidth < windowHeight * m_VideoWidth / m_VideoHeight) {
-        m_RenderWidth = windowWidth;
-        m_RenderHeight = windowWidth * m_VideoHeight / m_VideoWidth;
+    if (m_VideoWidth > m_VideoHeight){
+        if (windowWidth < windowHeight * m_VideoWidth / m_VideoHeight) {
+            m_RenderWidth = windowWidth;
+            m_RenderHeight = windowWidth * m_VideoHeight / m_VideoWidth;
+        } else {
+            m_RenderWidth = windowHeight * m_VideoWidth / m_VideoHeight;
+            m_RenderHeight = windowHeight;
+        }
     } else {
-        m_RenderWidth = windowHeight * m_VideoWidth / m_VideoHeight;
-        m_RenderHeight = windowHeight;
+        m_RenderWidth = m_VideoHeight;
+        m_RenderHeight = m_VideoWidth;
     }
+
 
     //2. 获取转换的上下文
     m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight,
@@ -99,6 +105,13 @@ void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
 ////        LOGCATE("当前视频镇不合格:%d",pFrame->key_frame);
 //        return;
 //    }
+    long long cur = GetSysCurrentTime();
+    if (mLastTime == 0){
+        mLastTime = cur;
+    } else {
+        LOGCATE("draw frame spend time:%jd",cur - mLastTime);
+        mLastTime = cur;
+    }
 //3. 格式转换
     sws_scale(m_SwsContext, pFrame->data, pFrame->linesize, 0, m_VideoHeight, m_RGBAFrame->data,
               m_RGBAFrame->linesize);
@@ -106,7 +119,7 @@ void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
 //    LOGCATE("log every frame timestamp:%jd",(pFrame->pts));
 //    LOGCATE("log every frame best timestamp:%jd",(pFrame->best_effort_timestamp));
 
-    usleep(16 * 1000);
+//    usleep(16 * 1000);
 }
 
 void VideoRender::displayToSurface(AVFrame *pFrame) {

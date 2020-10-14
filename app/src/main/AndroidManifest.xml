@@ -10,9 +10,6 @@
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature
-        android:glEsVersion="0x00030000"
-        android:required="true" />
 
     <application
         android:name=".DemoApplication"
@@ -22,14 +19,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".opengles.TestThreadActivity">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
 
         </activity>
         <activity android:name=".ffmpeg.FFmpegOpenGLActivity">
+
+        </activity>
+        <activity android:name=".ffmpeg.FFmpegTextureActivity">
+
+        </activity>
+        <activity android:name=".ffmpeg.FFmpegEncodeActivity" />
+        <activity android:name=".activity.ThreadTestActivity" />
+        <activity
+            android:name=".ffmpeg.FFmpegVideoActivity"
+            android:configChanges="keyboard|screenSize">
 
             <!-- <intent-filter> -->
             <!-- <action android:name="android.intent.action.MAIN" /> -->
@@ -37,17 +52,6 @@
 
             <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
             <!-- </intent-filter> -->
-        </activity>
-        <activity android:name=".ffmpeg.FFmpegEncodeActivity"></activity>
-        <activity android:name=".activity.ThreadTestActivity" />
-        <activity
-            android:name=".ffmpeg.FFmpegVideoActivity"
-            android:configChanges="keyboard|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".opengles.OpenGLImageReaderActivity">
 

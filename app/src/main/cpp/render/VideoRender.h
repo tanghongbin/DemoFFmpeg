@@ -28,6 +28,7 @@ private:
     AVFrame *m_RGBAFrame;
     uint8_t *m_FrameBuffer;
     time_t lastTime;
+    long long mLastTime;
 
 
 public:

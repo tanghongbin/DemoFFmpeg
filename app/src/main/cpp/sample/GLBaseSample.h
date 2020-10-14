@@ -12,31 +12,31 @@ class GLBaseSample {
 
 protected:
 
-    GLuint m_ProgramObj,
-            m_TextureId,
-            m_VertexShader,
-            m_FragmentShader;
+    GLuint m_ProgramObj;
+    GLuint m_TextureId;
+    GLuint m_VertexShader;
+    GLuint m_FragmentShader;
     GLint m_SamplerLoc;
     NativeImage m_RenderImage;
 
 
 public:
 
-    GLBaseSample(){
+    GLBaseSample() {
 
     };
 
-    ~GLBaseSample(){
+    ~GLBaseSample() {
 
     };
 
-    int screenWidth,screenHeight;
+    int screenWidth, screenHeight;
 
     virtual void init() = 0;
 
     virtual void draw() = 0;
 
-    void loadImage(NativeImage *pImage){
+    void loadImage(NativeImage *pImage) {
         LOGCATE("TextureMapSample::LoadImage pImage = %p", pImage->ppPlane[0]);
         m_RenderImage.width = pImage->width;
         m_RenderImage.height = pImage->height;
@@ -44,7 +44,7 @@ public:
         NativeImageUtil::CopyNativeImage(pImage, &m_RenderImage);
     }
 
-    void GO_CHECK_GL_ERROR(){
+    void GO_CHECK_GL_ERROR() {
         LOGCATE("nothing to check");
     }
 

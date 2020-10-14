@@ -38,6 +38,7 @@ class MuxerManager {
         val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
         val H264_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
         val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "/blackanimal.mp4"
+        val MP4_PLAY_BIG_TEST_5_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test5.mp4"
 
     }
 

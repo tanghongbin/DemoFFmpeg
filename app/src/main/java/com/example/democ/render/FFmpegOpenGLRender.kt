@@ -5,8 +5,8 @@ import android.opengl.GLSurfaceView
 import android.view.Surface
 import com.example.democ.R
 import com.example.democ.audio.MuxerManager
+import com.example.democ.audio.log
 import com.example.democ.getAppContext
-import com.example.democ.opengles.NativeRender
 import java.nio.ByteBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -25,6 +25,7 @@ class FFmpegOpenGLRender : GLSurfaceView.Renderer{
     }
     override fun onDrawFrame(gl: GL10?) {
         native_OnDrawFrame()
+        log("java layer draw frame")
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -34,17 +35,17 @@ class FFmpegOpenGLRender : GLSurfaceView.Renderer{
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         native_OnSurfaceCreated()
 //        setImageByType(1)
-        val url = MuxerManager.MP4_PLAY_PATH
-        Thread{
-            playMP4(url,null,3)
-        }.start()
+        val url = MuxerManager.MP4_PLAY_BIG_PATH
+//        val url = MuxerManager.MP4_PLAY_PATH
+        // 1-音屏（不用指定），2-视频，3-yuv视频-不设置，4-opengl渲染
+        playMP4(url,null,4)
 
     }
 
     private fun setImageByType(type:Int) {
         when(type){
             1 -> {
-                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.mipmap.beautiful)
+                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.yifei)
                 val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
                 bitmap.copyPixelsToBuffer(byteBuffer)
                 native_SetImageData(IMAGE_FORMAT_RGBA, bitmap.width, bitmap.height, byteBuffer.array())

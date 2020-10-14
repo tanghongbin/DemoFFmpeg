@@ -15,6 +15,11 @@
 
 using namespace std;
 
+enum PLAY_STATUS{
+    RESUME,
+    PAUSE
+};
+
 class PlayMp4Instance {
 
 private:
@@ -25,13 +30,16 @@ private:
     static JavaVM *mJavaVm;
     static jobject mNativeRender;
     jobject mSurfaceInstance;
+    PLAY_STATUS mPlayStatus = RESUME;
+    mutex mMutex;
+    condition_variable signal;
 
 
 public:
 
     static long totalDuration;
 
-    void init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface);
+    void init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface,int viedoType);
 
     void unInit();
 
@@ -50,6 +58,10 @@ public:
                AVCodecContext *decode_context,
                AVPacket *packet, AVFrame *frame,BaseRender* baseRender,
                jobject pJobject,int m_StreamIndex);
+
+    void resume();
+
+    void pauseManual();
 };
 
 

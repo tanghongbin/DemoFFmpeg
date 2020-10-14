@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
+
+
     private fun setContent() {
         setContentView(R.layout.activity_main)
         start.setOnClickListener {
