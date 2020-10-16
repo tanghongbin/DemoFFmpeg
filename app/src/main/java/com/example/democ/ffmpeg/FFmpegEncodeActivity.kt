@@ -1,5 +1,6 @@
 package com.example.democ.ffmpeg
 
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -15,8 +16,9 @@ class FFmpegEncodeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_encode)
+
         val start = System.currentTimeMillis();
-        val path = NativeRender().encodeYuvToImage("file:///android_asset/image/YUV_Image_840x1074.NV21")
+        val path = NativeRender().encodeYuvToImage("")
         log("打印返回的地址:${path} 耗时:${System.currentTimeMillis() - start}")
         mImage.setImageURI(Uri.fromFile(File(path)))
 

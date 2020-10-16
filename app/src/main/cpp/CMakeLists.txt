@@ -14,6 +14,7 @@ set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 set(libName native-render)
 
 include_directories(
+        ffmpegsamples
         sample
         include
         utils
@@ -25,6 +26,7 @@ include_directories(
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
         ${CMAKE_SOURCE_DIR}/render/*.cpp
         ${CMAKE_SOURCE_DIR}/test/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/*.cpp)

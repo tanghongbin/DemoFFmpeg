@@ -8,6 +8,7 @@
 #include <EGLRender.h>
 #include <VideoRender.h>
 #include <PlayMp4Instance.h>
+#include <encode/EncodeYuvToJpg.h>
 #include "utils.h"
 #include "test/MyGLRenderContext.h"
 #include "utils/CustomGLUtils.h"
@@ -98,7 +99,7 @@ JNIEXPORT jint JNICALL native_getVideoHeight(JNIEnv *env, jobject instance) {
 
 JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jstring url) {
     const char * result = env->GetStringUTFChars(url, 0);
-    std::string encodedPath = encodeYuvToImageUtils(result);
+    std::string encodedPath = EncodeYuvToJpg::encode(result);
     return env -> NewStringUTF(encodedPath.c_str());
 }
 

@@ -50,6 +50,10 @@ long long GetSysCurrentTime();
 
 const char *encodeYuvToImageUtils(const char *filePath);
 
+const char *encodeYuvToImageUtils2(const char *filePath);
+
+const char *encdoeMp4FromOfficalDemo();
+
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);
 }
