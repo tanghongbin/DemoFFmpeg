@@ -17,12 +17,14 @@ class FFmpegEncodeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_encode)
 
+        val testGoodPath = "/storage/emulated/0/test.jpg"
+
         val start = System.currentTimeMillis();
         val path = NativeRender().encodeYuvToImage("")
         log("打印返回的地址:${path} 耗时:${System.currentTimeMillis() - start}")
         mImage.setImageURI(Uri.fromFile(File(path)))
 
-        val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
-        log("打印播放地址:${MP4_PLAY_PATH}")
+//        val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
+//        log("打印播放地址:${MP4_PLAY_PATH}")
     }
 }

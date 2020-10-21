@@ -42,6 +42,8 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
 
 void DeleteProgram(GLuint program);
 
+void sendMsg(int type, jobject obj, const char *funcName, const char *funcSinagure);
+
 void CheckGLError(const char *pGLOperation);
 
 void testLocalThread();
@@ -53,6 +55,11 @@ const char *encodeYuvToImageUtils(const char *filePath);
 const char *encodeYuvToImageUtils2(const char *filePath);
 
 const char *encdoeMp4FromOfficalDemo();
+
+
+void
+setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,
+                     int *renderWidth, int *renderHeight);
 
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);

@@ -8,6 +8,24 @@ import java.io.File
 import java.nio.ByteBuffer
 
 class MuxerManager {
+
+    companion object {
+        private var instance1: MuxerManager? = null
+        @Synchronized
+        fun getInstance(): MuxerManager {
+            if (instance1 == null) {
+                instance1 = MuxerManager()
+            }
+            return instance1!!
+        }
+        val MP4_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test.mp4"
+        val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
+        val H264_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
+        val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "/blackanimal.mp4"
+        val MP4_PLAY_BIG_TEST_5_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test5.mp4"
+        val YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "/YUV_Image_840x1074.NV21"
+    }
+
     private lateinit var muxer: MediaMuxer
 
     fun init() {
@@ -25,22 +43,7 @@ class MuxerManager {
     private var count = 0
     private var isStarted = false
 
-    companion object {
-        private var instance1: MuxerManager? = null
-        @Synchronized
-        fun getInstance(): MuxerManager {
-            if (instance1 == null) {
-                instance1 = MuxerManager()
-            }
-            return instance1!!
-        }
-        val MP4_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test.mp4"
-        val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
-        val H264_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
-        val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "/blackanimal.mp4"
-        val MP4_PLAY_BIG_TEST_5_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test5.mp4"
 
-    }
 
     fun writeSampleData(trackIndex:Int,byteBuffer: ByteBuffer,bufferInfo: MediaCodec.BufferInfo){
         muxer.writeSampleData(trackIndex,byteBuffer,bufferInfo)

@@ -66,8 +66,8 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
     override fun surfaceCreated(holder: SurfaceHolder?) {
 
 //        val url = MP4_PLAY_PATH
-        val url = MP4_PLAY_BIG_PATH
-//        val url = MP4_PLAY_BIG_TEST_5_PATH
+//        val url = MP4_PLAY_BIG_PATH
+        val url = MP4_PLAY_BIG_TEST_5_PATH
 
         // 1-音频，2-视频
 

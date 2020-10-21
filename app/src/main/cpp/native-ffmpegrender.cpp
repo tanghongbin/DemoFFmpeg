@@ -2,6 +2,9 @@
 // Created by Admin on 2020/9/27.
 //
 
+
+// 测试ffmpeg的编解码，格式转换，混合和解混合，推拉流
+
 #include <jni.h>
 #include <CustomGLUtils.h>
 #include <YuvToImageRender.h>
@@ -9,8 +12,9 @@
 #include <PlayMp4Instance.h>
 #include <VideoGLRender.h>
 #include <PlayMp4Practice.h>
+#include <JavaVmManager.h>
 
-#define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegOpenGLRender"
+#define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
 
 
 #ifdef __cplusplus
@@ -79,24 +83,12 @@ JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject
     playMp4Practice->init(playUrl,env,instance,surface,type);
 }
 
-JNIEXPORT void JNICALL native_SetImageData
-        (JNIEnv *env, jobject instance, jint format, jint width, jint height,
-         jbyteArray imageData) {
-    int len = env->GetArrayLength(imageData);
-    uint8_t *buf = new uint8_t[len];
-    env->GetByteArrayRegion(imageData, 0, len, reinterpret_cast<jbyte *>(buf));
-    OpenGLFFmpegRender::getInstance()->SetImageData(format, width, height, buf);
-    delete[] buf;
-    env->DeleteLocalRef(imageData);
-
-}
 
 
 static JNINativeMethod g_RenderMethods[] = {
         {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
         {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
-        {"native_SetImageData",     "(III[B)V", (void *) (native_SetImageData)},
         {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;I)V", (void *) (playMP4)}
 };
 
@@ -144,6 +136,7 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
         return jniRet;
     }
 
+
     jint regRet = RegisterNativeMethods(env, NATIVE_RENDER_CLASS_, g_RenderMethods,
                                         sizeof(g_RenderMethods) /
                                         sizeof(g_RenderMethods[0]));
@@ -151,7 +144,7 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
     {
         return JNI_ERR;
     }
-    env -> GetJavaVM(&GLUtilC::mVm);
+    JavaVmManager::initVm(env);
 //    HelloTest().test1();
 
     return JNI_VERSION_1_6;

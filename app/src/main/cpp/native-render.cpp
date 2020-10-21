@@ -9,6 +9,7 @@
 #include <VideoRender.h>
 #include <PlayMp4Instance.h>
 #include <encode/EncodeYuvToJpg.h>
+#include <JavaVmManager.h>
 #include "utils.h"
 #include "test/MyGLRenderContext.h"
 #include "utils/CustomGLUtils.h"
@@ -283,7 +284,7 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
     {
         return JNI_ERR;
     }
-    env -> GetJavaVM(&GLUtilC::mVm);
+    JavaVmManager::initVm(env);
 //    HelloTest().test1();
 
     return JNI_VERSION_1_6;

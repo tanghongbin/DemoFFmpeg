@@ -11,6 +11,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
+# ffmpegrender player render
 set(libName native-render)
 
 include_directories(

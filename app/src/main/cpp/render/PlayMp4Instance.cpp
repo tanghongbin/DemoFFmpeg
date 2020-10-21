@@ -3,6 +3,7 @@
 //
 
 #include <CustomGLUtils.h>
+#include <JavaVmManager.h>
 #include "PlayMp4Instance.h"
 #include "VideoRender.h"
 #include "BaseRender.h"
@@ -10,7 +11,6 @@
 #include "YuvToImageRender.h"
 #include "OpenGLFFmpegDecoder.h"
 
-JavaVM *PlayMp4Instance::mJavaVm = nullptr;
 jobject PlayMp4Instance::mNativeRender = nullptr;
 long PlayMp4Instance::totalDuration = 0;
 
@@ -19,7 +19,6 @@ void PlayMp4Instance::init(const char *url, JNIEnv *jniEnv, jobject nativeRender
     LOGCATE("init has started");
     strcpy(mPlayUrl, url);
     LOGCATE("init has reached address playUrl:%s", mPlayUrl);
-    jniEnv->GetJavaVM(&mJavaVm);
     LOGCATE("init has reached vm success");
     mNativeRender = jniEnv->NewGlobalRef(nativeRender);
     mSurfaceInstance = jniEnv->NewGlobalRef(surface);
@@ -31,10 +30,10 @@ void PlayMp4Instance::init(const char *url, JNIEnv *jniEnv, jobject nativeRender
 
 void PlayMp4Instance::unInit() {
     bool isAttach = false;
-    JNIEnv *jniEnv = GetEnv(&isAttach);
+    JNIEnv *jniEnv = JavaVmManager::GetEnv(&isAttach);
     jniEnv->DeleteGlobalRef(mNativeRender);
     jniEnv->DeleteGlobalRef(mSurfaceInstance);
-    if (isAttach) mJavaVm->DetachCurrentThread();
+    if (isAttach) JavaVmManager::detachCurrentThread();
     if (audio) {
         delete audio;
         audio = nullptr;
@@ -53,37 +52,8 @@ void PlayMp4Instance::seekPosition(int position) {
 
 }
 
-JNIEnv *PlayMp4Instance::GetEnv(bool *attach) {
-    JNIEnv *jniEnv;
-    int status = mJavaVm->GetEnv(reinterpret_cast<void **>(&jniEnv), JNI_VERSION_1_6);
-    if (status != JNI_OK) {
-        status = mJavaVm->AttachCurrentThread(&jniEnv, nullptr);
-        if (status != JNI_OK) {
-            return nullptr;
-        }
-        *attach = true;
-    }
-    return jniEnv;
-}
-
-/**
- * 发消息给java层
- * @param type
- */
-void PlayMp4Instance::sendMsg(int type) {
-    bool isAttach = false;
-    JNIEnv *jniEnv = GetEnv(&isAttach);
-    jmethodID id = jniEnv->GetMethodID(jniEnv->GetObjectClass(mNativeRender),
-                                       MSG_CALLBACK_FUNCTION_NAME, "(I)V");
-    jniEnv->CallVoidMethod(mNativeRender, id, type);
-    LOGCATE("sendmsg success type:%d", type);
-    if (isAttach) mJavaVm->DetachCurrentThread();
-}
 
 
-void PlayMp4Instance::detachCurrentThread() {
-    mJavaVm->DetachCurrentThread();
-}
 
 BaseRender *getRender(jint type) {
     // 1-音频，2-视频-nativeWindow，3-视频-opengl

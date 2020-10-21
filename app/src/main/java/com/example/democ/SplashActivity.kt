@@ -7,10 +7,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import com.example.democ.activity.AudioTestActivity
 import com.example.democ.activity.ThreadTestActivity
-import com.example.democ.ffmpeg.FFmpegEncodeActivity
-import com.example.democ.ffmpeg.FFmpegOpenGLActivity
-import com.example.democ.ffmpeg.FFmpegTextureActivity
-import com.example.democ.ffmpeg.FFmpegVideoActivity
+import com.example.democ.ffmpeg.*
 import com.example.democ.opengles.*
 import kotlinx.android.synthetic.main.activity_splash.*
 
@@ -28,7 +25,8 @@ class SplashActivity : AppCompatActivity() {
         NativeOpenGLESActiivty::class.java,
         OpenGLImageReaderActivity::class.java,
         TestThreadActivity::class.java,
-        FFmpegTextureActivity::class.java
+        FFmpegTextureActivity::class.java,
+        FFmpegNativeWindowActivity::class.java
 
     )
     fun putIndex(position:Int){

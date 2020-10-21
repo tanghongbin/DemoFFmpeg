@@ -27,7 +27,6 @@ private:
     thread *audio;
     thread *video;
     _jobject surface;
-    static JavaVM *mJavaVm;
     static jobject mNativeRender;
     jobject mSurfaceInstance;
     PLAY_STATUS mPlayStatus = RESUME;
@@ -42,12 +41,6 @@ public:
     void init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface,int viedoType);
 
     void unInit();
-
-    static JNIEnv *GetEnv(bool *attach);
-
-    static void sendMsg(int i);
-
-    static void detachCurrentThread();
 
     void seekPosition(int position);
 

@@ -11,6 +11,7 @@ extern "C" {
 #include <ImageDef.h>
 #include <time.h>
 #include <CustomGLUtils.h>
+#include <JavaVmManager.h>
 #include "VideoRender.h"
 #include "utils.h"
 #include "PlayMp4Instance.h"
@@ -24,31 +25,22 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     LOGCATE("prepare draw each frame");
     m_VideoWidth = pContext->width;
     m_VideoHeight = pContext->height;
-    LOGCATE("video width:%d  height:%d", m_VideoWidth, m_VideoHeight);
+    LOGCATE("video width:%d  height:%d codeWidth:%d codeHeight:%d", m_VideoWidth, m_VideoHeight
+    ,pContext->coded_width,pContext->coded_height);
 
     bool isAttach = false;
-    JNIEnv *jniEnv = PlayMp4Instance::GetEnv(&isAttach);
+    JNIEnv *jniEnv = JavaVmManager::GetEnv(&isAttach);
     //1. 利用 Java 层 SurfaceView 传下来的 Surface 对象，获取 ANativeWindow
     m_NativeWindow = ANativeWindow_fromSurface(jniEnv, pJobject);
-    if (isAttach) PlayMp4Instance::detachCurrentThread();
+    if (isAttach) JavaVmManager::detachCurrentThread();
 
     int windowWidth = ANativeWindow_getWidth(m_NativeWindow);
     int windowHeight = ANativeWindow_getHeight(m_NativeWindow);
 
-    if (m_VideoWidth > m_VideoHeight){
-        if (windowWidth < windowHeight * m_VideoWidth / m_VideoHeight) {
-            m_RenderWidth = windowWidth;
-            m_RenderHeight = windowWidth * m_VideoHeight / m_VideoWidth;
-        } else {
-            m_RenderWidth = windowHeight * m_VideoWidth / m_VideoHeight;
-            m_RenderHeight = windowHeight;
-        }
-    } else {
-        m_RenderWidth = m_VideoHeight;
-        m_RenderHeight = m_VideoWidth;
-    }
+    setupRenderDimension(windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
 
-
+    LOGCATE("windowWidth:%d windowHeight:%d \nvideoWidth:%d videoHeight:%d \n renderWidth:%d renderHeight:%d",
+            windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,m_RenderWidth,m_RenderHeight);
     //2. 获取转换的上下文
     m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight,
                                   pContext->pix_fmt,
@@ -67,7 +59,7 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize, m_FrameBuffer, AV_PIX_FMT_RGBA,
                          m_VideoWidth, m_VideoHeight, 1);
 
-    PlayMp4Instance::sendMsg(MSG_TYPE_READY);
+    sendMsg(MSG_TYPE_READY,instance,MSG_CALLBACK_FUNCTION_NAME,"(I)V");
 
     LOGCATE("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
             windowHeight, m_RenderWidth, m_RenderHeight);
@@ -109,7 +101,7 @@ void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
     if (mLastTime == 0){
         mLastTime = cur;
     } else {
-        LOGCATE("draw frame spend time:%jd",cur - mLastTime);
+//        LOGCATE("draw frame spend time:%jd",cur - mLastTime);
         mLastTime = cur;
     }
 //3. 格式转换
