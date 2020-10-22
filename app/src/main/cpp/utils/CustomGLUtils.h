@@ -56,6 +56,7 @@ const char *encodeYuvToImageUtils2(const char *filePath);
 
 const char *encdoeMp4FromOfficalDemo();
 
+bool checkNegativeReturn(int ret, const char *string);
 
 void
 setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,

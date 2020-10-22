@@ -32,8 +32,6 @@ public:
     static void
     createPlayProcess(PlayMp4Practice *pPractice, jobject pJobject, jobject pJobject1, int i);
 
-    bool checkNegativeReturn(int ret, const char string[18]);
-
     BaseRender *createRender(int type);
 
     void decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender *pRender, jobject pJobject,

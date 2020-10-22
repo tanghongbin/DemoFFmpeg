@@ -51,4 +51,15 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun playMP4(url:String, surface: Surface?, type: Int)
 
+//    external fun encodeAudio()
+//
+//    external fun encodeVideo()
+
+    external fun native_audioTest(type: Int)
+
+    external fun native_unInit()
+
+    //混合音视频
+//    external fun muxAv()
+
 }

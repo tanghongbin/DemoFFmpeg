@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
-set(libName native-render)
+set(libName native-ffmpegrender)
 
 include_directories(
         ffmpegsamples
@@ -28,6 +28,7 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
         ${CMAKE_SOURCE_DIR}/render/*.cpp
         ${CMAKE_SOURCE_DIR}/test/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/*.cpp)

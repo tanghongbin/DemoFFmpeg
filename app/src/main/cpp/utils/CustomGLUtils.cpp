@@ -121,6 +121,15 @@ setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWid
     }
 }
 
+
+bool checkNegativeReturn(int ret, const char *string) {
+    if (ret < 0) {
+        LOGCATE("------------%s",string);
+        return true;
+    }
+    return false;
+}
+
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,
                      GLuint &vertexShaderHandle, GLuint &fragShaderHandle) {
     GLuint program = 0;

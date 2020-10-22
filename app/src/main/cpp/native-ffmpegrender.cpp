@@ -13,6 +13,7 @@
 #include <VideoGLRender.h>
 #include <PlayMp4Practice.h>
 #include <JavaVmManager.h>
+#include <capturer/AudioRecordPlayHelper.h>
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
 
@@ -51,9 +52,42 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
     VideoGLRender::GetInstance() -> OnDrawFrame();
 }
 
+JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance,jint type) {
+    switch (type){
+        case 1:
+            AudioRecordPlayHelper::getInstance()->startCapture();
+            break;
+        case 2:
+            AudioRecordPlayHelper::getInstance()->stopCapture();
+            break;
+        case 3:
+            AudioRecordPlayHelper::getInstance()->startPlayBack();
+            break;
+        case 4:
+            AudioRecordPlayHelper::getInstance()->stopPlayBack();
+            break;
+        default:
+            break;
+    }
+}
+
 PlayMp4Instance* playMp4Instance;
 
 PlayMp4Practice* playMp4Practice;
+
+JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
+    AudioRecordPlayHelper::destroyInstance();
+    if (playMp4Instance){
+        delete playMp4Instance;
+        playMp4Instance = nullptr;
+    }
+    if (playMp4Practice){
+        delete playMp4Practice;
+        playMp4Practice = nullptr;
+    }
+}
+
+
 
 /**
  * 播放本地MP4文件
@@ -89,6 +123,10 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
         {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
+
+        {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
+        {"native_unInit",      "()V",      (void *) (native_unInit)},
+
         {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;I)V", (void *) (playMP4)}
 };
 

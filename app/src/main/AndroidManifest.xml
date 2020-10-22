@@ -19,7 +19,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ffmpeg.FFmpegNativeWindowActivity"></activity>
+        <activity android:name=".ffmpeg.FFmpegEncodeAudioActivity"></activity>
+        <activity android:name=".ffmpeg.FFmpegNavigationActivity" />
+        <activity android:name=".ffmpeg.FFmpegNativeWindowActivity" />
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,8 +37,8 @@
             <!-- </intent-filter> -->
 
         </activity>
-        <activity android:name=".ffmpeg.FFmpegOpenGLActivity"></activity>
-        <activity android:name=".ffmpeg.FFmpegTextureActivity"></activity>
+        <activity android:name=".ffmpeg.FFmpegOpenGLActivity" />
+        <activity android:name=".ffmpeg.FFmpegTextureActivity" />
         <activity android:name=".ffmpeg.FFmpegEncodeActivity" />
         <activity android:name=".activity.ThreadTestActivity" />
         <activity

@@ -16,17 +16,13 @@ class SplashActivity : AppCompatActivity() {
     private val arrays = arrayOf(
         AudioTestActivity::class.java,
         ThreadTestActivity::class.java,
-        FFmpegEncodeActivity::class.java,
-        FFmpegOpenGLActivity::class.java,
-        FFmpegVideoActivity::class.java,
 
         EmptyActivity::class.java,
         NativeEglTestActivity::class.java,
         NativeOpenGLESActiivty::class.java,
         OpenGLImageReaderActivity::class.java,
         TestThreadActivity::class.java,
-        FFmpegTextureActivity::class.java,
-        FFmpegNativeWindowActivity::class.java
+        FFmpegNavigationActivity::class.java
 
     )
     fun putIndex(position:Int){
@@ -43,7 +39,12 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         val arrayStr = arrays.map {
-            it.simpleName
+            val name = if(it.javaClass == FFmpegNavigationActivity::class.java){
+                "ffmpeg系列"
+            } else {
+                it.simpleName
+            }
+            name
         }
         val adapter = ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,arrayStr)
         mListView.adapter = adapter

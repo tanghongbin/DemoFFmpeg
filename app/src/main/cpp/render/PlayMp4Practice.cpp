@@ -7,6 +7,7 @@
 #include "BaseRender.h"
 #include "AudioRender.h"
 #include "VideoRender.h"
+#include "CustomGLUtils.h"
 
 extern "C" {
 #include "../include/libavcodec/avcodec.h"
@@ -43,10 +44,10 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
         return;
     }
     ret = avformat_open_input(&avFormatContext, pPractice->mUrl, NULL, NULL);
-    if (pPractice->checkNegativeReturn(ret, "open input failed")) return;
+    if (checkNegativeReturn(ret, "open input failed")) return;
 
     ret = avformat_find_stream_info(avFormatContext, NULL);
-    if (pPractice->checkNegativeReturn(ret, "find stream info failed")) return;
+    if (checkNegativeReturn(ret, "find stream info failed")) return;
     AVMediaType mediaType = type == 1 ? AVMEDIA_TYPE_AUDIO : AVMEDIA_TYPE_VIDEO;
 
     for (int i = 0; i < avFormatContext->nb_streams; ++i) {
@@ -67,10 +68,10 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
         return;
     }
     ret = avcodec_parameters_to_context(codecContext,avFormatContext->streams[stream_index]->codecpar);
-    if (pPractice->checkNegativeReturn(ret, "can't attach params to decodeCtx")) return;
+    if (checkNegativeReturn(ret, "can't attach params to decodeCtx")) return;
 
     ret = avcodec_open2(codecContext,codec,NULL);
-    if (pPractice->checkNegativeReturn(ret, "open decoder failed")) return;
+    if (checkNegativeReturn(ret, "open decoder failed")) return;
 
     BaseRender *baseRender = pPractice->createRender(type);
     baseRender->init(codecContext,renderInstance,surface);
@@ -100,13 +101,7 @@ BaseRender* PlayMp4Practice::createRender(int type) {
 
 }
 
-bool PlayMp4Practice::checkNegativeReturn(int ret, const char *string) {
-    if (ret < 0) {
-        LOGCATE("------------%s",string);
-        return true;
-    }
-    return false;
-}
+
 
 void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender *pRender,
                                  jobject pJobject,
