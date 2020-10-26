@@ -16,7 +16,7 @@ extern "C" {
 
 const char *EncodeYuvToJpg::encode(const char *sss) {
     const char *ERROR_RESULT = "";
-    const char *inputFileName = "/storage/emulated/0/YUV_Image_840x1074.NV21";
+    const char *inputFileName = "/storage/emulated/0/ffmpegtest/YUV_Image_840x1074.NV21";
     const char *finalResult;
     const AVCodec *codec;
     AVCodecContext *codeCtx = NULL;
@@ -31,7 +31,7 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     uint8_t *pic_buf;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
 
-    const char *outputFileName = "/storage/emulated/0/test_out_file.jpg";
+    const char *outputFileName = "/storage/emulated/0/ffmpegtest/test_out_file.jpg";
 
     // 先读取文件yuv数据到frame中
     in_file = fopen(inputFileName, "rb");
@@ -39,7 +39,7 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
         LOGCATE("Could not open input file %s\n", inputFileName);
         return ERROR_RESULT;
     }
-    out_file = fopen(outputFileName, "rb");
+    out_file = fopen(outputFileName, "wb");
     if (!out_file) {
         LOGCATE("Could not open out file %s\n", inputFileName);
         return ERROR_RESULT;
@@ -143,11 +143,11 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     //prepare read data
     encodeInternal(codeCtx,frame,pkt,out_file);
 
-//    encodeInternal(codeCtx, NULL, pkt, out_file);
+    encodeInternal(codeCtx, NULL, pkt, out_file);
 
     av_write_trailer(avFormatContext);
     /* add sequence end code to have a real MPEG file */
-//    fwrite(endcode, 1, sizeof(endcode), out_file);
+    fwrite(endcode, 1, sizeof(endcode), out_file);
 
     fclose(in_file);
     fclose(out_file);

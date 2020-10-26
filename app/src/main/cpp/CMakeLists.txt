@@ -27,6 +27,7 @@ include_directories(
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
+        ${CMAKE_SOURCE_DIR}/examples/*.c
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
         ${CMAKE_SOURCE_DIR}/render/*.cpp

@@ -8,6 +8,7 @@ import android.os.Environment
 import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.opengles.NativeRender
+import com.example.democ.render.FFmpegRender
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode.*
 import java.io.File
 
@@ -20,7 +21,7 @@ class FFmpegEncodeActivity : AppCompatActivity() {
         val testGoodPath = "/storage/emulated/0/test.jpg"
 
         val start = System.currentTimeMillis();
-        val path = NativeRender().encodeYuvToImage("")
+        val path = FFmpegRender().encodeYuvToImage("")
         log("打印返回的地址:${path} 耗时:${System.currentTimeMillis() - start}")
         mImage.setImageURI(Uri.fromFile(File(path)))
 

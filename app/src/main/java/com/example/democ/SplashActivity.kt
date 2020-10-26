@@ -49,9 +49,11 @@ class SplashActivity : AppCompatActivity() {
         val adapter = ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,arrayStr)
         mListView.adapter = adapter
         mListView.setOnItemClickListener { parent, view, position, id ->
-            val classes = arrays[position]
-            startActivity(Intent(this@SplashActivity,classes))
-            putIndex(position)
+            requestCustomPermissions {
+                val classes = arrays[position]
+                startActivity(Intent(this@SplashActivity,classes))
+                putIndex(position)
+            }
         }
 //        if (getLastIndex() != -1 && getLastIndex() != 7){
 //            startActivity(Intent(this@SplashActivity,arrays[getLastIndex()]))

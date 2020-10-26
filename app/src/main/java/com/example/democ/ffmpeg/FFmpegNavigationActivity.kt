@@ -9,6 +9,7 @@ import com.example.democ.R
 import com.example.democ.activity.AudioTestActivity
 import com.example.democ.activity.ThreadTestActivity
 import com.example.democ.opengles.*
+import com.example.democ.requestCustomPermissions
 import kotlinx.android.synthetic.main.activity_splash.*
 
 class FFmpegNavigationActivity : AppCompatActivity() {
@@ -22,8 +23,11 @@ class FFmpegNavigationActivity : AppCompatActivity() {
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrayStr)
         mListView.adapter = adapter
         mListView.setOnItemClickListener { parent, view, position, id ->
-            val classes = arrays[position]
-            startActivity(Intent(this@FFmpegNavigationActivity, classes))
+
+                val classes = arrays[position]
+                startActivity(Intent(this@FFmpegNavigationActivity, classes))
+
+
         }
 //        if (getLastIndex() != -1 && getLastIndex() != 7){
 //            startActivity(Intent(this@SplashActivity,arrays[getLastIndex()]))
@@ -36,7 +40,8 @@ class FFmpegNavigationActivity : AppCompatActivity() {
         FFmpegVideoActivity::class.java,
         FFmpegTextureActivity::class.java,
         FFmpegNativeWindowActivity::class.java,
-        FFmpegEncodeAudioActivity::class.java
+        FFmpegEncodeAudioActivity::class.java,
+        FFmpegEncodeVideoActivity::class.java
     )
 
 

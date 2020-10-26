@@ -7,11 +7,12 @@
 #include <jni.h>
 #include <OpenSL_IO.h>
 #include <__mutex_base>
+#include <libavutil/samplefmt.h>
 #include "AudioRecordPlayHelper.h"
 
 AudioRecordPlayHelper *AudioRecordPlayHelper::instance = nullptr;
 
-void AudioRecordPlayHelper::startCapture() {
+void AudioRecordPlayHelper::startCapture(recordCall call) {
     FILE *fp = fopen(TEST_CAPTURE_FILE_PATH, "wb");
     if (fp == NULL) {
         LOGCATE("cannot open file (%s)\n", TEST_CAPTURE_FILE_PATH);
@@ -31,15 +32,17 @@ void AudioRecordPlayHelper::startCapture() {
     g_loop_exit = 0;
     while (!g_loop_exit) {
         samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);
+        LOGCATE("capture audio data success :%d",samples);
         if (samples < 0) {
             LOGCATE("android_AudioIn failed !\n");
             break;
         }
+//        call(buffer,samples);
         if (fwrite((unsigned char *) buffer, samples * sizeof(short), 1, fp) != 1) {
             LOGCATE("failed to save captured data !\n ");
             break;
         }
-        LOGCATE("capture %d samples !\n", samples);
+//        LOGCATE("capture %d samples !\n", samples);
     }
 
     OpenSL_IO::android_CloseAudioDevice(stream);
@@ -50,6 +53,12 @@ void AudioRecordPlayHelper::startCapture() {
 
 void AudioRecordPlayHelper::stopCapture() {
     g_loop_exit = true;
+}
+
+int AudioRecordPlayHelper::getBufferSize() {
+//    return av_samples_get_buffer_size(NULL, pContext->channels, pFrame->nb_samples,
+//                                      pContext->sample_fmt, 1);
+    return 0;
 }
 
 void AudioRecordPlayHelper::startPlayBack() {
@@ -68,7 +77,7 @@ void AudioRecordPlayHelper::startPlayBack() {
     }
 
     int samples;
-    short buffer[BUFFER_SIZE];
+    uint8_t buffer[BUFFER_SIZE];
     g_loop_exit = 0;
     while (!g_loop_exit && !feof(fp)) {
         if (fread((unsigned char *) buffer, BUFFER_SIZE * 2, 1, fp) != 1) {

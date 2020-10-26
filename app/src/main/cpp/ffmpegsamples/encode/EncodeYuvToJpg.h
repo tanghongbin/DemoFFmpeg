@@ -13,9 +13,11 @@ extern "C"{
 class EncodeYuvToJpg {
 
 public:
+
     static const char * encode(const char * inputFile);
 
     static void encodeInternal(AVCodecContext *pContext, AVFrame *pFrame, AVPacket *pPacket, FILE *pFile);
+
 };
 
 

@@ -292,16 +292,16 @@ OPENSL_STREAM * OpenSL_IO::android_OpenAudioDevice(int sr, int inchannels, int o
     p->outlock = createThreadLock();
 
     if((p->outBufSamples = bufferframes*outchannels) != 0) {
-        if((p->outputBuffer[0] = (short *) calloc(p->outBufSamples, sizeof(short))) == NULL ||
-           (p->outputBuffer[1] = (short *) calloc(p->outBufSamples, sizeof(short))) == NULL) {
+        if((p->outputBuffer[0] = (uint8_t *) calloc(p->outBufSamples, sizeof(uint8_t))) == NULL ||
+           (p->outputBuffer[1] = (uint8_t *) calloc(p->outBufSamples, sizeof(uint8_t))) == NULL) {
             android_CloseAudioDevice(p);
             return NULL;
         }
     }
 
     if((p->inBufSamples = bufferframes*inchannels) != 0){
-        if((p->inputBuffer[0] = (short *) calloc(p->inBufSamples, sizeof(short))) == NULL ||
-           (p->inputBuffer[1] = (short *) calloc(p->inBufSamples, sizeof(short))) == NULL){
+        if((p->inputBuffer[0] = (uint8_t *) calloc(p->inBufSamples, sizeof(uint8_t))) == NULL ||
+           (p->inputBuffer[1] = (uint8_t *) calloc(p->inBufSamples, sizeof(uint8_t))) == NULL){
             android_CloseAudioDevice(p);
             return NULL;
         }
@@ -391,23 +391,23 @@ void OpenSL_IO::bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *conte
 }
 
 // gets a buffer of size samples from the device
-int OpenSL_IO::android_AudioIn(OPENSL_STREAM *p,short *buffer,int size)
+int OpenSL_IO::android_AudioIn(OPENSL_STREAM *p,uint8_t *buffer,int size)
 {
-    short *inBuffer;
+    uint8_t *inBuffer;
     int i, bufsamps = p->inBufSamples, index = p->currentInputIndex;
     if(p == NULL || bufsamps ==  0) return 0;
 
-    LOGCATE("has enter audioin:%p",p->inlock);
+//    LOGCATE("has enter audioin:%p",p->inlock);
     inBuffer = p->inputBuffer[p->currentInputBuffer];
     for(i=0; i < size; i++){
         if (index >= bufsamps) {
             waitThreadLock(p->inlock);
-            (*p->recorderBufferQueue)->Enqueue(p->recorderBufferQueue,inBuffer,bufsamps*sizeof(short));
+            (*p->recorderBufferQueue)->Enqueue(p->recorderBufferQueue,inBuffer,bufsamps*sizeof(uint8_t));
             p->currentInputBuffer = (p->currentInputBuffer ? 0 : 1);
             index = 0;
             inBuffer = p->inputBuffer[p->currentInputBuffer];
         }
-        buffer[i] = (short)inBuffer[index++];
+        buffer[i] = (uint8_t)inBuffer[index++];
     }
     p->currentInputIndex = index;
     if(p->outchannels == 0) p->time += (double) size/(p->sr*p->inchannels);
@@ -422,19 +422,19 @@ void OpenSL_IO::bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context
 }
 
 // puts a buffer of size samples to the device
-int OpenSL_IO::android_AudioOut(OPENSL_STREAM *p, short *buffer,int size)
+int OpenSL_IO::android_AudioOut(OPENSL_STREAM *p, uint8_t *buffer,int size)
 {
-    short *outBuffer;
+    uint8_t *outBuffer;
     int i, bufsamps = p->outBufSamples, index = p->currentOutputIndex;
     if(p == NULL  || bufsamps ==  0)  return 0;
     outBuffer = p->outputBuffer[p->currentOutputBuffer];
 
     for(i=0; i < size; i++){
-        outBuffer[index++] = (short)(buffer[i]);
+        outBuffer[index++] = (uint8_t)(buffer[i]);
         if (index >= p->outBufSamples) {
             waitThreadLock(p->outlock);
             (*p->bqPlayerBufferQueue)->Enqueue(p->bqPlayerBufferQueue,
-                                               outBuffer,bufsamps*sizeof(short));
+                                               outBuffer,bufsamps*sizeof(uint8_t));
             p->currentOutputBuffer = (p->currentOutputBuffer ?  0 : 1);
             index = 0;
             outBuffer = p->outputBuffer[p->currentOutputBuffer];

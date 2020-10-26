@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var mTestStart = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestPermissions {
+        requestCustomPermissions {
             setContent()
         }
     }
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun setContent() {
         setContentView(R.layout.activity_main)
         start.setOnClickListener {
-            requestPermissions {
+            requestCustomPermissions {
                 val start = System.nanoTime()
                 mTestStart = true
                 MuxerManager.getInstance().init()
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 audioDecoderPlayer.stopDecode()
             }
             R.id.nativePlayStart -> {
-                requestPermissions {
+                requestCustomPermissions {
                     native.startAudio(false)
                 }
             }
@@ -158,11 +158,13 @@ fun getAppContext():Context{
     return DemoApplication.instance
 }
 
-fun AppCompatActivity.requestPermissions(success: () -> Unit) {
+fun AppCompatActivity.requestCustomPermissions(success: () -> Unit) {
     RxPermissions(this).request(android.Manifest.permission.RECORD_AUDIO,
         android.Manifest.permission.CAMERA,
+        android.Manifest.permission.READ_EXTERNAL_STORAGE,
         android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         .subscribe {
+            log("权限请求结果:${it}")
             if (it) {
                 success()
             } else {

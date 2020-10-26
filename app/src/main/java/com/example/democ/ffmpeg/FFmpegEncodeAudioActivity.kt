@@ -19,6 +19,7 @@ class FFmpegEncodeAudioActivity : AppCompatActivity(),View.OnClickListener {
         button2.setOnClickListener(this)
         button3.setOnClickListener(this)
         button4.setOnClickListener(this)
+        button5.setOnClickListener(this)
         render = FFmpegRender()
     }
 
@@ -34,6 +35,7 @@ class FFmpegEncodeAudioActivity : AppCompatActivity(),View.OnClickListener {
                 Thread {
                     render.native_audioTest(1)
                 }.start()
+
             }
             R.id.button2 -> {
                 render.native_audioTest(2)
@@ -45,6 +47,11 @@ class FFmpegEncodeAudioActivity : AppCompatActivity(),View.OnClickListener {
             }
             R.id.button4 -> {
                 render.native_audioTest(4)
+            }
+            R.id.button5 -> {
+                Thread {
+                    render.native_startEncode()
+                }.start()
             }
         }
     }

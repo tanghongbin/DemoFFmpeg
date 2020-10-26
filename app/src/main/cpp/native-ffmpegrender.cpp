@@ -14,6 +14,9 @@
 #include <PlayMp4Practice.h>
 #include <JavaVmManager.h>
 #include <capturer/AudioRecordPlayHelper.h>
+#include <encode/FFmpegEncodeAudio.h>
+#include <encode/EncodeYuvToJpg.h>
+#include <encode/FFmpegEncodeVideo.h>
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
 
@@ -52,10 +55,22 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
     VideoGLRender::GetInstance() -> OnDrawFrame();
 }
 
+JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
+    FFmpegEncodeAudio::getInstance()->init();
+//    FFmpegEncodeAudio::getInstance()->initOffcialDemo();
+}
+
+JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jstring url) {
+    const char * result = env->GetStringUTFChars(url, 0);
+    std::string encodedPath = EncodeYuvToJpg::encode(result);
+    return env -> NewStringUTF(encodedPath.c_str());
+}
+
 JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance,jint type) {
     switch (type){
         case 1:
-            AudioRecordPlayHelper::getInstance()->startCapture();
+            FFmpegEncodeAudio::getInstance();
+            AudioRecordPlayHelper::getInstance()->startCapture(FFmpegEncodeAudio::recordCallback);
             break;
         case 2:
             AudioRecordPlayHelper::getInstance()->stopCapture();
@@ -77,6 +92,7 @@ PlayMp4Practice* playMp4Practice;
 
 JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
     AudioRecordPlayHelper::destroyInstance();
+    FFmpegEncodeAudio::destroyInstance();
     if (playMp4Instance){
         delete playMp4Instance;
         playMp4Instance = nullptr;
@@ -117,13 +133,36 @@ JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject
     playMp4Practice->init(playUrl,env,instance,surface,type);
 }
 
+JNIEXPORT void JNICALL native_encodeFrame(JNIEnv *env, jobject instance,
+                                              jbyteArray imageData) {
+    int len = env->GetArrayLength(imageData);
+    uint8_t *buf = new uint8_t[len];
+    env->GetByteArrayRegion(imageData, 0, len, reinterpret_cast<jbyte *>(buf));
+    FFmpegEncodeVideo::getInstance() -> encodeVideoFrame(buf);
+    delete[] buf;
+    env->DeleteLocalRef(imageData);
+}
 
+JNIEXPORT void JNICALL native_videoEncodeInit(JNIEnv *env, jobject instance) {
+    FFmpegEncodeVideo::getInstance() -> init();
+}
+
+JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
+    FFmpegEncodeVideo::getInstance() -> unInit();
+    FFmpegEncodeVideo::destroyInstance();
+}
 
 static JNINativeMethod g_RenderMethods[] = {
         {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
         {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
 
+        {"native_videoEncodeInit",      "()V",      (void *) (native_videoEncodeInit)},
+        {"native_videoEncodeUnInit",      "()V",      (void *) (native_videoEncodeUnInit)},
+
+        {"native_startEncode",      "()V",      (void *) (native_startEncode)},
+        {"native_encodeFrame",      "([B)V",      (void *) (native_encodeFrame)},
+        {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
         {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
         {"native_unInit",      "()V",      (void *) (native_unInit)},
 

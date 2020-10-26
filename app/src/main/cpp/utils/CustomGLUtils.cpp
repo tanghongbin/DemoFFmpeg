@@ -124,7 +124,7 @@ setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWid
 
 bool checkNegativeReturn(int ret, const char *string) {
     if (ret < 0) {
-        LOGCATE("------------%s",string);
+        LOGCATE("------------:retCode:%d  msg:%s",ret,string);
         return true;
     }
     return false;

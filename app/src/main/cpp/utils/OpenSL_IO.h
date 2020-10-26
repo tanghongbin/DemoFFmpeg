@@ -5,6 +5,7 @@
 #ifndef DEMOC_OPENSL_IO_H
 #define DEMOC_OPENSL_IO_H
 
+// ========================录制和播放音频元数据pcm
 
 #include <bits/pthread_types.h>
 #include <SLES/OpenSLES.h>
@@ -46,8 +47,8 @@ typedef struct opensl_stream {
     int currentInputBuffer;
 
     // buffers
-    short *outputBuffer[2];
-    short *inputBuffer[2];
+    uint8_t *outputBuffer[2];
+    uint8_t *inputBuffer[2];
 
     // size of buffers
     int outBufSamples;
@@ -86,7 +87,7 @@ public:
 /*
   Write a buffer to the OpenSL stream *p, of size samples. Returns the number of samples written.
 */
-    static int android_AudioOut(OPENSL_STREAM *p, short *buffer,int size);
+    static int android_AudioOut(OPENSL_STREAM *p, uint8_t *buffer,int size);
 
     static int waitThreadLock(void *lock);
 

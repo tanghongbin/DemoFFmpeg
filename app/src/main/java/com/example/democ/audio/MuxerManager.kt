@@ -18,12 +18,13 @@ class MuxerManager {
             }
             return instance1!!
         }
-        val MP4_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test.mp4"
-        val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
-        val H264_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "/video.mp4"
-        val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "/blackanimal.mp4"
-        val MP4_PLAY_BIG_TEST_5_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test5.mp4"
-        val YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "/YUV_Image_840x1074.NV21"
+        val FILD_DIR = "/ffmpegtest"
+        val MP4_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/test.mp4"
+        val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/video.mp4"
+        val H264_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/video.mp4"
+        val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/blackanimal.mp4"
+        val MP4_PLAY_BIG_TEST_5_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}test5.mp4"
+        val YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/YUV_Image_840x1074.NV21"
     }
 
     private lateinit var muxer: MediaMuxer

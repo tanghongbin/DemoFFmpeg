@@ -29,7 +29,7 @@
  * frames in the GPU video surfaces.
  */
 
-#include "config.h"
+//#include "config.h"
 
 #include <stdio.h>
 

@@ -12,7 +12,6 @@ import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_PATH
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
 import com.example.democ.opengles.NativeRender
-import com.example.democ.requestPermissions
 import com.example.democ.utils.MSG_TYPE_ONREADY
 import com.tbruyelle.rxpermissions2.RxPermissions
 import kotlinx.android.synthetic.main.activity_f_fmpeg_video.*
