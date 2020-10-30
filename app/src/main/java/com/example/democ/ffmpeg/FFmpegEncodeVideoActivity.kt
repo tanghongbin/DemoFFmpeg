@@ -14,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.render.FFmpegRender
+import com.example.democ.runAsyncTask
 import com.example.democ.utils.CameraHelper
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
@@ -31,6 +33,9 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
         mCameraHelper.init()
         mCameraHelper.setPreviewCallback(this)
         mRender = FFmpegRender()
+        mReadFile.setOnClickListener {
+            mRender.native_testReadFile()
+        }
     }
 
 
@@ -42,15 +47,18 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
     }
 
 
-
-    override fun onDestroy() {
+    override fun onBackPressed() {
         mCameraHelper.release()
         mRender.native_videoEncodeUnInit()
+        super.onBackPressed()
+    }
+
+    override fun onDestroy() {
         super.onDestroy()
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-
+        mRender.native_OnSurfaceChanged(width,height)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
@@ -58,6 +66,11 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        mRender.native_videoEncodeInit()
+        runAsyncTask({
+            mRender.native_videoEncodeInit()
+        },{
+
+        })
+
     }
 }

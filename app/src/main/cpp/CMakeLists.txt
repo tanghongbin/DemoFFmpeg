@@ -27,7 +27,6 @@ include_directories(
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
-        ${CMAKE_SOURCE_DIR}/examples/*.c
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
         ${CMAKE_SOURCE_DIR}/render/*.cpp
@@ -70,6 +69,12 @@ set_target_properties(swresample PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDRO
 add_library(swscale SHARED IMPORTED )
 set_target_properties(swscale PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libswscale.so)
 
+add_library(mp3 SHARED IMPORTED )
+set_target_properties(mp3 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libmp3lame.so)
+
+add_library(x264 SHARED IMPORTED )
+set_target_properties(x264 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libx264.so)
+
 find_library(log-lib log )
 
 find_library(OpenSLES-lib OpenSLES)
@@ -80,7 +85,9 @@ set(third-party-libs
         avformat
         avutil
         swresample
-        swscale)
+        swscale
+        mp3
+        x264)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this

@@ -69,6 +69,7 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_videoEncodeUnInit()
 
+    external fun native_testReadFile()
 
     //混合音视频
 //    external fun muxAv()

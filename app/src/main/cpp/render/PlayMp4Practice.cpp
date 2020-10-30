@@ -114,18 +114,19 @@ void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender 
     for (;;){
         ret = av_read_frame(pContext,pPacket);
         if (ret < 0) {
-            LOGCATE("av_read_frame finished or some other error");
+            LOGCATE("av_read_frame error:%s",av_err2str(ret));
             break;
         }
         LOGCATE("log streamIndex:%d",pPacket->stream_index);
         if (pPacket->stream_index == stream_index){
             ret = avcodec_send_packet(codecContext,pPacket);
             if (ret < 0) {
-                LOGCATE("avcodec_send_packet finished or some other error");
+                LOGCATE("avcodec_send_packet error:%s",av_err2str(ret));
                 break;
             }
             pRender->eachPacket(pPacket,codecContext);
             while (avcodec_receive_frame(codecContext,pFrame) == 0){
+                LOGCATE("receive frame success,prepare draw");
                 pRender->draw_frame(codecContext, pFrame, pJobject1);
             }
         }

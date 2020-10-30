@@ -121,6 +121,27 @@ setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWid
     }
 }
 
+/**
+ * nv21 转换成yuv420p
+ * @param image_src
+ * @param image_dst
+ * @param image_width
+ * @param image_height
+ */
+void NvToYUV420p(const uint8_t * image_src, uint8_t* image_dst,int image_width, int image_height){
+    uint8_t* p = image_dst;
+    memcpy(p, image_src, image_width * image_height * 3 / 2);
+    const uint8_t *pNV = image_src + image_width * image_height;
+    uint8_t *pU = p + image_width * image_height;
+    uint8_t *pV = p + image_width * image_height + ((image_width * image_height)>>2);
+    for (int i=0; i<(image_width * image_height)/2; i++)
+    {
+        if((i%2)==0)
+            *pV++=*(pNV+i);
+        else
+            *pU++=*(pNV+i);
+    }
+}
 
 bool checkNegativeReturn(int ret, const char *string) {
     if (ret < 0) {

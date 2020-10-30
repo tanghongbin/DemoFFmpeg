@@ -26,7 +26,7 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
 //        val url = MuxerManager.MP4_PLAY_BIG_PATH
-        val url = MuxerManager.YUV_PATH
+        val url = MuxerManager.ENCODE_VIDEO_PATH
 
         // 1-音频，2-视频
         val render = FFmpegRender()

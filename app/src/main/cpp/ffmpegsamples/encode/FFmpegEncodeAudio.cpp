@@ -123,7 +123,6 @@ FFmpegEncodeAudio::encodeAudioLoop(AVCodecContext *pContext, AVPacket *pPacket, 
         pFrame->data[0] = frame_buffer;
         pFrame->pts = start * 100;
 
-
 //        LOGCATE("print after read_frame:%p",frame->data);
         ret = avcodec_send_frame(pContext, pFrame);
         if (ret < 0) {

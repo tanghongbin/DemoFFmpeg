@@ -47,7 +47,7 @@ class CameraHelper(val activity: Activity,val surface: SurfaceView,val call:Surf
             parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO)
             parameters.setSceneMode(Camera.Parameters.SCENE_MODE_AUTO)
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO)
-            parameters.setPreviewFormat(ImageFormat.YV12)
+            parameters.setPreviewFormat(ImageFormat.NV21)
             parameters.setPictureSize(displayMetrics.widthPixels, displayMetrics.heightPixels);
             parameters.setPreviewSize(displayMetrics.widthPixels, displayMetrics.heightPixels)
             //这两个属性 如果这两个属性设置的和真实手机的不一样时，就会报错

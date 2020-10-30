@@ -24,6 +24,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <libavcodec/jni.h>
+
 /*
  * Class:     com_byteflow_app_MyNativeRender
  * Method:    native_OnSurfaceCreated
@@ -41,6 +44,9 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
 JNIEXPORT void JNICALL native_OnSurfaceChanged
         (JNIEnv *env, jobject instance, jint width, jint height) {
     VideoGLRender::GetInstance() -> OnSurfaceChanged(width,height);
+    FFmpegEncodeVideo::getInstance()->mWindow_width = width;
+    FFmpegEncodeVideo::getInstance()->mWindow_height = height;
+    LOGCATE("setup width:%d height:%d",width,height);
 //    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
 //    YuvToImageRender::mWindowWidth = width;
 //    YuvToImageRender::mWindowHeight = height;
@@ -145,11 +151,16 @@ JNIEXPORT void JNICALL native_encodeFrame(JNIEnv *env, jobject instance,
 
 JNIEXPORT void JNICALL native_videoEncodeInit(JNIEnv *env, jobject instance) {
     FFmpegEncodeVideo::getInstance() -> init();
+//    FFmpegEncodeVideo::getInstance() -> initOffcialDemo();
 }
 
 JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
     FFmpegEncodeVideo::getInstance() -> unInit();
     FFmpegEncodeVideo::destroyInstance();
+}
+
+JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
+    FFmpegEncodeVideo::getInstance() -> testReadFile();
 }
 
 static JNINativeMethod g_RenderMethods[] = {
@@ -159,6 +170,8 @@ static JNINativeMethod g_RenderMethods[] = {
 
         {"native_videoEncodeInit",      "()V",      (void *) (native_videoEncodeInit)},
         {"native_videoEncodeUnInit",      "()V",      (void *) (native_videoEncodeUnInit)},
+        {"native_testReadFile",      "()V",      (void *) (native_testReadFile)},
+
 
         {"native_startEncode",      "()V",      (void *) (native_startEncode)},
         {"native_encodeFrame",      "([B)V",      (void *) (native_encodeFrame)},
@@ -222,6 +235,9 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
         return JNI_ERR;
     }
     JavaVmManager::initVm(env);
+    if (av_jni_set_java_vm(jvm,NULL) < 0){
+        return JNI_ERR;
+    }
 //    HelloTest().test1();
 
     return JNI_VERSION_1_6;

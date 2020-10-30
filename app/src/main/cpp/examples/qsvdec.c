@@ -41,7 +41,7 @@
 #include "libavutil/buffer.h"
 #include "libavutil/error.h"
 #include "libavutil/hwcontext.h"
-#include "libavutil/hwcontext_qsv.h"
+//#include "libavutil/hwcontext_qsv.h"
 #include "libavutil/mem.h"
 
 typedef struct DecodeContext {

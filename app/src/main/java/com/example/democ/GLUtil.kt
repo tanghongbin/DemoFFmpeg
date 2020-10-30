@@ -3,6 +3,7 @@ package com.example.democ
 import android.content.Context
 import android.opengl.GLES20
 import com.example.democ.audio.log
+import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -163,4 +164,18 @@ fun array2Buffer(array: ShortArray): ShortBuffer {
     buffer.put(array)
     buffer.position(0)
     return buffer
+}
+
+fun <T>Any.runAsyncTask(asyncBlock:() -> T,mainBlock:(T) -> Unit = {}){
+    val job = Job()
+    val scope = CoroutineScope(job)
+    scope.launch(Dispatchers.IO) {
+        val result = asyncBlock()
+        withContext(Dispatchers.Main){
+            mainBlock(result)
+        }
+        job.cancelAndJoin()
+        log("协成任务结束")
+    }
+    log("携程体走完")
 }
