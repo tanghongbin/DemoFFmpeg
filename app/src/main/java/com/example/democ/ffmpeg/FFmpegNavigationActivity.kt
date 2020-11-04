@@ -1,15 +1,10 @@
 package com.example.democ.ffmpeg
 
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import com.example.democ.R
-import com.example.democ.activity.AudioTestActivity
-import com.example.democ.activity.ThreadTestActivity
-import com.example.democ.opengles.*
-import com.example.democ.requestCustomPermissions
 import kotlinx.android.synthetic.main.activity_splash.*
 
 class FFmpegNavigationActivity : AppCompatActivity() {
@@ -35,7 +30,7 @@ class FFmpegNavigationActivity : AppCompatActivity() {
     }
 
     private val arrays = arrayOf(
-        FFmpegEncodeActivity::class.java,
+        FFmpegEncodeYuvToJpgActivity::class.java,
         FFmpegOpenGLActivity::class.java,
         FFmpegVideoActivity::class.java,
         FFmpegTextureActivity::class.java,

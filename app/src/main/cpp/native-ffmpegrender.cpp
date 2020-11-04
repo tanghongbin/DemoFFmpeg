@@ -238,6 +238,7 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
     if (av_jni_set_java_vm(jvm,NULL) < 0){
         return JNI_ERR;
     }
+    sys_log_init();
 //    HelloTest().test1();
 
     return JNI_VERSION_1_6;

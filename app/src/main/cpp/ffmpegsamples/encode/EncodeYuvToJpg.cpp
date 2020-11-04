@@ -20,15 +20,12 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     const char *finalResult;
     const AVCodec *codec;
     AVCodecContext *codeCtx = NULL;
-    AVFormatContext *avFormatContext;
-    AVOutputFormat *outputFormat;
-    int i, ret, x, y;
     FILE *in_file;
     FILE *out_file;
     AVFrame *frame;
     AVPacket *pkt;
-    AVStream *stream;
     uint8_t *pic_buf;
+    int ret;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
 
     const char *outputFileName = "/storage/emulated/0/ffmpegtest/test_out_file.jpg";
@@ -45,43 +42,12 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
         return ERROR_RESULT;
     }
 
-    avFormatContext = avformat_alloc_context();
-
-//    //2.打开文件解封装
-//    if (avformat_open_input(&avFormatContext, inputFileName, NULL, NULL) != 0) {
-//        LOGCATE("init format error");
-//        return ERROR_RESULT;
-//    }
-//
-//    //3.获取音视频流信息
-//    if (avformat_find_stream_info(avFormatContext, NULL) < 0) {
-//        LOGCATE("can't find valid stream info");
-//        return ERROR_RESULT;
-//    }
-//
-////    ================
-//avFormatContext->iformat;
-
-    outputFormat = av_guess_format("mjpeg", NULL, NULL);
-    if (!outputFormat) {
-        LOGCATE("Could not create output format");
-        return ERROR_RESULT;
-    }
-    avFormatContext->oformat = outputFormat;
-    // open outfile
-    if (avio_open(&avFormatContext->pb, outputFileName, AVIO_FLAG_READ_WRITE) < 0) {
-        LOGCATE("Could not open input file %s\n", outputFileName);
-        return ERROR_RESULT;
-    }
-
-    stream = avformat_new_stream(avFormatContext, 0);
-    if (stream == nullptr) {
-        LOGCATE("can't create new stream");
-        return ERROR_RESULT;
-    }
+    AVOutputFormat *output = av_guess_format(NULL, outputFileName, NULL);
+    LOGCATE("打印是否为null:%p",output);
+    LOGCATE("print order for format:%d",output->video_codec);
 
     // 找到编码器
-    codec = avcodec_find_encoder(outputFormat->video_codec);
+    codec = avcodec_find_encoder(output->video_codec);
     if (!codec) {
         LOGCATE("can't find coedc");
         return ERROR_RESULT;
@@ -96,43 +62,46 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
 
 
     // 配置编码环境
-    codeCtx->codec_id = codec->id;
-    codeCtx->codec_type = AVMEDIA_TYPE_VIDEO;
+//    codeCtx->codec_id = codec->id;
+//    codeCtx->codec_type = AVMEDIA_TYPE_VIDEO;
     codeCtx->pix_fmt = AV_PIX_FMT_YUVJ420P;
 
     codeCtx->width = 840;
     codeCtx->height = 1074;
 
-    codeCtx->time_base.num = 1;
-    codeCtx->time_base.den = 25;
+    codeCtx->time_base = AVRational{1, 25};
+    codeCtx->framerate = AVRational{25, 1};
+    codeCtx->bit_rate = 4000000;
+//    codeCtx->max_b_frames = 10;
+    codeCtx->gop_size = 1;
 
-    av_dump_format(avFormatContext,0,outputFileName,1);
-
-
+//    if (codec->id == AV_CODEC_ID_H264)
+//        av_opt_set(codeCtx->priv_data, "preset", "slow", 0);
 
     // 打开编码器
-    if (avcodec_open2(codeCtx, codec, NULL) < 0) {
-        LOGCATE("can't open encoder");
+    if ((ret = avcodec_open2(codeCtx, codec, NULL)) < 0) {
+        LOGCATE("can't open encoder:%s",av_err2str(ret));
         return ERROR_RESULT;
     }
     LOGCATE("already open decoder");
     frame = av_frame_alloc();
     pkt = av_packet_alloc();
-    int pictureSize = avpicture_get_size(codeCtx->pix_fmt, codeCtx->width, codeCtx->height);
-    LOGCATE("already get picsize:%d",pictureSize);
-    pic_buf = static_cast<uint8_t *>(av_malloc(pictureSize));
-    if (!pic_buf) {
-        LOGCATE("can't malloc picbuf");
+    frame->width = codeCtx->width;
+    frame->height = codeCtx->height;
+    frame->format = codeCtx->pix_fmt;
+    int pictureSize = av_image_get_buffer_size(codeCtx->pix_fmt, codeCtx->width, codeCtx->height,
+                                               1);
+    ret = av_frame_get_buffer(frame, 1);
+    if (ret < 0) {
+        LOGCATE("can't get frame buffer");
         return ERROR_RESULT;
     }
-    LOGCATE("picbuf get picsize alloc success");
-    avformat_write_header(avFormatContext, NULL);
+    pic_buf = static_cast<uint8_t *>(av_malloc(pictureSize));
     int y_size = codeCtx->width * codeCtx->height;
-    LOGCATE("prepare new packet,pring pkg %p",pkt);
-    av_new_packet(pkt, y_size);
+
     LOGCATE("prepare read yuv data");
     //read yuv
-    if (fread(pic_buf, 1, y_size * 3 / 2, in_file) <= 0) {
+    if (fread(pic_buf, 1, pictureSize, in_file) <= 0) {
         LOGCATE("can't read yuv data");
         return ERROR_RESULT;
     }
@@ -141,11 +110,10 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     frame->data[2] = pic_buf + y_size * 5 / 4;  // V
 
     //prepare read data
-    encodeInternal(codeCtx,frame,pkt,out_file);
+    encodeInternal(codeCtx, frame, pkt, out_file);
 
     encodeInternal(codeCtx, NULL, pkt, out_file);
 
-    av_write_trailer(avFormatContext);
     /* add sequence end code to have a real MPEG file */
     fwrite(endcode, 1, sizeof(endcode), out_file);
 
@@ -180,12 +148,10 @@ void EncodeYuvToJpg::encodeInternal(AVCodecContext *enc_ctx, AVFrame *frame, AVP
 
     while (ret >= 0) {
         ret = avcodec_receive_packet(enc_ctx, pkt);
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             LOGCATE("Error during encoding,encode has end");
             return;
-        }
-
-        else if (ret < 0) {
+        } else if (ret < 0) {
             LOGCATE("Error during encoding\n");
             return;
         }

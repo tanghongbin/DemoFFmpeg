@@ -64,6 +64,10 @@ void
 setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,
                      int *renderWidth, int *renderHeight);
 
+void syslog_print(void *ptr, int level, const char *fmt, va_list vl);
+
+void sys_log_init();
+
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);
 }

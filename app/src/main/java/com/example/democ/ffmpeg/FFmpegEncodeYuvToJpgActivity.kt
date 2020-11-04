@@ -1,5 +1,6 @@
 package com.example.democ.ffmpeg
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +13,7 @@ import com.example.democ.render.FFmpegRender
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode.*
 import java.io.File
 
-class FFmpegEncodeActivity : AppCompatActivity() {
+class FFmpegEncodeYuvToJpgActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

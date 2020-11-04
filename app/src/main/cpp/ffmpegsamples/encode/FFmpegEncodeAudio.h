@@ -12,6 +12,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 };
 
+#define AAC_ENCODER_NAME "libfdk_aac"
 
 using namespace std;
 
@@ -33,8 +34,6 @@ public:
 
     void audioFrameCopy(uint8_t *frame, int sampleSize);
 
-    void initOffcialDemo();
-
 private:
     mutex mMutex;
     static FFmpegEncodeAudio *instance;
@@ -48,11 +47,11 @@ private:
 
     void configFrameParams(AVFrame *pFrame, AVCodecContext *pContext);
 
+    int check_sample_fmt(const AVCodec *codec, enum AVSampleFormat sample_fmt);
 
     int select_sample_rate(AVCodec *pCodec);
 
     uint64_t select_channel_layout(AVCodec *pCodec);
-
 
     int check_sample_fmt(AVCodec *pCodec, AVSampleFormat format);
 };

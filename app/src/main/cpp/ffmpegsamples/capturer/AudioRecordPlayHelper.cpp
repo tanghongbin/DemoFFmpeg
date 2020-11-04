@@ -32,7 +32,7 @@ void AudioRecordPlayHelper::startCapture(recordCall call) {
     g_loop_exit = 0;
     while (!g_loop_exit) {
         samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);
-        LOGCATE("capture audio data success :%d",samples);
+//        LOGCATE("capture audio data success :%d",samples);
         if (samples < 0) {
             LOGCATE("android_AudioIn failed !\n");
             break;

@@ -12,7 +12,7 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="录音开始" />
+        android:text="录音保存为pcm开始" />
 
     <Button
         android:id="@+id/button2"
@@ -24,7 +24,7 @@
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="播放开始" />
+        android:text="播放pcm文件开始" />
 
     <Button
         android:id="@+id/button4"

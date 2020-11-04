@@ -10,7 +10,7 @@
 #include <PlayMp4Instance.h>
 #include <encode/EncodeYuvToJpg.h>
 #include <JavaVmManager.h>
-#include "utils.h"
+#include "utils/utils.h"
 #include "test/MyGLRenderContext.h"
 #include "utils/CustomGLUtils.h"
 //com.example.democ.opengles
