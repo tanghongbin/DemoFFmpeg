@@ -55,7 +55,7 @@ class FFmpegRender : GLSurfaceView.Renderer{
 //
 //    external fun encodeVideo()
 
-    external fun encodeYuvToImage(url:String):String
+    external fun encodeYuvToImage(type: Int):String
 
     external fun native_audioTest(type: Int)
 

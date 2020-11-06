@@ -28,6 +28,15 @@ void AudioRender::init(AVCodecContext *codeCtx, _jobject *instance, _jobject *pJ
     LOGCATE("AudioRender::Init");
     openSlesRender = new OpenSLESRender;
     openSlesRender->Init();
+
+    // 2.申请输出buffer
+    int m_nbSamples = (int) av_rescale_rnd(ACC_NB_SAMPLES, AUDIO_DST_SAMPLE_RATE,
+                                           codeCtx->sample_rate, AV_ROUND_UP);
+
+    m_BufferSize = av_samples_get_buffer_size(NULL, AUDIO_DST_CHANNEL_COUNTS, m_nbSamples,
+                                                  DST_SAMPLT_FORMAT, 1);
+
+    m_AudioOutBuffer = (uint8_t *) malloc(m_BufferSize);
 }
 
 
@@ -41,6 +50,12 @@ void AudioRender::unInit() {
     if (m_SwrContext) {
         swr_free(&m_SwrContext);
         m_SwrContext = nullptr;
+    }
+
+    //4. 释放资源
+    if (m_AudioOutBuffer) {
+        free(m_AudioOutBuffer);
+        m_AudioOutBuffer = nullptr;
     }
 }
 
@@ -57,15 +72,6 @@ void AudioRender::eachPacket(AVPacket *packet, AVCodecContext *pContext) {
 void AudioRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
                              _jobject *pJobject) {
 
-    // 2.申请输出buffer
-    int m_nbSamples = (int) av_rescale_rnd(ACC_NB_SAMPLES, AUDIO_DST_SAMPLE_RATE,
-                                           pContext->sample_rate, AV_ROUND_UP);
-
-    int m_BufferSize = av_samples_get_buffer_size(NULL, AUDIO_DST_CHANNEL_COUNTS, m_nbSamples,
-                                                  DST_SAMPLT_FORMAT, 1);
-    uint8_t *m_AudioOutBuffer = (uint8_t *) malloc(m_BufferSize);
-
-
     //3. 重采样，frame 为解码帧
     int result = swr_convert(m_SwrContext, &m_AudioOutBuffer, m_BufferSize / 2,
                              (const uint8_t **) pFrame->data, pFrame->nb_samples);
@@ -75,11 +81,6 @@ void AudioRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
         openSlesRender->RenderAudioFrame(m_AudioOutBuffer, m_BufferSize);
     }
 
-//4. 释放资源
-    if (m_AudioOutBuffer) {
-        free(m_AudioOutBuffer);
-        m_AudioOutBuffer = nullptr;
-    }
 
 }
 

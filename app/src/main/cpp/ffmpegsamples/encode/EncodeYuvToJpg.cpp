@@ -6,6 +6,7 @@
 #include <utils.h>
 
 #include "EncodeYuvToJpg.h"
+#include "SwsHelper.h"
 
 extern "C" {
 #include <libavutil/imgutils.h>
@@ -16,7 +17,7 @@ extern "C" {
 
 const char *EncodeYuvToJpg::encode(const char *sss) {
     const char *ERROR_RESULT = "";
-    const char *inputFileName = "/storage/emulated/0/ffmpegtest/YUV_Image_840x1074.NV21";
+    const char *inputFileName = INPUT_YUV_IMAGE_PATH;
     const char *finalResult;
     const AVCodec *codec;
     AVCodecContext *codeCtx = NULL;
@@ -28,7 +29,7 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     int ret;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
 
-    const char *outputFileName = "/storage/emulated/0/ffmpegtest/test_out_file.jpg";
+    const char *outputFileName = OUTPUT_PNG_IMAGE_PATH;
 
     // 先读取文件yuv数据到frame中
     in_file = fopen(inputFileName, "rb");
@@ -75,6 +76,10 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
 //    codeCtx->max_b_frames = 10;
     codeCtx->gop_size = 1;
 
+    SwsHelper* swsHelper = new SwsHelper;
+    swsHelper->init(codeCtx->width,codeCtx->height,codeCtx->pix_fmt,
+            1920,1080,codeCtx->pix_fmt,SWS_FAST_BILINEAR,NULL,NULL,NULL);
+
 //    if (codec->id == AV_CODEC_ID_H264)
 //        av_opt_set(codeCtx->priv_data, "preset", "slow", 0);
 
@@ -110,9 +115,9 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     frame->data[2] = pic_buf + y_size * 5 / 4;  // V
 
     //prepare read data
-    encodeInternal(codeCtx, frame, pkt, out_file);
+    encodeInternal(codeCtx, frame, pkt, out_file, swsHelper);
 
-    encodeInternal(codeCtx, NULL, pkt, out_file);
+    encodeInternal(codeCtx, NULL, pkt, out_file, nullptr);
 
     /* add sequence end code to have a real MPEG file */
     fwrite(endcode, 1, sizeof(endcode), out_file);
@@ -124,6 +129,10 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     av_frame_free(&frame);
     av_packet_free(&pkt);
 
+    swsHelper->unInit();
+    delete swsHelper;
+    swsHelper = nullptr;
+
     LOGCATE("enough");
     finalResult = outputFileName;
     return finalResult;
@@ -131,8 +140,9 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
 }
 
 
-void EncodeYuvToJpg::encodeInternal(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
-                                    FILE *outfile) {
+void EncodeYuvToJpg::encodeInternal(AVCodecContext *pContext, AVFrame *pFrame, AVPacket *pPacket,
+                                    FILE *pFile,
+                                    SwsHelper *pHelper) {
 
     int ret;
 
@@ -140,14 +150,14 @@ void EncodeYuvToJpg::encodeInternal(AVCodecContext *enc_ctx, AVFrame *frame, AVP
 //    if (frame)
 //        LOGCATE("Send frame %3"PRId64"\n", frame->pts);
 
-    ret = avcodec_send_frame(enc_ctx, frame);
+    ret = avcodec_send_frame(pContext, pFrame);
     if (ret < 0) {
         LOGCATE("Error sending a frame for encoding\n");
         return;
     }
 
     while (ret >= 0) {
-        ret = avcodec_receive_packet(enc_ctx, pkt);
+        ret = avcodec_receive_packet(pContext, pPacket);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             LOGCATE("Error during encoding,encode has end");
             return;
@@ -156,8 +166,8 @@ void EncodeYuvToJpg::encodeInternal(AVCodecContext *enc_ctx, AVFrame *frame, AVP
             return;
         }
 
-        LOGCATE("Write packet size:%d", pkt->size);
-        fwrite(pkt->data, 1, pkt->size, outfile);
-        av_packet_unref(pkt);
+        LOGCATE("Write packet size:%d pktData:%p", pPacket->size,pPacket->data);
+        fwrite(pPacket->data, 1, pPacket->size, pFile);
+        av_packet_unref(pPacket);
     }
 }

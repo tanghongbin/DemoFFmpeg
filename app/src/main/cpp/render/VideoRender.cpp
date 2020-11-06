@@ -25,8 +25,8 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     LOGCATE("prepare draw each frame");
     m_VideoWidth = pContext->width;
     m_VideoHeight = pContext->height;
-    LOGCATE("video width:%d  height:%d codeWidth:%d codeHeight:%d", m_VideoWidth, m_VideoHeight
-    ,pContext->coded_width,pContext->coded_height);
+    LOGCATE("video width:%d  height:%d codeWidth:%d codeHeight:%d", m_VideoWidth, m_VideoHeight,
+            pContext->coded_width, pContext->coded_height);
 
     bool isAttach = false;
     JNIEnv *jniEnv = JavaVmManager::GetEnv(&isAttach);
@@ -37,10 +37,11 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     int windowWidth = ANativeWindow_getWidth(m_NativeWindow);
     int windowHeight = ANativeWindow_getHeight(m_NativeWindow);
 
-    setupRenderDimension(windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
+    setupRenderDimension(windowWidth, windowHeight, m_VideoWidth, m_VideoHeight, &m_RenderWidth,
+                         &m_RenderHeight);
 
     LOGCATE("windowWidth:%d windowHeight:%d \nvideoWidth:%d videoHeight:%d \n renderWidth:%d renderHeight:%d",
-            windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,m_RenderWidth,m_RenderHeight);
+            windowWidth, windowHeight, m_VideoWidth, m_VideoHeight, m_RenderWidth, m_RenderHeight);
     //2. 获取转换的上下文
     m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight,
                                   pContext->pix_fmt,
@@ -59,7 +60,7 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize, m_FrameBuffer, AV_PIX_FMT_RGBA,
                          m_VideoWidth, m_VideoHeight, 1);
 
-    sendMsg(MSG_TYPE_READY,instance,MSG_CALLBACK_FUNCTION_NAME,"(I)V");
+    sendMsg(MSG_TYPE_READY, instance, MSG_CALLBACK_FUNCTION_NAME, "(I)V");
 
     LOGCATE("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
             windowHeight, m_RenderWidth, m_RenderHeight);
@@ -98,7 +99,7 @@ void VideoRender::draw_frame(AVCodecContext *pContext, AVFrame *pFrame,
 //        return;
 //    }
     long long cur = GetSysCurrentTime();
-    if (mLastTime == 0){
+    if (mLastTime == 0) {
         mLastTime = cur;
     } else {
 //        LOGCATE("draw frame spend time:%jd",cur - mLastTime);
@@ -131,6 +132,8 @@ void VideoRender::displayToSurface(AVFrame *pFrame) {
     for (int i = 0; i < m_RenderHeight; ++i) {
         //一行一行地拷贝图像数据
         memcpy(dstBuffer + i * dstLineSize, m_FrameBuffer + i * srcLineSize, srcLineSize);
+//        memcpy(dstBuffer + i * dstLineSize, pFrame->data[0] + i * srcLineSize, srcLineSize);
+
     }
 //解锁当前 Window ，渲染缓冲区数据
     ANativeWindow_unlockAndPost(m_NativeWindow);

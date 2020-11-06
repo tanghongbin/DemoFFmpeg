@@ -46,7 +46,7 @@ void FFmpegEncodeAudio::init() {
     AVCodec *codec;
     AVCodecContext *codecContext;
     int ret;
-    const char *out_file_name = "/storage/emulated/0/ffmpegtest/encodeaudio.aac";
+    const char *out_file_name = "/storage/emulated/0/ffmpegtest/encodeaudio.mp3";
     const char *input_file_name = "/storage/emulated/0/ffmpegtest/capture.pcm";
     FILE *outFile;
     FILE *inFile;

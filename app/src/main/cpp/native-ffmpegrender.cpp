@@ -17,6 +17,9 @@
 #include <encode/FFmpegEncodeAudio.h>
 #include <encode/EncodeYuvToJpg.h>
 #include <encode/FFmpegEncodeVideo.h>
+#include <encode/SwsConvertYuvToPng.h>
+#include <GLES3/gl3.h>
+
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
 
@@ -25,6 +28,7 @@
 extern "C" {
 #endif
 
+#include <libavutil/imgutils.h>
 #include <libavcodec/jni.h>
 
 /*
@@ -66,11 +70,19 @@ JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
 //    FFmpegEncodeAudio::getInstance()->initOffcialDemo();
 }
 
-JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jstring url) {
-    const char * result = env->GetStringUTFChars(url, 0);
-    std::string encodedPath = EncodeYuvToJpg::encode(result);
+JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jint type) {
+    std::string encodedPath = "";
+    if (type == 1) {
+        encodedPath = EncodeYuvToJpg::encode("");
+    } else if (type == 2){
+//        encodedPath = SwsConvertYuvToPng::encode("");
+    }
     return env -> NewStringUTF(encodedPath.c_str());
 }
+
+//JNIEXPORT void JNICALL swsPng(JNIEnv *env, jobject instance) {
+//    SwsConvertYuvToPng::encode("");
+//}
 
 JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance,jint type) {
     switch (type){
@@ -159,8 +171,22 @@ JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
     FFmpegEncodeVideo::destroyInstance();
 }
 
+
 JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
-    FFmpegEncodeVideo::getInstance() -> testReadFile();
+    long long startTime = GetSysCurrentTime();
+    int size = av_image_get_buffer_size(AV_PIX_FMT_RGBA,840,1074,1);
+    uint8_t * buffer = static_cast<uint8_t *>(av_malloc(size));
+    FILE* file = fopen(OUTPUT_PNG_IMAGE_PATH,"rb");
+    if (!file){
+        LOGCATE("open filaed");
+        return;
+    }
+    fread(buffer,1,size,file);
+    int a = 2147483648,b = -1;
+    unsigned int c = 4294967296;
+    unsigned int d = 4294967294;
+    LOGCATE("打印数据a:%d b:%d c:%d d:%u ",a,b,c,d);
+    LOGCATE("总数:%d  花费时间:%lld",size,GetSysCurrentTime() - startTime);
 }
 
 static JNINativeMethod g_RenderMethods[] = {
@@ -175,7 +201,8 @@ static JNINativeMethod g_RenderMethods[] = {
 
         {"native_startEncode",      "()V",      (void *) (native_startEncode)},
         {"native_encodeFrame",      "([B)V",      (void *) (native_encodeFrame)},
-        {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
+        {"encodeYuvToImage",     "(I)Ljava/lang/String;", (void *) (encodeYuvToImage)},
+
         {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
         {"native_unInit",      "()V",      (void *) (native_unInit)},
 

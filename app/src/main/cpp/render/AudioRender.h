@@ -40,6 +40,8 @@ class AudioRender : public BaseRender {
 private:
     SwrContext *m_SwrContext;
     OpenSLESRender* openSlesRender;
+    uint8_t *m_AudioOutBuffer;
+    int m_BufferSize;
 
 
 public:
