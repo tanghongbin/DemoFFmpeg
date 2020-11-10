@@ -38,7 +38,7 @@ class FFmpegRender : GLSurfaceView.Renderer{
         val url = MuxerManager.MP4_PLAY_BIG_PATH
 //        val url = MuxerManager.MP4_PLAY_PATH
         // 1-音屏（不用指定），2-视频，3-yuv视频-不设置，4-opengl渲染
-        playMP4(url,null,2)
+//        playMP4(url,null,2)
 
     }
 
@@ -49,7 +49,7 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_OnDrawFrame()
 
-    external fun playMP4(url:String, surface: Surface?, type: Int)
+    external fun playMP4(url:String, surface: Surface?)
 
 //    external fun encodeAudio()
 //

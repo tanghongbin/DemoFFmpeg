@@ -3,6 +3,7 @@
 //
 
 #include <utils.h>
+#include <TimeAsyncHelper.h>
 #include "PlayMp4Practice.h"
 #include "BaseRender.h"
 #include "AudioRender.h"
@@ -22,22 +23,23 @@ void PlayMp4Practice::init(const char *url, JNIEnv *jniEnv, jobject renderInstan
     mRenderInstance = jniEnv->NewGlobalRef(renderInstance);
     mSurface = jniEnv->NewGlobalRef(surface);
     LOGCATE("play address is:%s", mUrl);
-    mThread = new thread(createPlayProcess, this,mRenderInstance, mSurface, type);
+    mThread = new thread(createPlayProcess, this, mRenderInstance, mSurface, type);
     LOGCATE("print thread name:%s", mThread->get_id());
 }
 
 
 void
-PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderInstance, jobject surface,
+PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderInstance,
+                                   jobject surface,
                                    int type) {
     // 1-音频，2-视频
     AVFormatContext *avFormatContext;
     AVCodec *codec;
     int ret = -1;
-    int stream_index;
+    int stream_index = -1;
     AVCodecContext *codecContext;
 
-    LOGCATE("native print play url:%s",pPractice->mUrl);
+    LOGCATE("native print play url:%s", pPractice->mUrl);
     avFormatContext = avformat_alloc_context();
     if (!avFormatContext) {
         LOGCATE("avformat alloc failed");
@@ -53,6 +55,7 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
     for (int i = 0; i < avFormatContext->nb_streams; ++i) {
         if (mediaType == avFormatContext->streams[i]->codecpar->codec_type) {
             stream_index = i;
+            LOGCATE("当前type:%d  stream_index:%d", type, stream_index);
         }
     }
     // 找到解码器
@@ -67,14 +70,15 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
         LOGCATE("can't alloc code context");
         return;
     }
-    ret = avcodec_parameters_to_context(codecContext,avFormatContext->streams[stream_index]->codecpar);
+    ret = avcodec_parameters_to_context(codecContext,
+                                        avFormatContext->streams[stream_index]->codecpar);
     if (checkNegativeReturn(ret, "can't attach params to decodeCtx")) return;
 
-    ret = avcodec_open2(codecContext,codec,NULL);
+    ret = avcodec_open2(codecContext, codec, NULL);
     if (checkNegativeReturn(ret, "open decoder failed")) return;
 
     BaseRender *baseRender = pPractice->createRender(type);
-    baseRender->init(codecContext,renderInstance,surface);
+    baseRender->init(codecContext, renderInstance, surface);
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
     pPractice->decodeLoop(packet, frame, baseRender, renderInstance, surface, codecContext,
@@ -90,7 +94,7 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
     avformat_free_context(avFormatContext);
 }
 
-BaseRender* PlayMp4Practice::createRender(int type) {
+BaseRender *PlayMp4Practice::createRender(int type) {
     if (type == 1) {
         return new AudioRender;
     } else if (type == 2) {
@@ -102,7 +106,6 @@ BaseRender* PlayMp4Practice::createRender(int type) {
 }
 
 
-
 void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender *pRender,
                                  jobject pJobject,
                                  jobject pJobject1, AVCodecContext *codecContext,
@@ -110,27 +113,41 @@ void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender 
 
     // 循环解析
     LOGCATE("prepare play");
+    TimeAsyncHelper *asyncHelper = new TimeAsyncHelper;
     int ret;
-    for (;;){
-        ret = av_read_frame(pContext,pPacket);
+    while (isLoop) {
+        ret = av_read_frame(pContext, pPacket);
         if (ret < 0) {
-            LOGCATE("av_read_frame error:%s",av_err2str(ret));
+            LOGCATE("av_read_frame error:%s", av_err2str(ret));
             break;
         }
-        LOGCATE("log streamIndex:%d",pPacket->stream_index);
-        if (pPacket->stream_index == stream_index){
-            ret = avcodec_send_packet(codecContext,pPacket);
+//        LOGCATE("log streamIndex:%d", pPacket->stream_index);
+        if (pPacket->stream_index == stream_index) {
+            asyncHelper->updateTimeStamp(true, pPacket, NULL, pContext, stream_index);
+            if (!asyncHelper->assertDtsIsValid()) {
+                goto LoopEnd;
+            }
+            ret = avcodec_send_packet(codecContext, pPacket);
             if (ret < 0) {
-                LOGCATE("avcodec_send_packet error:%s",av_err2str(ret));
+                LOGCATE("avcodec_send_packet error:%s", av_err2str(ret));
                 break;
             }
-            pRender->eachPacket(pPacket,codecContext);
-            while (avcodec_receive_frame(codecContext,pFrame) == 0){
-                LOGCATE("receive frame success,prepare draw");
+            pRender->eachPacket(pPacket, codecContext);
+            while (avcodec_receive_frame(codecContext, pFrame) == 0) {
+//                LOGCATE("receive frame success,prepare draw");
+                asyncHelper->updateTimeStamp(false, pPacket, pFrame, pContext, stream_index);
+                asyncHelper->async();
                 pRender->draw_frame(codecContext, pFrame, pJobject1);
             }
         }
+        LoopEnd:
         av_packet_unref(pPacket);
     }
+    delete asyncHelper;
+    asyncHelper = nullptr;
     LOGCATE("loop end");
+}
+
+void PlayMp4Practice::stopPlay() {
+    isLoop = false;
 }

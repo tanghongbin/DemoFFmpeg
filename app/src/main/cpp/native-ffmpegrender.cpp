@@ -116,6 +116,7 @@ JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
         playMp4Instance = nullptr;
     }
     if (playMp4Practice){
+        playMp4Practice -> stopPlay();
         delete playMp4Practice;
         playMp4Practice = nullptr;
     }
@@ -143,12 +144,13 @@ JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
 //}
 
 
-JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface,jint type) {
+JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface) {
     LOGCATE("prepare play mp4");
     playMp4Practice = new PlayMp4Practice();
     const char * playUrl = env->GetStringUTFChars(url,0);
     LOGCATE("prepare init mp4 , detected address %s",playUrl);
-    playMp4Practice->init(playUrl,env,instance,surface,type);
+    playMp4Practice->init(playUrl,env,instance,surface,1);
+    playMp4Practice->init(playUrl,env,instance,surface,2);
 }
 
 JNIEXPORT void JNICALL native_encodeFrame(JNIEnv *env, jobject instance,
@@ -206,7 +208,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
         {"native_unInit",      "()V",      (void *) (native_unInit)},
 
-        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;I)V", (void *) (playMP4)}
+        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
 };
 
 static int RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum)
@@ -265,7 +267,11 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
     if (av_jni_set_java_vm(jvm,NULL) < 0){
         return JNI_ERR;
     }
-    sys_log_init();
+    if (ENABLE_FFMPEG_LOG){
+        LOGCATE("system log has been init");
+        sys_log_init();
+    }
+
 //    HelloTest().test1();
 
     return JNI_VERSION_1_6;

@@ -66,10 +66,10 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
                          fragShaderHandle);
 }
 
-long long GetSysCurrentTime() {
+ long long GetSysCurrentTime() {
     struct timeval time;
     gettimeofday(&time, NULL);
-    long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
+     long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
     return curTime;
 }
 

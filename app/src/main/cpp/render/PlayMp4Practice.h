@@ -18,6 +18,7 @@ using namespace std;
 class PlayMp4Practice {
 private:
     thread* mThread;
+    bool isLoop = true;
 
 
 public:
@@ -26,6 +27,7 @@ public:
     char mUrl[1024];
     jobject mRenderInstance;
     jobject mSurface;
+
 
     void init(const char* url,JNIEnv* jniEnv,jobject renderInstance,jobject surface,int type);
 
@@ -37,6 +39,8 @@ public:
     void decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender *pRender, jobject pJobject,
                     jobject pJobject1, AVCodecContext *codecContext, AVFormatContext *pContext,
                     int i);
+
+    void stopPlay();
 };
 
 
