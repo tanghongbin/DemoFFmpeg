@@ -4,6 +4,7 @@
 
 
 #include <utils.h>
+#include <CustomGLUtils.h>
 
 #include "EncodeYuvToJpg.h"
 #include "SwsHelper.h"
@@ -15,9 +16,8 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-const char *EncodeYuvToJpg::encode(const char *sss) {
+const char *EncodeYuvToJpg::encode(const char *inputFileName) {
     const char *ERROR_RESULT = "";
-    const char *inputFileName = INPUT_YUV_IMAGE_PATH;
     const char *finalResult;
     const AVCodec *codec;
     AVCodecContext *codeCtx = NULL;
@@ -29,8 +29,7 @@ const char *EncodeYuvToJpg::encode(const char *sss) {
     int ret;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
 
-    const char *outputFileName = OUTPUT_PNG_IMAGE_PATH;
-
+    const char *outputFileName = getRandomStr("encodejpg-",".jpg","filterImg/");
     // 先读取文件yuv数据到frame中
     in_file = fopen(inputFileName, "rb");
     if (!in_file) {

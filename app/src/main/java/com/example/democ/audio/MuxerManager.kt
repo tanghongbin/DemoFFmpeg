@@ -27,6 +27,7 @@ class MuxerManager {
         val YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/YUV_Image_840x1074.NV21"
         val ENCODE_VIDEO_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/encodeVideo.h264"
 
+        val FILTER_ADD_TO_YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/filterAddToYuv.h264"
         val SWS_CONVERT_PNG = Environment.getExternalStorageDirectory().absolutePath + "/sws_after_scale.png"
     }
 

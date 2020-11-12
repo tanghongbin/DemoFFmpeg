@@ -12,16 +12,19 @@
 #include <PlayMp4Instance.h>
 #include <VideoGLRender.h>
 #include <PlayMp4Practice.h>
-#include <JavaVmManager.h>
+#include <helpers/JavaVmManager.h>
 #include <capturer/AudioRecordPlayHelper.h>
 #include <encode/FFmpegEncodeAudio.h>
 #include <encode/EncodeYuvToJpg.h>
 #include <encode/FFmpegEncodeVideo.h>
 #include <encode/SwsConvertYuvToPng.h>
 #include <GLES3/gl3.h>
+#include <filters/WaterFilterHelper.h>
+#include <filters/EncodeYuvToYuvByFilter.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
+#define ENABLE_FFMPEG_LOG true
 
 
 #ifdef __cplusplus
@@ -70,14 +73,16 @@ JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
 //    FFmpegEncodeAudio::getInstance()->initOffcialDemo();
 }
 
-JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jint type) {
-    std::string encodedPath = "";
-    if (type == 1) {
-        encodedPath = EncodeYuvToJpg::encode("");
-    } else if (type == 2){
-//        encodedPath = SwsConvertYuvToPng::encode("");
-    }
-    return env -> NewStringUTF(encodedPath.c_str());
+JNIEXPORT jstring JNICALL native_addFilterToYuv(JNIEnv *env, jobject instance,jstring inName) {
+    EncodeYuvToYuvByFilter* filterHelper = new EncodeYuvToYuvByFilter;
+    const char * result = filterHelper->yuvToyuvByFilter(getCharStrFromJstring(env,inName));
+    delete filterHelper;
+    return getJstringFromCharStr(env,result);
+//    FFmpegEncodeAudio::getInstance()->initOffcialDemo();
+}
+
+JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jstring jstring1) {
+    return getJstringFromCharStr(env,EncodeYuvToJpg::encode(getCharStrFromJstring(env,jstring1)));
 }
 
 //JNIEXPORT void JNICALL swsPng(JNIEnv *env, jobject instance) {
@@ -203,7 +208,8 @@ static JNINativeMethod g_RenderMethods[] = {
 
         {"native_startEncode",      "()V",      (void *) (native_startEncode)},
         {"native_encodeFrame",      "([B)V",      (void *) (native_encodeFrame)},
-        {"encodeYuvToImage",     "(I)Ljava/lang/String;", (void *) (encodeYuvToImage)},
+        {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
+        {"native_addFilterToYuv",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (native_addFilterToYuv)},
 
         {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
         {"native_unInit",      "()V",      (void *) (native_unInit)},

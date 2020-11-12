@@ -13,6 +13,8 @@ extern "C"{
 #include <libavformat/avformat.h>
 };
 
+
+#define ENABLE_AV_FILTER true
 using namespace std;
 
 class PlayMp4Practice {
@@ -37,6 +39,21 @@ public:
     BaseRender *createRender(int type);
 
     void decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender *pRender, jobject pJobject,
+                    jobject pJobject1, AVCodecContext *codecContext, AVFormatContext *pContext,
+                    int i);
+
+    /**
+     * 带滤镜的解析
+     * @param pPacket
+     * @param pFrame
+     * @param pRender
+     * @param pJobject
+     * @param pJobject1
+     * @param codecContext
+     * @param pContext
+     * @param i
+     */
+    void decodeLoopWithFilter(AVPacket *pPacket, AVFrame *pFrame, BaseRender *pRender, jobject pJobject,
                     jobject pJobject1, AVCodecContext *codecContext, AVFormatContext *pContext,
                     int i);
 

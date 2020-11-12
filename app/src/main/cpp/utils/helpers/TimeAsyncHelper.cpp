@@ -29,7 +29,7 @@ long TimeAsyncHelper::async(){
     if (curStamp > eapseTime){
         auto differ = static_cast<unsigned int>(curStamp - eapseTime);
         differ = differ > DELAY_MAX_TIME ? DELAY_MAX_TIME : differ;
-        LOGCATE("videoCurTime:%ld pastSysDuration:%lld syncDiffer:%d",curStamp,eapseTime,differ);
+//        LOGCATE("videoCurTime:%ld pastSysDuration:%lld syncDiffer:%d",curStamp,eapseTime,differ);
         av_usleep(differ * 1000);
     }
     delay = static_cast<long>(eapseTime - curStamp);
@@ -45,7 +45,7 @@ void TimeAsyncHelper::updateTimeStamp(bool isPkt, AVPacket *pkt, AVFrame *frame,
     if (isPkt){
         if (pkt->dts > 0 && pkt->dts != AV_NOPTS_VALUE){
             curStamp = static_cast<long int>(pkt->dts * av_q2d(pContext->streams[stream_index]->time_base) * 1000);
-            LOGCATE("pkt's dts:%lld dts_value:%ld",pkt->dts,curStamp);
+//            LOGCATE("pkt's dts:%lld dts_value:%ld",pkt->dts,curStamp);
         }
 //        LOGCATE("print pkt-dts:%lld",pkt->dts);
     } else {
@@ -57,7 +57,7 @@ void TimeAsyncHelper::updateTimeStamp(bool isPkt, AVPacket *pkt, AVFrame *frame,
 //            LOGCATE("frame's pts:%lld pts_value:%ld",frame->pts,curStamp);
         } else {
             curStamp = 0;
-            LOGCATE("frame's pkt_dts and pts is invalid");
+//            LOGCATE("frame's pkt_dts and pts is invalid");
         }
 //        LOGCATE("print frame-pkt_dts:%lld frame-pts",frame->pkt_dts,frame->pts);
     }

@@ -8,7 +8,6 @@
 
 #include <android/log.h>
 
-#define ENABLE_FFMPEG_LOG false
 #define LOG_TAG "AudioDemo-JNI"
 #define LOGCATE(...) __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 #define LOGCATE_LEVEL(level,...) ((void)__android_log_vprint(level,LOG_TAG,__VA_ARGS__))

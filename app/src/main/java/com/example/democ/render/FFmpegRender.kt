@@ -55,7 +55,7 @@ class FFmpegRender : GLSurfaceView.Renderer{
 //
 //    external fun encodeVideo()
 
-    external fun encodeYuvToImage(type: Int):String
+    external fun encodeYuvToImage(type: String):String
 
     external fun native_audioTest(type: Int)
 
@@ -70,6 +70,8 @@ class FFmpegRender : GLSurfaceView.Renderer{
     external fun native_videoEncodeUnInit()
 
     external fun native_testReadFile()
+
+    external fun native_addFilterToYuv(inputFileName:String):String
 
     //混合音视频
 //    external fun muxAv()

@@ -10,11 +10,12 @@
 #include "malloc.h"
 #include "cstdlib"
 #include "utils.h"
-#include "JavaVmManager.h"
+#include "helpers/JavaVmManager.h"
 #include <android/native_window_jni.h>
 #include <android/native_window.h>
 #include <pthread.h>
 #include <thread>
+#include <iostream>
 
 
 extern "C" {
@@ -66,10 +67,10 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
                          fragShaderHandle);
 }
 
- long long GetSysCurrentTime() {
+long long GetSysCurrentTime() {
     struct timeval time;
     gettimeofday(&time, NULL);
-     long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
+    long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
     return curTime;
 }
 
@@ -145,6 +146,14 @@ void sys_log_init() {
     av_log_set_callback(syslog_print);
     av_log_set_level(AV_LOG_DEBUG);
     LOGCATE("sys_log_init has successed");
+}
+
+uint8_t *fillArrayToFrame(AVPixelFormat avPixelFormat, AVFrame *frame) {
+    int in_size = av_image_get_buffer_size(avPixelFormat, frame->width, frame->height, 1);
+    uint8_t *in_buffer = static_cast<uint8_t *>(av_malloc(in_size));
+    av_image_fill_arrays(frame->data, frame->linesize, in_buffer, AV_PIX_FMT_YUV420P, frame->width,
+                         frame->height, 1);
+    return in_buffer;
 }
 
 /**
@@ -274,6 +283,31 @@ void testParams(int age, const char *name, const char *title) {
 
 void testLocalThread() {
     thread = new std::thread(testParams, 1, "23232", "adfasdfsfs");
+}
+
+const char *getCharStrFromJstring(JNIEnv *jniEnv, jstring str) {
+    const char *result = jniEnv->GetStringUTFChars(str, 0);
+    return result;
+}
+
+const char *getRandomStr(const char *prefix, const char *suffix) {
+    return getRandomStr(prefix,suffix,"");
+}
+
+const char *getRandomStr(const char *prefix, const char *suffix,const char *subDir) {
+    long long start = GetSysCurrentTime();
+    std::string dirs = "/storage/emulated/0/ffmpegtest/" ;
+    std::string result = dirs + subDir + prefix + std::to_string(start) + suffix;
+    char *resultChar = new char[100];
+    strcpy(resultChar,result.c_str());
+    return resultChar;
+}
+
+
+jstring getJstringFromCharStr(JNIEnv *jniEnv, const char *str) {
+    jstring result = jniEnv->NewStringUTF(str);
+    delete str;
+    return result;
 }
 
 const char *encdoeMp4FromOfficalDemo() {

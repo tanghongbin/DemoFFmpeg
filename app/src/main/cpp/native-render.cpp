@@ -9,7 +9,7 @@
 #include <VideoRender.h>
 #include <PlayMp4Instance.h>
 #include <encode/EncodeYuvToJpg.h>
-#include <JavaVmManager.h>
+#include "utils/helpers/JavaVmManager.h"
 #include "utils/utils.h"
 #include "test/MyGLRenderContext.h"
 #include "utils/CustomGLUtils.h"

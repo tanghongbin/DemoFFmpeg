@@ -11,9 +11,7 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
-<!--    android:requestLegacyExternalStorage="true"-->
     <application
-
         android:name=".DemoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ffmpeg.FFmpegEncodeVideoActivity"></activity>
+        <activity android:name=".ffmpeg.FFmpegFilterAddToYuvActivity"></activity>
+        <activity android:name=".ffmpeg.FFmpegEncodeVideoActivity" />
         <activity android:name=".ffmpeg.FFmpegEncodeAudioActivity" />
         <activity android:name=".ffmpeg.FFmpegNavigationActivity" />
         <activity android:name=".ffmpeg.FFmpegNativeWindowActivity" />

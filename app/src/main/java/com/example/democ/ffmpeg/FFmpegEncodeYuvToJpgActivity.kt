@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import com.example.democ.R
+import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.MuxerManager.Companion.SWS_CONVERT_PNG
 import com.example.democ.audio.log
 import com.example.democ.opengles.NativeRender
@@ -21,7 +22,6 @@ class FFmpegEncodeYuvToJpgActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_encode)
 
-        val testGoodPath = "/storage/emulated/0/test.jpg"
 
 
         val render = FFmpegRender()
@@ -32,7 +32,7 @@ class FFmpegEncodeYuvToJpgActivity : AppCompatActivity() {
         button.setOnClickListener {
             mImage.setImageDrawable(null)
             val start = System.currentTimeMillis();
-            val path = render.encodeYuvToImage(1)
+            val path = render.encodeYuvToImage(MuxerManager.YUV_PATH)
             log("打印返回的地址:${path} 耗时:${System.currentTimeMillis() - start}")
             mImage.setImageURI(Uri.fromFile(File(path)))
         }

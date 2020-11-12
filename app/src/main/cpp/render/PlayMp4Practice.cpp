@@ -3,7 +3,9 @@
 //
 
 #include <utils.h>
-#include <TimeAsyncHelper.h>
+#include <helpers/TimeAsyncHelper.h>
+#include <filters/WaterFilterHelper.h>
+#include <encode/EncodeYuvToJpg.h>
 #include "PlayMp4Practice.h"
 #include "BaseRender.h"
 #include "AudioRender.h"
@@ -11,6 +13,8 @@
 #include "CustomGLUtils.h"
 
 extern "C" {
+#include <libavfilter/buffersrc.h>
+#include <libavfilter/buffersink.h>
 #include "../include/libavcodec/avcodec.h"
 #include "../include/libavutil/frame.h"
 #include "../include/libavformat/avformat.h"
@@ -81,8 +85,23 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
     baseRender->init(codecContext, renderInstance, surface);
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
-    pPractice->decodeLoop(packet, frame, baseRender, renderInstance, surface, codecContext,
-                          avFormatContext, stream_index);
+    if (ENABLE_AV_FILTER) {
+        bool isVideo =
+                avFormatContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO;
+        // 只有视频使用滤镜，音频不用
+        if (isVideo) {
+            LOGCATE("isvideo:true index:%d", stream_index);
+            pPractice->decodeLoopWithFilter(packet, frame, baseRender, renderInstance, surface,
+                                            codecContext,
+                                            avFormatContext, stream_index);
+        } else {
+            pPractice->decodeLoop(packet, frame, baseRender, renderInstance, surface, codecContext,
+                                  avFormatContext, stream_index);
+        }
+    } else {
+        pPractice->decodeLoop(packet, frame, baseRender, renderInstance, surface, codecContext,
+                              avFormatContext, stream_index);
+    }
 
     baseRender->unInit();
     delete baseRender;
@@ -92,6 +111,7 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
     avformat_close_input(&avFormatContext);
     avcodec_free_context(&codecContext);
     avformat_free_context(avFormatContext);
+    LOGCATE("free all context over");
 }
 
 BaseRender *PlayMp4Practice::createRender(int type) {
@@ -134,7 +154,6 @@ void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender 
             }
             pRender->eachPacket(pPacket, codecContext);
             while (avcodec_receive_frame(codecContext, pFrame) == 0) {
-//                LOGCATE("receive frame success,prepare draw");
                 asyncHelper->updateTimeStamp(false, pPacket, pFrame, pContext, stream_index);
                 asyncHelper->async();
                 pRender->draw_frame(codecContext, pFrame, pJobject1);
@@ -146,6 +165,109 @@ void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender 
     delete asyncHelper;
     asyncHelper = nullptr;
     LOGCATE("loop end");
+}
+
+void PlayMp4Practice::decodeLoopWithFilter(AVPacket *pPacket, AVFrame *pFrame, BaseRender *pRender,
+                                           jobject pJobject,
+                                           jobject pJobject1, AVCodecContext *codecContext,
+                                           AVFormatContext *pContext, int stream_index) {
+
+    // 循环解析
+    LOGCATE("prepare play");
+    const char *outName = getRandomStr("frameyuvout-", ".yuv");
+    LOGCATE("log yuv random address :%s",outName);
+    FILE *fp_yuv = fopen(outName, "wb+");
+    if (!fp_yuv) {
+        LOGCATE("open outfile failed");
+        return;
+    }
+
+    TimeAsyncHelper *asyncHelper = new TimeAsyncHelper;
+    WaterFilterHelper *waterFilterHelper = new WaterFilterHelper;
+    int ret;
+//    ret = waterFilterHelper->initWaterFilter(pContext, codecContext, stream_index);
+    if (ret < 0) {
+        LOGCATE("waterfilterHelper init failed:%s",av_err2str(ret));
+        goto WholeLoopEnd;
+    }
+    while (isLoop) {
+        ret = av_read_frame(pContext, pPacket);
+        if (ret < 0) {
+            LOGCATE("av_read_frame error:%s", av_err2str(ret));
+            break;
+        }
+//        LOGCATE("log streamIndex:%d", pPacket->stream_index);
+        if (pPacket->stream_index == stream_index) {
+            asyncHelper->updateTimeStamp(true, pPacket, NULL, pContext, stream_index);
+            if (!asyncHelper->assertDtsIsValid()) {
+                goto StartNextLoop;
+            }
+            ret = avcodec_send_packet(codecContext, pPacket);
+            if (ret < 0) {
+                LOGCATE("avcodec_send_packet error:%s", av_err2str(ret));
+                break;
+            }
+            pRender->eachPacket(pPacket, codecContext);
+            while (avcodec_receive_frame(codecContext, pFrame) == 0) {
+                //------------------ 添加滤镜
+                if (av_buffersrc_add_frame_flags(waterFilterHelper->buffersrc_ctx, pFrame,
+                                                 AV_BUFFERSRC_FLAG_KEEP_REF) < 0) {
+                    av_log(NULL, AV_LOG_ERROR, "Error while feeding the filtergraph\n");
+                    break;
+                }
+                while (true) {
+//                    ret = av_buffersink_get_frame(waterFilterHelper->buffersink_ctx,
+//                                                  waterFilterHelper->filterFrame);
+                    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                        break;
+                    }
+                    if (ret < 0) {
+                        goto WholeLoopEnd;
+                    }
+//                    AVFrame *pFrame_out = waterFilterHelper->filterFrame;
+//                    if (pFrame_out->format == AV_PIX_FMT_YUV420P) {
+//                        //Y, U, V
+//                        for (int i = 0; i < pFrame_out->height; i++) {
+//                            fwrite(pFrame_out->data[0] + pFrame_out->linesize[0] * i, 1,
+//                                   pFrame_out->width, fp_yuv);
+//                        }
+//                        for (int i = 0; i < pFrame_out->height / 2; i++) {
+//                            fwrite(pFrame_out->data[1] + pFrame_out->linesize[1] * i, 1,
+//                                   pFrame_out->width / 2, fp_yuv);
+//                        }
+//                        for (int i = 0; i < pFrame_out->height / 2; i++) {
+//                            fwrite(pFrame_out->data[2] + pFrame_out->linesize[2] * i, 1,
+//                                   pFrame_out->width / 2, fp_yuv);
+//
+//                        }
+//                        LOGCATE("write yuv data over");
+//                    }
+
+//                    asyncHelper->updateTimeStamp(false, pPacket, waterFilterHelper->filterFrame,
+//                                                 pContext, stream_index);
+//                    asyncHelper->async();
+//                    pRender->draw_frame(codecContext, waterFilterHelper->filterFrame,
+//                                        pJobject1);
+//                    av_frame_unref(waterFilterHelper->filterFrame);
+                }
+                //------------------
+
+                av_frame_unref(pFrame);
+            }
+        }
+        StartNextLoop:
+        av_packet_unref(pPacket);
+    }
+
+    WholeLoopEnd:
+    fclose(fp_yuv);
+    waterFilterHelper->unInit();
+    delete waterFilterHelper;
+    waterFilterHelper = nullptr;
+    delete asyncHelper;
+    asyncHelper = nullptr;
+    LOGCATE("loop end");
+
 }
 
 void PlayMp4Practice::stopPlay() {

@@ -11,7 +11,7 @@ extern "C" {
 #include <ImageDef.h>
 #include <time.h>
 #include <CustomGLUtils.h>
-#include <JavaVmManager.h>
+#include <helpers/JavaVmManager.h>
 #include "VideoRender.h"
 #include "utils.h"
 #include "PlayMp4Instance.h"

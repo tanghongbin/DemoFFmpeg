@@ -3,7 +3,7 @@
 //
 
 #include <CustomGLUtils.h>
-#include <JavaVmManager.h>
+#include <helpers/JavaVmManager.h>
 #include "PlayMp4Instance.h"
 #include "VideoRender.h"
 #include "BaseRender.h"

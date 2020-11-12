@@ -6,7 +6,14 @@
 #include "utils.h"
 #include <string>
 #include <gtc/matrix_transform.hpp>
+
+
 #include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/GLES3/gl3.h"
+
+extern "C" {
+#include <libavutil/frame.h>
+#include <libavutil/pixfmt.h>
+}
 
 #ifndef DEMOC_GLUTILS_H
 #define DEMOC_GLUTILS_H
@@ -56,9 +63,17 @@ const char *encodeYuvToImageUtils2(const char *filePath);
 
 const char *encdoeMp4FromOfficalDemo();
 
+const char *getCharStrFromJstring(JNIEnv *jniEnv, jstring str);
+
+const char *getRandomStr(const char *prefix, const char *suffix);
+
+const char *getRandomStr(const char *prefix, const char *suffix, const char *subDir);
+
+jstring getJstringFromCharStr(JNIEnv *jniEnv, const char *str);
+
 bool checkNegativeReturn(int ret, const char *string);
 
-void NvToYUV420p(const uint8_t * image_src, uint8_t* image_dst,int image_width, int image_height);
+void NvToYUV420p(const uint8_t *image_src, uint8_t *image_dst, int image_width, int image_height);
 
 void
 setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,
@@ -67,6 +82,8 @@ setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWid
 void syslog_print(void *ptr, int level, const char *fmt, va_list vl);
 
 void sys_log_init();
+
+uint8_t *fillArrayToFrame(AVPixelFormat avPixelFormat, AVFrame *frame);
 
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);

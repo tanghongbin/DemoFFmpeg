@@ -29,8 +29,10 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/filters/*.cpp
         ${CMAKE_SOURCE_DIR}/render/*.cpp
         ${CMAKE_SOURCE_DIR}/test/*.cpp
+        ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/*.cpp)
 
 
