@@ -28,7 +28,7 @@ const char *EncodeYuvToYuvByFilter::yuvToyuvByFilter(const char *inputName) {
         LOGCATE("can't open inputfile");
         return ERROR_RESULT;
     }
-    const char *outFileName = getRandomStr("filteryuvtoyuv-", ".yuv");
+    const char *outFileName = getRandomStr("filteryuvtoyuv-", ".yuv","yuvfiles/");
 
     LOGCATE("log outFileName:%s targetOut:%s",outFileName,outFileName);
     FILE *outFile = fopen(outFileName, "wb");
@@ -42,22 +42,31 @@ const char *EncodeYuvToYuvByFilter::yuvToyuvByFilter(const char *inputName) {
     inFrame->width = width;
     inFrame->height = height;
     inFrame->format = AV_PIX_FMT_YUV420P;
+
+    outFrame->width = width;
+    outFrame->height = height;
+    outFrame->format = AV_PIX_FMT_YUV420P;
     uint8_t *in_buffer = fillArrayToFrame(AV_PIX_FMT_YUV420P, inFrame);
     uint8_t *out_buffer = fillArrayToFrame(AV_PIX_FMT_YUV420P, outFrame);
 
     int size = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, inFrame->width, inFrame->height, 1);
-    if (fread(in_buffer, 1, size, inFile) < size) {
+    if (fread(in_buffer, 1, size, inFile)!= size) {
         LOGCATE("read in buffer error");
         return ERROR_RESULT;
     }
+    LOGCATE("log yuv in_file size:%d",size);
     //input Y,U,V
     inFrame->data[0] = in_buffer;
     inFrame->data[1] = in_buffer + width * height;
     inFrame->data[2] = in_buffer + width * height * 5 / 4;
 
     WaterFilterHelper *waterFilterHelper = new WaterFilterHelper;
-    waterFilterHelper->initWaterFilter(width, height);
-
+    ret = waterFilterHelper->initWaterFilter(width, height);
+    if (ret < 0){
+        LOGCATE("init waterfilter error:%s",av_err2str(ret));
+        return ERROR_RESULT;
+    }
+    long long startTime = GetSysCurrentTime();
     if ((ret = av_buffersrc_add_frame(waterFilterHelper->buffersrc_ctx, inFrame)) < 0) {
         LOGCATE("av_buffersrc_add_frame failed:%s",av_err2str(ret));
         return ERROR_RESULT;
@@ -66,9 +75,11 @@ const char *EncodeYuvToYuvByFilter::yuvToyuvByFilter(const char *inputName) {
 
     ret = av_buffersink_get_frame(waterFilterHelper->buffersink_ctx, outFrame);
     if (ret < 0){
-        LOGCATE("av_buffersink_get_frame error:%S",av_err2str(ret));
+        LOGCATE("av_buffersink_get_frame error:%s",av_err2str(ret));
         return ERROR_RESULT;
     }
+
+    LOGCATE("查看滤镜耗时：%lld",GetSysCurrentTime() - startTime);
 
     if(outFrame->format==AV_PIX_FMT_YUV420P){
         for(int i=0;i<outFrame->height;i++){
@@ -95,12 +106,12 @@ const char *EncodeYuvToYuvByFilter::yuvToyuvByFilter(const char *inputName) {
     EncodeYuvToJpg* yuvToJpg = new EncodeYuvToJpg;
     const char * finalResult = yuvToJpg->encode(outFileName);
     delete yuvToJpg;
-    ret = remove(outFileName);
-    if (ret < 0){
-        LOGCATE("删除文件失败");
-    } else {
-        LOGCATE("文件删除成功");
-    }
+//    ret = remove(outFileName);
+//    if (ret < 0){
+//        LOGCATE("删除文件失败");
+//    } else {
+//        LOGCATE("文件删除成功");
+//    }
     LOGCATE("打印最终输出jpg:   %s",finalResult);
     delete outFileName;
 

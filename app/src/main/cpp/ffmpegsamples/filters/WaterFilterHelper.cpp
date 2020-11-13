@@ -20,7 +20,7 @@
 #include <typeinfo>
 
 
-extern "C"{
+extern "C" {
 #include <libavfilter/buffersink.h>
 #include <libavutil/imgutils.h>
 #include <libavfilter/buffersrc.h>
@@ -29,27 +29,47 @@ extern "C"{
 using namespace std;
 
 
-int WaterFilterHelper::initWaterFilter(int in_width,int in_height) {
+int WaterFilterHelper::initWaterFilter(int in_width, int in_height) {
     char args[512];
     int ret;
-    const AVFilter *buffersrc  = avfilter_get_by_name("buffer");
+    const AVFilter *buffersrc = avfilter_get_by_name("buffer");
     const AVFilter *buffersink = avfilter_get_by_name("buffersink");
     AVFilterInOut *outputs = avfilter_inout_alloc();
-    AVFilterInOut *inputs  = avfilter_inout_alloc();
-    enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE };
+    AVFilterInOut *inputs = avfilter_inout_alloc();
+    enum AVPixelFormat pix_fmts[] = {AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE};
     AVBufferSinkParams *buffersink_params;
 
     filter_graph = avfilter_graph_alloc();
 
     snprintf(args, sizeof(args),
              "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
-             in_width,in_height,AV_PIX_FMT_YUV420P,
-             1, 25,1,1);
+             in_width, in_height, AV_PIX_FMT_YUV420P,
+             1, 25, 1, 1);
 
     ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                                        args, NULL, filter_graph);
     if (ret < 0) {
-        LOGCATE("Cannot create buffer source:%s",av_err2str(ret));
+        LOGCATE("Cannot create buffer source:%s", av_err2str(ret));
+        return ret;
+    }
+
+    const AVFilter *scaleFilter = avfilter_get_by_name("scale");
+    if (!scaleFilter){
+        LOGCATE("can't find scale filter");
+        return ret;
+    }
+    AVFilterContext* scaleContext;
+    ret = avfilter_graph_create_filter(&scaleContext,scaleFilter,"scale","840:1074",NULL,filter_graph);
+    if (ret < 0){
+        LOGCATE("can't create scale filter");
+        return ret;
+    }
+
+    const AVFilter *scaleFilter2 = avfilter_get_by_name("scale");
+    AVFilterContext* scaleContext2;
+    ret = avfilter_graph_create_filter(&scaleContext2,scaleFilter2,"scale","1260:1611",NULL,filter_graph);
+    if (ret < 0){
+        LOGCATE("can't create scale filter");
         return ret;
     }
 
@@ -60,40 +80,53 @@ int WaterFilterHelper::initWaterFilter(int in_width,int in_height) {
                                        NULL, buffersink_params, filter_graph);
     av_free(buffersink_params);
     if (ret < 0) {
-        LOGCATE("Cannot create buffer sink:%s",av_err2str(ret));
+        LOGCATE("Cannot create buffer sink:%s", av_err2str(ret));
         return ret;
     }
 
     /* Endpoints for the filter graph. */
-    outputs->name       = av_strdup("in");
+    outputs->name = av_strdup("in");
     outputs->filter_ctx = buffersrc_ctx;
-    outputs->pad_idx    = 0;
-    outputs->next       = NULL;
+    outputs->pad_idx = 0;
+    outputs->next = NULL;
 
-    inputs->name       = av_strdup("out");
+    inputs->name = av_strdup("out");
     inputs->filter_ctx = buffersink_ctx;
-    inputs->pad_idx    = 0;
-    inputs->next       = NULL;
+    inputs->pad_idx = 0;
+    inputs->next = NULL;
 
-//    const char *filter_descr = "lutyuv='u=128:v=128'";
-//    const char *filter_descr = "boxblur";
-//    const char *filter_descr = "hflip";
-    //const char *filter_descr = "hue='h=60:s=-3'";
-    const char *filter_descr = "crop=2/3*in_w:2/3*in_h";
-//    const char *filter_descr = "scale=78:24";
-//    const char *filter_descr = "drawbox=x=100:y=100:w=100:h=100:color=pink@0.5";
-    //const char *filter_descr = "drawtext=fontfile=arial.ttf:fontcolor=green:fontsize=30:text='Lei Xiaohua'";
-
-
-    if ((ret = avfilter_graph_parse_ptr(filter_graph, filter_descr,
-                                        &inputs, &outputs, NULL)) < 0){
-        LOGCATE("avfilter_graph_parse_ptr error:%s",av_err2str(ret));
+    ret = avfilter_link(buffersrc_ctx,0,scaleContext,0);
+    if (checkNegativeReturn(ret,av_err2str(ret)))
         return ret;
-    }
+    ret = avfilter_link(scaleContext,0,scaleContext2,0);
+    if (checkNegativeReturn(ret,av_err2str(ret)))
+        return ret;
+    ret = avfilter_link(scaleContext2,0,buffersink_ctx,0);
+    if (checkNegativeReturn(ret,av_err2str(ret)))
+        return ret;
+
+//    const char *filter_descr = "lutyuv='u=128:v=128'";// disable
+//    const char *filter_descr = "boxblur"; // disable
+//    const char *filter_descr = "hflip"; // disable
+//    const char *filter_descr = "hue='h=60:s=-3'"; // disable
+//    const char *filter_descr = "crop=2/3*in_w:2/3*in_h"; // disable
+//    const char *filter_descr = "scale=420:537";
+//    const char *filter_descr = "fade=in:0:307color=yellow";
+
+//    const char *filter_descr = "drawbox=x=100:y=100:w=100:h=100:color=pink@0.5"; // disable
+//    const char *filter_descr = "drawtext=fontfile=arial.ttf:fontcolor=green:fontsize=30:text='Lei Xiaohua'";
 
 
-    if ((ret = avfilter_graph_config(filter_graph, NULL)) < 0){
-        LOGCATE("avfilter_graph_config error:%s",av_err2str(ret));
+
+//    if ((ret = avfilter_graph_parse_ptr(filter_graph, filter_descr,
+//                                        &inputs, &outputs, NULL)) < 0) {
+//        LOGCATE("avfilter_graph_parse_ptr error:%s", av_err2str(ret));
+//        return ret;
+//    }
+
+
+    if ((ret = avfilter_graph_config(filter_graph, NULL)) < 0) {
+        LOGCATE("avfilter_graph_config error:%s", av_err2str(ret));
         return ret;
     }
     return ret;
@@ -104,13 +137,13 @@ void WaterFilterHelper::unInit() {
     avfilter_graph_free(&filter_graph);
 }
 
-const char * WaterFilterHelper::testFilter(const char * inFileName){
+const char *WaterFilterHelper::testFilter(const char *inFileName) {
     int ret = 0;
-    const char * Error_Result = "";
+    const char *Error_Result = "";
     long long start = GetSysCurrentTime();
 
     // input yuv
-    FILE* inFile = NULL;
+    FILE *inFile = NULL;
     inFile = fopen(inFileName, "rb+");
     if (!inFile) {
         LOGCATE("Fail to open file\n");
@@ -121,18 +154,18 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
     int in_height = 272;
 
     // output yuv
-    FILE* outFile = NULL;
+    FILE *outFile = NULL;
 
 
-    const char * outFileName =  getRandomStr("filteryuv-",".yuv");
-    LOGCATE("log outputName:%s",outFileName);
+    const char *outFileName = getRandomStr("filteryuv-", ".yuv");
+    LOGCATE("log outputName:%s", outFileName);
     outFile = fopen(outFileName, "wb");
     if (!outFile) {
         LOGCATE("Fail to create file for output\n");
         return Error_Result;
     }
 
-    AVFilterGraph* filter_graph = avfilter_graph_alloc();
+    AVFilterGraph *filter_graph = avfilter_graph_alloc();
     if (!filter_graph) {
         LOGCATE("Fail to create filter graph!\n");
         return Error_Result;
@@ -142,29 +175,29 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
     char args[512];
 
 
-
     snprintf(args, sizeof(args),
-                "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
-                in_width, in_height, AV_PIX_FMT_YUV420P,
-                1, 25, 1, 1);
+             "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
+             in_width, in_height, AV_PIX_FMT_YUV420P,
+             1, 25, 1, 1);
 
-    const AVFilter* bufferSrc = avfilter_get_by_name("buffer");
-    AVFilterContext* bufferSrc_ctx;
+    const AVFilter *bufferSrc = avfilter_get_by_name("buffer");
+    AVFilterContext *bufferSrc_ctx;
 
     ret = avfilter_graph_create_filter(&bufferSrc_ctx, bufferSrc, "in", args, NULL, filter_graph);
     if (ret < 0) {
-        LOGCATE("Fail to create filter bufferSrc :%s",av_err2str(ret));
+        LOGCATE("Fail to create filter bufferSrc :%s", av_err2str(ret));
         return Error_Result;
     }
 
     // sink filter
     AVBufferSinkParams *bufferSink_params;
-    AVFilterContext* bufferSink_ctx;
-    const AVFilter* bufferSink = avfilter_get_by_name("buffersink");
-    enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE };
+    AVFilterContext *bufferSink_ctx;
+    const AVFilter *bufferSink = avfilter_get_by_name("buffersink");
+    enum AVPixelFormat pix_fmts[] = {AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE};
     bufferSink_params = av_buffersink_params_alloc();
     bufferSink_params->pixel_fmts = pix_fmts;
-    ret = avfilter_graph_create_filter(&bufferSink_ctx, bufferSink, "out", NULL, bufferSink_params, filter_graph);
+    ret = avfilter_graph_create_filter(&bufferSink_ctx, bufferSink, "out", NULL, bufferSink_params,
+                                       filter_graph);
     if (ret < 0) {
         LOGCATE("Fail to create filter sink filter\n");
         return Error_Result;
@@ -173,16 +206,18 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
     // split filter
     const AVFilter *splitFilter = avfilter_get_by_name("split");
     AVFilterContext *splitFilter_ctx;
-    ret = avfilter_graph_create_filter(&splitFilter_ctx, splitFilter, "split", "outputs=2", NULL, filter_graph);
+    ret = avfilter_graph_create_filter(&splitFilter_ctx, splitFilter, "split", "outputs=2", NULL,
+                                       filter_graph);
     if (ret < 0) {
-        LOGCATE("Fail to create split filter:%s",av_err2str(ret));
+        LOGCATE("Fail to create split filter:%s", av_err2str(ret));
         return Error_Result;
     }
 
     // crop filter
     const AVFilter *cropFilter = avfilter_get_by_name("crop");
     AVFilterContext *cropFilter_ctx;
-    ret = avfilter_graph_create_filter(&cropFilter_ctx, cropFilter, "crop", "out_w=iw:out_h=ih/2:x=0:y=0", NULL, filter_graph);
+    ret = avfilter_graph_create_filter(&cropFilter_ctx, cropFilter, "crop",
+                                       "out_w=iw:out_h=ih/2:x=0:y=0", NULL, filter_graph);
     if (ret < 0) {
         LOGCATE("Fail to create crop filter\n");
         return Error_Result;
@@ -191,7 +226,8 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
     // vflip filter
     const AVFilter *vflipFilter = avfilter_get_by_name("vflip");
     AVFilterContext *vflipFilter_ctx;
-    ret = avfilter_graph_create_filter(&vflipFilter_ctx, vflipFilter, "vflip", NULL, NULL, filter_graph);
+    ret = avfilter_graph_create_filter(&vflipFilter_ctx, vflipFilter, "vflip", NULL, NULL,
+                                       filter_graph);
     if (ret < 0) {
         LOGCATE("Fail to create vflip filter\n");
         return Error_Result;
@@ -200,7 +236,8 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
     // overlay filter
     const AVFilter *overlayFilter = avfilter_get_by_name("overlay");
     AVFilterContext *overlayFilter_ctx;
-    ret = avfilter_graph_create_filter(&overlayFilter_ctx, overlayFilter, "overlay", "y=0:H/2", NULL, filter_graph);
+    ret = avfilter_graph_create_filter(&overlayFilter_ctx, overlayFilter, "overlay", "y=0:H/2",
+                                       NULL, filter_graph);
     if (ret < 0) {
         LOGCATE("Fail to create overlay filter\n");
         return Error_Result;
@@ -257,12 +294,14 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
 //    av_free(graph_str);
 
     AVFrame *frame_in = av_frame_alloc();
-    unsigned char *frame_buffer_in = (unsigned char *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_YUV420P, in_width, in_height, 1));
+    unsigned char *frame_buffer_in = (unsigned char *) av_malloc(
+            av_image_get_buffer_size(AV_PIX_FMT_YUV420P, in_width, in_height, 1));
     av_image_fill_arrays(frame_in->data, frame_in->linesize, frame_buffer_in,
                          AV_PIX_FMT_YUV420P, in_width, in_height, 1);
 
     AVFrame *frame_out = av_frame_alloc();
-    unsigned char *frame_buffer_out = (unsigned char *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_YUV420P, in_width, in_height, 1));
+    unsigned char *frame_buffer_out = (unsigned char *) av_malloc(
+            av_image_get_buffer_size(AV_PIX_FMT_YUV420P, in_width, in_height, 1));
     av_image_fill_arrays(frame_out->data, frame_out->linesize, frame_buffer_out,
                          AV_PIX_FMT_YUV420P, in_width, in_height, 1);
 
@@ -272,13 +311,14 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
 
     while (1) {
 
-        if (fread(frame_buffer_in, 1, in_width*in_height * 3 / 2, inFile) != in_width*in_height * 3 / 2) {
+        if (fread(frame_buffer_in, 1, in_width * in_height * 3 / 2, inFile) !=
+            in_width * in_height * 3 / 2) {
             break;
         }
         //input Y,U,V
         frame_in->data[0] = frame_buffer_in;
-        frame_in->data[1] = frame_buffer_in + in_width*in_height;
-        frame_in->data[2] = frame_buffer_in + in_width*in_height * 5 / 4;
+        frame_in->data[1] = frame_buffer_in + in_width * in_height;
+        frame_in->data[2] = frame_buffer_in + in_width * in_height * 5 / 4;
 
         if (av_buffersrc_add_frame(bufferSrc_ctx, frame_in) < 0) {
             LOGCATE("Error while add frame.\n");
@@ -293,13 +333,16 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
         //output Y,U,V
         if (frame_out->format == AV_PIX_FMT_YUV420P) {
             for (int i = 0; i < frame_out->height; i++) {
-                fwrite(frame_out->data[0] + frame_out->linesize[0] * i, 1, frame_out->width, outFile);
+                fwrite(frame_out->data[0] + frame_out->linesize[0] * i, 1, frame_out->width,
+                       outFile);
             }
             for (int i = 0; i < frame_out->height / 2; i++) {
-                fwrite(frame_out->data[1] + frame_out->linesize[1] * i, 1, frame_out->width / 2, outFile);
+                fwrite(frame_out->data[1] + frame_out->linesize[1] * i, 1, frame_out->width / 2,
+                       outFile);
             }
             for (int i = 0; i < frame_out->height / 2; i++) {
-                fwrite(frame_out->data[2] + frame_out->linesize[2] * i, 1, frame_out->width / 2, outFile);
+                fwrite(frame_out->data[2] + frame_out->linesize[2] * i, 1, frame_out->width / 2,
+                       outFile);
             }
         }
         LOGCATE("Process 1 frame!\n");
@@ -313,8 +356,8 @@ const char * WaterFilterHelper::testFilter(const char * inFileName){
     av_frame_free(&frame_out);
     avfilter_graph_free(&filter_graph);
 
-    EncodeYuvToJpg * encodeYuvToJpg = new EncodeYuvToJpg;
-    const char * result = encodeYuvToJpg->encode(outFileName);
-    LOGCATE("convert total cost:%lld ms",(GetSysCurrentTime() - start));
+    EncodeYuvToJpg *encodeYuvToJpg = new EncodeYuvToJpg;
+    const char *result = encodeYuvToJpg->encode(outFileName);
+    LOGCATE("convert total cost:%lld ms", (GetSysCurrentTime() - start));
     return result;
 }

@@ -23,6 +23,7 @@ const char *EncodeYuvToJpg::encode(const char *inputFileName) {
     AVCodecContext *codeCtx = NULL;
     FILE *in_file;
     FILE *out_file;
+
     AVFrame *frame;
     AVPacket *pkt;
     uint8_t *pic_buf;
@@ -75,10 +76,6 @@ const char *EncodeYuvToJpg::encode(const char *inputFileName) {
 //    codeCtx->max_b_frames = 10;
     codeCtx->gop_size = 1;
 
-    SwsHelper* swsHelper = new SwsHelper;
-    swsHelper->init(codeCtx->width,codeCtx->height,codeCtx->pix_fmt,
-            1920,1080,codeCtx->pix_fmt,SWS_FAST_BILINEAR,NULL,NULL,NULL);
-
 //    if (codec->id == AV_CODEC_ID_H264)
 //        av_opt_set(codeCtx->priv_data, "preset", "slow", 0);
 
@@ -114,7 +111,7 @@ const char *EncodeYuvToJpg::encode(const char *inputFileName) {
     frame->data[2] = pic_buf + y_size * 5 / 4;  // V
 
     //prepare read data
-    encodeInternal(codeCtx, frame, pkt, out_file, swsHelper);
+    encodeInternal(codeCtx, frame, pkt, out_file, NULL);
 
     encodeInternal(codeCtx, NULL, pkt, out_file, nullptr);
 
@@ -128,9 +125,6 @@ const char *EncodeYuvToJpg::encode(const char *inputFileName) {
     av_frame_free(&frame);
     av_packet_free(&pkt);
 
-    swsHelper->unInit();
-    delete swsHelper;
-    swsHelper = nullptr;
 
     LOGCATE("enough");
     finalResult = outputFileName;

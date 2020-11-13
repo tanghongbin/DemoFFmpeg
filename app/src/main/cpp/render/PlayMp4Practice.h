@@ -14,7 +14,7 @@ extern "C"{
 };
 
 
-#define ENABLE_AV_FILTER true
+#define ENABLE_AV_FILTER false
 using namespace std;
 
 class PlayMp4Practice {
