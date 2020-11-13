@@ -30,7 +30,7 @@ class FFmpegNavigationActivity : AppCompatActivity() {
     }
 
     private val arrays = arrayOf(
-        FFmpegEncodeYuvToJpgActivity::class.java,
+        FFmpegConvertYuvActivity::class.java,
         FFmpegOpenGLActivity::class.java,
         FFmpegVideoActivity::class.java,
         FFmpegTextureActivity::class.java,

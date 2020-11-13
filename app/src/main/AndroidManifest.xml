@@ -41,7 +41,7 @@
         </activity>
         <activity android:name=".ffmpeg.FFmpegOpenGLActivity" />
         <activity android:name=".ffmpeg.FFmpegTextureActivity" />
-        <activity android:name=".ffmpeg.FFmpegEncodeYuvToJpgActivity" />
+        <activity android:name=".ffmpeg.FFmpegConvertYuvActivity" />
         <activity android:name=".activity.ThreadTestActivity" />
         <activity
             android:name=".ffmpeg.FFmpegVideoActivity"

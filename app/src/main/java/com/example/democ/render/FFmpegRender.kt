@@ -71,6 +71,8 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_testReadFile()
 
+    external fun native_yuv2rgb()
+
     external fun native_addFilterToYuv(inputFileName:String):String
 
     //混合音视频

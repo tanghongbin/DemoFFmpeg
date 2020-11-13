@@ -21,6 +21,7 @@
 #include <GLES3/gl3.h>
 #include <filters/WaterFilterHelper.h>
 #include <filters/EncodeYuvToYuvByFilter.h>
+#include <swscale/SwsConvertYuvToRgb.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
@@ -39,6 +40,9 @@ extern "C" {
  * Method:    native_OnSurfaceCreated
  * Signature: ()V
  */
+
+
+
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
     VideoGLRender::GetInstance() -> OnSurfaceCreated();
 }
@@ -72,6 +76,12 @@ JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
     FFmpegEncodeAudio::getInstance()->init();
 //    FFmpegEncodeAudio::getInstance()->initOffcialDemo();
 }
+
+JNIEXPORT void JNICALL native_yuv2rgb(JNIEnv *env, jobject instance) {
+    SwsConvertYuvToRgb::convert();
+}
+
+
 
 JNIEXPORT jstring JNICALL native_addFilterToYuv(JNIEnv *env, jobject instance,jstring inName) {
     EncodeYuvToYuvByFilter* filterHelper = new EncodeYuvToYuvByFilter;
@@ -196,26 +206,7 @@ JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
     LOGCATE("总数:%d  花费时间:%lld",size,GetSysCurrentTime() - startTime);
 }
 
-static JNINativeMethod g_RenderMethods[] = {
-        {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
-        {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
-        {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
 
-        {"native_videoEncodeInit",      "()V",      (void *) (native_videoEncodeInit)},
-        {"native_videoEncodeUnInit",      "()V",      (void *) (native_videoEncodeUnInit)},
-        {"native_testReadFile",      "()V",      (void *) (native_testReadFile)},
-
-
-        {"native_startEncode",      "()V",      (void *) (native_startEncode)},
-        {"native_encodeFrame",      "([B)V",      (void *) (native_encodeFrame)},
-        {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
-        {"native_addFilterToYuv",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (native_addFilterToYuv)},
-
-        {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
-        {"native_unInit",      "()V",      (void *) (native_unInit)},
-
-        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
-};
 
 static int RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum)
 {
@@ -248,6 +239,29 @@ static void UnregisterNativeMethods(JNIEnv *env, const char *className)
         env->UnregisterNatives(clazz);
     }
 }
+
+static JNINativeMethod g_RenderMethods[] = {
+        {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
+        {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
+        {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
+
+        {"native_videoEncodeInit",      "()V",      (void *) (native_videoEncodeInit)},
+        {"native_videoEncodeUnInit",      "()V",      (void *) (native_videoEncodeUnInit)},
+        {"native_testReadFile",      "()V",      (void *) (native_testReadFile)},
+
+
+        {"native_startEncode",      "()V",      (void *) (native_startEncode)},
+        {"native_encodeFrame",      "([B)V",      (void *) (native_encodeFrame)},
+        {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
+        {"native_addFilterToYuv",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (native_addFilterToYuv)},
+
+        {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
+        {"native_unInit",      "()V",      (void *) (native_unInit)},
+        {"native_yuv2rgb",      "()V",      (void *) (native_yuv2rgb)},
+
+
+        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
+};
 
 
 // call this func when loading lib

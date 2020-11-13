@@ -67,6 +67,7 @@ const char *getCharStrFromJstring(JNIEnv *jniEnv, jstring str);
 
 const char *getRandomStr(const char *prefix, const char *suffix);
 
+//attribute_deprecated
 const char *getRandomStr(const char *prefix, const char *suffix, const char *subDir);
 
 jstring getJstringFromCharStr(JNIEnv *jniEnv, const char *str);

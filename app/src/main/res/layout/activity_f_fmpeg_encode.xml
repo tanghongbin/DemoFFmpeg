@@ -5,9 +5,10 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:layout_height="match_parent"
-    tools:context=".ffmpeg.FFmpegEncodeYuvToJpgActivity">
+    tools:context=".ffmpeg.FFmpegConvertYuvActivity">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
@@ -19,6 +20,12 @@
         <Button
             android:text="swscale-yuv转png"
             android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:text="swscale-yuv转rgb"
+            android:id="@+id/button3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 

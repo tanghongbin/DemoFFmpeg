@@ -16,7 +16,16 @@ import kotlinx.android.synthetic.main.activity_f_fmpeg_encode.*
 import java.io.File
 import java.io.FileInputStream
 
-class FFmpegEncodeYuvToJpgActivity : AppCompatActivity() {
+/**
+*
+* author : tanghongbin
+*
+* date   : 2020/11/13 17:43
+*
+* desc   : 转换yuv到rgb，jpg，png
+*
+**/
+class FFmpegConvertYuvActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +51,10 @@ class FFmpegEncodeYuvToJpgActivity : AppCompatActivity() {
             val start = System.currentTimeMillis();
 //            render.swsPng()
             mImage.setImageURI(Uri.fromFile(File(SWS_CONVERT_PNG)))
+        }
+
+        button3.setOnClickListener {
+            render.native_yuv2rgb();
         }
 
         Thread{
