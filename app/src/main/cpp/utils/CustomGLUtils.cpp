@@ -306,7 +306,6 @@ const char *getRandomStr(const char *prefix, const char *suffix,const char *subD
 
 jstring getJstringFromCharStr(JNIEnv *jniEnv, const char *str) {
     jstring result = jniEnv->NewStringUTF(str);
-    delete str;
     return result;
 }
 

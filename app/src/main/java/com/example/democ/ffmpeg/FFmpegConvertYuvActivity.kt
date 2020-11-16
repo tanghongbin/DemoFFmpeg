@@ -1,7 +1,9 @@
 package com.example.democ.ffmpeg
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaMuxer
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -57,15 +59,14 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
             render.native_yuv2rgb();
         }
 
-        Thread{
-            val startMillion = System.currentTimeMillis()
-
-            val file = File("/storage/emulated/0/ffmpegtest/test_png_out_file.png")
-            val input = FileInputStream(file)
-            val bytearray = input.readBytes()
-            log("最后计数:${bytearray.size} 总共耗时:${System.currentTimeMillis() - startMillion}")
-        }.start()
-
-        render.native_testReadFile()
+        button4.setOnClickListener {
+            val path = MuxerManager.MP4_PATH
+            var resultPath = render.native_changeOutputFormat(path)
+            resultPath = ""
+            log("打印返回的地址:${resultPath}")
+            startActivity(Intent(this,FFmpegNativeWindowActivity::class.java).apply {
+                putExtra("path",resultPath)
+            })
+        }
     }
 }

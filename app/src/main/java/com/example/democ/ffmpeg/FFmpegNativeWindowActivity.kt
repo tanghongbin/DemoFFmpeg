@@ -11,6 +11,11 @@ import kotlinx.android.synthetic.main.activity_f_fmpeg_native_window.*
 class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     lateinit var render:FFmpegRender
+    private val mPlayPath:String by lazy {
+       val result =  if (intent.getStringExtra("path").isNullOrBlank()) MuxerManager.MP4_PLAY_BIG_TEST_5_PATH
+        else intent.getStringExtra("path")
+        result
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_native_window)
@@ -27,10 +32,9 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        val url = MuxerManager.MP4_PLAY_BIG_TEST_5_PATH
 //        val url = MuxerManager.ENCODE_VIDEO_PATH
 
         // 1-音频，2-视频
-        render.playMP4(url, holder?.surface)
+        render.playMP4(mPlayPath, holder?.surface)
     }
 }

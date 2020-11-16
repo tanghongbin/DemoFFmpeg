@@ -22,6 +22,7 @@
 #include <filters/WaterFilterHelper.h>
 #include <filters/EncodeYuvToYuvByFilter.h>
 #include <swscale/SwsConvertYuvToRgb.h>
+#include <swscale/ConvertMp4ToFlv.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
@@ -79,6 +80,11 @@ JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
 
 JNIEXPORT void JNICALL native_yuv2rgb(JNIEnv *env, jobject instance) {
     SwsConvertYuvToRgb::convert();
+}
+
+JNIEXPORT jstring JNICALL native_changeOutputFormat(JNIEnv *env, jobject instance,jstring jstring1) {
+    const char * result =  ConvertMp4ToFlv::convert(getCharStrFromJstring(env,jstring1));
+    return getJstringFromCharStr(env,result);
 }
 
 
@@ -248,6 +254,8 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_videoEncodeInit",      "()V",      (void *) (native_videoEncodeInit)},
         {"native_videoEncodeUnInit",      "()V",      (void *) (native_videoEncodeUnInit)},
         {"native_testReadFile",      "()V",      (void *) (native_testReadFile)},
+        {"native_changeOutputFormat",      "(Ljava/lang/String;)Ljava/lang/String;",  (void *) (native_changeOutputFormat)},
+
 
 
         {"native_startEncode",      "()V",      (void *) (native_startEncode)},
