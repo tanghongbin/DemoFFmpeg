@@ -26,7 +26,7 @@
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
-#define ENABLE_FFMPEG_LOG true
+
 
 
 #ifdef __cplusplus

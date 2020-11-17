@@ -12,7 +12,7 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     lateinit var render:FFmpegRender
     private val mPlayPath:String by lazy {
-       val result =  if (intent.getStringExtra("path").isNullOrBlank()) MuxerManager.MP4_PLAY_BIG_TEST_5_PATH
+       val result =  if (intent.getStringExtra("path").isNullOrBlank()) MuxerManager.SLIGHT_MP4_VIDEO_PATH
         else intent.getStringExtra("path")
         result
     }

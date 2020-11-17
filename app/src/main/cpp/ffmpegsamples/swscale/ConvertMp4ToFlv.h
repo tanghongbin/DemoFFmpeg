@@ -5,6 +5,7 @@
 #ifndef DEMOC_CONVERTMP4TOFLV_H
 #define DEMOC_CONVERTMP4TOFLV_H
 
+#define CONVERT_FORMAT_FILES "convertFormatFiles/"
 
 class ConvertMp4ToFlv {
 

@@ -6,14 +6,11 @@ import android.view.SurfaceHolder
 import android.view.WindowManager
 import android.widget.SeekBar
 import com.example.democ.R
-import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_BIG_PATH
-import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_BIG_TEST_5_PATH
-import com.example.democ.audio.MuxerManager.Companion.MP4_PLAY_PATH
+import com.example.democ.audio.MuxerManager.Companion.SLIGHT_MP4_VIDEO_PATH
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
 import com.example.democ.opengles.NativeRender
 import com.example.democ.utils.MSG_TYPE_ONREADY
-import com.tbruyelle.rxpermissions2.RxPermissions
 import kotlinx.android.synthetic.main.activity_f_fmpeg_video.*
 
 class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallback {
@@ -66,7 +63,7 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
 
 //        val url = MP4_PLAY_PATH
 //        val url = MP4_PLAY_BIG_PATH
-        val url = MP4_PLAY_BIG_TEST_5_PATH
+        val url = SLIGHT_MP4_VIDEO_PATH
 
         // 1-音频，2-视频
 
