@@ -30,6 +30,7 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/filters/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/swscale/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/muxer/*.cpp
         ${CMAKE_SOURCE_DIR}/render/*.cpp
         ${CMAKE_SOURCE_DIR}/test/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp

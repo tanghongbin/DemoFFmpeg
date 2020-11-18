@@ -77,6 +77,8 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_addFilterToYuv(inputFileName:String):String
 
+    external fun splitAudioAndVideo(path:String)
+
     //混合音视频
 //    external fun muxAv()
 

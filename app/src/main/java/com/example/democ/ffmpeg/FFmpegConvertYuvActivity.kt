@@ -73,30 +73,43 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
                 timer.schedule(object : TimerTask() {
                     override fun run() {
                         runOnUiThread {
-                            mText.text = String.format("${ (System.currentTimeMillis() - start) / 1000.0f}s")
+                            mText.text =
+                                String.format("${(System.currentTimeMillis() - start) / 1000.0f}s")
                         }
                     }
-                },0,1000)
-                val path = MuxerManager.MP4_PLAY_BIG_PATH
+                }, 0, 1000)
+//                val path = MuxerManager.MP4_PLAY_BIG_PATH
+                val path = MuxerManager.FLV_DOWNLOAD_MY_LOGO
+//                val path = MuxerManager.MP4_DOWNLOAD_FUNNY_VIDEO
+//                val path = MuxerManager.MP4_PLAY_PATH
                 val resultPath = render.native_changeOutputFormat(path)
                 log("打印返回的地址:${resultPath}")
                 timer.cancel()
-                log("总共转换耗时:${System.currentTimeMillis()  - start}")
-                withContext(Dispatchers.Main){
-                    if (resultPath.isNullOrEmpty()){
+                log("总共转换耗时:${System.currentTimeMillis() - start}")
+                withContext(Dispatchers.Main) {
+                    if (resultPath.isNullOrEmpty()) {
                         toast("转换失败")
                     } else {
                         toast("编码陈宫")
                         delay(3000)
-                        startActivity(Intent(this@FFmpegConvertYuvActivity, FFmpegNativeWindowActivity::class.java).apply {
-                            putExtra("path", resultPath)
-                        })
+                        startActivity(
+                            Intent(
+                                this@FFmpegConvertYuvActivity,
+                                FFmpegNativeWindowActivity::class.java
+                            ).apply {
+                                putExtra("path", resultPath)
+                            })
                     }
                 }
             }
+        }
 
-
-
+        button5.setOnClickListener {
+            //            val path = MuxerManager.MP4_PLAY_BIG_PATH
+//            val path = MuxerManager.FLV_DOWNLOAD_MY_LOGO
+//                val path = MuxerManager.MP4_DOWNLOAD_FUNNY_VIDEO
+            val path = MuxerManager.MP4_PLAY_PATH
+            render.splitAudioAndVideo(path)
         }
     }
 }

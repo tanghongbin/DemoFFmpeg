@@ -23,10 +23,10 @@
 #include <filters/EncodeYuvToYuvByFilter.h>
 #include <swscale/SwsConvertYuvToRgb.h>
 #include <swscale/ConvertMp4ToFlv.h>
+#include <muxer/CustomDemuxer.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
-
 
 
 #ifdef __cplusplus
@@ -45,7 +45,7 @@ extern "C" {
 
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-    VideoGLRender::GetInstance() -> OnSurfaceCreated();
+    VideoGLRender::GetInstance()->OnSurfaceCreated();
 }
 
 /*
@@ -55,10 +55,10 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
  */
 JNIEXPORT void JNICALL native_OnSurfaceChanged
         (JNIEnv *env, jobject instance, jint width, jint height) {
-    VideoGLRender::GetInstance() -> OnSurfaceChanged(width,height);
+    VideoGLRender::GetInstance()->OnSurfaceChanged(width, height);
     FFmpegEncodeVideo::getInstance()->mWindow_width = width;
     FFmpegEncodeVideo::getInstance()->mWindow_height = height;
-    LOGCATE("setup width:%d height:%d",width,height);
+    LOGCATE("setup width:%d height:%d", width, height);
 //    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
 //    YuvToImageRender::mWindowWidth = width;
 //    YuvToImageRender::mWindowHeight = height;
@@ -70,7 +70,7 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged
  * Signature: ()V
  */
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
-    VideoGLRender::GetInstance() -> OnDrawFrame();
+    VideoGLRender::GetInstance()->OnDrawFrame();
 }
 
 JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
@@ -82,31 +82,35 @@ JNIEXPORT void JNICALL native_yuv2rgb(JNIEnv *env, jobject instance) {
     SwsConvertYuvToRgb::convert();
 }
 
-JNIEXPORT jstring JNICALL native_changeOutputFormat(JNIEnv *env, jobject instance,jstring jstring1) {
-    const char * result =  ConvertMp4ToFlv::convert(getCharStrFromJstring(env,jstring1));
-    return getJstringFromCharStr(env,result);
+JNIEXPORT jstring JNICALL
+native_changeOutputFormat(JNIEnv *env, jobject instance, jstring jstring1) {
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".flv");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".mkv");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".mp4");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".avi");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".wvm");
+    return getJstringFromCharStr(env, "");
 }
 
 
-
-JNIEXPORT jstring JNICALL native_addFilterToYuv(JNIEnv *env, jobject instance,jstring inName) {
-    EncodeYuvToYuvByFilter* filterHelper = new EncodeYuvToYuvByFilter;
-    const char * result = filterHelper->yuvToyuvByFilter(getCharStrFromJstring(env,inName));
+JNIEXPORT jstring JNICALL native_addFilterToYuv(JNIEnv *env, jobject instance, jstring inName) {
+    EncodeYuvToYuvByFilter *filterHelper = new EncodeYuvToYuvByFilter;
+    const char *result = filterHelper->yuvToyuvByFilter(getCharStrFromJstring(env, inName));
     delete filterHelper;
-    return getJstringFromCharStr(env,result);
+    return getJstringFromCharStr(env, result);
 //    FFmpegEncodeAudio::getInstance()->initOffcialDemo();
 }
 
-JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance,jstring jstring1) {
-    return getJstringFromCharStr(env,EncodeYuvToJpg::encode(getCharStrFromJstring(env,jstring1)));
+JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance, jstring jstring1) {
+    return getJstringFromCharStr(env, EncodeYuvToJpg::encode(getCharStrFromJstring(env, jstring1)));
 }
 
 //JNIEXPORT void JNICALL swsPng(JNIEnv *env, jobject instance) {
 //    SwsConvertYuvToPng::encode("");
 //}
 
-JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance,jint type) {
-    switch (type){
+JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance, jint type) {
+    switch (type) {
         case 1:
             FFmpegEncodeAudio::getInstance();
             AudioRecordPlayHelper::getInstance()->startCapture(FFmpegEncodeAudio::recordCallback);
@@ -125,19 +129,19 @@ JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance,jint type)
     }
 }
 
-PlayMp4Instance* playMp4Instance;
+PlayMp4Instance *playMp4Instance;
 
-PlayMp4Practice* playMp4Practice;
+PlayMp4Practice *playMp4Practice;
 
 JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
     AudioRecordPlayHelper::destroyInstance();
     FFmpegEncodeAudio::destroyInstance();
-    if (playMp4Instance){
+    if (playMp4Instance) {
         delete playMp4Instance;
         playMp4Instance = nullptr;
     }
-    if (playMp4Practice){
-        playMp4Practice -> stopPlay();
+    if (playMp4Practice) {
+        playMp4Practice->stopPlay();
         delete playMp4Practice;
         playMp4Practice = nullptr;
     }
@@ -165,121 +169,107 @@ JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
 //}
 
 
-JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface) {
+JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance, jstring url, jobject surface) {
     LOGCATE("prepare play mp4");
     playMp4Practice = new PlayMp4Practice();
-    const char * playUrl = env->GetStringUTFChars(url,0);
-    LOGCATE("prepare init mp4 , detected address %s",playUrl);
-    playMp4Practice->init(playUrl,env,instance,surface,1);
-    playMp4Practice->init(playUrl,env,instance,surface,2);
+    const char *playUrl = env->GetStringUTFChars(url, 0);
+    LOGCATE("prepare init mp4 , detected address %s", playUrl);
+    playMp4Practice->init(playUrl, env, instance, surface, 1);
+    playMp4Practice->init(playUrl, env, instance, surface, 2);
 }
 
 JNIEXPORT void JNICALL native_encodeFrame(JNIEnv *env, jobject instance,
-                                              jbyteArray imageData) {
+                                          jbyteArray imageData) {
     int len = env->GetArrayLength(imageData);
     uint8_t *buf = new uint8_t[len];
     env->GetByteArrayRegion(imageData, 0, len, reinterpret_cast<jbyte *>(buf));
-    FFmpegEncodeVideo::getInstance() -> encodeVideoFrame(buf);
+    FFmpegEncodeVideo::getInstance()->encodeVideoFrame(buf);
     delete[] buf;
     env->DeleteLocalRef(imageData);
 }
 
 JNIEXPORT void JNICALL native_videoEncodeInit(JNIEnv *env, jobject instance) {
-    FFmpegEncodeVideo::getInstance() -> init();
+    FFmpegEncodeVideo::getInstance()->init();
 //    FFmpegEncodeVideo::getInstance() -> initOffcialDemo();
 }
 
 JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
-    FFmpegEncodeVideo::getInstance() -> unInit();
+    FFmpegEncodeVideo::getInstance()->unInit();
     FFmpegEncodeVideo::destroyInstance();
 }
 
 
 JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
-    long long startTime = GetSysCurrentTime();
-    int size = av_image_get_buffer_size(AV_PIX_FMT_RGBA,840,1074,1);
-    uint8_t * buffer = static_cast<uint8_t *>(av_malloc(size));
-    FILE* file = fopen(OUTPUT_PNG_IMAGE_PATH,"rb");
-    if (!file){
-        LOGCATE("open filaed");
-        return;
-    }
-    fread(buffer,1,size,file);
-    int a = 2147483648,b = -1;
-    unsigned int c = 4294967296;
-    unsigned int d = 4294967294;
-    LOGCATE("打印数据a:%d b:%d c:%d d:%u ",a,b,c,d);
-    LOGCATE("总数:%d  花费时间:%lld",size,GetSysCurrentTime() - startTime);
+
+
+
 }
 
 
+JNIEXPORT void JNICALL splitAudioAndVideo(JNIEnv *env, jobject instance,jstring path) {
+    CustomDemuxer::demuxerDiffcult(getCharStrFromJstring(env,path));
+}
 
-static int RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum)
-{
+
+static int
+RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum) {
     LOGCATE("RegisterNativeMethods");
     jclass clazz = env->FindClass(className);
-    if (clazz == NULL)
-    {
+    if (clazz == NULL) {
         LOGCATE("RegisterNativeMethods fail. clazz == NULL");
         return JNI_FALSE;
     }
-    if (env->RegisterNatives(clazz, methods, methodNum) < 0)
-    {
+    if (env->RegisterNatives(clazz, methods, methodNum) < 0) {
         LOGCATE("RegisterNativeMethods fail");
         return JNI_FALSE;
     }
     return JNI_TRUE;
 }
 
-static void UnregisterNativeMethods(JNIEnv *env, const char *className)
-{
+static void UnregisterNativeMethods(JNIEnv *env, const char *className) {
     LOGCATE("UnregisterNativeMethods");
     jclass clazz = env->FindClass(className);
-    if (clazz == NULL)
-    {
+    if (clazz == NULL) {
         LOGCATE("UnregisterNativeMethods fail. clazz == NULL");
         return;
     }
-    if (env != NULL)
-    {
+    if (env != NULL) {
         env->UnregisterNatives(clazz);
     }
 }
 
 static JNINativeMethod g_RenderMethods[] = {
-        {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
-        {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
-        {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
+        {"native_OnSurfaceCreated",   "()V",                                         (void *) (native_OnSurfaceCreated)},
+        {"native_OnSurfaceChanged",   "(II)V",                                       (void *) (native_OnSurfaceChanged)},
+        {"native_OnDrawFrame",        "()V",                                         (void *) (native_OnDrawFrame)},
 
-        {"native_videoEncodeInit",      "()V",      (void *) (native_videoEncodeInit)},
-        {"native_videoEncodeUnInit",      "()V",      (void *) (native_videoEncodeUnInit)},
-        {"native_testReadFile",      "()V",      (void *) (native_testReadFile)},
-        {"native_changeOutputFormat",      "(Ljava/lang/String;)Ljava/lang/String;",  (void *) (native_changeOutputFormat)},
-
-
-
-        {"native_startEncode",      "()V",      (void *) (native_startEncode)},
-        {"native_encodeFrame",      "([B)V",      (void *) (native_encodeFrame)},
-        {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
-        {"native_addFilterToYuv",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (native_addFilterToYuv)},
-
-        {"native_audioTest",      "(I)V",      (void *) (native_audioTest)},
-        {"native_unInit",      "()V",      (void *) (native_unInit)},
-        {"native_yuv2rgb",      "()V",      (void *) (native_yuv2rgb)},
+        {"native_videoEncodeInit",    "()V",                                         (void *) (native_videoEncodeInit)},
+        {"native_videoEncodeUnInit",  "()V",                                         (void *) (native_videoEncodeUnInit)},
+        {"native_testReadFile",       "()V",                                         (void *) (native_testReadFile)},
+        {"splitAudioAndVideo",       "(Ljava/lang/String;)V",                        (void *) (splitAudioAndVideo)},
+        {"native_changeOutputFormat", "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_changeOutputFormat)},
 
 
-        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
+        {"native_startEncode",        "()V",                                         (void *) (native_startEncode)},
+        {"native_encodeFrame",        "([B)V",                                       (void *) (native_encodeFrame)},
+        {"encodeYuvToImage",          "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (encodeYuvToImage)},
+        {"native_addFilterToYuv",     "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_addFilterToYuv)},
+
+        {"native_audioTest",          "(I)V",                                        (void *) (native_audioTest)},
+        {"native_unInit",             "()V",                                         (void *) (native_unInit)},
+        {"native_yuv2rgb",            "()V",                                         (void *) (native_yuv2rgb)},
+
+
+        {"playMP4",                   "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
 };
 
 
 // call this func when loading lib
-extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
-{
+extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p) {
 //    LOGCATE("===== JNI_OnLoad =====");
     jint jniRet = JNI_ERR;
     JNIEnv *env = NULL;
-    if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK)
-    {
+    if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
         return jniRet;
     }
 
@@ -287,15 +277,14 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
     jint regRet = RegisterNativeMethods(env, NATIVE_RENDER_CLASS_, g_RenderMethods,
                                         sizeof(g_RenderMethods) /
                                         sizeof(g_RenderMethods[0]));
-    if (regRet != JNI_TRUE)
-    {
+    if (regRet != JNI_TRUE) {
         return JNI_ERR;
     }
     JavaVmManager::initVm(env);
-    if (av_jni_set_java_vm(jvm,NULL) < 0){
+    if (av_jni_set_java_vm(jvm, NULL) < 0) {
         return JNI_ERR;
     }
-    if (ENABLE_FFMPEG_LOG){
+    if (ENABLE_FFMPEG_LOG) {
         LOGCATE("system log has been init");
         sys_log_init();
     }
@@ -306,12 +295,9 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p)
 }
 
 
-
-extern "C" void JNI_OnUnload(JavaVM *jvm, void *p)
-{
+extern "C" void JNI_OnUnload(JavaVM *jvm, void *p) {
     JNIEnv *env = NULL;
-    if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK)
-    {
+    if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
         return;
     }
 

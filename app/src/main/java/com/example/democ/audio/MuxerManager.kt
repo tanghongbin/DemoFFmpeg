@@ -28,6 +28,11 @@ class MuxerManager {
 
         val FILTER_ADD_TO_YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/filterAddToYuv.h264"
         val SWS_CONVERT_PNG = Environment.getExternalStorageDirectory().absolutePath + "/sws_after_scale.png"
+
+
+        // =================== download -=====================================
+        val MP4_DOWNLOAD_FUNNY_VIDEO = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/funny_video.mp4"
+        val FLV_DOWNLOAD_MY_LOGO = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/my_logo.flv"
     }
 
     private lateinit var muxer: MediaMuxer
