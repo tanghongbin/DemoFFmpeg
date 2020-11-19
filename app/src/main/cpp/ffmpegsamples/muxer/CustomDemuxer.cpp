@@ -137,7 +137,7 @@ void CustomDemuxer::demuxerDiffcult(const char *path){
         }
         inStream = iFmtCtx->streams[pkt->stream_index];
         // 过滤无效frame
-        LOGCATE("start read mediatype ,current index:%d",pkt->stream_index);
+//        LOGCATE("start read mediatype ,current index:%d",pkt->stream_index);
         AVMediaType mediaType = iFmtCtx->streams[pkt->stream_index]->codecpar->codec_type;
         if (mediaType != AVMEDIA_TYPE_VIDEO &&
                 mediaType != AVMEDIA_TYPE_AUDIO &&
@@ -156,7 +156,7 @@ void CustomDemuxer::demuxerDiffcult(const char *path){
         }
         frame_index++;
         pkt->stream_index = 0;
-        LOGCATE("start resacle");
+//        LOGCATE("start resacle");
         av_packet_rescale_ts(pkt,inStream->time_base,
                 outStream->time_base);
 //        LOGCATE("current frame:%d",frame_index);

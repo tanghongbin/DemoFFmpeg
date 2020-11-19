@@ -111,6 +111,10 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
             val path = MuxerManager.MP4_PLAY_PATH
             render.splitAudioAndVideo(path)
         }
+
+        button6.setOnClickListener {
+            render.native_muxerAudioAndVideo()
+        }
     }
 }
 

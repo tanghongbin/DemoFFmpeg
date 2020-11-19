@@ -79,6 +79,8 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun splitAudioAndVideo(path:String)
 
+    external fun native_muxerAudioAndVideo()
+
     //混合音视频
 //    external fun muxAv()
 

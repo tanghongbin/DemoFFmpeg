@@ -24,6 +24,7 @@
 #include <swscale/SwsConvertYuvToRgb.h>
 #include <swscale/ConvertMp4ToFlv.h>
 #include <muxer/CustomDemuxer.h>
+#include <muxer/CustomMuxer.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
@@ -201,8 +202,12 @@ JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
 
 JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
 
+}
 
-
+JNIEXPORT void JNICALL native_muxerAudioAndVideo(JNIEnv *env, jobject instance) {
+    long long start = GetSysCurrentTime();
+    CustomMuxer::muxer();
+    LOGCATE("total cost:%lld",GetSysCurrentTime() - start);
 }
 
 
@@ -249,7 +254,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"splitAudioAndVideo",       "(Ljava/lang/String;)V",                        (void *) (splitAudioAndVideo)},
         {"native_changeOutputFormat", "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_changeOutputFormat)},
 
-
+        {"native_muxerAudioAndVideo",        "()V",                         (void *) (native_muxerAudioAndVideo)},
         {"native_startEncode",        "()V",                                         (void *) (native_startEncode)},
         {"native_encodeFrame",        "([B)V",                                       (void *) (native_encodeFrame)},
         {"encodeYuvToImage",          "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (encodeYuvToImage)},
