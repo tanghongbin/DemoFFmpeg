@@ -5,8 +5,6 @@
 #ifndef DEMOC_FFMPEGENCODEVIDEO_H
 #define DEMOC_FFMPEGENCODEVIDEO_H
 
-#define OUT_PUT_VIDEO_PATH "/storage/emulated/0/ffmpegtest/encodeCameraVideo.h264"
-
 
 class FFmpegEncodeVideo {
 
@@ -18,9 +16,11 @@ private:
     AVFrame *frame;
     AVPacket *pkt;
     FILE *in_file;
-    FILE *out_file;
+    AVFormatContext* ofmtctx;
+    AVStream* oStream;
     uint8_t* pic_buf;
     int mFrameIndex;
+    int pts_frame_index = 1,dts_frame_index = 1;
     bool mHasInitSuccess = false;
     static FFmpegEncodeVideo* instance;
 
@@ -43,9 +43,6 @@ public:
 
     void encode(AVCodecContext *pContext, AVFrame* frame, AVPacket *pPacket, FILE *pFile);
 
-    void initOffcialDemo();
-
-    void testReadFile();
 };
 
 

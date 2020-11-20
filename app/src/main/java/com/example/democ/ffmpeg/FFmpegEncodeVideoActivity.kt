@@ -48,8 +48,7 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
 
 
     override fun onBackPressed() {
-        mCameraHelper.release()
-        mRender.native_videoEncodeUnInit()
+
         super.onBackPressed()
     }
 
@@ -62,7 +61,8 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-
+        mCameraHelper.release()
+        mRender.native_videoEncodeUnInit()
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
