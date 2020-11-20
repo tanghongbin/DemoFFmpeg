@@ -25,12 +25,29 @@
 #include <swscale/ConvertMp4ToFlv.h>
 #include <muxer/CustomDemuxer.h>
 #include <muxer/CustomMuxer.h>
+#include <SingleNodeList.h>
+#include <TimeTracker.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
 
 
+void addNum(SingleNodeList *nodeList);
+
+void addNum(SingleNodeList *nodeList) {
+    const char *array[12] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
+    for (int i = 0; i < 500; ++i) {
+        int index = i % 10;
+        const char *tem = array[index];
+        CustomNode *newNode = new CustomNode;
+        newNode->point = tem;
+        nodeList->pushLast(newNode);
+    }
+}
+
 #ifdef __cplusplus
+
+
 extern "C" {
 #endif
 
@@ -85,11 +102,11 @@ JNIEXPORT void JNICALL native_yuv2rgb(JNIEnv *env, jobject instance) {
 
 JNIEXPORT jstring JNICALL
 native_changeOutputFormat(JNIEnv *env, jobject instance, jstring jstring1) {
-    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".flv");
-    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".mkv");
-    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".mp4");
-    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".avi");
-    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1),".wvm");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1), ".flv");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1), ".mkv");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1), ".mp4");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1), ".avi");
+    ConvertMp4ToFlv::convert(getCharStrFromJstring(env, jstring1), ".wvm");
     return getJstringFromCharStr(env, "");
 }
 
@@ -199,20 +216,41 @@ JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
     FFmpegEncodeVideo::destroyInstance();
 }
 
+SingleNodeList *listHelper;
 
 JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
+    if (!listHelper) listHelper = new SingleNodeList;
+
+    TimeTracker::trackBegin();
+    std::thread *thread1 = new std::thread(addNum, listHelper);
+    std::thread *thread2 = new std::thread(addNum, listHelper);
+
+    thread1->join();
+    thread2->join();
+
+    int start = 1;
+    while (listHelper->popFirst()) {
+        start++;
+    }
+    TimeTracker::trackOver();
+    LOGCATE("this is times:%d", start);
+    if (listHelper) {
+        delete listHelper;
+        listHelper = nullptr;
+    }
 
 }
+
 
 JNIEXPORT void JNICALL native_muxerAudioAndVideo(JNIEnv *env, jobject instance) {
     long long start = GetSysCurrentTime();
     CustomMuxer::muxer();
-    LOGCATE("total cost:%lld",GetSysCurrentTime() - start);
+    LOGCATE("total cost:%lld", GetSysCurrentTime() - start);
 }
 
 
-JNIEXPORT void JNICALL splitAudioAndVideo(JNIEnv *env, jobject instance,jstring path) {
-    CustomDemuxer::demuxerDiffcult(getCharStrFromJstring(env,path));
+JNIEXPORT void JNICALL splitAudioAndVideo(JNIEnv *env, jobject instance, jstring path) {
+    CustomDemuxer::demuxerDiffcult(getCharStrFromJstring(env, path));
 }
 
 
@@ -251,10 +289,10 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_videoEncodeInit",    "()V",                                         (void *) (native_videoEncodeInit)},
         {"native_videoEncodeUnInit",  "()V",                                         (void *) (native_videoEncodeUnInit)},
         {"native_testReadFile",       "()V",                                         (void *) (native_testReadFile)},
-        {"splitAudioAndVideo",       "(Ljava/lang/String;)V",                        (void *) (splitAudioAndVideo)},
+        {"splitAudioAndVideo",        "(Ljava/lang/String;)V",                       (void *) (splitAudioAndVideo)},
         {"native_changeOutputFormat", "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_changeOutputFormat)},
 
-        {"native_muxerAudioAndVideo",        "()V",                         (void *) (native_muxerAudioAndVideo)},
+        {"native_muxerAudioAndVideo", "()V",                                         (void *) (native_muxerAudioAndVideo)},
         {"native_startEncode",        "()V",                                         (void *) (native_startEncode)},
         {"native_encodeFrame",        "([B)V",                                       (void *) (native_encodeFrame)},
         {"encodeYuvToImage",          "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (encodeYuvToImage)},

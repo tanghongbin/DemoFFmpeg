@@ -115,6 +115,10 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
         button6.setOnClickListener {
             render.native_muxerAudioAndVideo()
         }
+
+        button7.setOnClickListener {
+            render.native_testReadFile()
+        }
     }
 }
 

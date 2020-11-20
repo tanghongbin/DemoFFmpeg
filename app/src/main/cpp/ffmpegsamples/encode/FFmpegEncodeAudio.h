@@ -8,8 +8,10 @@
 #include <link.h>
 #include <__mutex_base>
 
+
 extern "C" {
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 };
 
 #define AAC_ENCODER_NAME "libfdk_aac"
@@ -39,9 +41,9 @@ private:
     static FFmpegEncodeAudio *instance;
 
 
-    void
-    encodeAudioLoop(AVCodecContext *pContext, AVPacket *pPacket, AVFrame *pFrame, FILE *string1,
-                    FILE *inputFile);
+    int
+    encodeAudioLoop(AVCodecContext *pContext, AVPacket *pPacket, AVFrame *pFrame,
+                    AVFormatContext *ofmtctx, FILE *inputFile, uint8_t *string1);
 
     void configAudioEncodeParams(AVCodecContext *pContext, AVCodec *pCodec);
 

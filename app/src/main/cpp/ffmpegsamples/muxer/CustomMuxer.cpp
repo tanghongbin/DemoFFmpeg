@@ -148,12 +148,13 @@ void CustomMuxer::muxer() {
                                     (double) AV_TIME_BASE / av_q2d(in_stream->r_frame_rate);
                             pkt->pts = (double) (frame_index * calc_duration) /
                                        (double) (av_q2d(time_base1) * AV_TIME_BASE);
+                            int64_t temp = (double)frame_index / av_q2d(in_stream->r_frame_rate) * (time_base1.den / time_base1.num);
                             // pts:50049 calc_duration:41708
                             pkt->dts = pkt->pts;
                             pkt->duration = (double) calc_duration /
                                             (double) (av_q2d(time_base1) * AV_TIME_BASE);
-                            LOGCATE("video ====== calc_duration:%lld pts:%lld dts:%lld duration:%lld frame_index:%d timebase:%lld",
-                                    calc_duration,pkt->pts,pkt->dts,pkt->duration,frame_index);
+                            LOGCATE("video ====== calc_duration:%lld pts:%lld dts:%lld duration:%lld frame_index:%d timebase:%lld temp-pts:%lld",
+                                    calc_duration,pkt->pts,pkt->dts,pkt->duration,frame_index,temp);
                             frame_index++;
                         }
                         cur_video_pts = pkt->pts;
