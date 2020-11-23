@@ -47,7 +47,7 @@ void FFmpegEncodeAudio::init() {
     AVCodecContext *codecContext;
     int ret;
 
-    const char *out_file_name =  getRandomStr("encodeaudio_",".aac","encodeAudios/");
+    const char *out_file_name =  getRandomStr("encodeaudio_",".mp3","encodeAudios/");
     const char *input_file_name = "/storage/emulated/0/ffmpegtest/capture.pcm";
     FILE *inFile;
     AVFrame *frame;
@@ -80,6 +80,7 @@ void FFmpegEncodeAudio::init() {
         return;
     }
     configAudioEncodeParams(codecContext, codec);
+    av_dump_format(ofmtCtx,0,out_file_name,1);
     ret = avcodec_open2(codecContext, codec, NULL);
     LOGCATE("check open audio encoder resultStr:%s",av_err2str(ret));
     if (checkNegativeReturn(ret, "can't open encoder")) return;
@@ -163,7 +164,7 @@ FFmpegEncodeAudio::encodeAudioLoop(AVCodecContext *pContext, AVPacket *pPacket, 
         if (fread(frame_buffer, 1, size, inputFile) <= 0) {
             LOGCATE("read has complete");
             break;
-        } else if (ferror(inputFile)) {
+        } else if (feof(inputFile)) {
             LOGCATE("read has error");
             ret = -1;
             break;
