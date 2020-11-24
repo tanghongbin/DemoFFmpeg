@@ -63,7 +63,7 @@ extern "C" {
 
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-    VideoGLRender::GetInstance()->OnSurfaceCreated();
+//    VideoGLRender::GetInstance()->OnSurfaceCreated();
 }
 
 /*
@@ -73,10 +73,11 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
  */
 JNIEXPORT void JNICALL native_OnSurfaceChanged
         (JNIEnv *env, jobject instance, jint width, jint height) {
-    VideoGLRender::GetInstance()->OnSurfaceChanged(width, height);
-    FFmpegEncodeVideo::getInstance()->mWindow_width = width;
-    FFmpegEncodeVideo::getInstance()->mWindow_height = height;
-    LOGCATE("setup width:%d height:%d", width, height);
+//    VideoGLRender::GetInstance()->OnSurfaceChanged(width, height);
+    FFmpegEncodeVideo::getInstance()->mWindow_width = height;
+    FFmpegEncodeVideo::getInstance()->mWindow_height = width;
+    LOGCATE("setup width:%d height:%d", FFmpegEncodeVideo::getInstance()->mWindow_width,
+            FFmpegEncodeVideo::getInstance()->mWindow_height);
 //    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
 //    YuvToImageRender::mWindowWidth = width;
 //    YuvToImageRender::mWindowHeight = height;
@@ -88,7 +89,7 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged
  * Signature: ()V
  */
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
-    VideoGLRender::GetInstance()->OnDrawFrame();
+//    VideoGLRender::GetInstance()->OnDrawFrame();
 }
 
 JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {

@@ -1,23 +1,16 @@
 package com.example.democ.ffmpeg
 
-import android.app.Activity
-import android.graphics.ImageFormat
-import android.graphics.Point
 import android.hardware.Camera
-import android.hardware.Camera.CameraInfo
 import android.os.Bundle
-import android.util.DisplayMetrics
-import android.view.Surface
 import android.view.SurfaceHolder
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.audio.log
+import com.example.democ.getBitmapFromYuvdata
 import com.example.democ.render.FFmpegRender
 import com.example.democ.runAsyncTask
 import com.example.democ.utils.CameraHelper
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.*
-import java.util.concurrent.CopyOnWriteArrayList
 
 
 class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
@@ -30,7 +23,7 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_encode_video)
         mCameraHelper = CameraHelper(this,mSurface,this)
-        mCameraHelper.init()
+        mCameraHelper.init(1920,1080)
         mCameraHelper.setPreviewCallback(this)
         mRender = FFmpegRender()
         mReadFile.setOnClickListener {
@@ -38,12 +31,20 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
         }
     }
 
+    var isSet = false
+
 
 
     override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
+        if (!isSet){
+            isSet = true
+            mImage.setImageBitmap(getBitmapFromYuvdata(data))
+        }
         data?.apply {
+            log("打印数组大小:${data.size}")
             mRender.native_encodeFrame(data)
         }
+
     }
 
 
@@ -57,11 +58,11 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(), Camera.PreviewCallback,
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-        mRender.native_OnSurfaceChanged(width,height)
+        mRender.native_OnSurfaceChanged(mCameraHelper.getVideoWidth(),mCameraHelper.getVideoHeight())
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        mCameraHelper.release()
+//        mCameraHelper.release()
         mRender.native_videoEncodeUnInit()
     }
 

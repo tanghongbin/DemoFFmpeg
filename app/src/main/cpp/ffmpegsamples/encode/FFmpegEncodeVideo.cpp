@@ -70,15 +70,15 @@ void FFmpegEncodeVideo::init() {
     }
 
     /* put sample parameters */
-    codeCtx->bit_rate = 30000000;
+    codeCtx->bit_rate = 3500 *1000;
     /* resolution must be a multiple of two */
-    codeCtx->width = 1920;
-    codeCtx->height = 1080;
+    codeCtx->width = mWindow_width;
+    codeCtx->height = mWindow_height;
     /* frames per second */
     codeCtx->time_base = (AVRational) {1, 25};
     codeCtx->framerate = (AVRational) {25, 1};
 
-    LOGCATE("log width:%d height:%d",mWindow_width,mWindow_height);
+    LOGCATE("log width:%d height:%d",codeCtx->width,codeCtx->height);
 
     /* emit one intra frame every ten frames
      * check frame pict_type before passing frame
@@ -86,12 +86,12 @@ void FFmpegEncodeVideo::init() {
      * then gop_size is ignored and the output of encoder
      * will always be I frame irrespective to gop_size
      */
-    codeCtx->gop_size = 250;
-    codeCtx->max_b_frames = 1;
+    codeCtx->gop_size = 25;
+    codeCtx->max_b_frames = 0;
     codeCtx->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if (codec->id == AV_CODEC_ID_H264)
-        av_opt_set(codeCtx->priv_data, "preset", "slow", 0);
+        av_opt_set(codeCtx->priv_data, "preset", "veryfast", 0);
 
     // create output ctx
     oStream = avformat_new_stream(ofmtctx,NULL);
@@ -135,10 +135,17 @@ void FFmpegEncodeVideo::init() {
     
     if (checkNegativeReturn(ret, "av_frame_get_buffer error :%s")) return;
 
-    int pic_size = av_image_get_buffer_size(codeCtx->pix_fmt, codeCtx->width, codeCtx->height, 1);
-    pic_buf = static_cast<uint8_t *>(av_malloc(pic_size));
-    LOGCATE("print pic_size:%d", pic_size);
-    ret = av_image_fill_arrays(frame->data,frame->linesize,pic_buf,codeCtx->pix_fmt,frame->width,frame->height,1);
+    bufferSize = av_image_get_buffer_size(codeCtx->pix_fmt, codeCtx->width, codeCtx->height, 32);
+//    int lineSize = av_image_get_linesize(codeCtx->pix_fmt, codeCtx->width, 1);
+//    pic_buf = static_cast<uint8_t *>(av_malloc(bufferSize));
+    LOGCATE("print pic_size:%d fmt:%d width:%d height:%d", bufferSize,codeCtx->pix_fmt,codeCtx->width,codeCtx->height);
+//    ret = av_image_fill_arrays(frame->data,frame->linesize,pic_buf,codeCtx->pix_fmt,codeCtx->width,codeCtx->height,1);
+
+    ret = av_frame_get_buffer(frame, 32);
+    if (ret < 0) {
+        fprintf(stderr, "Could not allocate the video frame data\n");
+        exit(1);
+    }
 
     if (ret < 0) {
         LOGCATE("Could not allocate the video frame data\n");
@@ -146,7 +153,7 @@ void FFmpegEncodeVideo::init() {
     }
 
     int y_size = codeCtx->width * codeCtx->height;
-    LOGCATE("print compute_size:%d real_size:%d", pic_size, y_size * 3 / 2);
+    LOGCATE("print compute_size:%d real_size:%d", bufferSize, y_size * 3 / 2);
 
     ret = avformat_write_header(ofmtctx,NULL);
     if (ret < 0) {
@@ -155,6 +162,7 @@ void FFmpegEncodeVideo::init() {
     }
 
     mHasInitSuccess = true;
+    LOGCATE("video encode init success ");
 }
 
 
@@ -164,7 +172,7 @@ void FFmpegEncodeVideo::unInit() {
     
 
     av_write_trailer(ofmtctx);
-    av_freep(pic_buf);
+//    av_freep(pic_buf);
     fclose(in_file);
 
     avcodec_free_context(&codeCtx);
@@ -187,15 +195,22 @@ void FFmpegEncodeVideo::encodeVideoFrame(uint8_t *pic_src) {
     if (!mHasInitSuccess)
         return;
     int ret;
-
-    NvToYUV420p(pic_src,pic_buf,codeCtx->width,codeCtx->height);
-    LOGCATE("convert over :%p",pic_buf);
+    uint8_t temp_array[bufferSize];
     int y_size = codeCtx->width * codeCtx->height;
     double duration = AV_TIME_BASE / av_q2d(codeCtx->framerate);
-    frame->data[0] = pic_buf;              // Y
-    frame->data[1] = pic_buf + y_size;      // U
-    frame->data[2] = pic_buf + y_size * 5 / 4;  // V
+    ret = av_frame_make_writable(frame);
+    if (ret < 0){
+        LOGCATE("av_frame_make_writable failed: code:%d  errorStr:%s",ret,av_err2str(ret));
+        goto END;
+    }
+    NvToYUV420p(pic_src,temp_array,codeCtx->width,codeCtx->height);
+    LOGCATE("convert over :%p",temp_array);
+    frame->data[0] = temp_array;              // Y
+    frame->data[1] = temp_array + y_size;      // U
+    frame->data[2] = temp_array + y_size * 5 / 4;  // V
 //    double pts = (double)(pts_frame_index / (av_q2d(codeCtx->framerate))) * AV_TIME_BASE;
+
+
 
 //    LOGCATE("current pts:%f",pts);
     frame->pts = pts_frame_index;
@@ -211,7 +226,7 @@ void FFmpegEncodeVideo::encodeVideoFrame(uint8_t *pic_src) {
     }
 //    pkt->dts = pts;
     pkt->stream_index = 0;
-    ret = av_interleaved_write_frame(ofmtctx,pkt);
+    ret = av_write_frame(ofmtctx,pkt);
     if (ret < 0) {
         LOGCATE("av_interleaved_write_frame failed:%s",av_err2str(ret));
         goto END;

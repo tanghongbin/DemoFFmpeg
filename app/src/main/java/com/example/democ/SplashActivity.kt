@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_splash.*
 class SplashActivity : AppCompatActivity() {
 
     private val arrays = arrayOf(
+        MainActivity::class.java,
         AudioTestActivity::class.java,
         ThreadTestActivity::class.java,
 

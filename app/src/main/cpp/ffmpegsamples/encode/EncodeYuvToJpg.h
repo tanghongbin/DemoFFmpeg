@@ -30,6 +30,8 @@ public:
      */
     static const char * encode(const char * inputFile);
 
+    static const char * encodeByByteArray(uint8_t* buffer);
+
     static void
     encodeInternal(AVCodecContext *pContext, AVFrame *pFrame, AVPacket *pPacket, FILE *pFile,
                    SwsHelper *pHelper);

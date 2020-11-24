@@ -38,19 +38,7 @@ class CustomSurfaceView @JvmOverloads constructor(
     }
 
     private var hasBuild = false
-    fun getBitmap(data: ByteArray?){
-//        if (hasBuild) return
-//        hasBuild = true
-        val yuvImage = YuvImage(data,ImageFormat.NV21,1080,1920,null)
-        val out = ByteArrayOutputStream()
-        val result = yuvImage.compressToJpeg(Rect(0,0,1080,1920),100,out)
-        if (result){
-            val array = out.toByteArray()
-            val bitmap = BitmapFactory.decodeByteArray(array,0,array.size)
-            out.close()
-            callBack(bitmap)
-        }
-    }
+
 
     fun setCallback(block:(Bitmap?) -> Unit ){
         callBack = block
@@ -136,4 +124,19 @@ class CustomSurfaceView @JvmOverloads constructor(
     }
 
 
+}
+
+fun getBitmapFromYuvdata(data: ByteArray?):Bitmap?{
+//        if (hasBuild) return
+//        hasBuild = true
+    val yuvImage = YuvImage(data,ImageFormat.NV21,1080,1920,null)
+    val out = ByteArrayOutputStream()
+    val result = yuvImage.compressToJpeg(Rect(0,0,1080,1920),100,out)
+    if (result){
+        val array = out.toByteArray()
+        val bitmap = BitmapFactory.decodeByteArray(array,0,array.size)
+        out.close()
+        return bitmap
+    }
+    return null
 }

@@ -10,68 +10,148 @@ import android.view.SurfaceView
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.audio.log
-import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.*
 
 /**
-*
-* author : tanghongbin
-*
-* date   : 2020/10/26 14:29
-*
-* desc   : 打开相机并且预览回调数据
-*
-**/
-class CameraHelper(val activity: Activity,val surface: SurfaceView,val call:SurfaceHolder.Callback) : SurfaceHolder.Callback {
-    lateinit var camera:Camera
-    fun init(){
-        camera = android.hardware.Camera.open(1)
-//        initCameraParams(camera)
-        surface.holder.addCallback(this)
-        camera = android.hardware.Camera.open(1)
-//        initCameraParams(camera)
-        setCameraDisplayOrientation(activity,1,camera)
+ *
+ * author : tanghongbin
+ *
+ * date   : 2020/10/26 14:29
+ *
+ * desc   : 打开相机并且预览回调数据
+ *
+ **/
+class CameraHelper(
+    val activity: Activity,
+    val surface: SurfaceView,
+    val call: SurfaceHolder.Callback
+) : SurfaceHolder.Callback,
+    Camera.PreviewCallback {
+    private lateinit var camera: Camera
+    private var mRotation = 0
+    private var mWidth: Int = 0
+    private var mHeight: Int = 0
+    private var mCameraId = 1
+    private var mCall: Camera.PreviewCallback? = null
+    private var mHolder: SurfaceHolder? = null
+
+    fun getVideoWidth(): Int {
+        return mWidth
     }
 
-    fun setPreviewCallback(call:Camera.PreviewCallback){
-        camera.setPreviewCallback(call)
+    fun getVideoHeight(): Int {
+        return mHeight
+    }
+
+    fun init(width: Int, height: Int) {
+        surface.holder.addCallback(this)
+        mWidth = width
+        mHeight = height
+        if (mWidth <= 0 || mHeight <= 0) {
+            throw IllegalArgumentException("Illegal Argument width or height is 0")
+        }
+    }
+
+    fun setPreviewCallback(call: Camera.PreviewCallback) {
+        mCall = call
     }
 
     private fun initCameraParams(camera: Camera?) {
-        var parameters = camera?.getParameters();
-        val manager = activity.getSystemService(AppCompatActivity.WINDOW_SERVICE) as WindowManager
-        val displayMetrics = DisplayMetrics()
-        manager.defaultDisplay.getMetrics(displayMetrics)
-        log("打印窗口的宽:${displayMetrics.widthPixels} 高:${displayMetrics.heightPixels}")
+        val parameters = camera?.getParameters();
         parameters?.let {
-            parameters.setFlashMode("off") // 无闪光灯
-            parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO)
-            parameters.setSceneMode(Camera.Parameters.SCENE_MODE_AUTO)
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO)
-            parameters.setPreviewFormat(ImageFormat.NV21)
-            parameters.setPictureSize(displayMetrics.widthPixels, displayMetrics.heightPixels);
-            parameters.setPreviewSize(displayMetrics.widthPixels, displayMetrics.heightPixels)
-            //这两个属性 如果这两个属性设置的和真实手机的不一样时，就会报错
-            camera?.setParameters(parameters)
+            parameters.previewFormat = ImageFormat.NV21
+            setPreviewSize(parameters)
+            setCameraDisplayOrientation(activity, mCameraId, camera)
+            camera.parameters = parameters
         }
-
+        camera?.setPreviewCallback(this)
     }
 
-    fun release(){
+    private fun setPreviewSize(parameters: Camera.Parameters) {
+        val supportedPreviewSizes =
+            parameters.supportedPreviewSizes
+        var size = supportedPreviewSizes[0]
+        //select the best resolution of camera
+        var m = Math.abs(size.height * size.width - mWidth * mHeight)
+        supportedPreviewSizes.removeAt(0)
+        for (next in supportedPreviewSizes) {
+            val n = Math.abs(next.height * next.width - mWidth * mHeight)
+            if (n < m) {
+                m = n
+                size = next
+            }
+        }
+        mWidth = size.width
+        mHeight = size.height
+        log("预览大小   width:${mWidth}  -- height:${mHeight}")
+        parameters.setPreviewSize(mWidth, mHeight)
+    }
+
+    private fun rotation90(dataArray: ByteArray) {
+//        var index = 0
+//        val ySize: Int = mWidth * mHeight
+//        val uvHeight: Int = mHeight / 2
+//        //back camera rotate 90 deree
+//        if (mCameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
+//            for (i in 0 until mWidth) {
+//                for (j in mHeight - 1 downTo 0) {
+//                    bytes!![index++] = dataArray[mWidth * j + i]
+//                }
+//            }
+//            var i = 0
+//            while (i < mWidth) {
+//                for (j in uvHeight - 1 downTo 0) { // v
+//                    bytes!![index++] = dataArray[ySize + mWidth * j + i]
+//                    // u
+//                    bytes!![index++] = dataArray[ySize + mWidth * j + i + 1]
+//                }
+//                i += 2
+//            }
+//        } else { //rotate 90 degree
+//            for (i in 0 until mWidth) {
+//                var nPos: Int = mWidth - 1
+//                for (j in 0 until mHeight) {
+//                    bytes!![index++] = dataArray[nPos - i]
+//                    nPos += mWidth
+//                }
+//            }
+//            //u v
+//            var i = 0
+//            while (i < mWidth) {
+//                var nPos: Int = ySize + mWidth - 1
+//                for (j in 0 until uvHeight) {
+//                    bytes!![index++] = dataArray[nPos - i - 1]
+//                    bytes!![index++] = dataArray[nPos - i]
+//                    nPos += mWidth
+//                }
+//                i += 2
+//            }
+//        }
+    }
+
+
+    private fun startPreview() {
+        camera = android.hardware.Camera.open(mCameraId)
+        initCameraParams(camera)
+        camera.setPreviewDisplay(mHolder)
+        camera.startPreview()
+    }
+
+    fun release() {
         camera.setPreviewCallback(null)
         camera.stopPreview()
         camera.release()
     }
 
-    fun setCameraDisplayOrientation(
+    private fun setCameraDisplayOrientation(
         activity: Activity,
         cameraId: Int, camera: Camera
     ) {
         val info = Camera.CameraInfo()
         Camera.getCameraInfo(cameraId, info)
-        val rotation = activity.windowManager.defaultDisplay
+        mRotation = activity.windowManager.defaultDisplay
             .rotation
         var degrees = 0
-        when (rotation) {
+        when (mRotation) {
             Surface.ROTATION_0 -> degrees = 0
             Surface.ROTATION_90 -> degrees = 90
             Surface.ROTATION_180 -> degrees = 180
@@ -89,18 +169,33 @@ class CameraHelper(val activity: Activity,val surface: SurfaceView,val call:Surf
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         log("java surfaceChanged")
-        call.surfaceChanged(holder,format,width,height)
+        call.surfaceChanged(holder, format, width, height)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         log("java surfaceDestroyed")
+        release()
         call.surfaceDestroyed(holder)
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        camera.setPreviewDisplay(holder)
-        camera.startPreview()
+        mHolder = holder
+        startPreview()
         call.surfaceCreated(holder)
         log("java surfaceCreated")
+    }
+
+    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
+        var dataResult = data
+        when (mRotation) {
+            Surface.ROTATION_0 -> {
+//                dataResult = rotation90(data!!)
+            }
+            Surface.ROTATION_90, Surface.ROTATION_270 -> {
+            }
+            else -> {
+            }
+        }
+        mCall?.onPreviewFrame(dataResult, camera)
     }
 }

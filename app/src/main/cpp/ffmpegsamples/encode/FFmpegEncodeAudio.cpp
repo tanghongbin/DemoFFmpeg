@@ -47,7 +47,7 @@ void FFmpegEncodeAudio::init() {
     AVCodecContext *codecContext;
     int ret;
 
-    const char *out_file_name =  getRandomStr("encodeaudio_",".mp3","encodeAudios/");
+    const char *out_file_name =  getRandomStr("encodeaudio_",".aac","encodeAudios/");
     const char *input_file_name = "/storage/emulated/0/ffmpegtest/capture.pcm";
     FILE *inFile;
     AVFrame *frame;
@@ -69,7 +69,9 @@ void FFmpegEncodeAudio::init() {
         return;
     }
     ofmt = ofmtCtx->oformat;
-    codec = avcodec_find_encoder(ofmt->audio_codec);
+    codec = avcodec_find_encoder(AV_CODEC_ID_AAC);
+    LOGCATE("log coder:%d aac:%d",ofmt->audio_codec,AV_CODEC_ID_AAC);
+//    codec = avcodec_find_encoder_by_name("libfdk_aac");
     if (!codec) {
         LOGCATE("can't find encoder");
         return;
