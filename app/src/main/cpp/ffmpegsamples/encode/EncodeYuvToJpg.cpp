@@ -16,6 +16,108 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+
+
+const char *EncodeYuvToJpg::encodeByByteArray(uint8_t* buffer) {
+    const char *ERROR_RESULT = "";
+    const char *finalResult;
+    const AVCodec *codec;
+    AVCodecContext *codeCtx = NULL;
+    FILE *out_file;
+
+    AVFrame *frame;
+    AVPacket *pkt;
+    int ret;
+    uint8_t endcode[] = {0, 0, 1, 0xb7};
+
+    const char *outputFileName = getRandomStr("encodejpg-",".jpg","filterImg/");
+
+    out_file = fopen(outputFileName, "wb");
+    if (!out_file) {
+        LOGCATE("Could not open out file %s\n", outputFileName);
+        return ERROR_RESULT;
+    }
+
+    AVOutputFormat *output = av_guess_format(NULL, outputFileName, NULL);
+    LOGCATE("打印是否为null:%p",output);
+    LOGCATE("print order for format:%d",output->video_codec);
+
+    // 找到编码器
+    codec = avcodec_find_encoder(output->video_codec);
+    if (!codec) {
+        LOGCATE("can't find coedc");
+        return ERROR_RESULT;
+    }
+
+
+    codeCtx = avcodec_alloc_context3(codec);
+    if (!codeCtx) {
+        LOGCATE("Could not allocate video codec context\n");
+        return ERROR_RESULT;
+    }
+
+
+    // 配置编码环境
+//    codeCtx->codec_id = codec->id;
+//    codeCtx->codec_type = AVMEDIA_TYPE_VIDEO;
+    codeCtx->pix_fmt = AV_PIX_FMT_YUVJ420P;
+
+    codeCtx->width = 1080;
+    codeCtx->height = 1920;
+
+    codeCtx->time_base = AVRational{1, 25};
+    codeCtx->framerate = AVRational{25, 1};
+    codeCtx->bit_rate = 4000000;
+//    codeCtx->max_b_frames = 10;
+    codeCtx->gop_size = 1;
+
+//    if (codec->id == AV_CODEC_ID_H264)
+//        av_opt_set(codeCtx->priv_data, "preset", "slow", 0);
+
+    // 打开编码器
+    if ((ret = avcodec_open2(codeCtx, codec, NULL)) < 0) {
+        LOGCATE("can't open encoder:%s",av_err2str(ret));
+        return ERROR_RESULT;
+    }
+    LOGCATE("already open decoder");
+    frame = av_frame_alloc();
+    pkt = av_packet_alloc();
+    frame->width = codeCtx->width;
+    frame->height = codeCtx->height;
+    frame->format = codeCtx->pix_fmt;
+    int pictureSize = av_image_get_buffer_size(codeCtx->pix_fmt, codeCtx->width, codeCtx->height,
+                                               1);
+    ret = av_frame_get_buffer(frame, 1);
+    if (ret < 0) {
+        LOGCATE("can't get frame buffer");
+        return ERROR_RESULT;
+    }
+    int y_size = codeCtx->width * codeCtx->height;
+
+    frame->data[0] = buffer;              // Y
+    frame->data[1] = buffer + y_size;      // U
+    frame->data[2] = buffer + y_size * 5 / 4;  // V
+
+    //prepare read data
+    encodeInternal(codeCtx, frame, pkt, out_file, NULL);
+
+    encodeInternal(codeCtx, NULL, pkt, out_file, nullptr);
+
+    /* add sequence end code to have a real MPEG file */
+    fwrite(endcode, 1, sizeof(endcode), out_file);
+
+    fclose(out_file);
+
+    avcodec_free_context(&codeCtx);
+    av_frame_free(&frame);
+    av_packet_free(&pkt);
+
+
+    LOGCATE("enough");
+    finalResult = outputFileName;
+    return finalResult;
+}
+
 const char *EncodeYuvToJpg::encode(const char *inputFileName) {
     const char *ERROR_RESULT = "";
     const char *finalResult;
@@ -39,7 +141,7 @@ const char *EncodeYuvToJpg::encode(const char *inputFileName) {
     }
     out_file = fopen(outputFileName, "wb");
     if (!out_file) {
-        LOGCATE("Could not open out file %s\n", inputFileName);
+        LOGCATE("Could not open out file %s\n", outputFileName);
         return ERROR_RESULT;
     }
 

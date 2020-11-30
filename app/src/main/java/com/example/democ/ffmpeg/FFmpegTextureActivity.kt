@@ -3,22 +3,32 @@ package com.example.democ.ffmpeg
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ConfigurationInfo
+import android.graphics.Bitmap
 import android.hardware.Camera
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
+import com.example.camera.listener.CameraPictureListener
+import com.example.camera.listener.CameraYUVDataListener
+import com.example.camera.manager.CameraSurfaceManager
 import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.getBitmapFromYuvdata
 import com.example.democ.render.FFmpegOpenGLRender
 import com.example.democ.utils.CameraHelper
+import com.example.democ.utils.CameraHelper_test
+import com.libyuv.util.YuvUtil
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.*
 import kotlinx.android.synthetic.main.activity_f_fmpeg_open_g_l.*
 import kotlinx.android.synthetic.main.activity_f_fmpeg_open_g_l.mSurface
 
-class FFmpegTextureActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.PreviewCallback {
+class FFmpegTextureActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.PreviewCallback,
+    CameraPictureListener, CameraYUVDataListener {
 
+
+//    private lateinit var mCameraHelper:CameraHelper
+private lateinit var mCameraHelper:CameraSurfaceManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_open_g_l)
@@ -28,11 +38,15 @@ class FFmpegTextureActivity : AppCompatActivity(), SurfaceHolder.Callback, Camer
     var isSet = false
 
     private fun init() {
+        mCameraHelper = CameraSurfaceManager(mSurface)
+        mCameraHelper.setCameraPictureListener(this)
+        mSurface.setCameraYUVDataListener(this)
 //        mOpenGlEs.init(FFmpegOpenGLRender())
-
-        var mCameraHelper = CameraHelper(this, mSurface, this)
-        mCameraHelper.init(1920,1080)
-        mCameraHelper.setPreviewCallback(this)
+//
+//        mCameraHelper = CameraHelper(this, mSurface, this)
+//        mCameraHelper.init(1920,1080)
+////        mCameraHelper.init()
+//        mCameraHelper.setPreviewCallback(this)
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -47,10 +61,65 @@ class FFmpegTextureActivity : AppCompatActivity(), SurfaceHolder.Callback, Camer
 
     }
 
-    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
-       if (!isSet){
-           isSet = true
-           mGlImage.setImageBitmap(getBitmapFromYuvdata(data))
-       }
+    override fun onResume() {
+        super.onResume()
+        mCameraHelper.onResume()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mCameraHelper.onStop()
+    }
+
+    override fun onPreviewFrame(srcData: ByteArray?, camera: Camera?) {
+
+    }
+
+    override fun onPictureBitmap(btmp: Bitmap?) {
+        mGlImage.setImageBitmap(btmp)
+    }
+
+    override fun onCallback(srcData: ByteArray?) {
+        val windowWidth = mSurface.cameraUtil.cameraWidth
+        val windowHeight = mSurface.cameraUtil.cameraHeight
+        val scaleHeight = mSurface.cameraUtil.cameraWidth
+        val scaleWidth = mSurface.cameraUtil.cameraHeight
+        val mOrientation = mSurface.cameraUtil.morientation
+
+        if (!isSet) {
+//            isSet = true
+
+            val bytes = ByteArray(windowHeight * windowWidth * 3 / 2)
+
+            YuvUtil.yuvCompress(
+                srcData,
+                windowWidth,
+                windowHeight,
+                bytes,
+                scaleHeight,
+                scaleWidth,
+                3,
+                mOrientation,
+                mOrientation == 270
+            )
+
+            val dstData = ByteArray(windowHeight * windowWidth * 3 / 2)
+            log("prepare yuv420 to nv21")
+            YuvUtil.yuvI420ToNV21(
+                bytes,
+                scaleWidth,
+                scaleHeight,
+                dstData
+            )
+            mGlImage.setImageBitmap(
+                getBitmapFromYuvdata(
+                    dstData,
+                    scaleWidth,
+                    scaleHeight
+                )
+            )
+        }
+
+
     }
 }

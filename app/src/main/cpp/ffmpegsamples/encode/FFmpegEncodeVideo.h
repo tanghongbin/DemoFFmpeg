@@ -18,7 +18,7 @@ private:
     FILE *in_file;
     AVFormatContext* ofmtctx;
     AVStream* oStream;
-//    uint8_t* pic_buf;
+    uint8_t* pic_buf;
     int bufferSize;
     int mFrameIndex;
     int pts_frame_index = 0,dts_frame_index = 0;

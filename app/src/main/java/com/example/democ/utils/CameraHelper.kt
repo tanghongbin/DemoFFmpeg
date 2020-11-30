@@ -10,6 +10,7 @@ import android.view.SurfaceView
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.audio.log
+import com.libyuv.util.YuvUtil
 
 /**
  *
@@ -20,19 +21,39 @@ import com.example.democ.audio.log
  * desc   : 打开相机并且预览回调数据
  *
  **/
+@Deprecated("不用了，有更好的")
 class CameraHelper(
     val activity: Activity,
     val surface: SurfaceView,
     val call: SurfaceHolder.Callback
 ) : SurfaceHolder.Callback,
     Camera.PreviewCallback {
-    private lateinit var camera: Camera
+    lateinit var camera: Camera
     private var mRotation = 0
+    private var bytes: ByteArray? = null
+    private var buffer: ByteArray? = null
     private var mWidth: Int = 0
     private var mHeight: Int = 0
+    private var mScaleWidth: Int = 0
+    private var mScaleHeight: Int = 0
     private var mCameraId = 1
     private var mCall: Camera.PreviewCallback? = null
     private var mHolder: SurfaceHolder? = null
+    private var mOrientation = 0
+
+
+
+    fun getOrientation():Int{
+        return mOrientation
+    }
+
+    fun getScaleWidth(): Int {
+        return mScaleWidth
+    }
+
+    fun getScaleHeight(): Int {
+        return mScaleHeight
+    }
 
     fun getVideoWidth(): Int {
         return mWidth
@@ -46,6 +67,8 @@ class CameraHelper(
         surface.holder.addCallback(this)
         mWidth = width
         mHeight = height
+        mScaleWidth = mHeight
+        mScaleHeight = mWidth
         if (mWidth <= 0 || mHeight <= 0) {
             throw IllegalArgumentException("Illegal Argument width or height is 0")
         }
@@ -57,13 +80,24 @@ class CameraHelper(
 
     private fun initCameraParams(camera: Camera?) {
         val parameters = camera?.getParameters();
+        val manager = activity.getSystemService(AppCompatActivity.WINDOW_SERVICE) as WindowManager
+        val displayMetrics = DisplayMetrics()
+        manager.defaultDisplay.getMetrics(displayMetrics)
+        log("打印窗口的宽:${displayMetrics.widthPixels} 高:${displayMetrics.heightPixels}")
         parameters?.let {
             parameters.previewFormat = ImageFormat.NV21
             setPreviewSize(parameters)
             setCameraDisplayOrientation(activity, mCameraId, camera)
             camera.parameters = parameters
         }
-        camera?.setPreviewCallback(this)
+
+        buffer = ByteArray(mWidth * mHeight * 3 / 2)
+        bytes = ByteArray(buffer!!.size)
+//
+        camera?.addCallbackBuffer(buffer)
+        camera?.setPreviewCallbackWithBuffer(this)
+
+
     }
 
     private fun setPreviewSize(parameters: Camera.Parameters) {
@@ -86,50 +120,8 @@ class CameraHelper(
         parameters.setPreviewSize(mWidth, mHeight)
     }
 
-    private fun rotation90(dataArray: ByteArray) {
-//        var index = 0
-//        val ySize: Int = mWidth * mHeight
-//        val uvHeight: Int = mHeight / 2
-//        //back camera rotate 90 deree
-//        if (mCameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
-//            for (i in 0 until mWidth) {
-//                for (j in mHeight - 1 downTo 0) {
-//                    bytes!![index++] = dataArray[mWidth * j + i]
-//                }
-//            }
-//            var i = 0
-//            while (i < mWidth) {
-//                for (j in uvHeight - 1 downTo 0) { // v
-//                    bytes!![index++] = dataArray[ySize + mWidth * j + i]
-//                    // u
-//                    bytes!![index++] = dataArray[ySize + mWidth * j + i + 1]
-//                }
-//                i += 2
-//            }
-//        } else { //rotate 90 degree
-//            for (i in 0 until mWidth) {
-//                var nPos: Int = mWidth - 1
-//                for (j in 0 until mHeight) {
-//                    bytes!![index++] = dataArray[nPos - i]
-//                    nPos += mWidth
-//                }
-//            }
-//            //u v
-//            var i = 0
-//            while (i < mWidth) {
-//                var nPos: Int = ySize + mWidth - 1
-//                for (j in 0 until uvHeight) {
-//                    bytes!![index++] = dataArray[nPos - i - 1]
-//                    bytes!![index++] = dataArray[nPos - i]
-//                    nPos += mWidth
-//                }
-//                i += 2
-//            }
-//        }
-    }
 
-
-    private fun startPreview() {
+    fun startPreview() {
         camera = android.hardware.Camera.open(mCameraId)
         initCameraParams(camera)
         camera.setPreviewDisplay(mHolder)
@@ -142,7 +134,7 @@ class CameraHelper(
         camera.release()
     }
 
-    private fun setCameraDisplayOrientation(
+    fun setCameraDisplayOrientation(
         activity: Activity,
         cameraId: Int, camera: Camera
     ) {
@@ -164,6 +156,7 @@ class CameraHelper(
         } else { // back-facing
             result = (info.orientation - degrees + 360) % 360
         }
+        mOrientation = result
         camera.setDisplayOrientation(result)
     }
 
@@ -174,7 +167,6 @@ class CameraHelper(
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         log("java surfaceDestroyed")
-        release()
         call.surfaceDestroyed(holder)
     }
 
@@ -185,17 +177,48 @@ class CameraHelper(
         log("java surfaceCreated")
     }
 
-    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
-        var dataResult = data
+    override fun onPreviewFrame(srcData: ByteArray?, camera: Camera?) {
+//        log("打印旋转角度:${mRotation}")
+//        log("打印原数组大小:${srcData?.size}  现在数组大小:${bytes?.size}")
+//        var dataResult = ByteArray(buffer!!.size)
+        log("mRotation:${mRotation}  mOrientation:${mOrientation}")
         when (mRotation) {
             Surface.ROTATION_0 -> {
-//                dataResult = rotation90(data!!)
+//                log("角度为0")
+//                YuvUtil.yuvCompress(
+//                    srcData,
+//                    mWidth,
+//                    mHeight,
+//                    bytes,
+//                    mHeight,
+//                    mWidth,
+//                    2,
+//                    90,
+//                    false
+//                )
+                YuvUtil.yuvCompress(
+                    srcData,
+                    mWidth,
+                    mHeight,
+                    bytes,
+                    mScaleHeight,
+                    mScaleWidth,
+                    3,
+                    mOrientation,
+                    mOrientation == 270
+                )
+//                YuvUtil.yuvNV21ToI420(data,mWidth,mHeight,bytes)
+//                YuvUtil.yuvNV21ToI420AndRotate(srcData,mWidth,mHeight,bytes,270)
+                log("打印本身已经旋转的角度:${mOrientation}")
             }
             Surface.ROTATION_90, Surface.ROTATION_270 -> {
             }
             else -> {
             }
         }
-        mCall?.onPreviewFrame(dataResult, camera)
+//        mCall?.onPreviewFrame(dataResult, camera)
+        mCall?.onPreviewFrame(bytes, camera)
+        camera!!.addCallbackBuffer(buffer)
     }
+
 }

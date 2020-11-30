@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ffmpeg.FFmpegEncodeVideoActivity">
 
-    <SurfaceView
+    <com.example.camera.manager.CameraSurfaceView
         android:id="@+id/mSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

@@ -74,8 +74,12 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
 JNIEXPORT void JNICALL native_OnSurfaceChanged
         (JNIEnv *env, jobject instance, jint width, jint height) {
 //    VideoGLRender::GetInstance()->OnSurfaceChanged(width, height);
-    FFmpegEncodeVideo::getInstance()->mWindow_width = height;
-    FFmpegEncodeVideo::getInstance()->mWindow_height = width;
+// 正常情况下这样设置
+//    FFmpegEncodeVideo::getInstance()->mWindow_width = height;
+//    FFmpegEncodeVideo::getInstance()->mWindow_height = width;
+
+    FFmpegEncodeVideo::getInstance()->mWindow_width = width;
+    FFmpegEncodeVideo::getInstance()->mWindow_height = height;
     LOGCATE("setup width:%d height:%d", FFmpegEncodeVideo::getInstance()->mWindow_width,
             FFmpegEncodeVideo::getInstance()->mWindow_height);
 //    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
@@ -132,7 +136,7 @@ JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance, jint type
     switch (type) {
         case 1:
             FFmpegEncodeAudio::getInstance();
-            AudioRecordPlayHelper::getInstance()->startCapture(FFmpegEncodeAudio::recordCallback);
+            AudioRecordPlayHelper::getInstance()->startCapture();
             break;
         case 2:
             AudioRecordPlayHelper::getInstance()->stopCapture();
@@ -199,12 +203,21 @@ JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance, jstring url, jobje
 
 JNIEXPORT void JNICALL native_encodeFrame(JNIEnv *env, jobject instance,
                                           jbyteArray imageData) {
-    int len = env->GetArrayLength(imageData);
-    uint8_t *buf = new uint8_t[len];
-    env->GetByteArrayRegion(imageData, 0, len, reinterpret_cast<jbyte *>(buf));
-    FFmpegEncodeVideo::getInstance()->encodeVideoFrame(buf);
-    delete[] buf;
-    env->DeleteLocalRef(imageData);
+
+    jbyte *data = env->GetByteArrayElements(imageData, 0);
+
+    FFmpegEncodeVideo::getInstance()->encodeVideoFrame(reinterpret_cast<uint8_t *>(data));
+
+    env->ReleaseByteArrayElements(imageData, data, 0);
+
+
+//    int len = env->GetArrayLength(imageData);
+//    LOGCATE("log jbytearray length:%d",len);
+//    uint8_t *buf = new uint8_t[len];
+//    env->GetByteArrayRegion(imageData, 0, len, reinterpret_cast<jbyte *>(buf));
+//
+//    delete[] buf;
+//    env->DeleteLocalRef(imageData);
 }
 
 JNIEXPORT void JNICALL native_videoEncodeInit(JNIEnv *env, jobject instance) {

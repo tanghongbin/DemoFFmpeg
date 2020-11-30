@@ -8,6 +8,8 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libswresample/swresample.h>
+#include <libavutil/opt.h>
 }
 
 using namespace std;
@@ -29,39 +31,32 @@ void FFmpegEncodeAudio::destroyInstance() {
     }
 }
 
-void FFmpegEncodeAudio::recordCallback(uint8_t *point, int sampleSize) {
-    LOGCATE("audio record callback success :%p   size:%d", point, sampleSize);
-    FFmpegEncodeAudio::getInstance()->audioFrameCopy(point, sampleSize);
+void FFmpegEncodeAudio::unInit() {
+    int ret = av_write_trailer(ofmtCtx);
+    if (ret < 0) {
+        LOGCATE("av_write_trailer failed :%s",av_err2str(ret));
+    }
+
+    av_free(frame_buffer);
+    av_packet_unref(packet);
+    av_packet_free(&packet);
+    av_frame_free(&frame);
+    swr_free(&swr);
+    if (ofmtCtx){
+        avformat_free_context(ofmtCtx);
+    }
+    if (ofmtCtx && !( ofmtCtx->flags & AVFMT_NOFILE)){
+        avio_close(ofmtCtx->pb);
+    }
+    if (ret < 0 && ret != AVERROR_EOF){
+        remove(out_file_name);
+    }
+    avcodec_free_context(&codecContext);
 }
-
-
-void FFmpegEncodeAudio::audioFrameCopy(uint8_t *point, int sampleSize) {
-
-//    LOGCATE("copy data from recorder to encoder");
-}
-
 
 void FFmpegEncodeAudio::init() {
-
-    AVCodec *codec;
-    AVCodecContext *codecContext;
-    int ret;
-
-    const char *out_file_name =  getRandomStr("encodeaudio_",".aac","encodeAudios/");
-    const char *input_file_name = "/storage/emulated/0/ffmpegtest/capture.pcm";
-    FILE *inFile;
-    AVFrame *frame;
-    AVPacket *packet;
-    AVFormatContext* ofmtCtx;
-    AVOutputFormat* ofmt;
-    AVStream* oStream;
-    uint8_t *frame_buffer;
+    out_file_name =  getRandomStr("encodeaudio_",".aac","encodeAudios/");
     LOGCATE("has enter encode audio init function");
-    inFile = fopen(input_file_name, "rb");
-    if (!inFile) {
-        LOGCATE("can't open input file");
-        return;
-    }
 
     ret = avformat_alloc_output_context2(&ofmtCtx,NULL,NULL,out_file_name);
     if (ret < 0){
@@ -69,13 +64,13 @@ void FFmpegEncodeAudio::init() {
         return;
     }
     ofmt = ofmtCtx->oformat;
-    codec = avcodec_find_encoder(AV_CODEC_ID_AAC);
-    LOGCATE("log coder:%d aac:%d",ofmt->audio_codec,AV_CODEC_ID_AAC);
+    codec = avcodec_find_encoder(ofmt->audio_codec);
 //    codec = avcodec_find_encoder_by_name("libfdk_aac");
     if (!codec) {
         LOGCATE("can't find encoder");
         return;
     }
+    LOGCATE("log coder:%d aac:%d",codec->id,AV_CODEC_ID_AAC);
     codecContext = avcodec_alloc_context3(codec);
     if (!codecContext) {
         LOGCATE("can't alloc codecContext");
@@ -125,87 +120,75 @@ void FFmpegEncodeAudio::init() {
         return;
     }
 
-    ret = encodeAudioLoop(codecContext, packet, frame, ofmtCtx, inFile, frame_buffer);
+    //9.用于音频转码
+    swr = swr_alloc();
+    av_opt_set_channel_layout(swr, "in_channel_layout", AV_CH_LAYOUT_STEREO, 0);
+    av_opt_set_channel_layout(swr, "out_channel_layout", AV_CH_LAYOUT_STEREO, 0);
+    av_opt_set_int(swr, "in_sample_rate", 44100, 0);
+    av_opt_set_int(swr, "out_sample_rate", 44100, 0);
+    av_opt_set_sample_fmt(swr, "in_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+    av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_FLTP, 0);
+    swr_init(swr);
+
     // encode loop
 
-    ret = av_write_trailer(ofmtCtx);
-    if (ret < 0) {
-        LOGCATE("av_write_trailer failed :%s",av_err2str(ret));
-        return;
-    }
 
-
-    av_free(frame_buffer);
-    av_packet_unref(packet);
-    av_packet_free(&packet);
-    av_frame_free(&frame);
-    if (ofmtCtx){
-        avformat_free_context(ofmtCtx);
-    }
-    if (ofmtCtx && !( ofmtCtx->flags & AVFMT_NOFILE)){
-        avio_close(ofmtCtx->pb);
-    }
-    if (ret < 0 && ret != AVERROR_EOF){
-        remove(out_file_name);
-    }
-    avcodec_free_context(&codecContext);
-
-    LOGCATE("encode finished");
+    LOGCATE("encode init finished");
 }
 
 int
-FFmpegEncodeAudio::encodeAudioLoop(AVCodecContext *pContext, AVPacket *pPacket, AVFrame *pFrame,
-                                   AVFormatContext *ofmtctx, FILE *inputFile, uint8_t *frame_buffer) {
-    int size = av_samples_get_buffer_size(NULL, pContext->channels, pFrame->nb_samples,
-                                          pContext->sample_fmt, 1);
+FFmpegEncodeAudio::encodeAudioFrame(uint8_t *audio_buffer, int length) {
+//    int size = av_samples_get_buffer_size(NULL, codecContext->channels, frame->nb_samples,
+//                                          codecContext->sample_fmt, 1);
 
     int ret = 0;
-    int start, frameNum = INT_MAX;
-    int packetCount = 0;
-    for (start = 1; start < frameNum; start++) {
-        if (fread(frame_buffer, 1, size, inputFile) <= 0) {
-            LOGCATE("read has complete");
-            break;
-        } else if (feof(inputFile)) {
-            LOGCATE("read has error");
-            ret = -1;
-            break;
-        }
-        pFrame->data[0] = frame_buffer;
-        pFrame->pts = start * 100;
+    uint8_t *out[2];
+    out[0] = new uint8_t[length];
+    out[1] = new uint8_t[length];
 
-//        LOGCATE("print after read_frame:%p",frame->data);
-        ret = avcodec_send_frame(pContext, pFrame);
-        if (ret < 0) {
-            LOGCATE("avcodec_send_frame failed :%s",av_err2str(ret));
+    const uint8_t * convert_buffer = audio_buffer;
+    ret = swr_convert(swr,out,length * 4,&convert_buffer,length/4);
+    if (ret < 0){
+        LOGCATE("convert error:%s",av_err2str(ret));
+        goto EndEncode;
+    }
+    frame->data[0] = out[0];
+    frame->data[1] = out[1];
+    frame->pts = frame_index;
+
+    ret = avcodec_send_frame(codecContext, frame);
+    if (ret < 0) {
+        LOGCATE("avcodec_send_frame failed :%s",av_err2str(ret));
+        goto EndEncode;
+    }
+    while (ret >= 0) {
+        ret = avcodec_receive_packet(codecContext, packet);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             break;
+        } else if (ret < 0) {
+            LOGCATE("avcodec_receive_packet failed :%s",av_err2str(ret));
+            goto EndEncode;
         }
-        while (ret >= 0) {
-            ret = avcodec_receive_packet(pContext, pPacket);
-            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                break;
-            } else if (ret < 0) {
-                LOGCATE("avcodec_receive_packet failed :%s",av_err2str(ret));
-                goto EndEncode;
-            }
-            if (pPacket->pts == AV_NOPTS_VALUE){
-                LOGCATE("no pts value");
-            }
-            pPacket->stream_index = 0;
-
-            ret = av_interleaved_write_frame(ofmtctx,pPacket);
-
-            if (ret < 0){
-                LOGCATE("av_interleaved_write_frame failed :%s",av_err2str(ret));
-                goto EndEncode;
-            }
-            av_packet_unref(pPacket);
-            LOGCATE("encode success one frame,get a packet %d", packetCount++);
+        if (packet->pts == AV_NOPTS_VALUE){
+            LOGCATE("no pts value");
         }
+        packet->stream_index = oStream->index;
+
+        ret = av_interleaved_write_frame(ofmtCtx,packet);
+
+        if (ret < 0){
+            LOGCATE("av_interleaved_write_frame failed :%s",av_err2str(ret));
+            goto EndEncode;
+        }
+        av_packet_unref(packet);
+        LOGCATE("encode success one frame:%d",frame_index);
+        frame_index++;
     }
 
     EndEncode:
-    av_packet_unref(pPacket);
+    av_packet_unref(packet);
+    delete out[0];
+    delete out[1];
     return ret;
 }
 

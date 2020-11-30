@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ffmpeg.FFmpegOpenGLActivity">
 
-    <SurfaceView
+    <com.example.camera.manager.CameraSurfaceView
         android:id="@+id/mSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
@@ -14,8 +14,8 @@
     <ImageView
         android:scaleType="center"
         android:id="@+id/mGlImage"
-        android:layout_width="250dp"
-        android:layout_height="400dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 <!--    <com.example.democ.view.MyGLSurfaceView-->
 <!--        android:id="@+id/mOpenGlEs"-->
 <!--        android:layout_width="match_parent"-->

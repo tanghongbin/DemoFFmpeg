@@ -5,12 +5,10 @@ import android.content.Context
 import android.graphics.*
 import android.hardware.Camera
 import android.hardware.Camera.CameraInfo
-import android.media.ImageReader
 import android.util.AttributeSet
 import android.view.Display
 import android.view.Surface
 import android.view.TextureView
-import com.example.democ.audio.EncodeManager
 import com.example.democ.audio.log
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -126,12 +124,12 @@ class CustomSurfaceView @JvmOverloads constructor(
 
 }
 
-fun getBitmapFromYuvdata(data: ByteArray?):Bitmap?{
+fun getBitmapFromYuvdata(data: ByteArray?,width: Int,height: Int):Bitmap?{
 //        if (hasBuild) return
 //        hasBuild = true
-    val yuvImage = YuvImage(data,ImageFormat.NV21,1080,1920,null)
+    val yuvImage = YuvImage(data,ImageFormat.NV21,width,height,null)
     val out = ByteArrayOutputStream()
-    val result = yuvImage.compressToJpeg(Rect(0,0,1080,1920),100,out)
+    val result = yuvImage.compressToJpeg(Rect(0,0,width,height),100,out)
     if (result){
         val array = out.toByteArray()
         val bitmap = BitmapFactory.decodeByteArray(array,0,array.size)

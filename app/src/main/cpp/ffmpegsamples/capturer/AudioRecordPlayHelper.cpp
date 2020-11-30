@@ -8,11 +8,12 @@
 #include <OpenSL_IO.h>
 #include <__mutex_base>
 #include <libavutil/samplefmt.h>
+#include <encode/FFmpegEncodeAudio.h>
 #include "AudioRecordPlayHelper.h"
 
 AudioRecordPlayHelper *AudioRecordPlayHelper::instance = nullptr;
 
-void AudioRecordPlayHelper::startCapture(recordCall call) {
+void AudioRecordPlayHelper::startCapture() {
     FILE *fp = fopen(TEST_CAPTURE_FILE_PATH, "wb");
     if (fp == NULL) {
         LOGCATE("cannot open file (%s)\n", TEST_CAPTURE_FILE_PATH);
@@ -27,6 +28,8 @@ void AudioRecordPlayHelper::startCapture(recordCall call) {
         return;
     }
 
+    FFmpegEncodeAudio::getInstance()->init();
+
     int samples;
     uint8_t buffer[BUFFER_SIZE];
     g_loop_exit = 0;
@@ -38,13 +41,16 @@ void AudioRecordPlayHelper::startCapture(recordCall call) {
             break;
         }
 //        call(buffer,samples);
-        if (fwrite((unsigned char *) buffer, samples * sizeof(short), 1, fp) != 1) {
-            LOGCATE("failed to save captured data !\n ");
-            break;
-        }
+        FFmpegEncodeAudio::getInstance()->encodeAudioFrame(buffer,samples);
+//        if (fwrite((unsigned char *) buffer, samples * sizeof(short), 1, fp) != 1) {
+//            LOGCATE("failed to save captured data !\n ");
+//            break;
+//        }
 //        LOGCATE("capture %d samples !\n", samples);
     }
 
+    FFmpegEncodeAudio::getInstance()->unInit();
+    FFmpegEncodeAudio::destroyInstance();
     OpenSL_IO::android_CloseAudioDevice(stream);
     fclose(fp);
 

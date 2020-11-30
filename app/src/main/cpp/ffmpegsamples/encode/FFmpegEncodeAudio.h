@@ -10,6 +10,7 @@
 
 
 extern "C" {
+#include <libswresample/swresample.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 };
@@ -32,18 +33,25 @@ public:
 
     void init();
 
-    static void recordCallback(uint8_t *point, int sampleSize);
+    void unInit();
 
-    void audioFrameCopy(uint8_t *frame, int sampleSize);
+    int encodeAudioFrame(uint8_t *audio_buffer, int length);
 
 private:
     mutex mMutex;
     static FFmpegEncodeAudio *instance;
-
-
-    int
-    encodeAudioLoop(AVCodecContext *pContext, AVPacket *pPacket, AVFrame *pFrame,
-                    AVFormatContext *ofmtctx, FILE *inputFile, uint8_t *string1);
+    AVCodec *codec;
+    AVCodecContext *codecContext;
+    int ret;
+    const char *out_file_name;
+    AVFrame *frame;
+    SwrContext *swr;
+    AVPacket *packet;
+    AVFormatContext *ofmtCtx;
+    AVOutputFormat *ofmt;
+    AVStream *oStream;
+    uint8_t *frame_buffer;
+    int frame_index = 0;
 
     void configAudioEncodeParams(AVCodecContext *pContext, AVCodec *pCodec);
 

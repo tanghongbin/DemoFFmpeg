@@ -23,7 +23,7 @@ private:
 
 public:
 
-    void startCapture(recordCall call);
+    void startCapture();
 
     void stopCapture();
 
