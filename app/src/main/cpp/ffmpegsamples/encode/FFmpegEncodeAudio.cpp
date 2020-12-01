@@ -199,7 +199,7 @@ FFmpegEncodeAudio::encodeAudioFrame(uint8_t *audio_buffer, int length) {
 void FFmpegEncodeAudio::configAudioEncodeParams(AVCodecContext *pContext, AVCodec *codec) {
     pContext->codec_id = codec->id;
     pContext->codec_type = AVMEDIA_TYPE_AUDIO;
-    pContext->bit_rate = 64000;
+    pContext->bit_rate = 96000;
 //    AV_CODEC_ID_MP2
     // sample_fmt 二者选1
 //    pContext->sample_fmt = AV_SAMPLE_FMT_S16; // 不支持

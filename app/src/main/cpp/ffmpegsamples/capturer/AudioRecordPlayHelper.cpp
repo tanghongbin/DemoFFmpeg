@@ -13,27 +13,20 @@
 
 AudioRecordPlayHelper *AudioRecordPlayHelper::instance = nullptr;
 
-void AudioRecordPlayHelper::startCapture() {
-    FILE *fp = fopen(TEST_CAPTURE_FILE_PATH, "wb");
-    if (fp == NULL) {
-        LOGCATE("cannot open file (%s)\n", TEST_CAPTURE_FILE_PATH);
-        return;
-    }
+void AudioRecordPlayHelper::startCapture(FFmpegEncodeAVToMp4 *encodeInstance) {
 
     OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(SAMPLERATE, CHANNELS, CHANNELS,
                                                                FRAME_SIZE);
-    if (stream == NULL) {
-        fclose(fp);
-        LOGCATE("failed to open audio device ! \n");
-        return;
-    }
-
-    FFmpegEncodeAudio::getInstance()->init();
-
     int samples;
     uint8_t buffer[BUFFER_SIZE];
     g_loop_exit = 0;
     while (!g_loop_exit) {
+        std::unique_lock<std::mutex> lock(mutex);
+        if (!encodeInstance->isRecording) {
+            variable.wait(lock);
+        }
+        lock.unlock();
+        LOGCATE("i'm recording audio");
         samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);
 //        LOGCATE("capture audio data success :%d",samples);
         if (samples < 0) {
@@ -41,7 +34,7 @@ void AudioRecordPlayHelper::startCapture() {
             break;
         }
 //        call(buffer,samples);
-        FFmpegEncodeAudio::getInstance()->encodeAudioFrame(buffer,samples);
+        encodeInstance->encode_frame_Av(buffer, samples, 1);
 //        if (fwrite((unsigned char *) buffer, samples * sizeof(short), 1, fp) != 1) {
 //            LOGCATE("failed to save captured data !\n ");
 //            break;
@@ -49,16 +42,53 @@ void AudioRecordPlayHelper::startCapture() {
 //        LOGCATE("capture %d samples !\n", samples);
     }
 
-    FFmpegEncodeAudio::getInstance()->unInit();
-    FFmpegEncodeAudio::destroyInstance();
     OpenSL_IO::android_CloseAudioDevice(stream);
-    fclose(fp);
+
 
     LOGCATE("nativeStartCapture completed !");
 }
 
+
+void AudioRecordPlayHelper::startCapture() {
+
+    OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(SAMPLERATE, CHANNELS, CHANNELS,
+                                                               FRAME_SIZE);
+    int samples;
+    uint8_t buffer[BUFFER_SIZE];
+    g_loop_exit = 0;
+    FFmpegEncodeAudio::getInstance()->init();
+    while (!g_loop_exit) {
+        LOGCATE("i'm recording audio");
+        samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);
+//        LOGCATE("capture audio data success :%d",samples);
+        if (samples < 0) {
+            LOGCATE("android_AudioIn failed !\n");
+            break;
+        }
+        FFmpegEncodeAudio::getInstance()->encodeAudioFrame(buffer,samples);
+//        call(buffer,samples);
+//        if (fwrite((unsigned char *) buffer, samples * sizeof(short), 1, fp) != 1) {
+//            LOGCATE("failed to save captured data !\n ");
+//            break;
+//        }
+//        LOGCATE("capture %d samples !\n", samples);
+    }
+    FFmpegEncodeAudio::getInstance()->unInit();
+    FFmpegEncodeAudio::destroyInstance();
+    OpenSL_IO::android_CloseAudioDevice(stream);
+
+
+    LOGCATE("nativeStartCapture completed !");
+}
+
+
+void AudioRecordPlayHelper::notify_weak() {
+    variable.notify_all();
+}
+
 void AudioRecordPlayHelper::stopCapture() {
-    g_loop_exit = true;
+    g_loop_exit = 1;
+    variable.notify_all();
 }
 
 int AudioRecordPlayHelper::getBufferSize() {

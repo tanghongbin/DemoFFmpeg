@@ -27,6 +27,7 @@
 #include <muxer/CustomMuxer.h>
 #include <SingleNodeList.h>
 #include <TimeTracker.h>
+#include <encode/FFmpegEncodeAVToMp4.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
@@ -267,6 +268,53 @@ JNIEXPORT void JNICALL splitAudioAndVideo(JNIEnv *env, jobject instance, jstring
     CustomDemuxer::demuxerDiffcult(getCharStrFromJstring(env, path));
 }
 
+JNIEXPORT void JNICALL native_startrecordmp4(JNIEnv *env, jobject instance) {
+    FFmpegEncodeAVToMp4::getInstance()->startRecordMp4();
+}
+
+
+JNIEXPORT void JNICALL native_stoprecordmp4(JNIEnv *env, jobject instance) {
+    FFmpegEncodeAVToMp4::getInstance()->stopRecordMp4();
+}
+
+
+JNIEXPORT void JNICALL native_encodeavmuxer_OnSurfaceCreated(JNIEnv *env, jobject instance) {
+
+}
+
+/*
+ * Class:     com_byteflow_app_MyNativeRender
+ * Method:    native_OnSurfaceChanged
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL native_encodeavmuxer_OnSurfaceChanged
+        (JNIEnv *env, jobject instance, jint width, jint height) {
+
+    FFmpegEncodeAVToMp4::getInstance()->mWindow_width = width;
+    FFmpegEncodeAVToMp4::getInstance()->mWindow_height = height;
+    LOGCATE("setup width:%d height:%d", FFmpegEncodeAVToMp4::getInstance()->mWindow_width,
+            FFmpegEncodeAVToMp4::getInstance()->mWindow_height);
+    FFmpegEncodeAVToMp4::getInstance()->initAvEncoder();
+
+}
+
+JNIEXPORT void JNICALL native_encodeavmuxer_encodeFrame(JNIEnv *env, jobject instance,
+                                                        jbyteArray imageData) {
+
+    jbyte *data = env->GetByteArrayElements(imageData, 0);
+
+    FFmpegEncodeAVToMp4::getInstance()->encode_frame_Av(reinterpret_cast<uint8_t *>(data), 0, 2);
+
+    env->ReleaseByteArrayElements(imageData, data, 0);
+
+}
+
+JNIEXPORT jstring JNICALL native_unInitRecordMp4(JNIEnv *env, jobject instance) {
+    jstring result = getJstringFromCharStr(env,FFmpegEncodeAVToMp4::getInstance()->out_file_name);
+    FFmpegEncodeAVToMp4::getInstance()->unInitAvEncoder();
+    FFmpegEncodeAVToMp4::destroyInstance();
+    return result;
+}
 
 static int
 RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum) {
@@ -296,28 +344,36 @@ static void UnregisterNativeMethods(JNIEnv *env, const char *className) {
 }
 
 static JNINativeMethod g_RenderMethods[] = {
-        {"native_OnSurfaceCreated",   "()V",                                         (void *) (native_OnSurfaceCreated)},
-        {"native_OnSurfaceChanged",   "(II)V",                                       (void *) (native_OnSurfaceChanged)},
-        {"native_OnDrawFrame",        "()V",                                         (void *) (native_OnDrawFrame)},
+        {"native_OnSurfaceCreated",               "()V",                                         (void *) (native_OnSurfaceCreated)},
+        {"native_OnSurfaceChanged",               "(II)V",                                       (void *) (native_OnSurfaceChanged)},
+        {"native_OnDrawFrame",                    "()V",                                         (void *) (native_OnDrawFrame)},
 
-        {"native_videoEncodeInit",    "()V",                                         (void *) (native_videoEncodeInit)},
-        {"native_videoEncodeUnInit",  "()V",                                         (void *) (native_videoEncodeUnInit)},
-        {"native_testReadFile",       "()V",                                         (void *) (native_testReadFile)},
-        {"splitAudioAndVideo",        "(Ljava/lang/String;)V",                       (void *) (splitAudioAndVideo)},
-        {"native_changeOutputFormat", "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_changeOutputFormat)},
+        {"native_videoEncodeInit",                "()V",                                         (void *) (native_videoEncodeInit)},
+        {"native_videoEncodeUnInit",              "()V",                                         (void *) (native_videoEncodeUnInit)},
+        {"native_testReadFile",                   "()V",                                         (void *) (native_testReadFile)},
+        {"splitAudioAndVideo",                    "(Ljava/lang/String;)V",                       (void *) (splitAudioAndVideo)},
+        {"native_changeOutputFormat",             "(Ljava/lang/String;)Ljava/lang/String;",
+                                                                                                 (void *) (native_changeOutputFormat)},
 
-        {"native_muxerAudioAndVideo", "()V",                                         (void *) (native_muxerAudioAndVideo)},
-        {"native_startEncode",        "()V",                                         (void *) (native_startEncode)},
-        {"native_encodeFrame",        "([B)V",                                       (void *) (native_encodeFrame)},
-        {"encodeYuvToImage",          "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (encodeYuvToImage)},
-        {"native_addFilterToYuv",     "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_addFilterToYuv)},
+        {"native_muxerAudioAndVideo",             "()V",                                         (void *) (native_muxerAudioAndVideo)},
+        {"native_startEncode",                    "()V",                                         (void *) (native_startEncode)},
+        {"native_encodeFrame",                    "([B)V",                                       (void *) (native_encodeFrame)},
+        {"encodeYuvToImage",                      "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (encodeYuvToImage)},
+        {"native_addFilterToYuv",                 "(Ljava/lang/String;)Ljava/lang/String;",
+                                                                                                 (void *) (native_addFilterToYuv)},
 
-        {"native_audioTest",          "(I)V",                                        (void *) (native_audioTest)},
-        {"native_unInit",             "()V",                                         (void *) (native_unInit)},
-        {"native_yuv2rgb",            "()V",                                         (void *) (native_yuv2rgb)},
+        {"native_audioTest",                      "(I)V",                                        (void *) (native_audioTest)},
+        {"native_unInit",                         "()V",                                         (void *) (native_unInit)},
+        {"native_yuv2rgb",                        "()V",                                         (void *) (native_yuv2rgb)},
+        {"native_startrecordmp4",                 "()V",                                         (void *) (native_startrecordmp4)},
+        {"native_stoprecordmp4",                  "()V",                                         (void *) (native_stoprecordmp4)},
 
+        {"native_unInitRecordMp4",                "()Ljava/lang/String;",                                         (void *) (native_unInitRecordMp4)},
+        {"playMP4",                               "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)},
+        {"native_encodeavmuxer_OnSurfaceCreated", "()V",                                         (void *) (native_encodeavmuxer_OnSurfaceCreated)},
+        {"native_encodeavmuxer_OnSurfaceChanged", "(II)V",                                       (void *) (native_encodeavmuxer_OnSurfaceChanged)},
+        {"native_encodeavmuxer_encodeFrame",      "([B)V",                                       (void *) (native_encodeavmuxer_encodeFrame)}
 
-        {"playMP4",                   "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
 };
 
 

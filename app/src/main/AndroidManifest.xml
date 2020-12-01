@@ -19,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ffmpeg.FFmpegFilterAddToYuvActivity"></activity>
+        <activity android:name=".ffmpeg.FFmpegEncodeAVToMp4Activity"></activity>
+        <activity android:name=".ffmpeg.FFmpegFilterAddToYuvActivity" />
         <activity android:name=".ffmpeg.FFmpegEncodeVideoActivity" />
         <activity android:name=".ffmpeg.FFmpegEncodeAudioActivity" />
         <activity android:name=".ffmpeg.FFmpegNavigationActivity" />

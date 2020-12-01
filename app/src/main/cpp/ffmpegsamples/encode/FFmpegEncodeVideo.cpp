@@ -175,11 +175,6 @@ void FFmpegEncodeVideo::unInit() {
 
 
     av_write_trailer(ofmtctx);
-//    av_freep(pic_buf);
-    if (in_file) {
-        LOGCATE("关闭文件");
-//        fclose(in_file);
-    }
     avcodec_free_context(&codeCtx);
     av_frame_free(&frame);
     av_packet_free(&pkt);

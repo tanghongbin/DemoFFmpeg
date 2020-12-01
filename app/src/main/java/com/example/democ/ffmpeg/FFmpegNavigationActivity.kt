@@ -37,7 +37,8 @@ class FFmpegNavigationActivity : AppCompatActivity() {
         FFmpegNativeWindowActivity::class.java,
         FFmpegEncodeAudioActivity::class.java,
         FFmpegEncodeVideoActivity::class.java,
-        FFmpegFilterAddToYuvActivity::class.java
+        FFmpegFilterAddToYuvActivity::class.java,
+        FFmpegEncodeAVToMp4Activity::class.java
     )
 
 

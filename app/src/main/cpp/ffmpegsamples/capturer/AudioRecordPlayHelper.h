@@ -5,6 +5,8 @@
 #ifndef DEMOC_AUDIORECORDPLAYHELPER_H
 #define DEMOC_AUDIORECORDPLAYHELPER_H
 
+#include <encode/FFmpegEncodeAVToMp4.h>
+
 #define SAMPLERATE 44100
 #define CHANNELS 1
 #define PERIOD_TIME 20 //ms
@@ -19,15 +21,21 @@ class AudioRecordPlayHelper {
 private:
     static AudioRecordPlayHelper* instance;
     volatile bool g_loop_exit = false;
+    std::mutex mutex;
+    std::condition_variable variable;
 
 
 public:
+
+    void startCapture(FFmpegEncodeAVToMp4 *pMp4);
 
     void startCapture();
 
     void stopCapture();
 
     void startPlayBack();
+
+    void notify_weak();
 
     int getBufferSize();
 

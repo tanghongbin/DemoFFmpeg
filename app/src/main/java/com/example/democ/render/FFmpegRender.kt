@@ -81,6 +81,18 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_muxerAudioAndVideo()
 
+    external fun native_startrecordmp4()
+
+    external fun native_stoprecordmp4()
+
+    external fun native_unInitRecordMp4():String
+
+    external fun native_encodeavmuxer_OnSurfaceCreated()
+
+    external fun native_encodeavmuxer_OnSurfaceChanged(width:Int,height:Int)
+
+    external fun native_encodeavmuxer_encodeFrame(byteArray: ByteArray)
+
     //混合音视频
 //    external fun muxAv()
 
