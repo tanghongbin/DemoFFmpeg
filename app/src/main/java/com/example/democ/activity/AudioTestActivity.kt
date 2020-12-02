@@ -6,11 +6,10 @@ import android.view.View
 import com.example.democ.R
 import com.example.democ.audio.*
 import kotlinx.android.synthetic.main.activity_audio_test.*
-import java.util.concurrent.locks.ReentrantLock
 
 class AudioTestActivity : AppCompatActivity() ,View.OnClickListener{
 
-    private lateinit var mAudioCapture:AudioCapturer
+    private lateinit var mAudioCapture: AudioRecorder
     private lateinit var mAudioPlayer:AudioPlayer
 
     private lateinit var mAudioEncoder:AudioEncoder
@@ -21,7 +20,7 @@ class AudioTestActivity : AppCompatActivity() ,View.OnClickListener{
         setContentView(R.layout.activity_audio_test)
         mStart.setOnClickListener(this)
         mEnd.setOnClickListener(this)
-        mAudioCapture = AudioCapturer()
+        mAudioCapture = AudioRecorder()
         mAudioPlayer = AudioPlayer()
         mAudioEncoder = AudioEncoder()
         mAudioDecoder = AudioDecoder()

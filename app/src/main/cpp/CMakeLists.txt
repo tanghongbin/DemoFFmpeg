@@ -14,6 +14,11 @@ set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libName native-ffmpegrender)
 
+get_filename_component(PARENT_DIR ${CMAKE_SOURCE_DIR} PATH)
+
+#使用单个yuv库
+set(LIBYUV_DIR ${PARENT_DIR}/libyuv-single)
+
 include_directories(
         ffmpegsamples
         sample
@@ -21,7 +26,9 @@ include_directories(
         utils
         render
         glm
-        test)
+        test
+        ${LIBYUV_DIR}/libs/${ANDROID_ABI}/include
+)
 
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
@@ -84,6 +91,14 @@ set_target_properties(x264 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI
 add_library(fdk-aac SHARED IMPORTED )
 set_target_properties(fdk-aac PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfdk-aac.so)
 
+add_library(libyuv
+        SHARED
+        IMPORTED)
+
+set_target_properties(libyuv
+        PROPERTIES IMPORTED_LOCATION
+        ${LIBYUV_DIR}/libs/${ANDROID_ABI}/libyuv.so)
+
 find_library(log-lib log )
 
 find_library(OpenSLES-lib OpenSLES)
@@ -96,7 +111,9 @@ set(third-party-libs
         swresample
         swscale
         mp3
-        x264)
+        x264
+        libyuv
+        )
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this

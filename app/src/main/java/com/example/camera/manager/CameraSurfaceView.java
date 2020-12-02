@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -87,6 +88,7 @@ public class CameraSurfaceView extends FrameLayout implements CameraSurfaceListe
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         camera.addCallbackBuffer(data);
+//        Log.d("TAG", "onPreviewFrame: " + data.length +"listener:"+listener);
         //进行回调
         if (listener != null) {
             listener.onCallback(data);
@@ -101,7 +103,7 @@ public class CameraSurfaceView extends FrameLayout implements CameraSurfaceListe
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if (mHolderCall != null) mHolderCall.surfaceChanged(holder,format,width,height);
+        if (mHolderCall != null) mHolderCall.surfaceChanged(holder, format, width, height);
     }
 
     @Override

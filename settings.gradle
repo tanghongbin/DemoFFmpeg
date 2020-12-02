@@ -1,2 +1,2 @@
 rootProject.name='DemoC'
-include ':app'
+include ':app', ':libyuv-single'

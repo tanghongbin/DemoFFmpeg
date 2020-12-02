@@ -26,7 +26,7 @@ void AudioRecordPlayHelper::startCapture(FFmpegEncodeAVToMp4 *encodeInstance) {
             variable.wait(lock);
         }
         lock.unlock();
-        LOGCATE("i'm recording audio");
+//        LOGCATE("i'm recording audio");
         samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);
 //        LOGCATE("capture audio data success :%d",samples);
         if (samples < 0) {
@@ -53,12 +53,13 @@ void AudioRecordPlayHelper::startCapture() {
 
     OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(SAMPLERATE, CHANNELS, CHANNELS,
                                                                FRAME_SIZE);
+    LOGCATE("log capture size:%d",BUFFER_SIZE);
     int samples;
     uint8_t buffer[BUFFER_SIZE];
     g_loop_exit = 0;
     FFmpegEncodeAudio::getInstance()->init();
     while (!g_loop_exit) {
-        LOGCATE("i'm recording audio");
+//        LOGCATE("i'm recording audio");
         samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);
 //        LOGCATE("capture audio data success :%d",samples);
         if (samples < 0) {

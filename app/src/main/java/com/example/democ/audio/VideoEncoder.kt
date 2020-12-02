@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.democ.CustomSurfaceView
 import com.example.democ.MainActivity.Companion.log
+import com.example.democ.utils.TimeTracker
 import java.io.IOException
 import java.util.*
 
@@ -20,7 +21,7 @@ import java.util.*
  * 文件
  *
  **/
-object EncodeManager {
+class VideoEncoder {
 
 
     private lateinit var mediaCodec: MediaCodec
@@ -32,13 +33,14 @@ object EncodeManager {
     var trackId:Int = 0
     var thread:Thread? =null
 
-
+    fun setDimensions(width:Int,height:Int){
+        mWidth = width
+        mHeight = height
+    }
 
 
     private fun initMediaCodec() {
-        yuv420spsrc = ByteArray(1920*1080*3/2)
-        mWidth = CustomSurfaceView.mSize!!.width
-        mHeight = CustomSurfaceView.mSize!!.height
+        yuv420spsrc = ByteArray(mWidth*mHeight*3/2)
         val size = mWidth * mHeight * 3 / 2
         log("width:${mWidth} --mHeight:${mHeight} 分配内存大小:${size}")
 //        yuv420spsrc = ByteArray(size)
@@ -90,7 +92,7 @@ object EncodeManager {
                 mediaCodec.stop()
                 mediaCodec.release()
             }
-            MuxerManager.getInstance().stop()
+        log("video encode thread has finished")
     }
 
 
@@ -101,6 +103,7 @@ object EncodeManager {
             override fun run() {
                 val startTime = System.nanoTime()
                 while (!isClosed) {
+                    val startTestTime =  TimeTracker.trackBegin()
                     val bufferId = mediaCodec.dequeueInputBuffer(-1)
                     if (bufferId > 0) {
                         val byteBuffer = mediaCodec.getInputBuffer(bufferId)
@@ -127,6 +130,7 @@ object EncodeManager {
                         trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
                         MuxerManager.getInstance().start()
                     }
+                    TimeTracker.trackEnd(startTestTime)
                 }
                 log("encode finished")
             }
@@ -134,6 +138,7 @@ object EncodeManager {
     }
 
     fun saveVideoByte(byteArray: ByteArray?){
+//        log("put every frame data:${byteArray?.size}")
         videoByteList.add(byteArray)
     }
 

@@ -13,11 +13,11 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     lateinit var render:FFmpegRender
     private val mPlayPath:String by lazy {
-       val result =  if (intent.getStringExtra("path").isNullOrBlank()) MuxerManager.MP4_PLAY_PATH
-        else intent.getStringExtra("path")
-        result
-//       val result =  SpUtils.getString("url")
-//        result ?: ""
+//       val result =  if (intent.getStringExtra("path").isNullOrBlank()) MuxerManager.MP4_PLAY_PATH
+//        else intent.getStringExtra("path")
+//        result
+       val result =  SpUtils.getString("url")
+        result ?: ""
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

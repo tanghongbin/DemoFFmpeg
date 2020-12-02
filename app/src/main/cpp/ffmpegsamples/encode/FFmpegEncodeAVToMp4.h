@@ -38,7 +38,6 @@ private:
     AVPacket *packetA;
     AVStream *oStreamA;
     uint8_t *frame_bufferA;
-    int pts_frame_indexA = 0;
 
 
     bool mHasInitSuccess = false;

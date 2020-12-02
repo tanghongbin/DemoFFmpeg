@@ -52,14 +52,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 recorder.startCapture()
                 encoder.open()
                 Thread(getEncodeTask()).start()
-                EncodeManager.startEncode()
+//                VideoEncoder.startEncode()
             }
         }
         stop.setOnClickListener {
             mSurface.onDestroy()
             encoder.close()
             recorder.stopCapture()
-            EncodeManager.stopEncode()
+//            VideoEncoder.stopEncode()
             mTestStart = false
         }
 
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     fun getEncodeTask() = Runnable {
         while (mTestStart) {
-            encoder.retrieve()
+//            encoder.retrieve()
         }
         encoder.close()
     }

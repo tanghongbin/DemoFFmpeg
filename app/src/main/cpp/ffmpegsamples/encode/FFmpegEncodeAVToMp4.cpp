@@ -140,7 +140,6 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
         }
         frameA->data[0] = out[0];
         frameA->data[1] = out[1];
-        frameA->pts = pts_frame_indexA;
 
         ret = avcodec_send_frame(codeCtxA, frameA);
         if (ret < 0) {
@@ -156,11 +155,11 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
                 goto EndEncode;
             }
             if (packetA->pts == AV_NOPTS_VALUE){
-                LOGCATE("no pts value");
+//                LOGCATE("no pts value");
             }
             if (packetA->dts == AV_NOPTS_VALUE){
-                LOGCATE("no dts value");
-                packetA->dts = packetA->pts;
+//                LOGCATE("no dts value");
+//                packetA->dts = packetA->pts;
             }
             packetA->stream_index = oStreamA->index;
 
@@ -171,8 +170,6 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
                 goto EndEncode;
             }
             av_packet_unref(packetA);
-            LOGCATE("encode success one frame:%d",pts_frame_indexA);
-            pts_frame_indexA++;
         }
 
         EndEncode:
@@ -198,6 +195,7 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
         int64_t calc_duration =
                 (double) AV_TIME_BASE / av_q2d(codeCtxV->framerate);
         //Parameters
+        frameV->pkt_duration = calc_duration;
         frameV->pts = pts_frame_indexV;
 
         LOGCATE("frame -> pts = %lld  duration:%lld",frameV->pts,calc_duration);
@@ -243,7 +241,6 @@ int FFmpegEncodeAVToMp4::initEncodeAudio(){
     }
     AVOutputFormat *ofmt = ofmtctx->oformat;
     codecA = avcodec_find_encoder(ofmt->audio_codec);
-//    codec = avcodec_find_encoder_by_name("libfdk_aac");
     if (!codecA) {
         LOGCATE("can't find encoder");
         return ret;
@@ -309,7 +306,9 @@ int FFmpegEncodeAVToMp4::initEncodeVideo() {
 
     AVOutputFormat *ofmt = ofmtctx->oformat;
     /* find the mpeg1video encoder */
-    codecV = avcodec_find_encoder(ofmt->video_codec);
+//    codecV = avcodec_find_encoder(ofmt->video_codec);
+    codecV = avcodec_find_encoder_by_name("h264_mediacodec");
+
     if (!codecV) {
         LOGCATE("Codec not found");
         exit(1);
@@ -421,18 +420,24 @@ int FFmpegEncodeAVToMp4::initEncodeVideo() {
 void FFmpegEncodeAVToMp4::configAudioEncodeParams(AVCodecContext *pContext, AVCodec *codec) {
     pContext->codec_id = codec->id;
     pContext->codec_type = AVMEDIA_TYPE_AUDIO;
-    pContext->bit_rate = 64000;
+    pContext->sample_fmt = AV_SAMPLE_FMT_FLTP;
+    pContext->sample_rate = 44100;
+
+    pContext->channel_layout = AV_CH_LAYOUT_STEREO;
+    pContext->channels = av_get_channel_layout_nb_channels(pContext->channel_layout);
+    pContext->bit_rate = 96000;
+    pContext->profile = FF_PROFILE_AAC_MAIN;
+    pContext->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
 //    AV_CODEC_ID_MP2
     // sample_fmt 二者选1
 //    pContext->sample_fmt = AV_SAMPLE_FMT_S16; // 不支持
-    pContext->sample_fmt = AV_SAMPLE_FMT_FLTP;
-    if (!check_sample_fmt(codec,pContext->sample_fmt)){
+
+    if (!check_sample_fmt(codec, pContext->sample_fmt)) {
         LOGCATE("this sample format is not support");
     }
-    /* select other audio parameters supported by the encoder */
-    pContext->sample_rate = select_sample_rate(codec);
-    pContext->channel_layout = select_channel_layout(codec);
-    pContext->channels = av_get_channel_layout_nb_channels(pContext->channel_layout);
+    if (ofmtctx->oformat->flags & AVFMT_GLOBALHEADER) {
+        pContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    }
 
     LOGCATE("look encode bit_rate:%jd sample_rate:%d  channel_layout:%jd channels:%d",
             pContext->bit_rate,
@@ -456,7 +461,6 @@ int FFmpegEncodeAVToMp4::check_sample_fmt(const AVCodec *codec, enum AVSampleFor
 void FFmpegEncodeAVToMp4::configFrameParams(AVFrame *pFrame, AVCodecContext *pContext) {
     pFrame->nb_samples = pContext->frame_size;
     pFrame->format = pContext->sample_fmt;
-    pFrame->channel_layout = pContext->channel_layout;
 
 }
 

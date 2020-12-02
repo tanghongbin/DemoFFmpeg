@@ -4,6 +4,7 @@ import android.media.MediaCodec
 import android.media.MediaFormat
 import android.media.MediaMuxer
 import android.os.Environment
+import com.example.democ.utils.getRandomStr
 import java.io.File
 import java.nio.ByteBuffer
 
@@ -45,7 +46,8 @@ class MuxerManager {
 //        }
 //        val result = file.createNewFile()
 //        log("文件创建结果:${result}")
-        muxer = MediaMuxer(MP4_PATH, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+        val path = getRandomStr("hwencodemp4/",".mp4")
+        muxer = MediaMuxer(path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
 //        log("初始化成功")
     }
 
@@ -55,6 +57,7 @@ class MuxerManager {
 
 
     fun writeSampleData(trackIndex:Int,byteBuffer: ByteBuffer,bufferInfo: MediaCodec.BufferInfo){
+//        log("i'm writeSampleData processing")
         muxer.writeSampleData(trackIndex,byteBuffer,bufferInfo)
     }
 
@@ -74,6 +77,8 @@ class MuxerManager {
     }
 
     fun stop() {
+        isStarted = false
+        count = 0
         muxer.stop()
         muxer.release()
         instance1 = null

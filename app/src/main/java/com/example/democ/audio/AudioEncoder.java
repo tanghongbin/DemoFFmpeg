@@ -145,7 +145,7 @@ public class AudioEncoder {
         });
     }
 
-    public synchronized boolean retrieve() {
+    private synchronized boolean retrieve() {
         if (!mIsOpened) {
             return false;
         }
@@ -158,16 +158,21 @@ public class AudioEncoder {
                 ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
                 outputBuffer.position(bufferInfo.offset);
                 outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                outputBuffer.position(bufferInfo.offset);
-                outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                byte[] frame = new byte[bufferInfo.size];
-                outputBuffer.get(frame);
-                mAudioEncodedListener.onFrameEncoded(frame,bufferInfo.presentationTimeUs);
-                log(TAG,"encoder retrieve data buffer " + bufferInfo.size);
+//                outputBuffer.position(bufferInfo.offset);
+//                outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+//                byte[] frame = new byte[bufferInfo.size];
+//                outputBuffer.get(frame);
+                // 写入混合流中
+                if (MuxerManager.Companion.getInstance().isReady() && outputBuffer != null){
+                    MuxerManager.Companion.getInstance().writeSampleData(trackId,outputBuffer,bufferInfo);
+//                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
+                }
+//                mAudioEncodedListener.onFrameEncoded(frame,bufferInfo.presentationTimeUs);
+//                log(TAG,"encoder retrieve data buffer " + bufferInfo.size);
                 mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
             } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
-//                trackId = MuxerManager.Companion.getInstance().addTrack(mMediaCodec.getOutputFormat());
-//                MuxerManager.Companion.getInstance().start();
+                trackId = MuxerManager.Companion.getInstance().addTrack(mMediaCodec.getOutputFormat());
+                MuxerManager.Companion.getInstance().start();
             }
         } catch (Throwable t) {
             t.printStackTrace();

@@ -16,7 +16,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-public class AudioCapturer {
+public class AudioRecorder {
 
     private static final String TAG = "AudioCapturer";
 	

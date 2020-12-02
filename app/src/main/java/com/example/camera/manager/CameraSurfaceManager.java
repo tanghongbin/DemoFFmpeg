@@ -60,7 +60,6 @@ public class CameraSurfaceManager implements SensorEventListener, CameraYUVDataL
         mCameraSurfaceView = cameraSurfaceView;
         mCameraUtil = cameraSurfaceView.getCameraUtil();
         mCameraSurfaceView.setCameraYUVDataListener(this);
-
         mSensorManager = (SensorManager) DemoApplication.instance.getSystemService(SENSOR_SERVICE);
     }
 

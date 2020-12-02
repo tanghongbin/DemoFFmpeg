@@ -38,7 +38,7 @@ public:
     int encodeAudioFrame(uint8_t *audio_buffer, int length);
 
 private:
-    mutex mMutex;
+
     static FFmpegEncodeAudio *instance;
     AVCodec *codec;
     AVCodecContext *codecContext;
@@ -46,12 +46,11 @@ private:
     const char *out_file_name;
     AVFrame *frame;
     SwrContext *swr;
-    AVPacket *packet;
+    AVPacket packet;
     AVFormatContext *ofmtCtx;
     AVOutputFormat *ofmt;
     AVStream *oStream;
     uint8_t *frame_buffer;
-    int frame_index = 0;
 
     void configAudioEncodeParams(AVCodecContext *pContext, AVCodec *pCodec);
 
