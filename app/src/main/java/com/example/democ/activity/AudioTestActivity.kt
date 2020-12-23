@@ -32,7 +32,7 @@ class AudioTestActivity : AppCompatActivity() ,View.OnClickListener{
             R.id.mStart -> {
                 mAudioCapture.setOnAudioFrameCapturedListener {
                     log("capture success data:${it}")
-                    mAudioEncoder.encode(it,System.nanoTime()/1000)
+                    mAudioEncoder.encode(it)
                 }
                 mAudioEncoder.setAudioEncodedListener { encoded, presentationTimeUs ->
                     log("encode success data:${encoded}")
@@ -42,7 +42,7 @@ class AudioTestActivity : AppCompatActivity() ,View.OnClickListener{
                     log("decode success data:${decoded}")
                     mAudioPlayer.play(decoded,0,decoded.size)
                 }
-                mAudioEncoder.open()
+//                mAudioEncoder.open()
                 mAudioDecoder.open()
                 mAudioEncoder.startRunTask()
                 mAudioDecoder.startRunTask()

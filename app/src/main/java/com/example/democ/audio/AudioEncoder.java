@@ -18,17 +18,17 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
-import android.util.Log;
 
 import com.example.democ.MainActivity;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.LinkedBlockingDeque;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class AudioEncoder {
 
-    private static final String TAG = AudioEncoder.class.getSimpleName();
+    private static final String TAG = "TAG";
 
     private static final String DEFAULT_MIME_TYPE = "audio/mp4a-latm";
     private static final int DEFAULT_CHANNEL_NUM = 1;
@@ -37,23 +37,27 @@ public class AudioEncoder {
     private static final int DEFAULT_PROFILE_LEVEL = MediaCodecInfo.CodecProfileLevel.AACObjectLC;
     private static final int DEFAULT_MAX_BUFFER_SIZE = 16384;
 
+    private static final int MAX_BUFFER_SIZE = 100;
+
     private MediaCodec mMediaCodec;
     private OnAudioEncodedListener mAudioEncodedListener;
     private boolean mIsOpened = false;
     private Thread mThread;
+    private long lastTime = 0L;
+    private LinkedBlockingDeque<byte[]> mAudioBufferList = new LinkedBlockingDeque<byte[]>();
 
     public interface OnAudioEncodedListener {
         void onFrameEncoded(byte[] encoded, long presentationTimeUs);
     }
 
-    public boolean open() {
+    private boolean open() {
         if (mIsOpened) {
             return true;
         }
         return open(DEFAULT_SAMPLE_RATE, DEFAULT_CHANNEL_NUM, DEFAULT_BITRATE, DEFAULT_MAX_BUFFER_SIZE);
     }
 
-    public boolean open(int samplerate, int channels, int bitrate, int maxBufferSize) {
+    private boolean open(int samplerate, int channels, int bitrate, int maxBufferSize) {
         log(TAG, "open audio encoder: " + samplerate + ", " + channels + ", " + maxBufferSize);
         if (mIsOpened) {
             return true;
@@ -79,7 +83,8 @@ public class AudioEncoder {
         return true;
     }
 
-    public void startRunTask(){
+    public void startRunTask() {
+        open();
         mThread = getRetrieveTask();
         mThread.start();
     }
@@ -90,6 +95,13 @@ public class AudioEncoder {
             return;
         }
         mIsOpened = false;
+        try {
+            mThread.interrupt();
+            mThread.join(1000);
+            mThread = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mThread = null;
         mMediaCodec.stop();
         mMediaCodec.release();
@@ -105,83 +117,81 @@ public class AudioEncoder {
         mAudioEncodedListener = listener;
     }
 
-    public synchronized boolean encode(byte[] input, long presentationTimeUs) {
-        Log.d(TAG, "encode: " + presentationTimeUs);
+    public boolean encode(byte[] input) {
         if (!mIsOpened) {
             return false;
         }
 
-        try {
-            ByteBuffer[] inputBuffers = mMediaCodec.getInputBuffers();
-            int inputBufferIndex = mMediaCodec.dequeueInputBuffer(1000);
-            if (inputBufferIndex >= 0) {
-                ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
-                inputBuffer.clear();
-                inputBuffer.put(input);
-                mMediaCodec.queueInputBuffer(inputBufferIndex, 0, input.length, presentationTimeUs, 0);
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return false;
+        if (mAudioBufferList.size() > MAX_BUFFER_SIZE) {
+            mAudioBufferList.poll();
         }
-//        log(TAG, "encode -");
+        //noinspection unchecked
+        mAudioBufferList.offerLast(input);
         return true;
     }
+
     private int trackId;
 
-    private Thread getRetrieveTask(){
+    private Thread getRetrieveTask() {
         return new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    while (isOpened()){
-                        retrieve();
-                    }
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-                log("","encode task finished");
+                retrieveLoop();
+                log("", "audio encode has finished");
             }
         });
     }
 
-    private synchronized boolean retrieve() {
-        if (!mIsOpened) {
-            return false;
-        }
+    private void retrieveLoop() {
 
-        try {
-            ByteBuffer[] outputBuffers = mMediaCodec.getOutputBuffers();
-            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-            int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 1000);
-            if (outputBufferIndex >= 0) {
-                ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-                outputBuffer.position(bufferInfo.offset);
-                outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+        long startTime = System.nanoTime();
+        while (isOpened()) {
+            try {
+                log("TAG","i'm looping to encode");
+                byte[] input = mAudioBufferList.take();
+                log("TAG","has get input array");
+                int inputBufferIndex = mMediaCodec.dequeueInputBuffer(1000);
+                if (inputBufferIndex >= 0) {
+                    ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(inputBufferIndex);
+                    inputBuffer.clear();
+                    inputBuffer.put(input);
+                    mMediaCodec.queueInputBuffer(inputBufferIndex, 0, input.length,
+                            (System.nanoTime() - startTime) / 1000, 0);
+                }
+//        log(TAG, "encode -");
+
+                log("TAG","has get encode input array");
+                MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+                int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 1000);
+                if (outputBufferIndex > 0) {
+                    ByteBuffer outputBuffer = mMediaCodec.getOutputBuffer(outputBufferIndex);
+                    outputBuffer.position(bufferInfo.offset);
+                    outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
 //                outputBuffer.position(bufferInfo.offset);
 //                outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
 //                byte[] frame = new byte[bufferInfo.size];
 //                outputBuffer.get(frame);
-                // 写入混合流中
-                if (MuxerManager.Companion.getInstance().isReady() && outputBuffer != null){
-                    MuxerManager.Companion.getInstance().writeSampleData(trackId,outputBuffer,bufferInfo);
-//                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
-                }
+                    // 写入混合流中
+                    if (MuxerManager.Companion.getInstance().isReady()) {
+                        MuxerManager.Companion.getInstance().writeSampleData(trackId, outputBuffer, bufferInfo);
+                        log("TAG", "音频写入数据:" + trackId + "   buffer:" + outputBuffer);
+                    }
+                    log("TAG","has get encode out array and write");
 //                mAudioEncodedListener.onFrameEncoded(frame,bufferInfo.presentationTimeUs);
 //                log(TAG,"encoder retrieve data buffer " + bufferInfo.size);
-                mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
-            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
-                trackId = MuxerManager.Companion.getInstance().addTrack(mMediaCodec.getOutputFormat());
-                MuxerManager.Companion.getInstance().start();
+                    mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+                } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                    trackId = MuxerManager.Companion.getInstance().addTrack(mMediaCodec.getOutputFormat());
+                    MuxerManager.Companion.getInstance().start();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return false;
         }
-        return true;
+
     }
 
-    private void log(String tag,String str){
+    private void log(String tag, String str) {
         MainActivity.Companion.log(str);
     }
 }

@@ -2,24 +2,18 @@ package com.example.democ.ffmpeg
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.MediaMuxer
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.audio.MuxerManager
-import com.example.democ.audio.MuxerManager.Companion.SWS_CONVERT_PNG
 import com.example.democ.audio.log
-import com.example.democ.opengles.NativeRender
 import com.example.democ.render.FFmpegRender
+import com.example.democ.utils.Constants
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode.*
 import kotlinx.coroutines.*
 import java.io.File
-import java.io.FileInputStream
 import java.util.*
 
 /**
@@ -46,7 +40,7 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
         button.setOnClickListener {
             mImage.setImageDrawable(null)
             val start = System.currentTimeMillis();
-            val path = render.encodeYuvToImage(MuxerManager.YUV_PATH)
+            val path = render.encodeYuvToImage(Constants.YUV_PATH)
             log("打印返回的地址:${path} 耗时:${System.currentTimeMillis() - start}")
             mImage.setImageURI(Uri.fromFile(File(path)))
         }
@@ -55,7 +49,7 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
             mImage.setImageDrawable(null)
             val start = System.currentTimeMillis();
 //            render.swsPng()
-            mImage.setImageURI(Uri.fromFile(File(SWS_CONVERT_PNG)))
+            mImage.setImageURI(Uri.fromFile(File(Constants.SWS_CONVERT_PNG)))
         }
 
         button3.setOnClickListener {
@@ -79,7 +73,7 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
                     }
                 }, 0, 1000)
 //                val path = MuxerManager.MP4_PLAY_BIG_PATH
-                val path = MuxerManager.FLV_DOWNLOAD_MY_LOGO
+                val path = Constants.FLV_DOWNLOAD_MY_LOGO
 //                val path = MuxerManager.MP4_DOWNLOAD_FUNNY_VIDEO
 //                val path = MuxerManager.MP4_PLAY_PATH
                 val resultPath = render.native_changeOutputFormat(path)
@@ -108,7 +102,7 @@ class FFmpegConvertYuvActivity : AppCompatActivity() {
             //            val path = MuxerManager.MP4_PLAY_BIG_PATH
 //            val path = MuxerManager.FLV_DOWNLOAD_MY_LOGO
 //                val path = MuxerManager.MP4_DOWNLOAD_FUNNY_VIDEO
-            val path = MuxerManager.MP4_PLAY_PATH
+            val path = Constants.MP4_PLAY_PATH
             render.splitAudioAndVideo(path)
         }
 

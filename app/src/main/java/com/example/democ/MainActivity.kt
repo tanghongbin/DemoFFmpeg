@@ -46,11 +46,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 MuxerManager.getInstance().init()
                 recorder.mListener = object : ByteBufferListener{
                     override fun listener(buffer: ByteArray) {
-                        encoder.encode(buffer,(System.nanoTime() - start)/1000)
+                        encoder.encode(buffer)
                     }
                 }
                 recorder.startCapture()
-                encoder.open()
+//                encoder.open()
                 Thread(getEncodeTask()).start()
 //                VideoEncoder.startEncode()
             }

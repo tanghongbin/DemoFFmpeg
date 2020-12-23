@@ -7,6 +7,7 @@ import com.example.democ.R
 import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.log
 import com.example.democ.getAppContext
+import com.example.democ.utils.Constants
 import java.nio.ByteBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -35,7 +36,7 @@ class FFmpegOpenGLRender : GLSurfaceView.Renderer{
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         native_OnSurfaceCreated()
 //        setImageByType(1)
-        val url = MuxerManager.MP4_PLAY_BIG_PATH
+        val url = Constants.MP4_PLAY_BIG_PATH
 //        val url = MuxerManager.MP4_PLAY_PATH
         // 1-音屏（不用指定），2-视频，3-yuv视频-不设置，4-opengl渲染
         playMP4(url,null,4)

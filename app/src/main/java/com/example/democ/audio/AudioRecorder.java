@@ -18,7 +18,7 @@ import android.util.Log;
 
 public class AudioRecorder {
 
-    private static final String TAG = "AudioCapturer";
+    private static final String TAG = "AudioRecorder";
 	
     private static final int DEFAULT_SOURCE = MediaRecorder.AudioSource.MIC;
     private static final int DEFAULT_SAMPLE_RATE = 44100;

@@ -1,12 +1,15 @@
 package com.example.democ.ffmpeg
 
+import android.app.ActivityManager
+import android.app.ActivityManager.RunningAppProcessInfo
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.hwencoder.FFmpegHwEncodeMuxerActivity
 import kotlinx.android.synthetic.main.activity_splash.*
+
 
 class FFmpegNavigationActivity : AppCompatActivity() {
 
@@ -42,6 +45,7 @@ class FFmpegNavigationActivity : AppCompatActivity() {
         FFmpegEncodeAVToMp4Activity::class.java,
         FFmpegHwEncodeMuxerActivity::class.java
     )
+
 
 
 }

@@ -5,11 +5,10 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.democ.CustomSurfaceView
 import com.example.democ.MainActivity.Companion.log
-import com.example.democ.utils.TimeTracker
+import com.libyuv.util.YuvUtil
 import java.io.IOException
-import java.util.*
+import java.util.concurrent.LinkedBlockingDeque
 
 /**
  *
@@ -24,29 +23,39 @@ import java.util.*
 class VideoEncoder {
 
 
+    companion object{
+        private final const val MAX_SIZE = 100
+    }
+
     private lateinit var mediaCodec: MediaCodec
     private lateinit var yuv420spsrc: ByteArray
     private var mWidth = 0
     private var mHeight = 0
     private var isClosed = false
-    private val videoByteList = LinkedList<ByteArray?>()
-    var trackId:Int = 0
-    var thread:Thread? =null
+    private var hasSetOretation = false
+    private var mDegree: Int = 0
+    private val videoByteList = LinkedBlockingDeque<ByteArray?>()
+    var trackId: Int = 0
+    var thread: Thread? = null
+    var startTime = 0L
 
-    fun setDimensions(width:Int,height:Int){
+    fun setDimensions(width: Int, height: Int) {
         mWidth = width
         mHeight = height
     }
 
+    fun setDegrees(degree: Int) {
+        hasSetOretation = true
+        mDegree = degree
+    }
+
 
     private fun initMediaCodec() {
-        yuv420spsrc = ByteArray(mWidth*mHeight*3/2)
-        val size = mWidth * mHeight * 3 / 2
-        log("width:${mWidth} --mHeight:${mHeight} 分配内存大小:${size}")
-//        yuv420spsrc = ByteArray(size)
+        yuv420spsrc = ByteArray(mWidth * mHeight * 3 / 2)
+        log("width:${mWidth} --mHeight:${mHeight} 分配内存大小:${mWidth * mHeight * 3 / 2}")
         //编码格式，AVC对应的是H264
         val mediaFormat =
-            MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, mWidth, mHeight)
+            MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, mHeight, mWidth)
         //YUV 420 对应的是图片颜色采样格式
         mediaFormat.setInteger(
             MediaFormat.KEY_COLOR_FORMAT,
@@ -64,11 +73,14 @@ class VideoEncoder {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+//        configAsync()
         //进入配置状态
         mediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
         //进行生命周期执行状态
         mediaCodec.start()
     }
+
+
 
 
     fun startEncode() {
@@ -78,77 +90,181 @@ class VideoEncoder {
         thread?.start()
     }
 
-    fun stopEncode(){
+    fun stopEncode() {
         isClosed = true
-            try {
-                thread?.join(1000)
-            } catch (e: InterruptedException) {
-                log("InterruptedException $e")
-            }
-            log(
-                " EncodeThread isAlive: " + thread?.isAlive
-            )
-            if (mediaCodec != null) {
-                mediaCodec.stop()
-                mediaCodec.release()
-            }
+        log("当前列表剩余:${videoByteList.size}")
+//        videoByteList.clear()
+        try {
+            thread?.interrupt()
+            thread?.join(1000)
+        } catch (e: InterruptedException) {
+            log("InterruptedException $e")
+        }
+        log(
+            " EncodeThread isAlive: " + thread?.isAlive
+        )
+        if (mediaCodec != null) {
+            mediaCodec.stop()
+            mediaCodec.release()
+        }
         log("video encode thread has finished")
     }
 
+    private fun configAsync() {
+        mediaCodec.setCallback(object : MediaCodec.Callback() {
+            override fun onOutputBufferAvailable(
+                codec: MediaCodec,
+                outputId: Int,
+                info: MediaCodec.BufferInfo) {
+                val byteBuffer = codec.getOutputBuffer(outputId)
+                val byteArray = ByteArray(info.size)
+                byteBuffer?.get(byteArray)
+                byteBuffer?.position(info.offset)
+                byteBuffer?.limit(info.offset + info.size)
+                // 写入混合流中
+                if (MuxerManager.getInstance().isReady() && byteBuffer != null) {
+                    MuxerManager.getInstance().writeSampleData(trackId, byteBuffer, info)
+//                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
+                }
+                //释放output buffer
+                codec.releaseOutputBuffer(outputId, false)
+            }
 
-    private fun innerThread():Thread{
+            override fun onInputBufferAvailable(codec: MediaCodec, bufferId: Int) {
+                val byteBuffer = codec.getInputBuffer(bufferId)
+                val inputBuff = getInputBuffer()
+                @Suppress("FoldInitializerAndIfToElvis")
+                if (inputBuff == null){
+                    log("get input buffer is null,must finished")
+                    return
+                }
+                byteBuffer?.put(inputBuff)
+                codec.queueInputBuffer(
+                    bufferId,
+                    0,
+                    inputBuff.size,
+                    (System.nanoTime() - startTime) ,
+                    0
+                )
+            }
+
+            override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
+                trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
+                MuxerManager.getInstance().start()
+            }
+
+            override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+                e.printStackTrace()
+                log("video encoder something error")
+            }
+        })
+        startTime = System.nanoTime()
+    }
+
+
+    private fun innerThread(): Thread {
         return object : Thread() {
 
             @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun run() {
                 val startTime = System.nanoTime()
                 while (!isClosed) {
-                    val startTestTime =  TimeTracker.trackBegin()
-                    val bufferId = mediaCodec.dequeueInputBuffer(-1)
-                    if (bufferId > 0) {
-                        val byteBuffer = mediaCodec.getInputBuffer(bufferId)
-                        val inputBuff = getInputBuffer() ?: break
-                        byteBuffer?.put(inputBuff)
-                        mediaCodec.queueInputBuffer(bufferId,0,inputBuff.size,(System.nanoTime() - startTime)/1000,0)
-                    }
-                    val info = MediaCodec.BufferInfo()
-                    val outputId = mediaCodec.dequeueOutputBuffer(info,0)
-                    if (outputId > 0){
-                        val byteBuffer = mediaCodec.getOutputBuffer(outputId)
-                        val byteArray = ByteArray(info.size)
-                        byteBuffer?.get(byteArray)
-                        byteBuffer?.position(info.offset)
-                        byteBuffer?.limit(info.offset + info.size)
-                        // 写入混合流中
-                        if (MuxerManager.getInstance().isReady() && byteBuffer != null){
-                            MuxerManager.getInstance().writeSampleData(trackId,byteBuffer,info)
-//                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
+//                    log("has encode video start")
+//                    TimeTracker.trackBegin()
+                    try {
+                        val bufferId = mediaCodec.dequeueInputBuffer(1000)
+                        if (bufferId > 0) {
+                            val byteBuffer = mediaCodec.getInputBuffer(bufferId)
+                            val inputBuff = getInputBuffer()
+                            @Suppress("FoldInitializerAndIfToElvis")
+                            if (inputBuff == null){
+                                log("get input buffer is null,must finished")
+                                break
+                            }
+                            byteBuffer?.put(inputBuff)
+                            mediaCodec.queueInputBuffer(
+                                bufferId,
+                                0,
+                                inputBuff.size,
+                                (System.nanoTime() - startTime) / 1000,
+                                0
+                            )
                         }
-                        //释放output buffer
-                        mediaCodec.releaseOutputBuffer(outputId, false)
-                    } else if (outputId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
-                        trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
-                        MuxerManager.getInstance().start()
+//                    log("has encode video middle")
+                        val info = MediaCodec.BufferInfo()
+                        val outputId = mediaCodec.dequeueOutputBuffer(info, 1000)
+                        if (outputId > 0) {
+                            val byteBuffer = mediaCodec.getOutputBuffer(outputId)
+                            val byteArray = ByteArray(info.size)
+                            byteBuffer?.get(byteArray)
+                            byteBuffer?.position(info.offset)
+                            byteBuffer?.limit(info.offset + info.size)
+                            // 写入混合流中
+                            if (MuxerManager.getInstance().isReady() && byteBuffer != null) {
+                                MuxerManager.getInstance().writeSampleData(trackId, byteBuffer, info)
+//                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
+                            }
+                            //释放output buffer
+                            mediaCodec.releaseOutputBuffer(outputId, false)
+                        } else if (outputId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                            trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
+                            MuxerManager.getInstance().start()
+                        }
+                    }catch (e:InterruptedException){
+                        e.printStackTrace()
                     }
-                    TimeTracker.trackEnd(startTestTime)
+//                    log("has encode video frame over")
+//                    TimeTracker.trackEnd()
                 }
-                log("encode finished")
+                log("encode video finished")
             }
         }
     }
 
-    fun saveVideoByte(byteArray: ByteArray?){
+    fun saveVideoByte(byteArray: ByteArray?) {
 //        log("put every frame data:${byteArray?.size}")
-        videoByteList.add(byteArray)
+        if (videoByteList.size > MAX_SIZE){
+            videoByteList.poll()
+        }
+        videoByteList.put(byteArray)
     }
 
 
     private fun getInputBuffer(): ByteArray? {
-        val input = videoByteList.poll()
-        NV21ToNV12(input, yuv420spsrc, mWidth, mHeight)
+        val input = videoByteList.take() ?: return null
+        //        val byteArray = ByteArray(mWidth * mHeight * 3 / 2)
+//        NV21ToNV12(input, yuv420spsrc, mWidth, mHeight)
+        nv212nv12(input, yuv420spsrc, mWidth, mHeight)
         return yuv420spsrc
     }
 
+    private fun nv212nv12(srcData: ByteArray?, dstData: ByteArray, mWidth: Int, mHeight: Int):Int {
+        if (srcData == null || dstData == null) {
+            return -1
+        }
+        val windowWidth = mWidth
+        val windowHeight = mHeight
+        val scaleHeight = mWidth
+        val scaleWidth = mHeight
+        val mOrientation = mDegree
+        if (!hasSetOretation) throw IllegalStateException("mDegree is invalid")
+//        log("srcData:${srcData?.size} dstData:${dstData?.size}")
+
+        YuvUtil.yuvCompress(
+            srcData,
+            windowWidth,
+            windowHeight,
+            dstData,
+            scaleHeight,
+            scaleWidth,
+            3,
+            mOrientation,
+            mOrientation == 270
+        )
+        return 0
+    }
+
+    @Deprecated("use c++ version")
     private fun NV21ToNV12(
         nv21: ByteArray?,
         nv12: ByteArray?,

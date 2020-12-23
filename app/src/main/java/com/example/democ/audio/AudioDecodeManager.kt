@@ -3,6 +3,7 @@ package com.example.democ.audio
 import android.media.*
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.democ.utils.Constants
 
 class AudioDecodeManager {
 
@@ -22,7 +23,7 @@ class AudioDecodeManager {
         mediaExtractor = MediaExtractor()
         //MP4 文件存放位置
         //MP4 文件存放位置
-        mediaExtractor?.setDataSource(MuxerManager.MP4_PLAY_PATH)
+        mediaExtractor?.setDataSource(Constants.MP4_PLAY_PATH)
         for (index in 0 until mediaExtractor!!.trackCount) {
             val trackFormat = mediaExtractor?.getTrackFormat(index)
             val mime: String = trackFormat!!.getString(MediaFormat.KEY_MIME)

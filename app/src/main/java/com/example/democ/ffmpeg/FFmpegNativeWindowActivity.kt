@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.SurfaceHolder
 import com.example.democ.R
 import com.example.democ.audio.MuxerManager
+import com.example.democ.audio.log
 import com.example.democ.render.FFmpegRender
+import com.example.democ.utils.Constants
 import com.example.democ.utils.SpUtils
 import kotlinx.android.synthetic.main.activity_f_fmpeg_native_window.*
 
@@ -16,8 +18,9 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 //       val result =  if (intent.getStringExtra("path").isNullOrBlank()) MuxerManager.MP4_PLAY_PATH
 //        else intent.getStringExtra("path")
 //        result
-       val result =  SpUtils.getString("url")
-        result ?: ""
+//       val result =  SpUtils.getString("url")
+//        result ?:
+        Constants.MP4_PLAY_PATH
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +41,7 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 //        val url = MuxerManager.ENCODE_VIDEO_PATH
 
         // 1-音频，2-视频
+        log("log play address :${mPlayPath}")
         render.playMP4(mPlayPath, holder?.surface)
     }
 }

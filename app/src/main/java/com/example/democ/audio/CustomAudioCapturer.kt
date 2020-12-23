@@ -25,11 +25,12 @@ class CustomAudioCapturer {
             return false
         }
         mMinBufferSize = AudioRecord.getMinBufferSize(DEFAULT_SAMPLE_RATE,DEFAULT_CHANNEL_CONFIG,DEFAULT_AUDIO_FORMAT)
+        mMinBufferSize = 4096
         if (mMinBufferSize == AudioRecord.ERROR_BAD_VALUE){
             log("invalid parameters")
             return false
         }
-        log("audioRecord minsize --$mMinBufferSize",tag = "Min")
+        log("audioRecord minsize --$mMinBufferSize")
         mAudio = AudioRecord(DEFAULT_SOURCE,DEFAULT_SAMPLE_RATE,DEFAULT_CHANNEL_CONFIG,DEFAULT_AUDIO_FORMAT,mMinBufferSize)
         if (mAudio?.state == AudioRecord.STATE_UNINITIALIZED){
             log("init error")
@@ -77,8 +78,9 @@ class CustomAudioCapturer {
                 AudioRecord.ERROR_BAD_VALUE -> log("error_bad_value")
                 else -> mListener?.listener(byteArray)
             }
+            log("has capture a frame audio")
         }
-        log("thread has terminated")
+        log("audio capture has finished")
     }
 
 }

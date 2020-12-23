@@ -5,7 +5,9 @@ import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
 import com.example.camera.manager.CameraSurfaceView
 import com.example.democ.audio.*
+import com.example.democ.utils.TimeTracker
 import com.libyuv.util.YuvUtil
+import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.*
 import java.lang.IllegalStateException
 
 /**
@@ -41,16 +43,14 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
     fun startRecord() {
         if (!mInited) throw IllegalStateException("you must call init() before startRecord()")
         if (mTestStart) return
-        val start = System.nanoTime()
         mTestStart = true
         MuxerManager.getInstance().init()
         mAudioRecorder.mListener = object : ByteBufferListener {
             override fun listener(buffer: ByteArray) {
-                mAudioEncoder.encode(buffer, (System.nanoTime() - start) / 1000)
+                mAudioEncoder.encode(buffer)
             }
         }
         mAudioRecorder.startCapture()
-        mAudioEncoder.open()
         mAudioEncoder.startRunTask()
         mVideoEncoder.startEncode()
         log("already start record")
@@ -58,17 +58,20 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
 
     fun stopRecord() {
         mTestStart = false
-        mAudioEncoder.close()
-        mAudioRecorder.stopCapture()
+
         mVideoEncoder.stopEncode()
+        mAudioRecorder.stopCapture()
+        mAudioEncoder.close()
         MuxerManager.getInstance().stop()
         log("already stop record")
     }
 
-    override fun onCallback(data: ByteArray?) {
+    override fun onCallback(srcData: ByteArray?) {
 //        log("callback every data:${mTestStart} size:${data?.size}")
-        if (!mTestStart) return
-        mVideoEncoder.saveVideoByte(data)
+//        TimeTracker.trackBegin()
+
+        mVideoEncoder.saveVideoByte(srcData)
+//        TimeTracker.trackEnd()
     }
 
 
@@ -87,6 +90,7 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
             cameraSurfaceView.cameraUtil.cameraWidth,
             cameraSurfaceView.cameraUtil.cameraHeight
         )
+        mVideoEncoder.setDegrees(cameraSurfaceView.cameraUtil.morientation)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {

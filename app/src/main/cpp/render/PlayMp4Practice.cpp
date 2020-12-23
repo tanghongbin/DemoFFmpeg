@@ -43,7 +43,8 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
     int stream_index = -1;
     AVCodecContext *codecContext;
 
-    LOGCATE("native print play url:%s", pPractice->mUrl);
+    ret = avformat_network_init();
+    LOGCATE("native print play url:%s network register result:%d", pPractice->mUrl,ret);
     avFormatContext = avformat_alloc_context();
     if (!avFormatContext) {
         LOGCATE("avformat alloc failed");
@@ -111,6 +112,7 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
     avformat_close_input(&avFormatContext);
     avcodec_free_context(&codecContext);
     avformat_free_context(avFormatContext);
+    avformat_network_deinit();
     LOGCATE("free all context over");
 }
 
