@@ -25,7 +25,7 @@
 #include <swscale/ConvertMp4ToFlv.h>
 #include <muxer/CustomDemuxer.h>
 #include <muxer/CustomMuxer.h>
-#include <SingleNodeList.h>
+//#include "../../../../old_files/SingleNodeList.hpp"
 #include <TimeTracker.h>
 #include <encode/FFmpegEncodeAVToMp4.h>
 
@@ -33,18 +33,16 @@
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
 
 
-void addNum(SingleNodeList *nodeList);
-
-void addNum(SingleNodeList *nodeList) {
-    const char *array[12] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
-    for (int i = 0; i < 500; ++i) {
-        int index = i % 10;
-        const char *tem = array[index];
-        CustomNode *newNode = new CustomNode;
-        newNode->point = tem;
-        nodeList->pushLast(newNode);
-    }
-}
+//void addNum(SingleNodeList<const char *> *nodeList);
+//
+//void addNum(SingleNodeList<const char *> *nodeList) {
+//    const char *array[12] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
+//    for (int i = 0; i < 500; ++i) {
+//        int index = i % 10;
+//        const char *tem = array[index];
+//        nodeList->pushLast(tem);
+//    }
+//}
 
 #ifdef __cplusplus
 
@@ -127,6 +125,10 @@ JNIEXPORT jstring JNICALL native_addFilterToYuv(JNIEnv *env, jobject instance, j
 
 JNIEXPORT jstring JNICALL encodeYuvToImage(JNIEnv *env, jobject instance, jstring jstring1) {
     return getJstringFromCharStr(env, EncodeYuvToJpg::encode(getCharStrFromJstring(env, jstring1)));
+}
+
+JNIEXPORT jstring JNICALL native_getSimpleInfo(JNIEnv *env, jobject instance) {
+    return getJstringFromCharStr(env,avformat_configuration());
 }
 
 //JNIEXPORT void JNICALL swsPng(JNIEnv *env, jobject instance) {
@@ -231,28 +233,28 @@ JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
     FFmpegEncodeVideo::destroyInstance();
 }
 
-SingleNodeList *listHelper;
+//SingleNodeList< const char *> *listHelper;
 
 JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
-    if (!listHelper) listHelper = new SingleNodeList;
-
-    TimeTracker::trackBegin();
-    std::thread *thread1 = new std::thread(addNum, listHelper);
-    std::thread *thread2 = new std::thread(addNum, listHelper);
-
-    thread1->join();
-    thread2->join();
-
-    int start = 1;
-    while (listHelper->popFirst()) {
-        start++;
-    }
-    TimeTracker::trackOver();
-    LOGCATE("this is times:%d", start);
-    if (listHelper) {
-        delete listHelper;
-        listHelper = nullptr;
-    }
+//    if (!listHelper) listHelper = new SingleNodeList<const char * >();
+//
+//    TimeTracker::trackBegin();
+//    std::thread *thread1 = new std::thread(addNum, listHelper);
+//    std::thread *thread2 = new std::thread(addNum, listHelper);
+//
+//    thread1->join();
+//    thread2->join();
+//
+//    int start = 1;
+//    while (listHelper->popFirst()) {
+//        start++;
+//    }
+//    TimeTracker::trackOver();
+//    LOGCATE("this is times:%d", start);
+//    if (listHelper) {
+//        delete listHelper;
+//        listHelper = nullptr;
+//    }
 
 }
 
@@ -310,7 +312,7 @@ JNIEXPORT void JNICALL native_encodeavmuxer_encodeFrame(JNIEnv *env, jobject ins
 }
 
 JNIEXPORT jstring JNICALL native_unInitRecordMp4(JNIEnv *env, jobject instance) {
-    jstring result = getJstringFromCharStr(env,FFmpegEncodeAVToMp4::getInstance()->out_file_name);
+    jstring result = getJstringFromCharStr(env, FFmpegEncodeAVToMp4::getInstance()->out_file_name);
     FFmpegEncodeAVToMp4::getInstance()->unInitAvEncoder();
     FFmpegEncodeAVToMp4::destroyInstance();
     return result;
@@ -359,8 +361,9 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_startEncode",                    "()V",                                         (void *) (native_startEncode)},
         {"native_encodeFrame",                    "([B)V",                                       (void *) (native_encodeFrame)},
         {"encodeYuvToImage",                      "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (encodeYuvToImage)},
-        {"native_addFilterToYuv",                 "(Ljava/lang/String;)Ljava/lang/String;",
-                                                                                                 (void *) (native_addFilterToYuv)},
+        {"native_addFilterToYuv",                 "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_addFilterToYuv)},
+        {"native_getSimpleInfo",                  "()Ljava/lang/String;",                        (void *) (native_getSimpleInfo)},
+
 
         {"native_audioTest",                      "(I)V",                                        (void *) (native_audioTest)},
         {"native_unInit",                         "()V",                                         (void *) (native_unInit)},
@@ -368,7 +371,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_startrecordmp4",                 "()V",                                         (void *) (native_startrecordmp4)},
         {"native_stoprecordmp4",                  "()V",                                         (void *) (native_stoprecordmp4)},
 
-        {"native_unInitRecordMp4",                "()Ljava/lang/String;",                                         (void *) (native_unInitRecordMp4)},
+        {"native_unInitRecordMp4",                "()Ljava/lang/String;",                        (void *) (native_unInitRecordMp4)},
         {"playMP4",                               "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)},
         {"native_encodeavmuxer_OnSurfaceCreated", "()V",                                         (void *) (native_encodeavmuxer_OnSurfaceCreated)},
         {"native_encodeavmuxer_OnSurfaceChanged", "(II)V",                                       (void *) (native_encodeavmuxer_OnSurfaceChanged)},

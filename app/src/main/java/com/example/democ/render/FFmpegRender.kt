@@ -94,6 +94,8 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_encodeavmuxer_encodeFrame(byteArray: ByteArray)
 
+    external fun native_getSimpleInfo():String
+
     //混合音视频
 //    external fun muxAv()
 

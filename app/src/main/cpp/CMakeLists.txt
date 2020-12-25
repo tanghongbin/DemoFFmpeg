@@ -100,6 +100,30 @@ set_target_properties(fdk-aac PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_
 #        PROPERTIES IMPORTED_LOCATION
 #        ${LIBYUV_DIR}/libs/${ANDROID_ABI}/libyuv.so)
 
+# ass crypto expat fontconfig freetype fribidi ssl
+
+add_library(crypto SHARED IMPORTED )
+set_target_properties(crypto PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libcrypto.so)
+
+add_library(expat SHARED IMPORTED )
+set_target_properties(expat PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libexpat.so)
+
+add_library(fontconfig SHARED IMPORTED )
+set_target_properties(fontconfig PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfontconfig.so)
+
+add_library(freetype SHARED IMPORTED )
+set_target_properties(freetype PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfreetype.so)
+
+add_library(fribidi SHARED IMPORTED )
+set_target_properties(fribidi PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfribidi.so)
+
+add_library(ssl SHARED IMPORTED )
+set_target_properties(ssl PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libssl.so)
+
+add_library(ass SHARED IMPORTED )
+set_target_properties(ass PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libass.so)
+
+
 find_library(log-lib log )
 
 find_library(OpenSLES-lib OpenSLES)
@@ -114,6 +138,13 @@ set(third-party-libs
         mp3
         x264
 #        libyuv
+        ass
+        crypto
+        expat
+        fontconfig
+        freetype
+        fribidi
+        ssl
         )
 
 # Specifies libraries CMake should link to your target library. You

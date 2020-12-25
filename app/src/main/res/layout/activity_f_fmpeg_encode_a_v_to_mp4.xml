@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ffmpeg.FFmpegEncodeAVToMp4Activity">
+
+
+
+    <com.example.camera.manager.CameraSurfaceView
+        android:layout_width="match_parent"
+        android:id="@+id/mAvSurface"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <Button
+            android:id="@+id/mStartRecordMp4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开始录制MP4" />
+
+        <Button
+            android:id="@+id/mStopRecordMp4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="结束录制mp4" />
+    </LinearLayout>
+
+</FrameLayout>

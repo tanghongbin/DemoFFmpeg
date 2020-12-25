@@ -30,7 +30,6 @@ public:
     jobject mRenderInstance;
     jobject mSurface;
 
-
     void init(const char* url,JNIEnv* jniEnv,jobject renderInstance,jobject surface,int type);
 
     static void

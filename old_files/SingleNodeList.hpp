@@ -5,16 +5,18 @@
 #include "SingleNodeList.h"
 #include "utils.h"
 
-SingleNodeList::SingleNodeList() {
+template<class T>
+SingleNodeList<T>::SingleNodeList() {
     firstNode = nullptr;
     curNode = nullptr;
 }
 
-SingleNodeList::~SingleNodeList() {
+template<class T>
+SingleNodeList<T>::~SingleNodeList() {
     LOGCATE("i'm free firstNode:%p", firstNode);
     while (firstNode) {
         LOGCATE("i'm start free:%p", firstNode);
-        CustomNode *next = firstNode->next;
+        CustomNode<T> *next = firstNode->next;
         firstNode->next = nullptr;
         delete firstNode;
         firstNode = next;
@@ -23,30 +25,33 @@ SingleNodeList::~SingleNodeList() {
 }
 
 
-void SingleNodeList::pushLast(CustomNode *node) {
+template<class T>
+void SingleNodeList<T>::pushLast(T node) {
     // 放入第一个
 //    LOGCATE("push node:%p str:%s",node->next,node->point);
 
     std::unique_lock<std::mutex> lock(mutex);
+    CustomNode<T>* newNode = new CustomNode<T>(node);
     if (!firstNode) {
-        firstNode = node;
+        firstNode = newNode;
     }
     if (!curNode) {
-        curNode = node;
+        curNode = newNode;
     } else {
-        curNode->next = node;
-        curNode = node;
+        curNode->next = newNode;
+        curNode = newNode;
     }
 }
 
 
-CustomNode *SingleNodeList::popFirst() {
+template<class T>
+T SingleNodeList<T>::popFirst() {
     std::unique_lock<std::mutex> lock(mutex);
     if (firstNode) {
-        CustomNode *tempFirst = firstNode;
+        CustomNode<T> *tempFirst = firstNode;
         firstNode = tempFirst->next;
         tempFirst->next = nullptr;
-        return tempFirst;
+        return tempFirst->point;
     }
     return nullptr;
 }
