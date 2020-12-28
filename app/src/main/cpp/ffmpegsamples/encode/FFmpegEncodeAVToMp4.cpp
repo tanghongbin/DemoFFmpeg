@@ -49,7 +49,9 @@ void FFmpegEncodeAVToMp4::initAvEncoder(){
         return;
     }
 
-    out_file_name = getRandomStr("encodevideo_", ".mp4", "encodemuxermp4/");
+//    out_file_name = getRandomStr("encodevideo_", ".mp4", "encodemuxermp4/");
+    out_file_name = RTMP_PUSH_URL;
+
 
     ret = initEncodeAudio();
     if (checkNegativeReturn(ret,"init audio error"))
@@ -306,8 +308,8 @@ int FFmpegEncodeAVToMp4::initEncodeVideo() {
 
     AVOutputFormat *ofmt = ofmtctx->oformat;
     /* find the mpeg1video encoder */
-//    codecV = avcodec_find_encoder(ofmt->video_codec);
-    codecV = avcodec_find_encoder_by_name("h264_mediacodec");
+    codecV = avcodec_find_encoder(ofmt->video_codec);
+//    codecV = avcodec_find_encoder_by_name("h264_mediacodec");
 
     if (!codecV) {
         LOGCATE("Codec not found");

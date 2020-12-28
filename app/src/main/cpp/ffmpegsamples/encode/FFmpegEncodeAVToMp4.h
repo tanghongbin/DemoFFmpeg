@@ -15,6 +15,8 @@ extern "C"{
 #include <libavformat/avformat.h>
 };
 
+#define RTMP_PUSH_URL "rtmp://livet.rolormd.com/live/20201228095318981?txSecret=174fadff3d03575d849fd6c61915548e&txTime=5FEBDD8F"
+
 class FFmpegEncodeAVToMp4 {
 
 private:
