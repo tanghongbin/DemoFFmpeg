@@ -1,7 +1,6 @@
 package com.example.democ.ffmpeg
 
 import android.graphics.Bitmap
-import android.hardware.Camera
 import android.os.Bundle
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
@@ -9,15 +8,9 @@ import com.example.camera.listener.CameraPictureListener
 import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
 import com.example.democ.R
-import com.example.democ.audio.log
-import com.example.democ.getBitmapFromYuvdata
 import com.example.democ.render.FFmpegRender
-import com.example.democ.runAsyncTask
-import com.example.democ.utils.CameraHelper
-import com.libyuv.util.YuvUtil
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.*
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.mSurface
-import kotlinx.android.synthetic.main.activity_f_fmpeg_open_g_l.*
 
 
 class FFmpegEncodeVideoActivity : AppCompatActivity(),
@@ -91,22 +84,21 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(),
         val windowHeight = mSurface.cameraUtil.cameraHeight
         val scaleHeight = mSurface.cameraUtil.cameraWidth
         val scaleWidth = mSurface.cameraUtil.cameraHeight
-        val mOrientation = mSurface.cameraUtil.morientation
+        val mOrientation = mSurface.cameraUtil.orientation
         val bytes = ByteArray(windowHeight * windowWidth * 3 / 2)
         val start = System.currentTimeMillis()
-        YuvUtil.yuvCompress(
-            srcData,
-            windowWidth,
-            windowHeight,
-            bytes,
-            scaleHeight,
-            scaleWidth,
-            3,
-            mOrientation,
-            mOrientation == 270
-        )
+//        YuvUtil.yuvCompress(
+//            srcData,
+//            windowWidth,
+//            windowHeight,
+//            bytes,
+//            scaleHeight,
+//            scaleWidth,
+//            3,
+//            mOrientation,
+//            mOrientation == 270
+//        )
 
         mRender.native_encodeFrame(bytes)
-        log("转换耗时:${System.currentTimeMillis() - start}")
     }
 }

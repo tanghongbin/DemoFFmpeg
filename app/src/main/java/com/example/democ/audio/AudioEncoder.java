@@ -20,6 +20,7 @@ import android.media.MediaFormat;
 import android.os.Build;
 
 import com.example.democ.MainActivity;
+import com.example.democ.interfaces.OutputEncodedDataListener;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -45,6 +46,12 @@ public class AudioEncoder {
     private Thread mThread;
     private long lastTime = 0L;
     private LinkedBlockingDeque<byte[]> mAudioBufferList = new LinkedBlockingDeque<byte[]>();
+
+    private OutputEncodedDataListener mOutputListener;
+
+    public void setOutputListener(OutputEncodedDataListener listener){
+        this.mOutputListener = listener;
+    }
 
     public interface OnAudioEncodedListener {
         void onFrameEncoded(byte[] encoded, long presentationTimeUs);
@@ -172,17 +179,19 @@ public class AudioEncoder {
 //                byte[] frame = new byte[bufferInfo.size];
 //                outputBuffer.get(frame);
                     // 写入混合流中
-                    if (MuxerManager.Companion.getInstance().isReady()) {
-                        MuxerManager.Companion.getInstance().writeSampleData(trackId, outputBuffer, bufferInfo);
-                        log("TAG", "音频写入数据:" + trackId + "   buffer:" + outputBuffer);
+                    if (MuxerManager.Companion.getInstance().isReady() && outputBuffer != null) {
+                        if (mOutputListener != null) mOutputListener.outputData(trackId,outputBuffer,bufferInfo);
+//                        MuxerManager.Companion.getInstance().writeSampleData(trackId, outputBuffer, bufferInfo);
+//                        log("TAG", "音频写入数据:" + trackId + "   buffer:" + outputBuffer);
                     }
                     log("TAG","has get encode out array and write");
 //                mAudioEncodedListener.onFrameEncoded(frame,bufferInfo.presentationTimeUs);
 //                log(TAG,"encoder retrieve data buffer " + bufferInfo.size);
                     mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
                 } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                    trackId = MuxerManager.Companion.getInstance().addTrack(mMediaCodec.getOutputFormat());
-                    MuxerManager.Companion.getInstance().start();
+                    if (mOutputListener != null) mOutputListener.outputFormatChanged(mMediaCodec.getOutputFormat());
+//                    trackId = MuxerManager.Companion.getInstance().addTrack(mMediaCodec.getOutputFormat());
+//                    MuxerManager.Companion.getInstance().start();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

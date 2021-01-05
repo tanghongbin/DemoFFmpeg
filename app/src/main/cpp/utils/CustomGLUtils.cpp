@@ -18,10 +18,12 @@
 #include <iostream>
 
 
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
+#include <lame/lame.h>
 }
 
 JavaVM *GLUtilC::mVm = nullptr;

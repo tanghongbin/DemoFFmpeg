@@ -31,7 +31,7 @@ public:
 
     static void destroyInstance();
 
-    void init();
+    void init(const char * pathSuffix);
 
     void unInit();
 

@@ -9,11 +9,12 @@
 #include <__mutex_base>
 #include <libavutil/samplefmt.h>
 #include <encode/FFmpegEncodeAudio.h>
+#include <encode/AbsEncodeAV.h>
 #include "AudioRecordPlayHelper.h"
 
 AudioRecordPlayHelper *AudioRecordPlayHelper::instance = nullptr;
 
-void AudioRecordPlayHelper::startCapture(FFmpegEncodeAVToMp4 *encodeInstance) {
+void AudioRecordPlayHelper::startCapture(AbsEncodeAv *encodeInstance) {
 
     OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(SAMPLERATE, CHANNELS, CHANNELS,
                                                                FRAME_SIZE);
@@ -22,7 +23,7 @@ void AudioRecordPlayHelper::startCapture(FFmpegEncodeAVToMp4 *encodeInstance) {
     g_loop_exit = 0;
     while (!g_loop_exit) {
         std::unique_lock<std::mutex> lock(mutex);
-        if (!encodeInstance->isRecording) {
+        if (!encodeInstance->checkIsRecording()) {
             variable.wait(lock);
         }
         lock.unlock();
@@ -34,7 +35,7 @@ void AudioRecordPlayHelper::startCapture(FFmpegEncodeAVToMp4 *encodeInstance) {
             break;
         }
 //        call(buffer,samples);
-        encodeInstance->encode_frame_Av(buffer, samples, 1);
+        encodeInstance->consume_every_frame(buffer, samples, 1);
 //        if (fwrite((unsigned char *) buffer, samples * sizeof(short), 1, fp) != 1) {
 //            LOGCATE("failed to save captured data !\n ");
 //            break;
@@ -57,7 +58,7 @@ void AudioRecordPlayHelper::startCapture() {
     int samples;
     uint8_t buffer[BUFFER_SIZE];
     g_loop_exit = 0;
-    FFmpegEncodeAudio::getInstance()->init();
+    FFmpegEncodeAudio::getInstance()->init(".mp3");
     while (!g_loop_exit) {
 //        LOGCATE("i'm recording audio");
         samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);

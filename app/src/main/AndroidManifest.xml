@@ -26,6 +26,7 @@
         <activity android:name=".ffmpeg.FFmpegEncodeAudioActivity" />
         <activity android:name=".ffmpeg.FFmpegNavigationActivity" />
         <activity android:name=".ffmpeg.FFmpegAboutActivity" />
+        <activity android:name=".ffmpeg.FFmpegLiveRtmpActivity" />
         <activity android:name=".ffmpeg.FFmpegNativeWindowActivity" />
         <activity android:name=".SplashActivity">
             <intent-filter>
@@ -44,6 +45,7 @@
         </activity>
         <activity android:name=".ffmpeg.FFmpegOpenGLActivity" />
         <activity android:name=".ffmpeg.FFmpegTextureActivity" />
+        <activity android:name=".ffmpeg.FFmpegTestNewCameraHelperActivity" />
         <activity android:name=".ffmpeg.FFmpegConvertYuvActivity" />
         <activity android:name=".activity.ThreadTestActivity" />
         <activity

@@ -6,8 +6,12 @@ import android.media.MediaFormat
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.democ.MainActivity.Companion.log
-import com.libyuv.util.YuvUtil
+import com.example.democ.interfaces.OutputEncodedDataListener
+import com.example.democ.utils.JavaYuvConvertHelper
+import com.libyuv.LibyuvUtil
+//import com.libyuv.util.YuvUtil
 import java.io.IOException
+import java.nio.ByteBuffer
 import java.util.concurrent.LinkedBlockingDeque
 
 /**
@@ -38,6 +42,11 @@ class VideoEncoder {
     var trackId: Int = 0
     var thread: Thread? = null
     var startTime = 0L
+    private var mOutputListener: OutputEncodedDataListener? = null
+
+    fun setOutputListener(listener:OutputEncodedDataListener){
+        this.mOutputListener = listener
+    }
 
     fun setDimensions(width: Int, height: Int) {
         mWidth = width
@@ -110,58 +119,6 @@ class VideoEncoder {
         log("video encode thread has finished")
     }
 
-    private fun configAsync() {
-        mediaCodec.setCallback(object : MediaCodec.Callback() {
-            override fun onOutputBufferAvailable(
-                codec: MediaCodec,
-                outputId: Int,
-                info: MediaCodec.BufferInfo) {
-                val byteBuffer = codec.getOutputBuffer(outputId)
-                val byteArray = ByteArray(info.size)
-                byteBuffer?.get(byteArray)
-                byteBuffer?.position(info.offset)
-                byteBuffer?.limit(info.offset + info.size)
-                // 写入混合流中
-                if (MuxerManager.getInstance().isReady() && byteBuffer != null) {
-                    MuxerManager.getInstance().writeSampleData(trackId, byteBuffer, info)
-//                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
-                }
-                //释放output buffer
-                codec.releaseOutputBuffer(outputId, false)
-            }
-
-            override fun onInputBufferAvailable(codec: MediaCodec, bufferId: Int) {
-                val byteBuffer = codec.getInputBuffer(bufferId)
-                val inputBuff = getInputBuffer()
-                @Suppress("FoldInitializerAndIfToElvis")
-                if (inputBuff == null){
-                    log("get input buffer is null,must finished")
-                    return
-                }
-                byteBuffer?.put(inputBuff)
-                codec.queueInputBuffer(
-                    bufferId,
-                    0,
-                    inputBuff.size,
-                    (System.nanoTime() - startTime) ,
-                    0
-                )
-            }
-
-            override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-                trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
-                MuxerManager.getInstance().start()
-            }
-
-            override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-                e.printStackTrace()
-                log("video encoder something error")
-            }
-        })
-        startTime = System.nanoTime()
-    }
-
-
     private fun innerThread(): Thread {
         return object : Thread() {
 
@@ -172,15 +129,15 @@ class VideoEncoder {
 //                    log("has encode video start")
 //                    TimeTracker.trackBegin()
                     try {
+                        val inputBuff = getInputBuffer()
+                        @Suppress("FoldInitializerAndIfToElvis")
+                        if (inputBuff == null){
+                            log("get input buffer is null,must finished")
+                            break
+                        }
                         val bufferId = mediaCodec.dequeueInputBuffer(1000)
                         if (bufferId > 0) {
                             val byteBuffer = mediaCodec.getInputBuffer(bufferId)
-                            val inputBuff = getInputBuffer()
-                            @Suppress("FoldInitializerAndIfToElvis")
-                            if (inputBuff == null){
-                                log("get input buffer is null,must finished")
-                                break
-                            }
                             byteBuffer?.put(inputBuff)
                             mediaCodec.queueInputBuffer(
                                 bufferId,
@@ -201,14 +158,16 @@ class VideoEncoder {
                             byteBuffer?.limit(info.offset + info.size)
                             // 写入混合流中
                             if (MuxerManager.getInstance().isReady() && byteBuffer != null) {
-                                MuxerManager.getInstance().writeSampleData(trackId, byteBuffer, info)
+                                mOutputListener?.outputData(trackId,byteBuffer,info)
+//                                MuxerManager.getInstance().writeSampleData(trackId, byteBuffer, info)
 //                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
                             }
                             //释放output buffer
                             mediaCodec.releaseOutputBuffer(outputId, false)
                         } else if (outputId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                            trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
-                            MuxerManager.getInstance().start()
+                            mOutputListener?.outputFormatChanged(mediaCodec.outputFormat)
+//                            trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
+//                            MuxerManager.getInstance().start()
                         }
                     }catch (e:InterruptedException){
                         e.printStackTrace()
@@ -250,49 +209,15 @@ class VideoEncoder {
         if (!hasSetOretation) throw IllegalStateException("mDegree is invalid")
 //        log("srcData:${srcData?.size} dstData:${dstData?.size}")
 
-        YuvUtil.yuvCompress(
+        JavaYuvConvertHelper.convert(
             srcData,
+            dstData,
             windowWidth,
             windowHeight,
-            dstData,
-            scaleHeight,
-            scaleWidth,
-            3,
             mOrientation,
             mOrientation == 270
         )
         return 0
-    }
-
-    @Deprecated("use c++ version")
-    private fun NV21ToNV12(
-        nv21: ByteArray?,
-        nv12: ByteArray?,
-        width: Int,
-        height: Int
-    ) {
-        if (nv21 == null || nv12 == null) {
-            return
-        }
-        val framesize = width * height
-        var i: Int
-        var j: Int
-        System.arraycopy(nv21, 0, nv12, 0, framesize)
-        i = 0
-        while (i < framesize) {
-            nv12[i] = nv21[i]
-            i++
-        }
-        j = 0
-        while (j < framesize / 2) {
-            nv12[framesize + j - 1] = nv21[j + framesize]
-            j += 2
-        }
-        j = 0
-        while (j < framesize / 2) {
-            nv12[framesize + j] = nv21[j + framesize - 1]
-            j += 2
-        }
     }
 
 }

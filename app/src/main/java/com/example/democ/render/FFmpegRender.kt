@@ -1,14 +1,9 @@
 package com.example.democ.render
 
-import android.graphics.BitmapFactory
 import android.opengl.GLSurfaceView
 import android.view.Surface
-import com.example.democ.R
-import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.log
-import com.example.democ.getAppContext
 import com.example.democ.utils.Constants
-import java.nio.ByteBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -43,6 +38,7 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     }
 
+    // ==============   播放部分 ======================
 
     external fun native_OnSurfaceCreated()
 
@@ -62,7 +58,11 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_unInit()
 
-    external fun native_startEncode()
+    fun startEncodeAudio(suffix:String){
+        native_startEncode(".${suffix}")
+    }
+
+    private external fun native_startEncode(suffix:String)
 
     external fun native_encodeFrame(byteArray: ByteArray)
 
@@ -98,5 +98,19 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     //混合音视频
 //    external fun muxAv()
+
+    // =====================  live 直播部分 ======================
+
+    external fun native_live_OnSurfaceCreated()
+
+    external fun native_live__OnSurfaceChanged(width:Int,height:Int)
+
+    external fun native_live_startpush()
+
+    external fun native_live_stoppush()
+
+    external fun native_live_onDestroy()
+
+    external fun native_live_encodeFrame(byteArray: ByteArray)
 
 }

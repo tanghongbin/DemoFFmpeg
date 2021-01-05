@@ -1,5 +1,6 @@
 package com.example.democ.ffmpeg
 
+import android.hardware.Camera
 import android.os.Bundle
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
@@ -10,9 +11,8 @@ import com.example.democ.audio.log
 import com.example.democ.render.FFmpegRender
 import com.example.democ.utils.CameraAsyncDataHelper
 import com.example.democ.utils.JavaYuvConvertHelper
-import com.example.democ.utils.SpUtils
 import com.libyuv.LibyuvUtil
-import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_a_v_to_mp4.*
+import kotlinx.android.synthetic.main.activity_live_rtmp.*
 
 /**
  *
@@ -23,30 +23,30 @@ import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_a_v_to_mp4.*
  * desc   : 将麦克风，摄像机采集的数据编码成aac,h264再合并输出成mp4文件
  *
  **/
-class FFmpegEncodeAVToMp4Activity : AppCompatActivity(), SurfaceHolder.Callback,
+class FFmpegLiveRtmpActivity : AppCompatActivity(), SurfaceHolder.Callback,
     CameraYUVDataListener {
 
     lateinit var mCameraSurfaceManager: CameraSurfaceManager
     lateinit var mFFmpegRender: FFmpegRender
     private val cameraAsyncHelper by lazy { CameraAsyncDataHelper() }
-    private var startTime = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_f_fmpeg_encode_a_v_to_mp4)
-        mCameraSurfaceManager = CameraSurfaceManager(mAvSurface)
+        setContentView(R.layout.activity_live_rtmp)
+        mCameraSurfaceManager = CameraSurfaceManager(mLiveSurface)
+        mCameraSurfaceManager.mCameraUtil.currentCameraType =
+            Camera.CameraInfo.CAMERA_FACING_FRONT
         mFFmpegRender = FFmpegRender()
-        mAvSurface.setCameraYUVDataListener(this)
-        mStartRecordMp4.setOnClickListener {
-            mFFmpegRender.native_startrecordmp4()
-            startTime = System.currentTimeMillis()
+        mLiveSurface.setCameraYUVDataListener(this)
+        mStartPushRtmp.setOnClickListener {
+            mFFmpegRender.native_live_startpush()
         }
-        mStopRecordMp4.setOnClickListener {
-            mFFmpegRender.native_stoprecordmp4()
-            log("录制结束，功耗时:${System.currentTimeMillis() - startTime}")
+        mStopPushRtmp.setOnClickListener {
+            mFFmpegRender.native_live_stoppush()
         }
-
-        mAvSurface.setmHolderCall(this)
         cameraAsyncHelper.mListener = CameraYUVDataListener { data -> realEncode(data) }
+
+        mLiveSurface.setmHolderCall(this)
     }
 
     override fun onResume() {
@@ -65,33 +65,32 @@ class FFmpegEncodeAVToMp4Activity : AppCompatActivity(), SurfaceHolder.Callback,
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-        mFFmpegRender.native_encodeavmuxer_OnSurfaceChanged(mAvSurface.cameraUtil.cameraWidth,
-            mAvSurface.cameraUtil.cameraHeight)
+        mFFmpegRender.native_live__OnSurfaceChanged(mLiveSurface.cameraUtil.cameraWidth,
+            mLiveSurface.cameraUtil.cameraHeight)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         log("java layer surfaceDestroyed")
-        val result = mFFmpegRender.native_unInitRecordMp4()
+        val result = mFFmpegRender.native_live_onDestroy()
         log("打印播放地址:${result}")
-        SpUtils.putString("url",result)
+//        SpUtils.putString("url",result)
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        mFFmpegRender.native_encodeavmuxer_OnSurfaceCreated()
+        mFFmpegRender.native_live_OnSurfaceCreated()
     }
 
-    override fun onCallback(nv21: ByteArray?) {
-        cameraAsyncHelper.addByteData(nv21)
+    override fun onCallback(srcData: ByteArray?) {
+        cameraAsyncHelper.addByteData(srcData)
     }
 
-    private fun realEncode(nv21: ByteArray?) {
-//        log("java layer onCallback")
-
-        val windowWidth = mAvSurface.cameraUtil.cameraWidth
-        val windowHeight = mAvSurface.cameraUtil.cameraHeight
-        val scaleHeight = mAvSurface.cameraUtil.cameraWidth
-        val scaleWidth = mAvSurface.cameraUtil.cameraHeight
-        val mOrientation = mAvSurface.cameraUtil.orientation
+    private fun realEncode(nv21:ByteArray?) {
+//        log("real encode")
+        val windowWidth = mLiveSurface.cameraUtil.cameraWidth
+        val windowHeight = mLiveSurface.cameraUtil.cameraHeight
+        val scaleHeight = mLiveSurface.cameraUtil.cameraWidth
+        val scaleWidth = mLiveSurface.cameraUtil.cameraHeight
+        val mOrientation = mLiveSurface.cameraUtil.orientation
         val bytesSize = nv21?.size ?: 0
 
         val start = System.currentTimeMillis()
@@ -104,9 +103,10 @@ class FFmpegEncodeAVToMp4Activity : AppCompatActivity(), SurfaceHolder.Callback,
             mOrientation == 270
         )
         val middle2 = System.currentTimeMillis()
-        //        log("nv21 转 i420 耗时:${middle - start}   旋转压缩耗时:${middle2 - middle}" +
+//                log("nv21 转 i420 耗时:${middle - start}   旋转压缩耗时:${middle2 - middle}" +
         //                "      width:${windowWidth} height:${windowHeight} orientation:${mOrientation}  数组大小:${bytesSize}")
-        mFFmpegRender.native_encodeavmuxer_encodeFrame(finalResult)
+        log("判断bytearray是否为空:${finalResult == null} 大小:${finalResult.size}")
+        mFFmpegRender.native_live_encodeFrame(finalResult)
     }
 
 

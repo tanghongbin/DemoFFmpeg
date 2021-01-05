@@ -14,6 +14,9 @@ set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libName native-ffmpegrender)
 
+#拉流-推流
+set(RTMP ${CMAKE_SOURCE_DIR}/librtmp)
+
 #get_filename_component(PARENT_DIR ${CMAKE_SOURCE_DIR} PATH)
 
 #使用单个yuv库
@@ -26,9 +29,14 @@ include_directories(
         utils
         render
         glm
+        rtmppusher
         test
+        librtmp/include
 #        ${LIBYUV_DIR}/libs/${ANDROID_ABI}/include
 )
+
+#指定 rtmp 静态库文件目录
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${RTMP}/libs/${CMAKE_ANDROID_ARCH_ABI}")
 
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
@@ -43,6 +51,8 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/test/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/*.cpp)
+
+
 
 
 
@@ -145,6 +155,7 @@ set(third-party-libs
         freetype
         fribidi
         ssl
+        rtmp
         )
 
 # Specifies libraries CMake should link to your target library. You

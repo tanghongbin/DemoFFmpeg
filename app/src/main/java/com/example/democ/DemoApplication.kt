@@ -1,6 +1,7 @@
 package com.example.democ
 
 import android.app.Application
+import com.libyuv.LibyuvUtil
 
 class DemoApplication : Application() {
     companion object{

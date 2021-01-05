@@ -21,7 +21,6 @@ import com.example.camera.listener.CameraYUVDataListener;
 import com.example.camera.util.CameraUtil;
 import com.example.camera.util.SPUtil;
 import com.example.democ.DemoApplication;
-import com.libyuv.util.YuvUtil;
 
 import java.io.ByteArrayOutputStream;
 
@@ -35,7 +34,7 @@ import static android.content.Context.SENSOR_SERVICE;
 public class CameraSurfaceManager implements SensorEventListener, CameraYUVDataListener {
 
     private CameraSurfaceView mCameraSurfaceView;
-    private CameraUtil mCameraUtil;
+    public CameraUtil mCameraUtil;
     private boolean isTakingPicture;
     private boolean isRunning;
     private CameraPictureListener listener;
@@ -101,19 +100,19 @@ public class CameraSurfaceManager implements SensorEventListener, CameraYUVDataL
                 @Override
                 public void run() {
                     int windowWidth = mCameraUtil.getCameraWidth(), windowHeight = mCameraUtil.getCameraHeight();
-                    final int morientation = mCameraUtil.getMorientation();
+                    final int morientation = mCameraUtil.getOrientation();
                     Log.d("TAG", "打印各个属性" + String.format("widowWidth:%d widowHeight:%d scaleWidth:%d scaleHeight:%d \n" +
                             "cropWidth:%d cropHeight:%d morientation:%d ", windowWidth, windowHeight, scaleWidth, scaleHeight, cropWidth, cropHeight, morientation));
 
                     //进行yuv数据的缩放，旋转镜像缩放等操作 original
                     final byte[] dstData = new byte[scaleWidth * scaleHeight * 3 / 2];
-                    YuvUtil.yuvCompress(srcData, mCameraUtil.getCameraWidth(), mCameraUtil.getCameraHeight(), dstData, scaleHeight, scaleWidth, 3, morientation, morientation == 270);
+//                    YuvUtil.yuvCompress(srcData, mCameraUtil.getCameraWidth(), mCameraUtil.getCameraHeight(), dstData, scaleHeight, scaleWidth, 3, morientation, morientation == 270);
                     //进行yuv数据裁剪的操作
 //                    final byte[] cropData = new byte[cropWidth * cropHeight * 3 / 2];
 //                    YuvUtil.yuvCropI420(dstData, scaleWidth, scaleHeight, cropData, cropWidth, cropHeight, cropStartX, cropStartY);
 //       //             这里将yuvi420转化为nv21，因为yuvimage只能操作nv21和yv12，为了演示方便，这里做一步转化的操作
                     final byte[] nv21Data = new byte[scaleWidth * scaleHeight * 3 / 2];
-                    YuvUtil.yuvI420ToNV21(dstData, scaleWidth, scaleHeight, nv21Data);
+//                    YuvUtil.yuvI420ToNV21(dstData, scaleWidth, scaleHeight, nv21Data);
                       YuvImage yuvImage = new YuvImage(nv21Data, ImageFormat.NV21, scaleWidth, scaleHeight, null);
                     ByteArrayOutputStream fOut = new ByteArrayOutputStream();
                     yuvImage.compressToJpeg(new Rect(0, 0, scaleWidth, scaleHeight), 100, fOut);

@@ -201,7 +201,6 @@ void FFmpegEncodeVideo::encodeVideoFrame(uint8_t *pic_src) {
 
     int ret;
     int y_size = codeCtx->width * codeCtx->height;
-    LOGCATE("encode width:%d height:%d", codeCtx->width, codeCtx->height);
     double duration = AV_TIME_BASE / av_q2d(codeCtx->framerate);
     ret = av_frame_make_writable(frame);
     if (ret < 0) {
@@ -211,7 +210,6 @@ void FFmpegEncodeVideo::encodeVideoFrame(uint8_t *pic_src) {
     frame->data[0] = pic_src;              // Y
     frame->data[1] = pic_src + y_size;      // U
     frame->data[2] = pic_src + y_size * 5 / 4;  // V
-    frame->pts = pts_frame_index;
     ret = avcodec_send_frame(codeCtx, frame);
     if (ret < 0) {
         LOGCATE("avcodec_send_frame failed:%s", av_err2str(ret));
@@ -222,12 +220,18 @@ void FFmpegEncodeVideo::encodeVideoFrame(uint8_t *pic_src) {
         ret = avcodec_receive_packet(codeCtx, pkt);
         LOGCATE("receive packet:%s", av_err2str(ret));
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-            LOGCATE("receive pkt AVERROR or AVERROR_EOF");
             break;
         } else if (ret < 0) {
             LOGCATE("Error during encoding:%s", av_err2str(ret));
             exit(1);
         }
+
+        // 设置时间戳
+        AVRational time_base = ofmtctx->streams[oStream->index]->time_base;
+        int64_t everyFrameDuration = (double)AV_TIME_BASE / av_q2d(time_base);
+        pkt->pts = (double) (pts_frame_index * everyFrameDuration) / (av_q2d(time_base)*AV_TIME_BASE);
+        pkt->dts = pkt->pts;
+        pkt->duration = (double)everyFrameDuration/(double)(av_q2d(time_base)*AV_TIME_BASE);
 
         pkt->stream_index = oStream->index;
         av_packet_rescale_ts(pkt, codeCtx->time_base, oStream->time_base);
@@ -237,11 +241,8 @@ void FFmpegEncodeVideo::encodeVideoFrame(uint8_t *pic_src) {
             LOGCATE("av_interleaved_write_frame failed:%s", av_err2str(ret));
             exit(1);
         }
-        pts_frame_index++;
-        dts_frame_index++;
         av_packet_unref(pkt);
     }
-
 
 //    END:
 //    av_packet_unref(pkt);

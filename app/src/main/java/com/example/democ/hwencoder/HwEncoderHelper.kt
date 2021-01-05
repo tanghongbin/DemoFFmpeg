@@ -1,14 +1,15 @@
 package com.example.democ.hwencoder
 
+import android.media.MediaCodec
+import android.media.MediaFormat
 import android.view.SurfaceHolder
 import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
 import com.example.camera.manager.CameraSurfaceView
 import com.example.democ.audio.*
-import com.example.democ.utils.TimeTracker
-import com.libyuv.util.YuvUtil
-import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_video.*
+import com.example.democ.interfaces.OutputEncodedDataListener
 import java.lang.IllegalStateException
+import java.nio.ByteBuffer
 
 /**
  *
@@ -29,7 +30,7 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
     private val mAudioEncoder by lazy { AudioEncoder() }
     private val decoder by lazy { AudioDecoder() }
     private val mVideoEncoder by lazy { VideoEncoder() }
-    private lateinit var mCameraSurfaceManager:CameraSurfaceManager
+    private lateinit var mCameraSurfaceManager: CameraSurfaceManager
 
 
     fun init() {
@@ -50,6 +51,23 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
                 mAudioEncoder.encode(buffer)
             }
         }
+        val listener = object : OutputEncodedDataListener {
+            override fun outputData(
+                trackId: Int,
+                byteBuffer: ByteBuffer,
+                bufferInfo: MediaCodec.BufferInfo
+            ) {
+                MuxerManager.getInstance()
+                    .writeSampleData(trackId, byteBuffer, bufferInfo);
+            }
+
+            override fun outputFormatChanged(mediaFormat: MediaFormat) {
+                MuxerManager.getInstance().addTrack(mediaFormat)
+                MuxerManager.getInstance().start()
+            }
+        }
+        mAudioEncoder.setOutputListener(listener)
+        mVideoEncoder.setOutputListener(listener)
         mAudioRecorder.startCapture()
         mAudioEncoder.startRunTask()
         mVideoEncoder.startEncode()
@@ -84,13 +102,15 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-        log("surfaceChanged width:${cameraSurfaceView.cameraUtil.cameraWidth} " +
-                    "height:${cameraSurfaceView.cameraUtil.cameraHeight}")
+        log(
+            "surfaceChanged width:${cameraSurfaceView.cameraUtil.cameraWidth} " +
+                    "height:${cameraSurfaceView.cameraUtil.cameraHeight}"
+        )
         mVideoEncoder.setDimensions(
             cameraSurfaceView.cameraUtil.cameraWidth,
             cameraSurfaceView.cameraUtil.cameraHeight
         )
-        mVideoEncoder.setDegrees(cameraSurfaceView.cameraUtil.morientation)
+        mVideoEncoder.setDegrees(cameraSurfaceView.cameraUtil.orientation)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {

@@ -28,7 +28,7 @@ private:
 
 public:
 
-    void startCapture(FFmpegEncodeAVToMp4 *pMp4);
+    void startCapture(AbsEncodeAv *pMp4);
 
     void startCapture();
 

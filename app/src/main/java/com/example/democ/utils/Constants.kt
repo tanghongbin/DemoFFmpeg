@@ -5,6 +5,7 @@ import android.os.Environment
 object Constants {
     val FILD_DIR = "/ffmpegtest"
     val FLV_ONLINE = "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
+    val RTMP_WINDOW_PUSH = "rtmp://106.13.78.235:1935/demo/windowsPush"
     val MP4_ONLINE_2 = "http://freesaasofficedata.oss.aliyuncs.com/2222/20190930142639768.mp4"
     val MP4_ONLINE = "http://pweb.longshinewz.com/Attachment/MsgFile/a33c1c6032ec4862b44728bde62b6a05.mp4"
     val MP4_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/test.mp4"

@@ -33,15 +33,15 @@ public class CameraUtil {
      **/
     private int morientation;
 
-    public int getMorientation() {
+    public int getOrientation() {
         return morientation;
     }
 
     /**
      * 预览的一个摄像头画面大小，默认为1080p，如果不支持的话就用摄像头默认的
      */
-    private int cameraWidth = 1920;
-    private int cameraHeight = 1080;
+    private int cameraWidth = 1280;
+    private int cameraHeight = 720;
 
     public int getCameraWidth() {
         return cameraWidth;

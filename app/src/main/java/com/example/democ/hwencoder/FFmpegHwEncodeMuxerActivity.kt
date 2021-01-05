@@ -12,6 +12,8 @@ import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.VideoEncoder
 import kotlinx.android.synthetic.main.activity_f_fmpeg_hw_encode_muxer.*
 
+
+
 /**
 *
 * author : tanghongbin

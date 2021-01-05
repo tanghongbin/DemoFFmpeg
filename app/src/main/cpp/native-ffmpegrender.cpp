@@ -28,6 +28,8 @@
 //#include "../../../../old_files/SingleNodeList.hpp"
 #include <TimeTracker.h>
 #include <encode/FFmpegEncodeAVToMp4.h>
+#include <encode/FFmpegEncodeAVToLiveRtmp.h>
+#include <rtmp.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
@@ -95,8 +97,8 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
 //    VideoGLRender::GetInstance()->OnDrawFrame();
 }
 
-JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
-    FFmpegEncodeAudio::getInstance()->init();
+JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance,jstring jstring1) {
+    FFmpegEncodeAudio::getInstance()->init(getCharStrFromJstring(env,jstring1));
 //    FFmpegEncodeAudio::getInstance()->initOffcialDemo();
 }
 
@@ -318,6 +320,53 @@ JNIEXPORT jstring JNICALL native_unInitRecordMp4(JNIEnv *env, jobject instance) 
     return result;
 }
 
+
+/// ==============================   直播 ===================
+
+JNIEXPORT void JNICALL native_live_startpush(JNIEnv *env, jobject instance) {
+    FFmpegEncodeAVToLiveRtmp::getInstance()->startRecordMp4();
+}
+
+JNIEXPORT void JNICALL native_live_stoppush(JNIEnv *env, jobject instance) {
+    FFmpegEncodeAVToLiveRtmp::getInstance()->stopRecordMp4();
+}
+
+JNIEXPORT void JNICALL native_live_onDestroy(JNIEnv *env, jobject instance) {
+    FFmpegEncodeAVToLiveRtmp::getInstance()->unInitAvEncoder();
+    FFmpegEncodeAVToLiveRtmp::destroyInstance();
+}
+
+JNIEXPORT void JNICALL native_live_OnSurfaceCreated(JNIEnv *env, jobject instance) {
+
+}
+
+/*
+ * Class:     com_byteflow_app_MyNativeRender
+ * Method:    native_OnSurfaceChanged
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL native_live__OnSurfaceChanged
+        (JNIEnv *env, jobject instance, jint width, jint height) {
+
+    FFmpegEncodeAVToLiveRtmp::getInstance()->mWindow_width = width;
+    FFmpegEncodeAVToLiveRtmp::getInstance()->mWindow_height = height;
+    LOGCATE("setup width:%d height:%d", FFmpegEncodeAVToLiveRtmp::getInstance()->mWindow_width,
+            FFmpegEncodeAVToLiveRtmp::getInstance()->mWindow_height);
+    FFmpegEncodeAVToLiveRtmp::getInstance()->initAvEncoder();
+
+}
+
+JNIEXPORT void JNICALL native_live_encodeFrame(JNIEnv *env, jobject instance,
+                                                        jbyteArray imageData) {
+
+    jbyte *data = env->GetByteArrayElements(imageData, 0);
+
+    FFmpegEncodeAVToLiveRtmp::getInstance()->encode_frame_Av(reinterpret_cast<uint8_t *>(data), 0, 2);
+
+    env->ReleaseByteArrayElements(imageData, data, 0);
+
+}
+
 static int
 RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum) {
     LOGCATE("RegisterNativeMethods");
@@ -358,7 +407,7 @@ static JNINativeMethod g_RenderMethods[] = {
                                                                                                  (void *) (native_changeOutputFormat)},
 
         {"native_muxerAudioAndVideo",             "()V",                                         (void *) (native_muxerAudioAndVideo)},
-        {"native_startEncode",                    "()V",                                         (void *) (native_startEncode)},
+        {"native_startEncode",                    "(Ljava/lang/String;)V",                                         (void *) (native_startEncode)},
         {"native_encodeFrame",                    "([B)V",                                       (void *) (native_encodeFrame)},
         {"encodeYuvToImage",                      "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (encodeYuvToImage)},
         {"native_addFilterToYuv",                 "(Ljava/lang/String;)Ljava/lang/String;",      (void *) (native_addFilterToYuv)},
@@ -375,7 +424,18 @@ static JNINativeMethod g_RenderMethods[] = {
         {"playMP4",                               "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)},
         {"native_encodeavmuxer_OnSurfaceCreated", "()V",                                         (void *) (native_encodeavmuxer_OnSurfaceCreated)},
         {"native_encodeavmuxer_OnSurfaceChanged", "(II)V",                                       (void *) (native_encodeavmuxer_OnSurfaceChanged)},
-        {"native_encodeavmuxer_encodeFrame",      "([B)V",                                       (void *) (native_encodeavmuxer_encodeFrame)}
+        {"native_encodeavmuxer_encodeFrame",      "([B)V",                                       (void *) (native_encodeavmuxer_encodeFrame)},
+
+
+        /**
+         * ================================    直播模块 =====================================
+         */
+        {"native_live_OnSurfaceCreated", "()V",                                         (void *) (native_live_OnSurfaceCreated)},
+        {"native_live__OnSurfaceChanged", "(II)V",                                       (void *) (native_live__OnSurfaceChanged)},
+        {"native_live_encodeFrame",      "([B)V",                                       (void *) (native_live_encodeFrame)},
+        {"native_live_startpush",                    "()V",                                       (void *) (native_live_startpush)},
+        {"native_live_stoppush",                    "()V",                                       (void *) (native_live_stoppush)},
+        {"native_live_onDestroy",                    "()V",                                       (void *) (native_live_onDestroy)},
 
 };
 

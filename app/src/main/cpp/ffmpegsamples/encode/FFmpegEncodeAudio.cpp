@@ -52,8 +52,8 @@ void FFmpegEncodeAudio::unInit() {
     avcodec_free_context(&codecContext);
 }
 
-void FFmpegEncodeAudio::init() {
-    out_file_name = getRandomStr("encodeaudio_", ".aac", "encodeAudios/");
+void FFmpegEncodeAudio::init(const char * pathSuffix) {
+    out_file_name = getRandomStr("encodeaudio_", pathSuffix, "encodeAudios/");
     LOGCATE("has enter encode audio init function");
 
     ret = avformat_alloc_output_context2(&ofmtCtx, NULL, NULL, out_file_name);

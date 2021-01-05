@@ -21,7 +21,7 @@ private:
     uint8_t* pic_buf;
     int bufferSize;
     int mFrameIndex;
-    int pts_frame_index = 0,dts_frame_index = 0;
+    int pts_frame_index = 0;
     bool mHasInitSuccess = false;
     static FFmpegEncodeVideo* instance;
 

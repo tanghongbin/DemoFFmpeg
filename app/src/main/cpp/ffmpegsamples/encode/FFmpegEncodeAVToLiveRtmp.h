@@ -2,13 +2,12 @@
 // Created by Admin on 2020/11/30.
 //
 
-#ifndef DEMOC_FFMPEGENCODEAVTOMP4_H
-#define DEMOC_FFMPEGENCODEAVTOMP4_H
+#ifndef DEMOC_FFMPEGENCODEAVTOLIVERTMP_H
+#define DEMOC_FFMPEGENCODEAVTOLIVERTMP_H
 
 
 #include <cstdint>
 #include <thread>
-#include "AbsEncodeAV.h"
 
 extern "C"{
 #include <libswresample/swresample.h>
@@ -16,7 +15,9 @@ extern "C"{
 #include <libavformat/avformat.h>
 };
 
-class FFmpegEncodeAVToMp4 : public AbsEncodeAv {
+#define RTMP_PUSH_URL "rtmp://106.13.78.235:1935/demo/AndroidPush"
+
+class FFmpegEncodeAVToLiveRtmp : public AbsEncodeAv{
 
 private:
 
@@ -30,6 +31,7 @@ private:
     AVStream* oStreamV;
     int bufferSize;
     int pts_frame_indexV = 1;
+    int pts_frame_indexA = 1;
 
     // 音频参数
     AVCodec *codecA;
@@ -39,13 +41,17 @@ private:
     AVPacket *packetA;
     AVStream *oStreamA;
     uint8_t *frame_bufferA;
+    int64_t start_time;
+    std::mutex mutex;
+
+    int frameRate = 20;
 
 
     bool mHasInitSuccess = false;
 
     std::thread* audioCaptureThread;
 
-    static FFmpegEncodeAVToMp4* instance;
+    static FFmpegEncodeAVToLiveRtmp* instance;
 
 
 
@@ -62,7 +68,7 @@ private:
 
     int check_sample_fmt(AVCodec *pCodec, AVSampleFormat format);
 
-    static void startCaptureAudio(FFmpegEncodeAVToMp4* instance);
+    static void startCaptureAudio(FFmpegEncodeAVToLiveRtmp* instance);
 
 
 
@@ -72,7 +78,7 @@ public:
     int mWindow_height;
     const char *out_file_name;
 
-    static FFmpegEncodeAVToMp4* getInstance();
+    static FFmpegEncodeAVToLiveRtmp* getInstance();
 
     static void destroyInstance();
 
@@ -87,16 +93,18 @@ public:
     // 1-音频，2-视频
     void encode_frame_Av(uint8_t* buffer, int size, int mediaType);
 
-    bool checkIsRecording();
-
-    void consume_every_frame(uint8_t* buffer, int size, int mediaType);
-
     int initEncodeVideo();
 
     int initEncodeAudio();
 
-    void logPkt(AVFormatContext *pContext, AVPacket *pPacket);
+    void logPkt(AVFormatContext *pContext, AVPacket *pPacket, int i, AVRational rational);
+
+
+    bool checkIsRecording();
+
+    void consume_every_frame(uint8_t* buffer, int size, int mediaType);
+
 };
 
 
-#endif //DEMOC_FFMPEGENCODEAVTOMP4_H
+#endif //DEMOC_FFMPEGENCODEAVTOLIVERTMP_H

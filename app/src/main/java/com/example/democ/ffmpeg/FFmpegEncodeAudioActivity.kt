@@ -50,7 +50,7 @@ class FFmpegEncodeAudioActivity : AppCompatActivity(),View.OnClickListener {
             }
             R.id.button5 -> {
                 Thread {
-                    render.native_startEncode()
+                    render.startEncodeAudio("aac")
                 }.start()
             }
         }

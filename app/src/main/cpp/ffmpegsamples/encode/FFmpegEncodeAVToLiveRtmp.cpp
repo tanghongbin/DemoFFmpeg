@@ -7,67 +7,54 @@
 #include <capturer/AudioRecordPlayHelper.h>
 
 
+#include "FFmpegEncodeAVToLiveRtmp.h"
 
-#include "FFmpegEncodeAVToMp4.h"
-
-extern "C"{
+extern "C" {
 #include <libavutil/timestamp.h>
 #include <libavutil/time.h>
 #include <libavutil/opt.h>
 #include <libavutil/imgutils.h>
 }
 
-FFmpegEncodeAVToMp4* FFmpegEncodeAVToMp4::instance = nullptr;
+FFmpegEncodeAVToLiveRtmp *FFmpegEncodeAVToLiveRtmp::instance = nullptr;
 
-FFmpegEncodeAVToMp4* FFmpegEncodeAVToMp4::getInstance(){
-    if(instance == nullptr){
-        instance = new FFmpegEncodeAVToMp4;
+FFmpegEncodeAVToLiveRtmp *FFmpegEncodeAVToLiveRtmp::getInstance() {
+    if (instance == nullptr) {
+        instance = new FFmpegEncodeAVToLiveRtmp;
     }
     return instance;
 }
 
-void FFmpegEncodeAVToMp4::destroyInstance(){
+void FFmpegEncodeAVToLiveRtmp::destroyInstance() {
     instance = nullptr;
     LOGCATE("has destroyed");
 }
 
-void FFmpegEncodeAVToMp4::startRecordMp4(){
+void FFmpegEncodeAVToLiveRtmp::startRecordMp4() {
     LOGCATE("start record mp4");
     isRecording = true;
     AudioRecordPlayHelper::getInstance()->notify_weak();
 }
 
-bool FFmpegEncodeAVToMp4::checkIsRecording(){
-    return isRecording;
-}
-
-void FFmpegEncodeAVToMp4::consume_every_frame(uint8_t* buffer, int size, int mediaType){
-    encode_frame_Av(buffer,size,mediaType);
-}
-
-void FFmpegEncodeAVToMp4::stopRecordMp4(){
+void FFmpegEncodeAVToLiveRtmp::stopRecordMp4() {
     LOGCATE("stop record mp4");
     isRecording = false;
 }
 
-void FFmpegEncodeAVToMp4::initAvEncoder(){
+void FFmpegEncodeAVToLiveRtmp::initAvEncoder() {
     // 先初始化视频的，再初始化音频的
     if (mHasInitSuccess) {
         LOGCATE("has init success, don't need to reinit");
         return;
     }
-
-    // mp4,flv,avi,mov,mkv,wmv
-    out_file_name = getRandomStr("encodevideo_", ".mp4", "encodemuxermp4/");
-//    out_file_name = RTMP_PUSH_URL;
-
+    out_file_name = RTMP_PUSH_URL;
 
     ret = initEncodeAudio();
-    if (checkNegativeReturn(ret,"init audio error"))
+    if (checkNegativeReturn(ret, "init audio error"))
         return;
 
     ret = initEncodeVideo();
-    if (checkNegativeReturn(ret,"init video error"))
+    if (checkNegativeReturn(ret, "init video error"))
         return;
 
     mHasInitSuccess = true;
@@ -75,19 +62,28 @@ void FFmpegEncodeAVToMp4::initAvEncoder(){
 
     av_dump_format(ofmtctx, 0, out_file_name, 1);
 
-    audioCaptureThread = new std::thread(startCaptureAudio,this);
+    audioCaptureThread = new std::thread(startCaptureAudio, this);
+    start_time = av_gettime();
 }
 
-void FFmpegEncodeAVToMp4::startCaptureAudio(FFmpegEncodeAVToMp4* instance){
+bool FFmpegEncodeAVToLiveRtmp::checkIsRecording() {
+    return isRecording;
+}
+
+void FFmpegEncodeAVToLiveRtmp::consume_every_frame(uint8_t *buffer, int size, int mediaType) {
+    encode_frame_Av(buffer, size, mediaType);
+}
+
+void FFmpegEncodeAVToLiveRtmp::startCaptureAudio(FFmpegEncodeAVToLiveRtmp *instance) {
     AudioRecordPlayHelper::getInstance()->startCapture(instance);
 }
 
-void FFmpegEncodeAVToMp4::unInitAvEncoder(){
+void FFmpegEncodeAVToLiveRtmp::unInitAvEncoder() {
     if (!mHasInitSuccess)
         return;
     isRecording = false;
-    encode_frame_Av(nullptr,0,1);
-    encode_frame_Av(nullptr,0,2);
+    encode_frame_Av(nullptr, 0, 1);
+    encode_frame_Av(nullptr, 0, 2);
     LOGCATE("start unInit");
     // 视频
     av_write_trailer(ofmtctx);
@@ -129,22 +125,25 @@ void FFmpegEncodeAVToMp4::unInitAvEncoder(){
 }
 
 // 1-音频，2-视频
-void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int mediaType){
+void FFmpegEncodeAVToLiveRtmp::encode_frame_Av(uint8_t *buffer, int length, int mediaType) {
 
-    if (!mHasInitSuccess)
+    if (!mHasInitSuccess) {
         return;
-    if (!isRecording)
+    }
+    if (!isRecording) {
         return;
-
-    if (mediaType == 1){
+    }
+    std::unique_lock<std::mutex> lock(mutex);
+//    LOGCATE("begin encode every frame type:%d",mediaType);
+    if (mediaType == 1) {
         uint8_t *out[2];
         out[0] = new uint8_t[length];
         out[1] = new uint8_t[length];
 
-        const uint8_t * convert_buffer = buffer;
-        ret = swr_convert(swr,out,length * 4,&convert_buffer,length/4);
-        if (ret < 0){
-            LOGCATE("convert error:%s",av_err2str(ret));
+        const uint8_t *convert_buffer = buffer;
+        ret = swr_convert(swr, out, length * 4, &convert_buffer, length / 4);
+        if (ret < 0) {
+            LOGCATE("convert error:%s", av_err2str(ret));
             goto EndEncode;
         }
         frameA->data[0] = out[0];
@@ -152,7 +151,7 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
 
         ret = avcodec_send_frame(codeCtxA, frameA);
         if (ret < 0) {
-            LOGCATE("avcodec_send_frame failed :%s",av_err2str(ret));
+            LOGCATE("avcodec_send_frame failed :%s", av_err2str(ret));
             goto EndEncode;
         }
         while (ret >= 0) {
@@ -160,25 +159,49 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                 break;
             } else if (ret < 0) {
-                LOGCATE("avcodec_receive_packet failed :%s",av_err2str(ret));
+                LOGCATE("avcodec_receive_packet failed :%s", av_err2str(ret));
                 goto EndEncode;
             }
-            if (packetA->pts == AV_NOPTS_VALUE){
-                LOGCATE("no pts value");
+            pts_frame_indexA++;
+            if (packetA->pts == AV_NOPTS_VALUE) {
+//                //Write PTS
+//                LOGCATE("audio branch has no pts");
+                AVRational time_base1 = {60,44100};
+                //Duration between 2 frames (us)
+                int64_t calc_duration = (double) AV_TIME_BASE /
+                                        (44100/60.0);
+                //Parameters
+                packetA -> pts = (double) (pts_frame_indexA * calc_duration) /
+                          (double) (av_q2d(time_base1) * AV_TIME_BASE);
+                packetA -> dts = packetA -> pts;
+                packetA -> duration =
+                        (double) calc_duration / (double) (av_q2d(time_base1) * AV_TIME_BASE);
             }
-            if (packetA->dts == AV_NOPTS_VALUE){
+            if (packetA->dts == AV_NOPTS_VALUE) {
 //                LOGCATE("no dts value");
 //                packetA->dts = packetA->pts;
             }
             packetA->stream_index = oStreamA->index;
-            av_packet_rescale_ts(packetA, codeCtxA->time_base, oStreamA->time_base);
+
+            //PTS主要用于度量解码后的视频帧什么时候被显示出来
+//            packetA->pts = av_rescale_q_rnd(packetA->pts, in_stream->time_base, out_stream->time_base,
+//                                            (AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+//            //DTS主要是标识读入内存中的字节流在什么时候开始送入解码器中进行解码
+//            packetA->dts = av_rescale_q_rnd(packetA->dts, in_stream->time_base, out_stream->time_base,
+//                                            (AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+//            packetA->duration = av_rescale_q(packetA->duration, in_stream->time_base,
+//                                             out_stream->time_base);
+//            avPacket.pos = -1;
+
+//            av_packet_rescale_ts(packetA, codeCtxA->time_base, oStreamV->time_base);
             packetA->pos = -1;
-            LOGCATE("after changed audio branch has pts:%lld", packetA->pts);
-            ret = av_interleaved_write_frame(ofmtctx,packetA);
+
+//            LOGCATE("after changed audio branch has pts:%lld", packetA->pts);
+            ret = av_interleaved_write_frame(ofmtctx, packetA);
 //            logPkt(ofmtctx,packetA);
-            if (ret < 0){
-                LOGCATE("av_interleaved_write_frame failed :%s",av_err2str(ret));
-                goto EndEncode;
+            if (ret < 0) {
+                LOGCATE("av_interleaved_write_frame errorcode:%d failed :%s", ret, av_err2str(ret));
+                break;
             }
             av_packet_unref(packetA);
         }
@@ -188,10 +211,9 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
         delete out[0];
         delete out[1];
     } else {
-
         int ret;
         int y_size = codeCtxV->width * codeCtxV->height;
-        LOGCATE("encode width:%d height:%d", codeCtxV->width, codeCtxV->height);
+//        LOGCATE("encode width:%d height:%d", codeCtxV->width, codeCtxV->height);
         ret = av_frame_make_writable(frameV);
         if (ret < 0) {
             LOGCATE("av_frame_make_writable failed: code:%d  errorStr:%s", ret, av_err2str(ret));
@@ -201,54 +223,49 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
         frameV->data[1] = buffer + y_size;      // U
         frameV->data[2] = buffer + y_size * 5 / 4;  // V
 
-        AVRational time_base1 = codeCtxV->time_base;
-        //Duration between 2 frames (us)
         int64_t calc_duration =
                 (double) AV_TIME_BASE / av_q2d(codeCtxV->framerate);
-        //Parameters
         frameV->pkt_duration = calc_duration;
         frameV->pts = pts_frame_indexV;
 
-        LOGCATE("frame -> pts = %lld  duration:%lld",frameV->pts,calc_duration);
+
+//        LOGCATE("frame -> pts = %lld  duration:%lld", frameV->pts, calc_duration);
         ret = avcodec_send_frame(codeCtxV, frameV);
         if (ret < 0) {
             LOGCATE("avcodec_send_frame failed:%s", av_err2str(ret));
             return;
         }
 
+//        RTMPPacket
         while (ret >= 0) {
             ret = avcodec_receive_packet(codeCtxV, pktV);
+//            LOGCATE("receive packet:%s", av_err2str(ret));
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                LOGCATE("receive pkt AVERROR or AVERROR_EOF");
+                LOGCATE("receive pkt AVERROR or AVERROR_EOF errorStr:%s",av_err2str(ret));
                 break;
             } else if (ret < 0) {
                 LOGCATE("Error during encoding:%s", av_err2str(ret));
                 break;
             }
-
-            pktV->stream_index = oStreamV->index;
-//            av_packet_rescale_ts(pktV, codeCtxV->time_base, oStreamV->time_base);
-//            pktV->pos = -1;
-            logPkt(ofmtctx,pktV);
             ret = av_interleaved_write_frame(ofmtctx, pktV);
             if (ret < 0) {
-                LOGCATE("av_interleaved_write_frame failed:%s", av_err2str(ret));
+                LOGCATE("video av_interleaved_write_frame errorCode:%d failed:%s", ret, av_err2str(ret));
                 break;
             }
+            pts_frame_indexV++;
             av_packet_unref(pktV);
         }
-        pts_frame_indexV++;
     }
 }
 
-int FFmpegEncodeAVToMp4::initEncodeAudio(){
-    ret = avformat_alloc_output_context2(&ofmtctx, NULL, NULL, out_file_name);
+int FFmpegEncodeAVToLiveRtmp::initEncodeAudio() {
+    ret = avformat_alloc_output_context2(&ofmtctx, NULL, "flv", out_file_name);
     if (ret < 0) {
         LOGCATE("avformat_alloc_output_context2 failed:%s", av_err2str(ret));
         return ret;
     }
     AVOutputFormat *ofmt = ofmtctx->oformat;
-    codecA = avcodec_find_encoder(ofmt->audio_codec);
+    codecA = avcodec_find_encoder(AV_CODEC_ID_AAC);
     if (!codecA) {
         LOGCATE("can't find encoder");
         return ret;
@@ -260,16 +277,16 @@ int FFmpegEncodeAVToMp4::initEncodeAudio(){
         return ret;
     }
     configAudioEncodeParams(codeCtxA, codecA);
-    av_dump_format(ofmtctx,0,out_file_name,1);
+    av_dump_format(ofmtctx, 0, out_file_name, 1);
     ret = avcodec_open2(codeCtxA, codecA, NULL);
-    LOGCATE("check open audio encoder resultStr:%s",av_err2str(ret));
+    LOGCATE("check open audio encoder resultStr:%s", av_err2str(ret));
     if (checkNegativeReturn(ret, "can't open encoder")) return ret;
 
     // create output ctx
     oStreamA = avformat_new_stream(ofmtctx, NULL);
     ret = avcodec_parameters_from_context(oStreamA->codecpar, codeCtxA);
-    if (ret < 0){
-        LOGCATE("avcodec_parameters_from_context failed:%s",av_err2str(ret));
+    if (ret < 0) {
+        LOGCATE("avcodec_parameters_from_context failed:%s", av_err2str(ret));
         return ret;
     }
     oStreamA->codecpar->codec_tag = 0;
@@ -289,7 +306,8 @@ int FFmpegEncodeAVToMp4::initEncodeAudio(){
     int size = av_samples_get_buffer_size(NULL, codeCtxA->channels, codeCtxA->frame_size,
                                           codeCtxA->sample_fmt, 1);
     frame_bufferA = static_cast<uint8_t *>(av_malloc(size));
-    avcodec_fill_audio_frame(frameA, codeCtxA->channels, codeCtxA->sample_fmt, (const uint8_t*)frame_bufferA, size, 1);
+    avcodec_fill_audio_frame(frameA, codeCtxA->channels, codeCtxA->sample_fmt,
+                             (const uint8_t *) frame_bufferA, size, 1);
     if (checkNegativeReturn(ret, "can't alloc audio buffer")) return ret;
 
     //9.用于音频转码
@@ -309,13 +327,12 @@ int FFmpegEncodeAVToMp4::initEncodeAudio(){
     return ret;
 }
 
-int FFmpegEncodeAVToMp4::initEncodeVideo() {
+int FFmpegEncodeAVToLiveRtmp::initEncodeVideo() {
     LOGCATE("begin init FFmpegEncodeVideo");
 
     AVOutputFormat *ofmt = ofmtctx->oformat;
-//    LOGCATE("打印输出格式:%d 视频的:%d",ofmtctx.)
     /* find the mpeg1video encoder */
-    codecV = avcodec_find_encoder(ofmt->video_codec);
+    codecV = avcodec_find_encoder(AV_CODEC_ID_H264);
 //    codecV = avcodec_find_encoder_by_name("h264_mediacodec");
 
     if (!codecV) {
@@ -332,21 +349,21 @@ int FFmpegEncodeAVToMp4::initEncodeVideo() {
     codeCtxV->codec_id = codecV->id;
     codeCtxV->codec_type = AVMEDIA_TYPE_VIDEO;
     /* put sample parameters */
-    codeCtxV->bit_rate = 2500 * 1000;
+    codeCtxV->bit_rate = 1200 * 1024;
     /* resolution must be a multiple of two */
     codeCtxV->width = mWindow_height;
     codeCtxV->height = mWindow_width;
     /* frames per second */
-    codeCtxV->time_base = (AVRational) {1, 20};
-    codeCtxV->framerate = (AVRational) {20, 1};
+    codeCtxV->time_base = (AVRational) {1, frameRate};
+    codeCtxV->framerate = (AVRational) {frameRate, 1};
     LOGCATE("log width:%d height:%d", codeCtxV->width, codeCtxV->height);
-    codeCtxV->gop_size = 7;
+    codeCtxV->gop_size = frameRate;
     codeCtxV->max_b_frames = 1;
     codeCtxV->pix_fmt = AV_PIX_FMT_YUV420P;
 
     AVDictionary *opt = 0;
     if (codecV->id == AV_CODEC_ID_H264) {
-        av_dict_set_int(&opt, "video_track_timescale", 20, 0);
+        av_dict_set_int(&opt, "video_track_timescale", frameRate, 0);
         av_dict_set(&opt, "preset", "veryfast", 0);
         av_dict_set(&opt, "tune", "zerolatency", 0);
     }
@@ -358,11 +375,11 @@ int FFmpegEncodeAVToMp4::initEncodeVideo() {
         LOGCATE("avcodec_parameters_from_context failed:%s", av_err2str(ret));
         return ret;
     }
-    av_stream_set_r_frame_rate(oStreamV, {1, 25});
+    av_stream_set_r_frame_rate(oStreamV, {1, frameRate});
     oStreamV->codecpar->codec_tag = 0;
-    if (!(ofmtctx->flags & AVFMT_NOFILE)){
-        if((ret = avio_open(&ofmtctx->pb,out_file_name,AVIO_FLAG_WRITE)) < 0){
-            LOGCATE("avio_open failed:%s",av_err2str(ret));
+    if (!(ofmtctx->flags & AVFMT_NOFILE)) {
+        if ((ret = avio_open(&ofmtctx->pb, out_file_name, AVIO_FLAG_WRITE)) < 0) {
+            LOGCATE("avio_open failed:%s", av_err2str(ret));
             return ret;
         }
     }
@@ -426,7 +443,7 @@ int FFmpegEncodeAVToMp4::initEncodeVideo() {
  * 配置音频编码参数
  * @param pContext
  */
-void FFmpegEncodeAVToMp4::configAudioEncodeParams(AVCodecContext *pContext, AVCodec *codec) {
+void FFmpegEncodeAVToLiveRtmp::configAudioEncodeParams(AVCodecContext *pContext, AVCodec *codec) {
     pContext->codec_id = codec->id;
     pContext->codec_type = AVMEDIA_TYPE_AUDIO;
     pContext->sample_fmt = AV_SAMPLE_FMT_FLTP;
@@ -455,8 +472,8 @@ void FFmpegEncodeAVToMp4::configAudioEncodeParams(AVCodecContext *pContext, AVCo
             pContext->channels);
 }
 
-int FFmpegEncodeAVToMp4::check_sample_fmt(const AVCodec *codec, enum AVSampleFormat sample_fmt)
-{
+int
+FFmpegEncodeAVToLiveRtmp::check_sample_fmt(const AVCodec *codec, enum AVSampleFormat sample_fmt) {
     const enum AVSampleFormat *p = codec->sample_fmts;
 
     while (*p != AV_SAMPLE_FMT_NONE) {
@@ -467,14 +484,14 @@ int FFmpegEncodeAVToMp4::check_sample_fmt(const AVCodec *codec, enum AVSampleFor
     return 0;
 }
 
-void FFmpegEncodeAVToMp4::configFrameParams(AVFrame *pFrame, AVCodecContext *pContext) {
+void FFmpegEncodeAVToLiveRtmp::configFrameParams(AVFrame *pFrame, AVCodecContext *pContext) {
     pFrame->nb_samples = pContext->frame_size;
     pFrame->format = pContext->sample_fmt;
 
 }
 
 
-int FFmpegEncodeAVToMp4::select_sample_rate(AVCodec *codec) {
+int FFmpegEncodeAVToLiveRtmp::select_sample_rate(AVCodec *codec) {
     const int *p;
     int best_samplerate = 0;
 
@@ -487,11 +504,11 @@ int FFmpegEncodeAVToMp4::select_sample_rate(AVCodec *codec) {
             best_samplerate = *p;
         p++;
     }
-    LOGCATE("pring best sample_rate:%d",best_samplerate);
+    LOGCATE("pring best sample_rate:%d", best_samplerate);
     return best_samplerate;
 }
 
-uint64_t FFmpegEncodeAVToMp4::select_channel_layout(AVCodec *codec) {
+uint64_t FFmpegEncodeAVToLiveRtmp::select_channel_layout(AVCodec *codec) {
     const uint64_t *p;
     uint64_t best_ch_layout = 0;
     int best_nb_channels = 0;
@@ -513,7 +530,7 @@ uint64_t FFmpegEncodeAVToMp4::select_channel_layout(AVCodec *codec) {
 }
 
 
-int FFmpegEncodeAVToMp4::check_sample_fmt(AVCodec *pCodec, AVSampleFormat sample_fmt) {
+int FFmpegEncodeAVToLiveRtmp::check_sample_fmt(AVCodec *pCodec, AVSampleFormat sample_fmt) {
     const enum AVSampleFormat *p = pCodec->sample_fmts;
 
     while (*p != AV_SAMPLE_FMT_NONE) {
@@ -524,12 +541,13 @@ int FFmpegEncodeAVToMp4::check_sample_fmt(AVCodec *pCodec, AVSampleFormat sample
     return 0;
 }
 
-void FFmpegEncodeAVToMp4::logPkt(AVFormatContext *pContext, AVPacket *pkt) {
-    AVRational *time_base = &ofmtctx->streams[pkt->stream_index]->time_base;
-
-    LOGCATE("some detail info ----- pts:%s pts_time:%s dts:%s dts_time:%s duration:%s duration_time:%s stream_index:%d\n",
-           av_ts2str(pkt->pts), av_ts2timestr(pkt->pts, time_base),
-           av_ts2str(pkt->dts), av_ts2timestr(pkt->dts, time_base),
-           av_ts2str(pkt->duration), av_ts2timestr(pkt->duration, time_base),
-           pkt->stream_index);
+void FFmpegEncodeAVToLiveRtmp::logPkt(AVFormatContext *pContext, AVPacket *pPacket, int index,
+                                      AVRational rational) {
+    AVRational *time_base = &ofmtctx->streams[pPacket->stream_index]->time_base;
+    LOGCATE("Send frame index:%d,pts:%lld,dts:%lld,duration:%lld,time_base:%d,%d",
+         index,
+         (long long) pPacket->pts,
+         (long long) pPacket->dts,
+         (long long) pPacket->duration,
+         time_base -> num, time_base ->den);
 }
