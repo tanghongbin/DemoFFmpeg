@@ -1,7 +1,5 @@
 package com.example.democ.ffmpeg
 
-import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -45,7 +43,8 @@ class FFmpegNavigationActivity : AppCompatActivity() {
         FFmpegFilterAddToYuvActivity::class.java,
         FFmpegEncodeAVToMp4Activity::class.java,
         FFmpegHwEncodeMuxerActivity::class.java,
-        FFmpegLiveRtmpActivity::class.java,
+        FFmpegRtmpNativeActivity::class.java,
+        FFmpegRtmpJavaHwActivity::class.java,
         FFmpegTestNewCameraHelperActivity::class.java
     )
 

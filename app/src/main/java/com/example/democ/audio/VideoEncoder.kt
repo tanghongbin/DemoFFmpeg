@@ -1,13 +1,17 @@
 package com.example.democ.audio
 
+import android.animation.TimeAnimator
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.democ.MainActivity.Companion.log
+import com.example.democ.hwencoder.VideoConfiguration
+import com.example.democ.hwencoder.VideoMediaCodec
 import com.example.democ.interfaces.OutputEncodedDataListener
 import com.example.democ.utils.JavaYuvConvertHelper
+import com.example.democ.utils.TimeTracker
 import com.libyuv.LibyuvUtil
 //import com.libyuv.util.YuvUtil
 import java.io.IOException
@@ -27,7 +31,7 @@ import java.util.concurrent.LinkedBlockingDeque
 class VideoEncoder {
 
 
-    companion object{
+    companion object {
         private final const val MAX_SIZE = 100
     }
 
@@ -44,7 +48,7 @@ class VideoEncoder {
     var startTime = 0L
     private var mOutputListener: OutputEncodedDataListener? = null
 
-    fun setOutputListener(listener:OutputEncodedDataListener){
+    fun setOutputListener(listener: OutputEncodedDataListener?) {
         this.mOutputListener = listener
     }
 
@@ -60,43 +64,28 @@ class VideoEncoder {
 
 
     private fun initMediaCodec() {
-        yuv420spsrc = ByteArray(mWidth * mHeight * 3 / 2)
         log("width:${mWidth} --mHeight:${mHeight} 分配内存大小:${mWidth * mHeight * 3 / 2}")
         //编码格式，AVC对应的是H264
-        val mediaFormat =
-            MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, mHeight, mWidth)
-        //YUV 420 对应的是图片颜色采样格式
-        mediaFormat.setInteger(
-            MediaFormat.KEY_COLOR_FORMAT,
-            MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible
-        )
-        //比特率
-        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 3000000)
-        //帧率
-        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 30)
-        //I 帧间隔
-        mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
-        try {
-            mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
-            //创建生成MP4初始化对象
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-//        configAsync()
-        //进入配置状态
-        mediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+
+        val config = VideoConfiguration.Builder().apply {
+            setSize(mHeight, mWidth)
+                .setBps(1200, 1800)
+                .setFps(20)
+                .setIfi(1)
+        }.build()
+        mediaCodec = VideoMediaCodec.getVideoMediaCodec(config)
+        yuv420spsrc = ByteArray(mHeight * mWidth * 3 / 2)
         //进行生命周期执行状态
         mediaCodec.start()
     }
-
-
-
 
     fun startEncode() {
         initMediaCodec()
         // 开启线程轮询编码
         thread = innerThread()
         thread?.start()
+        startTime = System.nanoTime()
+//        log("视频的开始时间:${}")
     }
 
     fun stopEncode() {
@@ -124,14 +113,14 @@ class VideoEncoder {
 
             @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun run() {
-                val startTime = System.nanoTime()
+
                 while (!isClosed) {
 //                    log("has encode video start")
-//                    TimeTracker.trackBegin()
+                    val innerStart = System.currentTimeMillis()
                     try {
                         val inputBuff = getInputBuffer()
                         @Suppress("FoldInitializerAndIfToElvis")
-                        if (inputBuff == null){
+                        if (inputBuff == null) {
                             log("get input buffer is null,must finished")
                             break
                         }
@@ -152,13 +141,14 @@ class VideoEncoder {
                         val outputId = mediaCodec.dequeueOutputBuffer(info, 1000)
                         if (outputId > 0) {
                             val byteBuffer = mediaCodec.getOutputBuffer(outputId)
-                            val byteArray = ByteArray(info.size)
-                            byteBuffer?.get(byteArray)
-                            byteBuffer?.position(info.offset)
-                            byteBuffer?.limit(info.offset + info.size)
+//                            val byteArray = ByteArray(info.size)
+//                            byteBuffer?.get(byteArray)
+//                            byteBuffer?.position(info.offset)
+//                            byteBuffer?.limit(info.offset + info.size)
                             // 写入混合流中
-                            if (MuxerManager.getInstance().isReady() && byteBuffer != null) {
-                                mOutputListener?.outputData(trackId,byteBuffer,info)
+//                            log("硬编码总时长:${System.currentTimeMillis() - innerStart}")
+                            if (byteBuffer != null) {
+                                mOutputListener?.outputData(byteBuffer, info)
 //                                MuxerManager.getInstance().writeSampleData(trackId, byteBuffer, info)
 //                            log("视频写入数据2:$trackId   buffer:$byteBuffer")
                             }
@@ -169,11 +159,11 @@ class VideoEncoder {
 //                            trackId = MuxerManager.getInstance().addTrack(mediaCodec.outputFormat)
 //                            MuxerManager.getInstance().start()
                         }
-                    }catch (e:InterruptedException){
+                    } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
 //                    log("has encode video frame over")
-//                    TimeTracker.trackEnd()
+
                 }
                 log("encode video finished")
             }
@@ -182,7 +172,7 @@ class VideoEncoder {
 
     fun saveVideoByte(byteArray: ByteArray?) {
 //        log("put every frame data:${byteArray?.size}")
-        if (videoByteList.size > MAX_SIZE){
+        if (videoByteList.size > MAX_SIZE) {
             videoByteList.poll()
         }
         videoByteList.put(byteArray)
@@ -197,7 +187,7 @@ class VideoEncoder {
         return yuv420spsrc
     }
 
-    private fun nv212nv12(srcData: ByteArray?, dstData: ByteArray, mWidth: Int, mHeight: Int):Int {
+    private fun nv212nv12(srcData: ByteArray?, dstData: ByteArray, mWidth: Int, mHeight: Int): Int {
         if (srcData == null || dstData == null) {
             return -1
         }
@@ -209,7 +199,7 @@ class VideoEncoder {
         if (!hasSetOretation) throw IllegalStateException("mDegree is invalid")
 //        log("srcData:${srcData?.size} dstData:${dstData?.size}")
 
-        JavaYuvConvertHelper.convert(
+        JavaYuvConvertHelper.convertNv21ToNv12(
             srcData,
             dstData,
             windowWidth,

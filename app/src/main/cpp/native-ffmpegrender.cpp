@@ -25,7 +25,7 @@
 #include <swscale/ConvertMp4ToFlv.h>
 #include <muxer/CustomDemuxer.h>
 #include <muxer/CustomMuxer.h>
-//#include "../../../../old_files/SingleNodeList.hpp"
+#include "../../../../old_files/SingleNodeList.hpp"
 #include <TimeTracker.h>
 #include <encode/FFmpegEncodeAVToMp4.h>
 #include <encode/FFmpegEncodeAVToLiveRtmp.h>
@@ -367,6 +367,26 @@ JNIEXPORT void JNICALL native_live_encodeFrame(JNIEnv *env, jobject instance,
 
 }
 
+
+/****
+ *  ======================================== rtmp 推流 ======================================
+ */
+
+JNIEXPORT void JNICALL native_sendPacketData(JNIEnv *env, jobject instance,
+                                              jbyteArray imageData,jint type) {
+
+    LOGCATE("jni has receive data:%p  type:%d",imageData,type);
+
+}
+
+JNIEXPORT void JNICALL native_rtmp_init(JNIEnv *env, jobject instance,jstring url) {
+
+}
+
+JNIEXPORT void JNICALL native_rtmp_destroy(JNIEnv *env, jobject instance) {
+
+}
+
 static int
 RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum) {
     LOGCATE("RegisterNativeMethods");
@@ -436,6 +456,13 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_live_startpush",                    "()V",                                       (void *) (native_live_startpush)},
         {"native_live_stoppush",                    "()V",                                       (void *) (native_live_stoppush)},
         {"native_live_onDestroy",                    "()V",                                       (void *) (native_live_onDestroy)},
+
+        /****
+         * ================================= rtmp 推流
+         */
+        {"native_sendPacketData",      "([BI)V",                                       (void *) (native_sendPacketData)},
+        {"native_rtmp_init",                    "(Ljava/lang/String;)V",                                       (void *) (native_rtmp_init)},
+        {"native_rtmp_destroy",                    "()V",                                       (void *) (native_rtmp_destroy)},
 
 };
 

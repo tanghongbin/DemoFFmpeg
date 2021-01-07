@@ -113,4 +113,12 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     external fun native_live_encodeFrame(byteArray: ByteArray)
 
+    //========================    RTMP 推流 ====================
+
+    external fun native_sendPacketData(byteArray: ByteArray,type:Int)
+
+    external fun native_rtmp_init()
+
+    external fun native_rtmp_destroy()
+
 }

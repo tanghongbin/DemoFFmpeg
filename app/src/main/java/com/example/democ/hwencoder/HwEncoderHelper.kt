@@ -1,15 +1,14 @@
 package com.example.democ.hwencoder
 
-import android.media.MediaCodec
-import android.media.MediaFormat
 import android.view.SurfaceHolder
 import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
 import com.example.camera.manager.CameraSurfaceView
 import com.example.democ.audio.*
 import com.example.democ.interfaces.OutputEncodedDataListener
+import com.example.democ.interfaces.OutputInitListener
 import java.lang.IllegalStateException
-import java.nio.ByteBuffer
+import java.lang.NullPointerException
 
 /**
  *
@@ -25,13 +24,15 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
 
     private var mTestStart = false
     private var mInited = false
-    private val mAudioRecorder by lazy { CustomAudioCapturer() }
+    private val mAudioRecorder by lazy { AudioRecorder() }
     private val player by lazy { CustomAudioTrack() }
     private val mAudioEncoder by lazy { AudioEncoder() }
     private val decoder by lazy { AudioDecoder() }
     private val mVideoEncoder by lazy { VideoEncoder() }
     private lateinit var mCameraSurfaceManager: CameraSurfaceManager
-
+    private var audioOutputListener:OutputEncodedDataListener? = null
+    private var videoOutputListener:OutputEncodedDataListener? = null
+    private var initListener:OutputInitListener? = null
 
     fun init() {
         if (mInited) return
@@ -41,35 +42,32 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
         mInited = true
     }
 
+    fun setAudioOutputListener(listener:OutputEncodedDataListener?){
+        audioOutputListener = listener
+    }
+
+    fun setVideoOutputListener(listener:OutputEncodedDataListener?){
+        videoOutputListener = listener
+    }
+
+    fun setOutputInitListener(listener:OutputInitListener?){
+        initListener = listener
+    }
+
     fun startRecord() {
         if (!mInited) throw IllegalStateException("you must call init() before startRecord()")
+        if (audioOutputListener == null || videoOutputListener == null || initListener == null)
+            throw NullPointerException("audioOutputListener or initListener can't be null")
         if (mTestStart) return
         mTestStart = true
-        MuxerManager.getInstance().init()
-        mAudioRecorder.mListener = object : ByteBufferListener {
-            override fun listener(buffer: ByteArray) {
-                mAudioEncoder.encode(buffer)
-            }
+        initListener?.init()
+        mAudioRecorder.setOnAudioFrameCapturedListener {
+            mAudioEncoder.encode(it)
         }
-        val listener = object : OutputEncodedDataListener {
-            override fun outputData(
-                trackId: Int,
-                byteBuffer: ByteBuffer,
-                bufferInfo: MediaCodec.BufferInfo
-            ) {
-                MuxerManager.getInstance()
-                    .writeSampleData(trackId, byteBuffer, bufferInfo);
-            }
-
-            override fun outputFormatChanged(mediaFormat: MediaFormat) {
-                MuxerManager.getInstance().addTrack(mediaFormat)
-                MuxerManager.getInstance().start()
-            }
-        }
-        mAudioEncoder.setOutputListener(listener)
-        mVideoEncoder.setOutputListener(listener)
         mAudioRecorder.startCapture()
-        mAudioEncoder.startRunTask()
+        mAudioEncoder.setOutputListener(audioOutputListener)
+        mVideoEncoder.setOutputListener(videoOutputListener)
+        mAudioEncoder.startEncode()
         mVideoEncoder.startEncode()
         log("already start record")
     }
@@ -80,7 +78,7 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
         mVideoEncoder.stopEncode()
         mAudioRecorder.stopCapture()
         mAudioEncoder.close()
-        MuxerManager.getInstance().stop()
+        initListener?.unInit()
         log("already stop record")
     }
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".hwencoder.FFmpegHwEncodeMuxerActivity">
+
+    <com.example.camera.manager.CameraSurfaceView
+        android:layout_width="match_parent"
+        android:id="@+id/mRtmpJavaSurface"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:text="开始推流"
+            android:id="@+id/mRtmpJavaStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:layout_marginStart="20dp"
+            android:text="停止推流"
+            android:id="@+id/mRtmpJavaStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</FrameLayout>

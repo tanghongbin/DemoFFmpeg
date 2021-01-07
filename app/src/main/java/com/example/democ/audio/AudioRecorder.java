@@ -16,14 +16,12 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import com.example.democ.hwencoder.AudioConfiguration;
+import com.example.democ.utils.AudioUtils;
+
 public class AudioRecorder {
 
     private static final String TAG = "AudioRecorder";
-	
-    private static final int DEFAULT_SOURCE = MediaRecorder.AudioSource.MIC;
-    private static final int DEFAULT_SAMPLE_RATE = 44100;
-    private static final int DEFAULT_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
-    private static final int DEFAULT_AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
 
     private AudioRecord mAudioRecord;
     private int mMinBufferSize = 0;
@@ -47,25 +45,20 @@ public class AudioRecorder {
     }
 
     public boolean startCapture() {
-        return startCapture(DEFAULT_SOURCE, DEFAULT_SAMPLE_RATE, DEFAULT_CHANNEL_CONFIG,
-            DEFAULT_AUDIO_FORMAT);
-    }
-
-    private boolean startCapture(int audioSource, int sampleRateInHz, int channelConfig, int audioFormat) {
 
         if (mIsCaptureStarted) {
             Log.e(TAG, "Capture already started !");
             return false;
         }
     
-        mMinBufferSize = AudioRecord.getMinBufferSize(sampleRateInHz,channelConfig,audioFormat);
+        mMinBufferSize = AudioUtils.getRecordBufferSize(AudioConfiguration.createDefault());
         if (mMinBufferSize == AudioRecord.ERROR_BAD_VALUE) {
             Log.e(TAG, "Invalid parameter !");
             return false;
         }
         Log.d(TAG , "getMinBufferSize = "+mMinBufferSize+" bytes !");
 		
-        mAudioRecord = new AudioRecord(audioSource,sampleRateInHz,channelConfig,audioFormat,mMinBufferSize);				
+        mAudioRecord = AudioUtils.getAudioRecord(AudioConfiguration.createDefault());
         if (mAudioRecord.getState() == AudioRecord.STATE_UNINITIALIZED) {
     	    Log.e(TAG, "AudioRecord initialize fail !");
 	    return false;

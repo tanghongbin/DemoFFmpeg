@@ -22,4 +22,6 @@ object Constants {
     // =================== download -=====================================
     val MP4_DOWNLOAD_FUNNY_VIDEO = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/funny_video.mp4"
     val FLV_DOWNLOAD_MY_LOGO = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/my_logo.flv"
+
+    val HW_MEDIA_CODEC_TIMEOUT = 12000
 }

@@ -23,7 +23,7 @@ import kotlinx.android.synthetic.main.activity_live_rtmp.*
  * desc   : 将麦克风，摄像机采集的数据编码成aac,h264再合并输出成mp4文件
  *
  **/
-class FFmpegLiveRtmpActivity : AppCompatActivity(), SurfaceHolder.Callback,
+class FFmpegRtmpNativeActivity : AppCompatActivity(), SurfaceHolder.Callback,
     CameraYUVDataListener {
 
     lateinit var mCameraSurfaceManager: CameraSurfaceManager

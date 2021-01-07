@@ -26,7 +26,8 @@
         <activity android:name=".ffmpeg.FFmpegEncodeAudioActivity" />
         <activity android:name=".ffmpeg.FFmpegNavigationActivity" />
         <activity android:name=".ffmpeg.FFmpegAboutActivity" />
-        <activity android:name=".ffmpeg.FFmpegLiveRtmpActivity" />
+        <activity android:name=".ffmpeg.FFmpegRtmpNativeActivity" />
+        <activity android:name=".ffmpeg.FFmpegRtmpJavaHwActivity" />
         <activity android:name=".ffmpeg.FFmpegNativeWindowActivity" />
         <activity android:name=".SplashActivity">
             <intent-filter>

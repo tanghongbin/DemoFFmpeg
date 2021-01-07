@@ -44,7 +44,7 @@ class AudioTestActivity : AppCompatActivity() ,View.OnClickListener{
                 }
 //                mAudioEncoder.open()
                 mAudioDecoder.open()
-                mAudioEncoder.startRunTask()
+                mAudioEncoder.startEncode()
                 mAudioDecoder.startRunTask()
                 mAudioCapture.startCapture()
                 mAudioPlayer.startPlayer()
