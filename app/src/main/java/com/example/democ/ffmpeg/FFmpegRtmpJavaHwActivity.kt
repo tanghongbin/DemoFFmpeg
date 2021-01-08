@@ -13,6 +13,7 @@ import com.example.democ.interfaces.OutputEncodedDataListener
 import com.example.democ.interfaces.OutputInitListener
 import com.example.democ.render.FFmpegRender
 import com.example.democ.rtmp.packer.rtmp.RtmpPacker
+import com.example.democ.utils.Constants
 import com.example.democ.utils.LogUtils
 import com.example.democ.utils.RtmpPushManager
 import kotlinx.android.synthetic.main.activity_rtmp_java_hw.*
@@ -95,7 +96,7 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
             LogUtils.log("has receive packet data:${data} type:${packetType}")
             mRtmpSender.native_sendPacketData(data,packetType)
         }
-        mRtmpSender.native_rtmp_init()
+        mRtmpSender.native_rtmp_init(Constants.RTMP_ANDROID_PUSH)
     }
 
     private fun isReady(): Boolean {
@@ -113,6 +114,7 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
     }
 
     override fun onDestroy() {
+        mRtmpSender.native_rtmp_destroy()
         super.onDestroy()
     }
 

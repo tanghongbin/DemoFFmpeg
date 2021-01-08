@@ -34,3 +34,8 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+//project.ext {
+//    useASAN = true
+//    ndkDir = properties.get('ndk.dir')
+//}

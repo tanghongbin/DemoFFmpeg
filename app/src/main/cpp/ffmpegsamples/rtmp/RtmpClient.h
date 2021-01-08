@@ -6,8 +6,24 @@
 #define DEMOC_RTMPCLIENT_H
 
 
+extern "C"{
+#include <rtmp.h>
+};
+
 #include <thread>
+#include <CustomSafeQueue.h>
+
 #include "../../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/c++/v1/cstdint"
+
+
+#define FIRST_VIDEO  1
+#define  FIRST_AUDIO  2
+#define  AUDIO  3
+#define  KEY_FRAME  4
+#define  INTER_FRAME  5
+#define  CONFIGRATION  6
+#define  PCM  7
+#define  YUV  8
 
 class RtmpClient {
 
@@ -17,10 +33,13 @@ private:
     std::thread *thread;
     RTMP *rtmp;
     static void loop(RtmpClient* client);
+    bool isStart = true;
+    CustomSafeQueue<RTMPPacket* > mDataQueue;
 
 
 public:
-    bool isStart = true;
+
+
 
     static RtmpClient* getInstance();
 
@@ -30,7 +49,13 @@ public:
 
     void destroyRtmp();
 
-    void sendData(uint8_t* data,int type);
+    void sendData(uint8_t* data,int type,int size);
+
+    void pushAACData(uint8_t *data, int dataLen);
+
+    void pushH264(uint8_t *data, int dataLen);
+
+    void pushData(RTMPPacket *packet);
 };
 
 

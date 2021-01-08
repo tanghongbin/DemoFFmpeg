@@ -25,11 +25,11 @@
 #include <swscale/ConvertMp4ToFlv.h>
 #include <muxer/CustomDemuxer.h>
 #include <muxer/CustomMuxer.h>
-#include "../../../../old_files/SingleNodeList.hpp"
 #include <TimeTracker.h>
 #include <encode/FFmpegEncodeAVToMp4.h>
 #include <encode/FFmpegEncodeAVToLiveRtmp.h>
 #include <rtmp.h>
+#include <rtmp/RtmpClient.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
@@ -373,18 +373,29 @@ JNIEXPORT void JNICALL native_live_encodeFrame(JNIEnv *env, jobject instance,
  */
 
 JNIEXPORT void JNICALL native_sendPacketData(JNIEnv *env, jobject instance,
-                                              jbyteArray imageData,jint type) {
+                                              jbyteArray byteData,jint type) {
+    int length = env->GetArrayLength(byteData);
 
-    LOGCATE("jni has receive data:%p  type:%d",imageData,type);
+    LOGCATE("log data size:%d",length);
+
+    jbyte *data = env->GetByteArrayElements(byteData, 0);
+
+    RtmpClient::getInstance()->sendData(reinterpret_cast<uint8_t *>(data),type,length);
+
+    env->ReleaseByteArrayElements(byteData, data, 0);
+//    LOGCATE("jni has receive data:%p  type:%d",byteData,type);
 
 }
 
 JNIEXPORT void JNICALL native_rtmp_init(JNIEnv *env, jobject instance,jstring url) {
-
+    RtmpClient::destroyInstance();
+    char * result = const_cast<char *>(getCharStrFromJstring(env, url));
+    RtmpClient::getInstance()->initRtmp(result);
 }
 
 JNIEXPORT void JNICALL native_rtmp_destroy(JNIEnv *env, jobject instance) {
-
+    RtmpClient::getInstance()->destroyRtmp();
+    RtmpClient::getInstance()->destroyInstance();
 }
 
 static int
@@ -462,7 +473,7 @@ static JNINativeMethod g_RenderMethods[] = {
          */
         {"native_sendPacketData",      "([BI)V",                                       (void *) (native_sendPacketData)},
         {"native_rtmp_init",                    "(Ljava/lang/String;)V",                                       (void *) (native_rtmp_init)},
-        {"native_rtmp_destroy",                    "()V",                                       (void *) (native_rtmp_destroy)},
+        {"native_rtmp_destroy",                    "()V",                                       (void *) (native_rtmp_destroy)}
 
 };
 

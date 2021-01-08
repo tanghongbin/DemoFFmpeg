@@ -1,5 +1,6 @@
 package com.example.democ.hwencoder
 
+import android.hardware.Camera
 import android.view.SurfaceHolder
 import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
@@ -37,6 +38,8 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
     fun init() {
         if (mInited) return
         mCameraSurfaceManager = CameraSurfaceManager(cameraSurfaceView)
+        mCameraSurfaceManager.mCameraUtil.currentCameraType =
+            Camera.CameraInfo.CAMERA_FACING_FRONT
         cameraSurfaceView.setCameraYUVDataListener(this)
         cameraSurfaceView.setmHolderCall(this)
         mInited = true
