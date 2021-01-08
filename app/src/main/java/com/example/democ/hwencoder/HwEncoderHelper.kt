@@ -34,6 +34,11 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
     private var audioOutputListener:OutputEncodedDataListener? = null
     private var videoOutputListener:OutputEncodedDataListener? = null
     private var initListener:OutputInitListener? = null
+    private var mCaptureMode = CaptureMode.RECORD
+
+    fun setCaptureMode(mode:CaptureMode){
+        mCaptureMode = mode
+    }
 
     fun init() {
         if (mInited) return
@@ -44,6 +49,8 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
         cameraSurfaceView.setmHolderCall(this)
         mInited = true
     }
+
+
 
     fun setAudioOutputListener(listener:OutputEncodedDataListener?){
         audioOutputListener = listener
@@ -62,7 +69,6 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
         if (audioOutputListener == null || videoOutputListener == null || initListener == null)
             throw NullPointerException("audioOutputListener or initListener can't be null")
         if (mTestStart) return
-        mTestStart = true
         initListener?.init()
         mAudioRecorder.setOnAudioFrameCapturedListener {
             mAudioEncoder.encode(it)
@@ -70,8 +76,11 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
         mAudioRecorder.startCapture()
         mAudioEncoder.setOutputListener(audioOutputListener)
         mVideoEncoder.setOutputListener(videoOutputListener)
+        mAudioEncoder.setCaptureMode(mCaptureMode)
+        mVideoEncoder.setCaptureMode(mCaptureMode)
         mAudioEncoder.startEncode()
         mVideoEncoder.startEncode()
+        mTestStart = true
         log("already start record")
     }
 
@@ -89,6 +98,7 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
 //        log("callback every data:${mTestStart} size:${data?.size}")
 //        TimeTracker.trackBegin()
 
+        if (!mTestStart) return
         mVideoEncoder.saveVideoByte(srcData)
 //        TimeTracker.trackEnd()
     }
@@ -120,5 +130,11 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
 
+    }
+
+    // 录像保存到本地，直播推流
+    enum class CaptureMode{
+        RECORD,
+        LIVE
     }
 }

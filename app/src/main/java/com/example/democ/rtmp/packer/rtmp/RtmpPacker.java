@@ -61,13 +61,36 @@ public class RtmpPacker implements Packer, AnnexbHelper.AnnexbNaluListener {
 
     @Override
     public void onVideoData(ByteBuffer bb, MediaCodec.BufferInfo bi) {
+        confirmFirstFrameInfoWrite();
         mAnnexbHelper.analyseVideoData(bb, bi);
+    }
+
+    // 自己加的，因为mediacodec 拿不到编码信息
+    private void confirmFirstFrameInfoWrite() {
+        if (isHeaderWrite) return;
+        byte[] sps = new byte[9];
+        sps[0] = 103;
+        sps[1] = 66;
+        sps[2] = -64;
+        sps[3] = 31;
+        sps[4] = -38;
+
+        sps[5] = 2;
+        sps[6] = -48;
+        sps[7] = 40;
+        sps[8] = 68;
+        byte[] pps = new byte[9];
+        pps[0] = 104;
+        pps[1] = -54;
+        pps[2] = -113;
+        pps[3] = 32;
+        onSpsPps(sps,pps);
     }
 
     @Override
     public void onAudioData(ByteBuffer bb, MediaCodec.BufferInfo bi) {
         if (packetListener == null
-//                || !isHeaderWrite || !isKeyFrameWrite
+                || !isHeaderWrite || !isKeyFrameWrite
         ) {
             return;
         }
@@ -92,7 +115,7 @@ public class RtmpPacker implements Packer, AnnexbHelper.AnnexbNaluListener {
     @Override
     public void onVideo(byte[] video, boolean isKeyFrame) {
         if (packetListener == null
-//                || !isHeaderWrite
+                || !isHeaderWrite
         ) {
             return;
         }
@@ -102,9 +125,9 @@ public class RtmpPacker implements Packer, AnnexbHelper.AnnexbNaluListener {
             packetType = KEY_FRAME;
         }
         //确保第一帧是关键帧，避免一开始出现灰色模糊界面
-//        if (!isKeyFrameWrite) {
-//            return;
-//        }
+        if (!isKeyFrameWrite) {
+            return;
+        }
         int size = VIDEO_HEADER_SIZE + video.length;
         ByteBuffer buffer = ByteBuffer.allocate(size);
         FlvPackerHelper.writeH264Packet(buffer, video, isKeyFrame);
@@ -113,7 +136,7 @@ public class RtmpPacker implements Packer, AnnexbHelper.AnnexbNaluListener {
 
     @Override
     public void onSpsPps(byte[] sps, byte[] pps) {
-        LogUtils.INSTANCE.log("prepare write sps pps  ==="+packetListener);
+//        LogUtils.INSTANCE.log("prepare write sps pps  ==="+packetListener);
         if (packetListener == null) {
             return;
         }

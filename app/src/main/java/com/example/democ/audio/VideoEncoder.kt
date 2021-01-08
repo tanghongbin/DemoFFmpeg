@@ -1,21 +1,15 @@
 package com.example.democ.audio
 
-import android.animation.TimeAnimator
+//import com.libyuv.util.YuvUtil
 import android.media.MediaCodec
-import android.media.MediaCodecInfo
-import android.media.MediaFormat
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.democ.MainActivity.Companion.log
+import com.example.democ.hwencoder.HwEncoderHelper
 import com.example.democ.hwencoder.VideoConfiguration
 import com.example.democ.hwencoder.VideoMediaCodec
 import com.example.democ.interfaces.OutputEncodedDataListener
 import com.example.democ.utils.JavaYuvConvertHelper
-import com.example.democ.utils.TimeTracker
-import com.libyuv.LibyuvUtil
-//import com.libyuv.util.YuvUtil
-import java.io.IOException
-import java.nio.ByteBuffer
 import java.util.concurrent.LinkedBlockingDeque
 
 /**
@@ -36,7 +30,7 @@ class VideoEncoder {
     }
 
     private lateinit var mediaCodec: MediaCodec
-    private lateinit var yuv420spsrc: ByteArray
+    //    private lateinit var yuv420spsrc: ByteArray
     private var mWidth = 0
     private var mHeight = 0
     private var isClosed = false
@@ -47,6 +41,12 @@ class VideoEncoder {
     var thread: Thread? = null
     var startTime = 0L
     private var mOutputListener: OutputEncodedDataListener? = null
+
+    private var mCaptureMode = HwEncoderHelper.CaptureMode.RECORD
+
+    fun setCaptureMode(mode: HwEncoderHelper.CaptureMode) {
+        mCaptureMode = mode
+    }
 
     fun setOutputListener(listener: OutputEncodedDataListener?) {
         this.mOutputListener = listener
@@ -69,12 +69,12 @@ class VideoEncoder {
 
         val config = VideoConfiguration.Builder().apply {
             setSize(mHeight, mWidth)
-                .setBps(1200, 1800)
+                .setBps(400, 600)
                 .setFps(20)
                 .setIfi(1)
         }.build()
         mediaCodec = VideoMediaCodec.getVideoMediaCodec(config)
-        yuv420spsrc = ByteArray(mHeight * mWidth * 3 / 2)
+//        yuv420spsrc = ByteArray(mHeight * mWidth * 3 / 2)
         //进行生命周期执行状态
         mediaCodec.start()
     }
@@ -118,27 +118,29 @@ class VideoEncoder {
 //                    log("has encode video start")
                     val innerStart = System.currentTimeMillis()
                     try {
-                        val inputBuff = getInputBuffer()
-                        @Suppress("FoldInitializerAndIfToElvis")
-                        if (inputBuff == null) {
-                            log("get input buffer is null,must finished")
-                            break
-                        }
-                        val bufferId = mediaCodec.dequeueInputBuffer(1000)
+                        val bufferId = mediaCodec.dequeueInputBuffer(12000)
                         if (bufferId > 0) {
                             val byteBuffer = mediaCodec.getInputBuffer(bufferId)
+                            val inputBuff = getInputBuffer()
+                            @Suppress("FoldInitializerAndIfToElvis")
+                            if (inputBuff == null) {
+                                log("get input buffer is null,must finished")
+                                break
+                            }
                             byteBuffer?.put(inputBuff)
+                            val timeStamp: Long =
+                                if (mCaptureMode === HwEncoderHelper.CaptureMode.RECORD) (System.nanoTime() - startTime) / 1000 else 0
                             mediaCodec.queueInputBuffer(
                                 bufferId,
                                 0,
                                 inputBuff.size,
-                                (System.nanoTime() - startTime) / 1000,
+                                timeStamp,
                                 0
                             )
                         }
 //                    log("has encode video middle")
                         val info = MediaCodec.BufferInfo()
-                        val outputId = mediaCodec.dequeueOutputBuffer(info, 1000)
+                        val outputId = mediaCodec.dequeueOutputBuffer(info, 12000)
                         if (outputId > 0) {
                             val byteBuffer = mediaCodec.getOutputBuffer(outputId)
 //                            val byteArray = ByteArray(info.size)
@@ -181,10 +183,9 @@ class VideoEncoder {
 
     private fun getInputBuffer(): ByteArray? {
         val input = videoByteList.take() ?: return null
-        //        val byteArray = ByteArray(mWidth * mHeight * 3 / 2)
-//        NV21ToNV12(input, yuv420spsrc, mWidth, mHeight)
-        nv212nv12(input, yuv420spsrc, mWidth, mHeight)
-        return yuv420spsrc
+        val byteArray = ByteArray(mWidth * mHeight * 3 / 2)
+        nv212nv12(input, byteArray, mWidth, mHeight)
+        return byteArray
     }
 
     private fun nv212nv12(srcData: ByteArray?, dstData: ByteArray, mWidth: Int, mHeight: Int): Int {

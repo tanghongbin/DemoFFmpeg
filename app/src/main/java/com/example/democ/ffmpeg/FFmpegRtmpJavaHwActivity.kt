@@ -6,16 +6,14 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
-import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.log
+import com.example.democ.hwencoder.AudioConfiguration
 import com.example.democ.hwencoder.HwEncoderHelper
 import com.example.democ.interfaces.OutputEncodedDataListener
 import com.example.democ.interfaces.OutputInitListener
 import com.example.democ.render.FFmpegRender
 import com.example.democ.rtmp.packer.rtmp.RtmpPacker
 import com.example.democ.utils.Constants
-import com.example.democ.utils.LogUtils
-import com.example.democ.utils.RtmpPushManager
 import kotlinx.android.synthetic.main.activity_rtmp_java_hw.*
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicInteger
@@ -41,11 +39,13 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        keepScreenOn()
         setContentView(R.layout.activity_rtmp_java_hw)
         mMuxerHelper = HwEncoderHelper(mRtmpJavaSurface)
         mRtmpJavaStart.setOnClickListener(this)
         mRtmpJavaStop.setOnClickListener(this)
         mMuxerHelper.init()
+        mMuxerHelper.setCaptureMode(HwEncoderHelper.CaptureMode.LIVE)
         init()
     }
 
@@ -56,7 +56,6 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
                 bufferInfo: MediaCodec.BufferInfo
             ) {
 //                log("begin write audio")
-                if (!isReady())return
                 mPacker.onAudioData(byteBuffer,bufferInfo)
             }
 
@@ -72,7 +71,6 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
                 bufferInfo: MediaCodec.BufferInfo
             ) {
 //                log("begin write video")
-                if (!isReady())return
                 mPacker.onVideoData(byteBuffer,bufferInfo)
             }
 
@@ -92,16 +90,14 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
             }
         })
         mPacker.start()
+        mPacker.initAudioParams(AudioConfiguration.DEFAULT_FREQUENCY, 16, false)
         mPacker.setPacketListener { data, packetType ->
-            LogUtils.log("has receive packet data:${data} type:${packetType}")
+//            LogUtils.log("has receive packet data:${data} type:${packetType}")
             mRtmpSender.native_sendPacketData(data,packetType)
         }
         mRtmpSender.native_rtmp_init(Constants.RTMP_ANDROID_PUSH)
     }
 
-    private fun isReady(): Boolean {
-        return mCount.get() == 2 && (System.currentTimeMillis() - startTime > 2000L && startTime != 0L)
-    }
 
     override fun onResume() {
         super.onResume()

@@ -7,7 +7,7 @@
 #include <CustomSafeQueue.h>
 #include "RtmpClient.h"
 
-extern "C"{
+extern "C" {
 #include <rtmp.h>
 }
 
@@ -32,25 +32,27 @@ void RtmpClient::loop(RtmpClient *client) {
     LOGCATE("start rtmp loop");
     while (client->isStart) {
         RTMPPacket *packet = client->mDataQueue.popFirst();
-        if (packet == nullptr) {
-            LOGCATE("packet is null,this is impossible");
-            continue;
+        if (packet == 0) {
+            LOGCATE("pkt is null,this is impossible");
+            break;
         }
         packet->m_nInfoField2 = client->rtmp->m_stream_id;
 //        LOGCATE("send pkt info body size:%d  type:%d",packet->m_nBodySize,packet->m_packetType);
         int ret = RTMP_SendPacket(client->rtmp, packet, 1);
 //        LOGCATE("发送结果：%d",ret);
         if (!ret) {
-            LOGCATE("发送失败:%d",ret);
+            LOGCATE("发送失败:%d", ret);
             break;
         }
     }
     LOGCATE("loop end");
-    RTMPPacket* deletePkt;
-    while ((deletePkt = client ->mDataQueue.popFirst()) != 0){
+    if (client->mDataQueue.size() != 0){
+        RTMPPacket *deletePkt = client->mDataQueue.removeFirst();
+        while (deletePkt != 0) {
             RTMPPacket_Free(deletePkt);
             delete deletePkt;
-            deletePkt = 0;
+            deletePkt = client->mDataQueue.removeFirst();
+        }
     }
     LOGCATE("rtmp loop end :%d", (nullptr == 0));
 }
@@ -98,6 +100,8 @@ void RtmpClient::initRtmp(char *url) {
 void RtmpClient::destroyRtmp() {
     isStart = false;
     if (rtmp) {
+        LOGCATE("begin to destroy");
+        mDataQueue.pushLast(0);
         thread->join();
         thread = 0;
         RTMP_DeleteStream(rtmp);
@@ -108,7 +112,7 @@ void RtmpClient::destroyRtmp() {
     }
 }
 
-void RtmpClient::sendData(uint8_t *data, int type,int dataSize) {
+void RtmpClient::sendData(uint8_t *data, int type, int dataSize) {
     if (type == FIRST_AUDIO || type == AUDIO) {//音频数据
         pushAACData(data, dataSize);
     } else if (type == FIRST_VIDEO || type == INTER_FRAME || type == KEY_FRAME) {
@@ -139,7 +143,7 @@ void RtmpClient::pushData(RTMPPacket *packet) {
     mDataQueue.pushLast(packet);
 }
 
-void RtmpClient::pushH264(uint8_t *data,  int dataLen) {
+void RtmpClient::pushH264(uint8_t *data, int dataLen) {
     RTMPPacket *packet = (RTMPPacket *) malloc(sizeof(RTMPPacket));
     RTMPPacket_Alloc(packet, dataLen);
     RTMPPacket_Reset(packet);

@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import com.example.democ.MainActivity;
 import com.example.democ.hwencoder.AudioConfiguration;
 import com.example.democ.hwencoder.AudioMediaCodec;
+import com.example.democ.hwencoder.HwEncoderHelper;
 import com.example.democ.interfaces.CaptureDataListener;
 import com.example.democ.interfaces.OutputEncodedDataListener;
 import com.example.democ.interfaces.SingleInterface;
@@ -48,6 +49,12 @@ public class AudioEncoder extends Thread {
     private long audioStartTime = 0L;
     private CaptureDataListener captureDataListener;
 //    private ArrayBlockingQueue<byte[]> mAudioBufferList = new ArrayBlockingQueue<byte[]>(2000);
+
+    private HwEncoderHelper.CaptureMode mCaptureMode = HwEncoderHelper.CaptureMode.RECORD;
+
+    public void setCaptureMode(HwEncoderHelper.CaptureMode mode){
+        mCaptureMode = mode;
+    }
 
     private OutputEncodedDataListener mOutputListener;
 
@@ -183,8 +190,10 @@ public class AudioEncoder extends Thread {
                 ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(inputBufferIndex);
                 inputBuffer.clear();
                 inputBuffer.put(input);
+                long timeStamp = mCaptureMode == HwEncoderHelper.CaptureMode.RECORD ?
+                        ((System.nanoTime() - audioStartTime) / 1000) : 0;
                 mMediaCodec.queueInputBuffer(inputBufferIndex, 0, input.length,
-                        (System.nanoTime() - audioStartTime) / 1000, 0);
+                        timeStamp , 0);
             }
         }catch (Exception e){
             e.printStackTrace();

@@ -376,7 +376,7 @@ JNIEXPORT void JNICALL native_sendPacketData(JNIEnv *env, jobject instance,
                                               jbyteArray byteData,jint type) {
     int length = env->GetArrayLength(byteData);
 
-    LOGCATE("log data size:%d",length);
+//    LOGCATE("log data size:%d",length);
 
     jbyte *data = env->GetByteArrayElements(byteData, 0);
 

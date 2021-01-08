@@ -49,6 +49,15 @@ public:
         return bean;
     }
 
+    T removeFirst() {
+        T bean = mQueue.front();
+        mQueue.pop();
+        return bean;
+    }
+
+    int size(){
+        return mQueue.size();
+    }
 };
 
 
