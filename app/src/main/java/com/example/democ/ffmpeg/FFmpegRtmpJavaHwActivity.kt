@@ -110,7 +110,6 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
     }
 
     override fun onDestroy() {
-        mRtmpSender.native_rtmp_destroy()
         super.onDestroy()
     }
 

@@ -1,6 +1,7 @@
 package com.example.democ.hwencoder
 
 import android.hardware.Camera
+import android.view.Surface
 import android.view.SurfaceHolder
 import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
@@ -8,6 +9,7 @@ import com.example.camera.manager.CameraSurfaceView
 import com.example.democ.audio.*
 import com.example.democ.interfaces.OutputEncodedDataListener
 import com.example.democ.interfaces.OutputInitListener
+import com.example.democ.interfaces.SingleGetDataInterface
 import java.lang.IllegalStateException
 import java.lang.NullPointerException
 

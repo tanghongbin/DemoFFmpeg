@@ -77,19 +77,23 @@ public class AudioEncoder extends Thread {
         while (mIsOpened){
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 1000);
-            if (outputBufferIndex > 0) {
-                ByteBuffer outputBuffer = mMediaCodec.getOutputBuffer(outputBufferIndex);
-                outputBuffer.position(bufferInfo.offset);
-                outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                // 写入混合流中
-                if (outputBuffer != null) {
-                    if (mOutputListener != null) mOutputListener.outputData(outputBuffer,bufferInfo);
-                }
-                mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+            if (outputBufferIndex >= 0) {
+                resolveOutputBuffer(bufferInfo, outputBufferIndex);
             } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 if (mOutputListener != null) mOutputListener.outputFormatChanged(mMediaCodec.getOutputFormat());
             }
         }
+    }
+
+    private void resolveOutputBuffer(MediaCodec.BufferInfo bufferInfo, int outputBufferIndex) {
+        ByteBuffer outputBuffer = mMediaCodec.getOutputBuffer(outputBufferIndex);
+        outputBuffer.position(bufferInfo.offset);
+        outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+        // 写入混合流中
+        if (outputBuffer != null) {
+            if (mOutputListener != null) mOutputListener.outputData(outputBuffer,bufferInfo);
+        }
+        mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
     }
 
     private boolean open() {
@@ -107,45 +111,6 @@ public class AudioEncoder extends Thread {
         log(TAG, "open audio encoder success !");
         return true;
     }
-
-//    private void config(MediaCodec mediaCodec) {
-//        mediaCodec.setCallback(new MediaCodec.Callback() {
-//            @Override
-//            public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
-//                byte[] input = mAudioBufferList.poll();
-//                if (input == null) return;
-//                if (audioStartTime == 0L) audioStartTime = System.nanoTime();
-//                ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(index);
-//                inputBuffer.clear();
-//                inputBuffer.put(input);
-//                mMediaCodec.queueInputBuffer(index, 0, input.length,
-//                        (System.nanoTime() - audioStartTime) / 1000, 0);
-//            }
-//
-//            @Override
-//            public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
-//                ByteBuffer outputBuffer = mMediaCodec.getOutputBuffer(index);
-//                outputBuffer.position(info.offset);
-//                outputBuffer.limit(info.offset + info.size);
-//                // 写入混合流中
-//                if (outputBuffer != null) {
-//                    if (mOutputListener != null) mOutputListener.outputData(outputBuffer,info);
-//                }
-//                mMediaCodec.releaseOutputBuffer(index, false);
-//            }
-//
-//            @Override
-//            public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
-//                log("DemoC","some error when encode audio");
-//                e.printStackTrace();
-//            }
-//
-//            @Override
-//            public void onOutputFormatChanged(@NonNull MediaCodec codec, @NonNull MediaFormat format) {
-//                if (mOutputListener != null) mOutputListener.outputFormatChanged(mMediaCodec.getOutputFormat());
-//            }
-//        });
-//    }
 
     public void startEncode() {
         open();

@@ -34,15 +34,17 @@ public class VideoMediaCodec {
 //            SopCastLog.d(SopCastConstant.TAG, "Device in fps setting black list, so set mediacodec fps 15");
 //            fps = 15;
 //        }
+
         format.setInteger(MediaFormat.KEY_FRAME_RATE, fps);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, videoConfiguration.ifi);
-//        format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
-//        format.setInteger(MediaFormat.KEY_COMPLEXITY, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+        format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
+        format.setInteger(MediaFormat.KEY_COMPLEXITY, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
         MediaCodec mediaCodec = null;
 
         try {
             mediaCodec = MediaCodec.createEncoderByType(videoConfiguration.mime);
-            mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+//            int flag =  MediaCodec.BUFFER_FLAG_CODEC_CONFIG  | MediaCodec.CONFIGURE_FLAG_ENCODE;
+            mediaCodec.configure(format, null, null,  MediaCodec.CONFIGURE_FLAG_ENCODE);
         }catch (Exception e) {
             e.printStackTrace();
             if (mediaCodec != null) {

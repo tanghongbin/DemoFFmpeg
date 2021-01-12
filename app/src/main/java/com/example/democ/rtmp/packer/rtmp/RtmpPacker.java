@@ -61,11 +61,11 @@ public class RtmpPacker implements Packer, AnnexbHelper.AnnexbNaluListener {
 
     @Override
     public void onVideoData(ByteBuffer bb, MediaCodec.BufferInfo bi) {
-        confirmFirstFrameInfoWrite();
+//        confirmFirstFrameInfoWrite();
         mAnnexbHelper.analyseVideoData(bb, bi);
     }
 
-    // 自己加的，因为mediacodec 拿不到编码信息
+    // 自己加的，因为mediacodec 拿不到编码信息,不需要了，看了源码注释后找到问题了,要 >= 0
     private void confirmFirstFrameInfoWrite() {
         if (isHeaderWrite) return;
         byte[] sps = new byte[9];
@@ -136,7 +136,7 @@ public class RtmpPacker implements Packer, AnnexbHelper.AnnexbNaluListener {
 
     @Override
     public void onSpsPps(byte[] sps, byte[] pps) {
-//        LogUtils.INSTANCE.log("prepare write sps pps  ==="+packetListener);
+        LogUtils.INSTANCE.log("prepare write sps pps  ==="+packetListener);
         if (packetListener == null) {
             return;
         }

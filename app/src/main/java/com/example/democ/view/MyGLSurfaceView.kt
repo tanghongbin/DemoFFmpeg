@@ -18,11 +18,11 @@ class MyGLSurfaceView @JvmOverloads constructor(context: Context?, attrs: Attrib
         val activityManager: ActivityManager =
             getAppContext().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val configurationInfo: ConfigurationInfo = activityManager.deviceConfigurationInfo
-        val supportsEs2: Boolean = configurationInfo.reqGlEsVersion >= 0x20000
+        val supportsEs3: Boolean = configurationInfo.reqGlEsVersion >= 0x30000
 
-        if (supportsEs2){
-            log("check is support v3 -${supportsEs2}")
-            setEGLContextClientVersion(2)
+        if (supportsEs3){
+            log("check is support v3 -${supportsEs3}")
+            setEGLContextClientVersion(3)
         }
 
         /*If no setEGLConfigChooser method is called,

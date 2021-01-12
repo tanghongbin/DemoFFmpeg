@@ -41,6 +41,10 @@ public class CameraSurfaceView extends FrameLayout implements CameraSurfaceListe
 
     private double mTargetAspect = -1.0;
 
+    public SurfaceView getmSurfaceView() {
+        return mSurfaceView;
+    }
+
     public SurfaceHolder.Callback getmHolderCall() {
         return mHolderCall;
     }
