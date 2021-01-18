@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
-set(libName native-ffmpegrender)
+set(libName native-render)
 
 #拉流-推流
 set(RTMP ${CMAKE_SOURCE_DIR}/librtmp)

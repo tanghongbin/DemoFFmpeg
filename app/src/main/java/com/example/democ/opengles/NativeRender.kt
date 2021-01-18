@@ -58,7 +58,7 @@ class NativeRender
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         native_OnSurfaceCreated()
-        setImageByType(1)
+//        setImageByType(1)
     }
 
     private fun setImageByType(type:Int) {
