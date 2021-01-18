@@ -7,7 +7,6 @@
 
 
 #include <ImageDef.h>
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/GLES3/gl3.h"
 #include "GLBaseSample.h"
 
 class TextureSample : public GLBaseSample {

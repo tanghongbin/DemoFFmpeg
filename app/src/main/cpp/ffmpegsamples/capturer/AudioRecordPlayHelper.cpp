@@ -118,10 +118,11 @@ void AudioRecordPlayHelper::startPlayBack() {
     uint8_t buffer[BUFFER_SIZE];
     g_loop_exit = 0;
     while (!g_loop_exit && !feof(fp)) {
-        if (fread((unsigned char *) buffer, BUFFER_SIZE * 2, 1, fp) != 1) {
-            LOGCATE("failed to read data \n ");
-            break;
-        }
+        // todo there is something error
+//        if (fread((uint8_t *) buffer, BUFFER_SIZE * 2, 1, fp) != 1) {
+//            LOGCATE("failed to read data \n ");
+//            break;
+//        }
         samples = OpenSL_IO::android_AudioOut(stream, buffer, BUFFER_SIZE);
         if (samples < 0) {
             LOGCATE("android_AudioOut failed !\n");

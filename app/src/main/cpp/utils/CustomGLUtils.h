@@ -6,9 +6,8 @@
 #include "utils.h"
 #include <string>
 #include <gtc/matrix_transform.hpp>
+#include <GLES3/gl3.h>
 
-
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/GLES3/gl3.h"
 
 extern "C" {
 #include <libavutil/frame.h>

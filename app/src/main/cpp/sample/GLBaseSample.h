@@ -5,7 +5,7 @@
 #ifndef DEMOC_GLBASESAMPLE_H
 #define DEMOC_GLBASESAMPLE_H
 
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/GLES3/gl3.h"
+#include <GLES3/gl3.h>
 #include "../utils/ImageDef.h"
 
 class GLBaseSample {

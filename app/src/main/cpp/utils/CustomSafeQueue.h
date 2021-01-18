@@ -6,10 +6,13 @@
 #define DEMOC_CUSTOMSAFEQUEUE_H
 
 
-#include <queue>
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/c++/v1/mutex"
+//#include <queue>
 
-using namespace std;
+//using namespace std;
+#include <stdlib.h>
+#include <mutex>
+
+#include <queue>
 
 /**
  * 线程安全，并且为空会阻塞

@@ -11,8 +11,7 @@ extern "C" {
 #include "../include/libavformat/avformat.h"
 };
 
-
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/jni.h"
+#include <jni.h>
 #include "VideoRenderInterface.h"
 
 class BaseRender {

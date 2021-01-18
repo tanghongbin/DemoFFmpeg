@@ -7,7 +7,6 @@
 
 
 
-#include "../../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/c++/v1/cstdio"
 #include "SwsHelper.h"
 
 extern "C"{

@@ -1,2 +1,2 @@
-rootProject.name='DemoC'
+rootProject.name='DemoFFmpeg'
 include ':app', ':libyuv-single'

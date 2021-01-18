@@ -13,7 +13,6 @@ extern "C"{
 #include <thread>
 #include <CustomSafeQueue.h>
 
-#include "../../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/c++/v1/cstdint"
 
 
 #define FIRST_VIDEO  1

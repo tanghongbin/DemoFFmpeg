@@ -17,7 +17,6 @@
 #include <GLEglSample.h>
 #include <CoordinateSystemSample.h>
 #include <ParticlesSample.h>
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/c++/v1/cstdint"
 
 
 class MyGLRenderContext {

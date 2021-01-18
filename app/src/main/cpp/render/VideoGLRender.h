@@ -7,11 +7,11 @@
 
 #include <ImageDef.h>
 #include <OpenGLImageDef.h>
+#include <GLES3/gl3.h>
+#include <cstdlib>
+#include <mutex>
 #include "VideoRender.h"
 #include "../glm/ext.hpp"
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/c++/v1/__mutex_base"
-#include "../../../../../../../android_sdk/android_sdk/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/GLES3/gl3.h"
-
 
 using namespace glm;
 
