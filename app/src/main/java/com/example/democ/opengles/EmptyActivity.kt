@@ -34,6 +34,7 @@ import javax.microedition.khronos.opengles.GL10
  * desc   : 这个类没什么用，留着做一些测试显示
  *
  **/
+@Deprecated("")
 class EmptyActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

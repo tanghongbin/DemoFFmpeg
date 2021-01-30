@@ -34,9 +34,8 @@ typedef struct test_params_struct {
     char *bookTitle;
 } TestParams;
 
-void CheckGLError(const char *pGLOperation);
 
-void CheckGLError(const char *pGLOperation);
+void glCheckError(const char *pGLOperation);
 
 GLuint LoadShader(GLenum shaderType, const char *pSource);
 
@@ -50,7 +49,6 @@ void DeleteProgram(GLuint program);
 
 void sendMsg(int type, jobject obj, const char *funcName, const char *funcSinagure);
 
-void CheckGLError(const char *pGLOperation);
 
 void testLocalThread();
 

@@ -5,6 +5,7 @@ import android.util.Log
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
+@Deprecated("")
 class NativeTestJava : GLSurfaceView.Renderer{
 
 

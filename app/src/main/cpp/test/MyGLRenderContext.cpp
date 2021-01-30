@@ -84,6 +84,7 @@ void MyGLRenderContext::SetImageData(int format, int width, int height, uint8_t 
 void MyGLRenderContext::OnSurfaceCreated() {
     LOGCATE("OnSurfaceCreated");
     glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+    m_Sample->init();
 }
 
 void MyGLRenderContext::OnSurfaceChanged(int width, int height) {
@@ -93,11 +94,11 @@ void MyGLRenderContext::OnSurfaceChanged(int width, int height) {
     MyGLRenderContext::height = height;
     m_Sample->screenWidth = width;
     m_Sample->screenHeight = height;
+
 }
 
 void MyGLRenderContext::OnDrawFrame() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    m_Sample->init();
     m_Sample->draw();
 }
 

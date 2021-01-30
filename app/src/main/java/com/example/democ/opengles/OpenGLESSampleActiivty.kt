@@ -10,7 +10,7 @@ import com.example.democ.R
 import com.example.democ.audio.MuxerManager
 import kotlinx.android.synthetic.main.activity_native_open_g_l_e_s_actiivty.*
 
-class NativeOpenGLESActiivty : AppCompatActivity() {
+class OpenGLESSampleActiivty : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -9,6 +9,7 @@
 #include <VideoRender.h>
 #include <PlayMp4Instance.h>
 #include <encode/EncodeYuvToJpg.h>
+#include <EglContext.h>
 #include "utils/helpers/JavaVmManager.h"
 #include "utils/utils.h"
 #include "test/MyGLRenderContext.h"
@@ -209,6 +210,11 @@ JNIEXPORT void JNICALL native_eglSetImageData(JNIEnv *env, jobject instance,  ji
     env->DeleteLocalRef(imageData);
 }
 
+JNIEXPORT void JNICALL egl_init_2(JNIEnv *env, jobject instance) {
+    EglContext::init();
+}
+
+
 
 
 static JNINativeMethod g_RenderMethods[] = {
@@ -231,8 +237,12 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_eglSetImageData",     "(II[B)V", (void *) (native_eglSetImageData)},
         {"getAvCodeInfo",     "()Ljava/lang/String;", (void *) (getAvCodeInfo)},
         {"encodeYuvToImage",     "(Ljava/lang/String;)Ljava/lang/String;", (void *) (encodeYuvToImage)},
-        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)}
-};
+        {"playMP4",     "(Ljava/lang/String;Landroid/view/Surface;)V", (void *) (playMP4)},
+
+         // ================  egl ctx ==================
+                {"egl_init_2",      "()V",      (void *) (egl_init_2)}
+
+        };
 
 static int RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum)
 {

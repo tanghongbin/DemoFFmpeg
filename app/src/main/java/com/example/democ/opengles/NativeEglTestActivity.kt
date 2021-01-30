@@ -14,6 +14,7 @@ import java.nio.ByteBuffer
 import java.nio.IntBuffer
 
 
+@Deprecated("")
 class NativeEglTestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

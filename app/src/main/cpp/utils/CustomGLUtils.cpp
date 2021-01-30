@@ -18,7 +18,6 @@
 #include <iostream>
 
 
-
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/imgutils.h>
@@ -30,33 +29,30 @@ JavaVM *GLUtilC::mVm = nullptr;
 
 int64_t GLUtilC::master_audio_clock = 0;
 
-void CheckGLError(const char *pGLOperation);
-
 void encode(AVCodecContext *pContext, AVFrame *pFrame, AVPacket *pPacket, FILE *pFile);
 
 GLuint LoadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = 0;
     shader = glCreateShader(shaderType);
-    if (shader) {
+    if (shader == 0) return shader;
 //        LOGCATE("createshader success");
-        glShaderSource(shader, 1, &pSource, nullptr);
-        glCompileShader(shader);
-        GLint compiled = 0;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-        if (!compiled) {
-            GLint infoLen = 0;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-            if (infoLen) {
-                char *buf = (char *) malloc(sizeof(infoLen));
-                if (buf) {
-                    glGetShaderInfoLog(shader, infoLen, NULL, buf);
-                    LOGCATE("GLUtils::LoadShader Could not compile shader %d:\n%s\n", shaderType,
-                            buf);
-                    free(buf);
-                }
-                glDeleteShader(shader);
-                shader = 0;
+    glShaderSource(shader, 1, &pSource, nullptr);
+    glCompileShader(shader);
+    GLint compiled = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        GLint infoLen = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+        if (infoLen) {
+            char *buf = (char *) malloc(sizeof(infoLen));
+            if (buf) {
+                glGetShaderInfoLog(shader, infoLen, NULL, buf);
+                LOGCATE("GLUtils::LoadShader Could not compile shader %d:\n%s\n", shaderType,
+                        buf);
+                free(buf);
             }
+            glDeleteShader(shader);
+            shader = 0;
         }
     }
     return shader;
@@ -181,7 +177,7 @@ void NvToYUV420p(const uint8_t *image_src, uint8_t *image_dst, int image_width, 
 
 bool checkNegativeReturn(int ret, const char *string) {
     if (ret < 0) {
-        LOGCATE("------------:retCode:%d  msg:%s  ffmpegErrorStr:%s", ret, string,av_err2str(ret));
+        LOGCATE("------------:retCode:%d  msg:%s  ffmpegErrorStr:%s", ret, string, av_err2str(ret));
         return true;
     }
     return false;
@@ -201,9 +197,9 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
     program = glCreateProgram();
     if (program) {
         glAttachShader(program, vertexShaderHandle);
-        CheckGLError("glAttachShader");
+        glCheckError("glAttachShader");
         glAttachShader(program, fragShaderHandle);
-        CheckGLError("glAttachShader");
+        glCheckError("glAttachShader");
         glLinkProgram(program);
         GLint linkStatus = GL_FALSE;
         glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
@@ -258,10 +254,9 @@ void sendMsg(int type, jobject obj, const char *funcName, const char *funcSinagu
 }
 
 
-void CheckGLError(const char *pGLOperation) {
-    for (GLint error = glGetError(); error; error = glGetError()) {
-        LOGCATE("GLUtils::CheckGLError GL Operation %s() glError (0x%x)\n", pGLOperation, error);
-    }
+void glCheckError(const char *pGLOperation) {
+    GLenum error = glGetError();
+    LOGCATE("GLUtils::glCheckError GL Operation %s() glError (0x%x)\n", pGLOperation, error);
 }
 
 std::thread *thread;
@@ -293,15 +288,15 @@ const char *getCharStrFromJstring(JNIEnv *jniEnv, jstring str) {
 }
 
 const char *getRandomStr(const char *prefix, const char *suffix) {
-    return getRandomStr(prefix,suffix,"");
+    return getRandomStr(prefix, suffix, "");
 }
 
-const char *getRandomStr(const char *prefix, const char *suffix,const char *subDir) {
+const char *getRandomStr(const char *prefix, const char *suffix, const char *subDir) {
     long long start = GetSysCurrentTime();
-    std::string dirs = "/storage/emulated/0/ffmpegtest/" ;
+    std::string dirs = "/storage/emulated/0/ffmpegtest/";
     std::string result = dirs + subDir + prefix + std::to_string(start) + suffix;
     char *resultChar = new char[100];
-    strcpy(resultChar,result.c_str());
+    strcpy(resultChar, result.c_str());
     return resultChar;
 }
 

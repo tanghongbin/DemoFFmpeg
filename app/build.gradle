@@ -76,9 +76,9 @@ android {
         }
     }
     sourceSets {
-        main {
-            jniLibs.srcDirs = ['libs']
-        }
+//        main {
+//            jniLibs.srcDirs = ['libs']
+//        }
     }
 }
 

@@ -376,7 +376,7 @@ void EGLRender::Init(int type)
 									 m_FragmentShader);
 	if (!m_ProgramObj)
 	{
-		CheckGLError("Create Program");
+//		CheckGLError("Create Program");
 		LOGCATE("EGLRender::Init Could not create program.");
 		return;
 	}
@@ -604,7 +604,7 @@ void EGLRender::SetIntParams(int paramType, int param)
 													  m_FragmentShader);
 				if (!m_ProgramObj)
 				{
-					CheckGLError("Create Program");
+//					CheckGLError("Create Program");
 					LOGCATE("EGLRender::SetIntParams Could not create program.");
 					return;
 				}

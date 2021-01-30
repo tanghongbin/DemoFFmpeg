@@ -49,6 +49,7 @@
         <activity android:name=".ffmpeg.FFmpegTestNewCameraHelperActivity" />
         <activity android:name=".ffmpeg.FFmpegConvertYuvActivity" />
         <activity android:name=".activity.ThreadTestActivity" />
+        <activity android:name=".opengles.OpenGLESNavigationActivity" />
         <activity
             android:name=".ffmpeg.FFmpegVideoActivity"
             android:configChanges="keyboard|screenSize">
@@ -70,7 +71,9 @@
             <!-- </intent-filter> -->
         </activity>
         <activity android:name=".opengles.NativeEglTestActivity" />
-        <activity android:name=".opengles.NativeOpenGLESActiivty" />
+        <activity android:name=".opengles.OpenGLESSampleActiivty" />
+        <activity android:name=".opengles.OpenGLesEglCtxActiivty" />
+
         <activity android:name=".activity.AudioTestActivity" />
         <activity android:name=".MainActivity" />
         <activity android:name=".opengles.EmptyActivity" />

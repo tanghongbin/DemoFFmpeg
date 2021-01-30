@@ -157,4 +157,8 @@ class NativeRender
 
     external fun native_resume()
 
+    // ========  egl ctx =============
+
+    external fun egl_init_2()
+
 }

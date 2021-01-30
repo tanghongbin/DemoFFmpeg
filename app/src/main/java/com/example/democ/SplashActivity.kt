@@ -16,14 +16,8 @@ class SplashActivity : AppCompatActivity() {
     private val arrays = arrayOf(
         MainActivity::class.java,
         AudioTestActivity::class.java,
-        ThreadTestActivity::class.java,
-
-        EmptyActivity::class.java,
-        NativeEglTestActivity::class.java,
-        NativeOpenGLESActiivty::class.java,
-        OpenGLImageReaderActivity::class.java,
-        TestThreadActivity::class.java,
-        FFmpegNavigationActivity::class.java
+        FFmpegNavigationActivity::class.java,
+        OpenGLESNavigationActivity::class.java
 
     )
     fun putIndex(position:Int){

@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 
 
+@Deprecated("")
 @RequiresApi(Build.VERSION_CODES.KITKAT)
 class NativeImageReaderRender {
 
