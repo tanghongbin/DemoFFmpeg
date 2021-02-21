@@ -18,20 +18,24 @@ TriangleSample::~TriangleSample() {
 
 void TriangleSample::init() {
     char vShaderStr[] =
-            "#version 300 es                          \n"
+            "#version 300 es                   \n"
+            "layout(location = 1) in vec4 a_color;       \n"
             "layout(location = 0) in vec4 vPosition;  \n"
+            "out vec4 v_color; \n"
             "void main()                              \n"
-            "{                                        \n"
+            "{                         \n"
+            "   v_color = a_color;            \n"
             "   gl_Position = vPosition;              \n"
             "}                                        \n";
 
     char fShaderStr[] =
             "#version 300 es                              \n"
-            "precision mediump float;                     \n"
+            "precision mediump float;   \n"
+            "in vec4 v_color;                     \n"
             "out vec4 fragColor;                          \n"
             "void main()                                  \n"
             "{                                            \n"
-            "   fragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );  \n"
+            "   fragColor = v_color;  \n"
             "}                                            \n";
 
     GLuint m_VertexShader;
@@ -48,6 +52,12 @@ void TriangleSample::draw() {
             0.5f, -0.5f, 0.0f,
     };
 
+//    GLfloat vVertices2[] = {
+//            1.0f, 0.5f, 0.0f,
+//            -0.5f, -0.5f, 0.0f,
+//            0.5f, -0.5f, 0.0f,
+//    };
+
     if (m_ProgramObj == 0)
         return;
 
@@ -55,10 +65,19 @@ void TriangleSample::draw() {
     glUseProgram(m_ProgramObj);
 
     // Load the vertex data
+    GLfloat colors1[12] = {1.0f,0.0f,0.0f,1.0f,
+                          0.0f,1.0f,0.0f,1.0f,
+                          0.0f,0.0f,1.0f,1.0f};
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
     glEnableVertexAttribArray(0);
 
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, colors1);
+    glEnableVertexAttribArray(1);
+
+
     glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDisableVertexAttribArray(0);
 
 }
 
