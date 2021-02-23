@@ -17,6 +17,7 @@ TriangleSample::~TriangleSample() {
 }
 
 void TriangleSample::init() {
+
     char vShaderStr[] =
             "#version 300 es                   \n"
             "layout(location = 1) in vec4 a_color;       \n"
@@ -35,22 +36,39 @@ void TriangleSample::init() {
             "out vec4 fragColor;                          \n"
             "void main()                                  \n"
             "{                                            \n"
-            "   fragColor = v_color;  \n"
+            "   fragColor = vec4(1.0f,0.0f,0.0f,1.0f);  \n"
             "}                                            \n";
 
     GLuint m_VertexShader;
     GLuint m_FragmentShader;
     m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
-
-}
-
-void TriangleSample::draw() {
-//    LOGCATE("TriangleSample::Draw");
     GLfloat vVertices[] = {
+            0.0f, 0.5f, 0.0f,
+            -0.5f, -0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f,
+    };
+
+    GLfloat vVertices2[] = {
             -0.5f, 0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
     };
+    glGenBuffers(2,vaoIds);
+    glBindBuffer(GL_ARRAY_BUFFER,vaoIds[0]);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat) * 9,vVertices,GL_STATIC_DRAW);
+
+    glGenVertexArrays(1,&vaoIds[0]);
+    glBindVertexArray(vaoIds[0]);
+
+    GLuint offset = 0;
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void*)offset);
+    glBindVertexArray(0);
+}
+
+void TriangleSample::draw() {
+//    LOGCATE("TriangleSample::Draw");
+
 
 //    GLfloat vVertices2[] = {
 //            1.0f, 0.5f, 0.0f,
@@ -68,6 +86,19 @@ void TriangleSample::draw() {
     GLfloat colors1[12] = {1.0f,0.0f,0.0f,1.0f,
                           0.0f,1.0f,0.0f,1.0f,
                           0.0f,0.0f,1.0f,1.0f};
+//    renderWithOriginal(vVertices, colors1);
+    // use buffer
+    renderWithBuffer(nullptr);
+
+}
+
+void TriangleSample::renderWithBuffer(const GLfloat *vVertices) const {
+    glBindVertexArray(vaoIds[0]);
+    glDrawArrays(GL_TRIANGLES,0,3);
+    glBindVertexArray(0);
+}
+
+void TriangleSample::renderWithOriginal(const GLfloat *vVertices, const GLfloat *colors1) const {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
     glEnableVertexAttribArray(0);
 
@@ -78,9 +109,8 @@ void TriangleSample::draw() {
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glDisableVertexAttribArray(0);
-
 }
 
 void TriangleSample::Destroy() {
-
+    glDeleteVertexArrays(1,&vaoIds[0]);
 }

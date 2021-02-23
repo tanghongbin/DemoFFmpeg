@@ -10,7 +10,9 @@
 
 class TriangleSample : public GLBaseSample{
 
+private:
     GLuint m_ProgramObj;
+    GLuint vaoIds[2] = {1,2};
 
 public:
     TriangleSample();
@@ -23,6 +25,9 @@ public:
 
     void Destroy();
 
+    void renderWithOriginal(const GLfloat *vVertices, const GLfloat *colors1) const;
+
+    void renderWithBuffer(const GLfloat *vVertices) const;
 };
 
 #endif //DEMOC_TRIANGLESAMPLE_H
