@@ -13,6 +13,7 @@ class TriangleSample : public GLBaseSample{
 private:
     GLuint m_ProgramObj;
     GLuint vaoIds[2] = {1,2};
+    GLint mvpLoc;
 
 public:
     TriangleSample();
