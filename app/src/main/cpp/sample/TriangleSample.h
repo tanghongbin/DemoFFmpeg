@@ -7,13 +7,14 @@
 
 #include "GLES3/gl3.h"
 #include "GLBaseSample.h"
+#include <CustomGLUtils.h>
 
 class TriangleSample : public GLBaseSample{
 
 private:
     GLuint m_ProgramObj;
     GLuint vaoIds[2] = {1,2};
-    GLint mvpLoc;
+    glm::mat4 m_MVPMatrix;
 
 public:
     TriangleSample();
@@ -26,9 +27,11 @@ public:
 
     void Destroy();
 
-    void renderWithOriginal(const GLfloat *vVertices, const GLfloat *colors1) const;
+    void renderWithOriginal(const GLfloat *vVertices, const GLfloat *colors1);
 
-    void renderWithBuffer(const GLfloat *vVertices) const;
+    void renderWithBuffer(const GLfloat *vVertices);
+
+    void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY);
 };
 
 #endif //DEMOC_TRIANGLESAMPLE_H

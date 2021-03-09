@@ -3,10 +3,8 @@
 //
 
 #include "VideoGLRender.h"
-#include <gtc/matrix_transform.hpp>
 #include <CustomGLUtils.h>
 #include <OpenGLImageDef.h>
-
 
 std::mutex VideoGLRender::m_Mutex;
 VideoGLRender* VideoGLRender::s_Instance = nullptr;
