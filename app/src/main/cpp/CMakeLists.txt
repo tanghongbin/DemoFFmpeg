@@ -14,6 +14,7 @@ set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libName native-render)
 set(libName2 native-ffmpegrender)
+set(libName3 native-player)
 
 #拉流-推流
 set(RTMP ${CMAKE_SOURCE_DIR}/librtmp)
@@ -73,6 +74,22 @@ file(GLOB src-files2
         ${CMAKE_SOURCE_DIR}/utils/*.cpp)
 
 
+file(GLOB src-files3
+        ${CMAKE_SOURCE_DIR}/${libName3}.cpp
+        ${CMAKE_SOURCE_DIR}/sample/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/rtmp/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/filters/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/swscale/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/muxer/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/io/*.cpp
+        ${CMAKE_SOURCE_DIR}/render/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/*.cpp
+        ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
+        ${CMAKE_SOURCE_DIR}/utils/*.cpp)
+
+
 
 
 
@@ -102,6 +119,14 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         ${src-files2})
 
+add_library( # Sets the name of the library.
+        ${libName3}
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        ${src-files3})
 
 
 
@@ -205,6 +230,14 @@ target_link_libraries(${libName}
         GLESv3)
 
 target_link_libraries(${libName2}
+        ${OpenSLES-lib}
+        ${log-lib}
+        ${third-party-libs}
+        EGL
+        android
+        GLESv3)
+
+target_link_libraries(${libName3}
         ${OpenSLES-lib}
         ${log-lib}
         ${third-party-libs}

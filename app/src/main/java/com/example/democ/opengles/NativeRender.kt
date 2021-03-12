@@ -58,13 +58,13 @@ class NativeRender
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         native_OnSurfaceCreated()
-//        setImageByType(1)
+        setImageByType(1)
     }
 
     private fun setImageByType(type:Int) {
         when(type){
             1 -> {
-                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.leg)
+                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.left)
                 val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
                 bitmap.copyPixelsToBuffer(byteBuffer)
                 native_SetImageData(IMAGE_FORMAT_RGBA, bitmap.width, bitmap.height, byteBuffer.array())

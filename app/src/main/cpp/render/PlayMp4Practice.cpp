@@ -117,8 +117,8 @@ BaseRender *PlayMp4Practice::createRender(int type) {
         return new AudioRender;
     } else if (type == 2) {
         return new VideoRender;
-    } else {
-        return new VideoRender;
+    } else if (type == 4) {
+        return new GLrender;
     }
 
 }

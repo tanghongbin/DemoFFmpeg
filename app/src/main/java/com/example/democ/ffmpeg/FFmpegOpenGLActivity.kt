@@ -21,6 +21,6 @@ class FFmpegOpenGLActivity : AppCompatActivity() {
 
 
     private fun init() {
-//        mOpenGlEs.init(FFmpegOpenGLRender())
+        mOpenGlEs.init(FFmpegOpenGLRender())
     }
 }

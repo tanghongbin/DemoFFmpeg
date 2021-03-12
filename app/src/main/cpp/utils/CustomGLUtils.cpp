@@ -300,6 +300,10 @@ const char *getRandomStr(const char *prefix, const char *suffix, const char *sub
     return resultChar;
 }
 
+const int getRandomInt(int range){
+    return random() % range;
+}
+
 
 jstring getJstringFromCharStr(JNIEnv *jniEnv, const char *str) {
     jstring result = jniEnv->NewStringUTF(str);

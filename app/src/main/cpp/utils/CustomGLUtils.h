@@ -83,6 +83,8 @@ void sys_log_init();
 
 uint8_t *fillArrayToFrame(AVPixelFormat avPixelFormat, AVFrame *frame);
 
+const int getRandomInt(int range);
+
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);
 }

@@ -75,6 +75,21 @@ void TriangleSample::init() {
 //    glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,0,(const void*)offset);
 ////    glVertexAttribDivisor(1,1);
 //    glBindVertexArray(0);
+
+// texture
+    GLubyte  gLubyte[4 * 3] = {
+            255,0,0,
+            0,255,0,
+            0,0,255,
+            255,255,0
+    };
+    GLuint textures[1] = {1};
+    glGenTextures(1,textures);
+    glBindTexture(GL_TEXTURE_2D,textures[0]);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,2,2,0,GL_RGB,GL_UNSIGNED_BYTE,gLubyte);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D,GL_NONE);
 }
 
 void TriangleSample::draw() {
@@ -82,9 +97,9 @@ void TriangleSample::draw() {
 
 
     GLfloat vVertices2[] = {
-            1.0f, 0.5f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
+            -1.0f, 1.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
     };
 
     if (m_ProgramObj == 0)
@@ -112,7 +127,11 @@ void TriangleSample::renderWithBuffer(const GLfloat *vVertices) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
     glEnableVertexAttribArray(0);
     setMat4(m_ProgramObj,"u_MVPMatrix",m_MVPMatrix);
-    glDrawArrays(GL_TRIANGLES,0,3);
+    glActiveTexture(1);
+    glBindTexture(GL_TEXTURE_2D,1);
+//    glDrawArrays(GL_TRIANGLES,0,3);
+    GLuint indices[3] = {0,1,2};
+    glDrawElements(GL_TRIANGLES,3,GL_UNSIGNED_INT,indices);
 //    glBindVertexArray(0);
 }
 
@@ -157,7 +176,7 @@ void TriangleSample::renderWithOriginal(const GLfloat *vVertices, const GLfloat 
     glEnableVertexAttribArray(1);
 
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisableVertexAttribArray(0);
 }
 

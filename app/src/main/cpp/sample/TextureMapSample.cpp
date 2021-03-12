@@ -23,9 +23,9 @@ void TextureMapSample::init()
 	glBindTexture(GL_TEXTURE_2D, m_TextureId);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	// 必须设置的两个属性
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
 	char vShaderStr[] =
 			"#version 300 es                            \n"
@@ -66,17 +66,21 @@ void TextureMapSample::draw()
 
 
 	if(m_ProgramObj == GL_NONE || m_TextureId == GL_NONE) return;
-	LOGCATE("TextureMapSample::Draw()");
+//	LOGCATE("TextureMapSample::Draw()");
+
+long long startTime = GetSysCurrentTime();
 	glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
+	// 左上角起始点，逆时针读取
 	GLfloat verticesCoords[] = {
-			-1.0f,  0.5f, 0.0f,  // Position 0
-			-1.0f, -0.5f, 0.0f,  // Position 1
-			1.0f, -0.5f, 0.0f,   // Position 2
-			1.0f,  0.5f, 0.0f,   // Position 3
+			-1.0f,  1.0f, 1.0f,  // Position 0
+			-1.0f, -1.0f, 1.0f,  // Position 1
+			1.0f, -1.0f, 0.0f,   // Position 2
+			1.0f,  1.0f, 0.0f,   // Position 3
 	};
 
+	// 纹理坐标左下角起始点，顺时针
 	GLfloat textureCoords[] = {
 			0.0f,  0.0f,        // TexCoord 0
 			0.0f,  1.0f,        // TexCoord 1
@@ -84,13 +88,7 @@ void TextureMapSample::draw()
 			1.0f,  0.0f         // TexCoord 3
 	};
 
-	GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
-
-	//upload RGBA image data
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	GLushort indices[] = { 0, 1, 2, 0, 3, 2 };
 
 	// Use the program object
 	glUseProgram (m_ProgramObj);
@@ -105,14 +103,23 @@ void TextureMapSample::draw()
 	glEnableVertexAttribArray (0);
 	glEnableVertexAttribArray (1);
 
+
+	glBindTexture(GL_TEXTURE_2D, m_TextureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	// Bind the RGBA map
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_TextureId);
+	//upload RGBA image data
 
+//	LOGCATE("print texture unit:%d",m_TextureId);
 	// Set the RGBA map sampler to texture unit to 0
-	glUniform1i(m_SamplerLoc, 0);
+	// 设置统一变量
+	glUniform1i(m_SamplerLoc, GL_TEXTURE0);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
+
+	LOGCATE("every frame cost:%lld",GetSysCurrentTime() - startTime);
 
 
 }
