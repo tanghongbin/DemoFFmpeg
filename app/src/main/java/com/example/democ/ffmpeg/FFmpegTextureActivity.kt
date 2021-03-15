@@ -10,7 +10,6 @@ import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
 import com.example.democ.R
 import kotlinx.android.synthetic.main.activity_f_fmpeg_open_g_l.*
-import kotlinx.android.synthetic.main.activity_f_fmpeg_open_g_l.mSurface
 
 class FFmpegTextureActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.PreviewCallback,
     CameraPictureListener, CameraYUVDataListener {
@@ -27,9 +26,9 @@ private lateinit var mCameraHelper:CameraSurfaceManager
     var isSet = false
 
     private fun init() {
-        mCameraHelper = CameraSurfaceManager(mSurface)
-        mCameraHelper.setCameraPictureListener(this)
-        mSurface.setCameraYUVDataListener(this)
+//        mCameraHelper = CameraSurfaceManager(mSurface)
+//        mCameraHelper.setCameraPictureListener(this)
+//        mSurface.setCameraYUVDataListener(this)
 //        mOpenGlEs.init(FFmpegOpenGLRender())
 //
 //        mCameraHelper = CameraHelper(this, mSurface, this)
@@ -69,16 +68,16 @@ private lateinit var mCameraHelper:CameraSurfaceManager
     }
 
     override fun onCallback(srcData: ByteArray?) {
-        val windowWidth = mSurface.cameraUtil.cameraWidth
-        val windowHeight = mSurface.cameraUtil.cameraHeight
-        val scaleHeight = mSurface.cameraUtil.cameraWidth
-        val scaleWidth = mSurface.cameraUtil.cameraHeight
-        val mOrientation = mSurface.cameraUtil.orientation
+//        val windowWidth = mSurface.cameraUtil.cameraWidth
+//        val windowHeight = mSurface.cameraUtil.cameraHeight
+//        val scaleHeight = mSurface.cameraUtil.cameraWidth
+//        val scaleWidth = mSurface.cameraUtil.cameraHeight
+//        val mOrientation = mSurface.cameraUtil.orientation
 
         if (!isSet) {
 //            isSet = true
 
-            val bytes = ByteArray(windowHeight * windowWidth * 3 / 2)
+//            val bytes = ByteArray(windowHeight * windowWidth * 3 / 2)
 
 //            YuvUtil.yuvCompress(
 //                srcData,

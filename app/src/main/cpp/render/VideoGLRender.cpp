@@ -273,16 +273,10 @@ void VideoGLRender::OnSurfaceChanged(int w, int h) {
 void VideoGLRender::OnDrawFrame() {
     glClear(GL_COLOR_BUFFER_BIT);
     if(m_ProgramObj == GL_NONE|| m_RenderImage.ppPlane[0] == nullptr) return;
-//    LOGCATE("VideoGLRender::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
+    LOGCATE("VideoGLRender::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
     m_FrameIndex++;
 
     long long cur = GetSysCurrentTime();
-    if (mCurTime == 0){
-        mCurTime = cur;
-    } else {
-        LOGCATE("draw frame spend time:%jd",cur - mCurTime);
-        mCurTime = cur;
-    }
 //    if(m_FrameIndex == 2)
 //        NativeOpenGLImageUtil::DumpNativeImage(&m_RenderImage, "/sdcard", "2222");
 
@@ -370,6 +364,7 @@ void VideoGLRender::OnDrawFrame() {
     setInt(m_ProgramObj, "u_nImgType", m_RenderImage.format);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *)0);
+    LOGCATE("draw frame spend time:%jd",GetSysCurrentTime() - cur);
 
 }
 

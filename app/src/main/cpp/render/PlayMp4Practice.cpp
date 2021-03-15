@@ -11,6 +11,7 @@
 #include "AudioRender.h"
 #include "VideoRender.h"
 #include "CustomGLUtils.h"
+#include "OpenGLFFmpegDecoder.h"
 
 extern "C" {
 #include <libavfilter/buffersrc.h>
@@ -118,7 +119,9 @@ BaseRender *PlayMp4Practice::createRender(int type) {
     } else if (type == 2) {
         return new VideoRender;
     } else if (type == 4) {
-        return new GLrender;
+        return new OpenGLFFmpegDecoder;
+    } else {
+        return new VideoRender;
     }
 
 }

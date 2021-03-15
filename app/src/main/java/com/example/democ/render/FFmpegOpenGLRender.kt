@@ -26,7 +26,7 @@ class FFmpegOpenGLRender : GLSurfaceView.Renderer{
     }
     override fun onDrawFrame(gl: GL10?) {
         native_OnDrawFrame()
-        log("java layer draw frame")
+//        log("java layer draw frame")
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -36,7 +36,7 @@ class FFmpegOpenGLRender : GLSurfaceView.Renderer{
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         native_OnSurfaceCreated()
 //        setImageByType(1)
-        val url = Constants.MP4_PLAY_BIG_PATH
+        val url = Constants.MP4_PATH
 //        val url = MuxerManager.MP4_PLAY_PATH
         // 1-音屏（不用指定），2-视频，3-yuv视频-不设置，4-opengl渲染
         playMP4(url,null,4)

@@ -68,16 +68,16 @@ void TextureMapSample::draw()
 	if(m_ProgramObj == GL_NONE || m_TextureId == GL_NONE) return;
 //	LOGCATE("TextureMapSample::Draw()");
 
-long long startTime = GetSysCurrentTime();
+
 	glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	// 左上角起始点，逆时针读取
 	GLfloat verticesCoords[] = {
-			-1.0f,  1.0f, 1.0f,  // Position 0
-			-1.0f, -1.0f, 1.0f,  // Position 1
-			1.0f, -1.0f, 0.0f,   // Position 2
-			1.0f,  1.0f, 0.0f,   // Position 3
+			-1.0f,  0.5f, 0.0f,  // Position 0
+			-1.0f, -0.5f, 0.0f,  // Position 1
+			1.0f, -0.5f, 0.0f,   // Position 2
+			1.0f,  0.5f, 0.0f,   // Position 3
 	};
 
 	// 纹理坐标左下角起始点，顺时针
@@ -103,14 +103,20 @@ long long startTime = GetSysCurrentTime();
 	glEnableVertexAttribArray (0);
 	glEnableVertexAttribArray (1);
 
+	LOGCATE("TextureMapSample::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
 
-	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	// Bind the RGBA map
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	//upload RGBA image data
+	long long startTime = GetSysCurrentTime();
+    // Bind the RGBA map
+    //upload RGBA image data
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    long long startTimeUpload = GetSysCurrentTime();
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
+
+    LOGCATE("every frame cost:%lld",GetSysCurrentTime() - startTime);
+    LOGCATE("every frame upload cost:%lld",GetSysCurrentTime() - startTimeUpload);
+
 
 //	LOGCATE("print texture unit:%d",m_TextureId);
 	// Set the RGBA map sampler to texture unit to 0
@@ -118,8 +124,9 @@ long long startTime = GetSysCurrentTime();
 	glUniform1i(m_SamplerLoc, GL_TEXTURE0);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
+    glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
-	LOGCATE("every frame cost:%lld",GetSysCurrentTime() - startTime);
+
 
 
 }

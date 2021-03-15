@@ -76,7 +76,8 @@ JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject
     playMp4Practice = new PlayMp4Practice();
     const char * playUrl = env->GetStringUTFChars(url,0);
     LOGCATE("prepare init mp4 , detected address %s",playUrl);
-    playMp4Practice->init(playUrl,env,instance,surface,type);
+    playMp4Practice->init(playUrl,env,instance,surface,1);
+    playMp4Practice->init(playUrl, env, instance, surface, type);
 }
 
 JNIEXPORT void JNICALL native_SetImageData
