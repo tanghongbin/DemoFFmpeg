@@ -9,7 +9,7 @@ object Constants {
     val RTMP_ANDROID_PUSH = "rtmp://106.13.78.235:1935/demo/androidRtmpPush"
     val MP4_ONLINE_2 = "http://freesaasofficedata.oss.aliyuncs.com/2222/20190930142639768.mp4"
     val MP4_ONLINE = "http://pweb.longshinewz.com/Attachment/MsgFile/a33c1c6032ec4862b44728bde62b6a05.mp4"
-    val MP4_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test.mp4"
+    val MP4_PATH = Environment.getExternalStorageDirectory().absolutePath + "/test.mkv"
     val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/video.mp4"
     val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/blackanimal.mp4"
     val SLIGHT_MP4_VIDEO_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/test5.mp4"
