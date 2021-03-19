@@ -9,6 +9,7 @@
 #include <CoordinateSystemSample.h>
 #include <TextureMapSample.h>
 #include <TextureCubeSample.h>
+#include <TestFBOSample.h>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
@@ -19,7 +20,7 @@
 MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
-    m_Sample = generateSample(8);
+    m_Sample = generateSample(9);
 }
 
 GLBaseSample *MyGLRenderContext::generateSample(int type) {
@@ -48,6 +49,9 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             break;
         case 8:
             sample = new TextureCubeSample();
+            break;
+        case 9:
+            sample = new TestFBOSample();
             break;
     }
     LOGCATE("create sample:%p",sample);

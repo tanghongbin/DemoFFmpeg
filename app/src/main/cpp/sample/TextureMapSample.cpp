@@ -31,23 +31,27 @@ void TextureMapSample::init()
 			"#version 300 es                            \n"
 			"layout(location = 0) in vec4 a_position;   \n"
 			"layout(location = 1) in vec2 a_texCoord;   \n"
+			"layout(location = 2) in float inFactor;\n"
+			"out float outFactor;\n"
 			"out vec2 v_texCoord;                       \n"
 			"void main()                                \n"
-			"{                                          \n"
+			"{                   \n"
 			"   gl_Position = a_position;               \n"
-			"   v_texCoord = a_texCoord;                \n"
-			"}                                          \n";
+			"   v_texCoord = a_texCoord;   \n"
+			"   outFactor = inFactor;\n"
+			"}";
 
 	char fShaderStr[] =
 			"#version 300 es                                     \n"
 			"precision mediump float;                            \n"
-			"in vec2 v_texCoord;                                 \n"
+			"in vec2 v_texCoord;\n"
+			"in float outFactor;\n"
 			"layout(location = 0) out vec4 outColor;             \n"
 			"uniform sampler2D s_TextureMap;                     \n"
 			"void main()                                         \n"
-			"{                                                   \n"
-			"  outColor = texture(s_TextureMap, v_texCoord);     \n"
-			"}                                                   \n";
+			"{\n"
+			"  outColor = texture(s_TextureMap, v_texCoord) * outFactor;\n"
+			"}";
 
 	m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
 	if (m_ProgramObj)
@@ -87,6 +91,11 @@ void TextureMapSample::draw()
 			1.0f,  1.0f,        // TexCoord 2
 			1.0f,  0.0f         // TexCoord 3
 	};
+	float value = ((getRandomInt(100)) * 1.0f/ 100.f);
+	LOGCATE("log value:%f",value);
+	GLfloat facotrs[] = {
+			value
+	};
 
 	GLushort indices[] = { 0, 1, 2, 0, 3, 2 };
 
@@ -99,9 +108,13 @@ void TextureMapSample::draw()
 	// Load the texture coordinate
 	glVertexAttribPointer (1, 2, GL_FLOAT,
 							GL_FALSE, 2 * sizeof (GLfloat), textureCoords);
+	glVertexAttribPointer (2, 1, GL_FLOAT,
+						   GL_FALSE, 1 * sizeof (GLfloat), facotrs);
 
 	glEnableVertexAttribArray (0);
 	glEnableVertexAttribArray (1);
+	glEnableVertexAttribArray (2);
+
 
 	LOGCATE("TextureMapSample::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
 

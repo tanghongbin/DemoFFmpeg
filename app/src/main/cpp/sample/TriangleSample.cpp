@@ -37,24 +37,43 @@ void TriangleSample::init() {
             "out vec4 fragColor;                          \n"
             "void main()                                  \n"
             "{                                            \n"
-            "   fragColor = vec4(1.0f,0.0f,0.0f,1.0f);  \n"
+            "   fragColor = vec4(0.0f,0.8f,0.8f,0.3f);  \n"
             "}                                            \n";
 
     GLuint m_VertexShader;
     GLuint m_FragmentShader;
     m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
+    int positionSize = 9;
     GLfloat vVertices[] = {
             -0.5f, 0.0f, 0.0f,
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f
     };
+    GLuint arrays[] = {
+            0,1,2
+    };
 //    int size = 9;
-//    glGenBuffers(2,vaoIds);
-//    glBindBuffer(GL_ARRAY_BUFFER,vaoIds[0]);
-//    glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat) * size,vVertices,GL_STATIC_DRAW);
-//
-//    glGenVertexArrays(1,&vaoIds[0]);
-//    glBindVertexArray(vaoIds[0]);
+    glGenBuffers(2, vboIds);
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat) * positionSize,vVertices,GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboIds[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(arrays),arrays,GL_STATIC_DRAW);
+
+    glGenVertexArrays(1,&vaoIds[0]);
+    glBindVertexArray(vaoIds[0]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboIds[1]);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(const void *)NULL);
+    glBindVertexArray(0);
+    glDisableVertexAttribArray(0);
+
+
+//    glGenVertexArrays(1,&vboIds[0]);
+//    glBindVertexArray(vboIds[0]);
 //
 //    GLuint offset = 0;
 //    glEnableVertexAttribArray(0);
@@ -66,61 +85,58 @@ void TriangleSample::init() {
 //                           0.0f,0.0f,1.0f,1.0f};
 //
 //    // bind color vetex
-//    glBindBuffer(GL_ARRAY_BUFFER,vaoIds[1]);
+//    glBindBuffer(GL_ARRAY_BUFFER,vboIds[1]);
 //    glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat) * 12,colors1,GL_STATIC_DRAW);
 //
-////    glGenVertexArrays(1,&vaoIds[1]);
-//    glBindVertexArray(vaoIds[1]);
+////    glGenVertexArrays(1,&vboIds[1]);
+//    glBindVertexArray(vboIds[1]);
 //    glEnableVertexAttribArray(1);
 //    glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,0,(const void*)offset);
 ////    glVertexAttribDivisor(1,1);
 //    glBindVertexArray(0);
 
 // texture
-    GLubyte  gLubyte[4 * 3] = {
-            255,0,0,
-            0,255,0,
-            0,0,255,
-            255,255,0
-    };
-    GLuint textures[1] = {1};
-    glGenTextures(1,textures);
-    glBindTexture(GL_TEXTURE_2D,textures[0]);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,2,2,0,GL_RGB,GL_UNSIGNED_BYTE,gLubyte);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D,GL_NONE);
+//    GLubyte  gLubyte[4 * 3] = {
+//            255,0,0,
+//            0,255,0,
+//            0,0,255,
+//            255,255,0
+//    };
+//    GLuint textures[1] = {1};
+//    glGenTextures(1,textures);
+//    glBindTexture(GL_TEXTURE_2D,textures[0]);
+//    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,2,2,0,GL_RGB,GL_UNSIGNED_BYTE,gLubyte);
+//    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+//    glBindTexture(GL_TEXTURE_2D,GL_NONE);
 }
 
 void TriangleSample::draw() {
 //    LOGCATE("TriangleSample::Draw");
 
 
-    GLfloat vVertices2[] = {
-            -1.0f, 1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-    };
 
     if (m_ProgramObj == 0)
         return;
 
+    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
     // Use the program object
     glUseProgram(m_ProgramObj);
 
-    // Load the vertex data
-    GLfloat colors1[12] = {1.0f,0.0f,0.0f,1.0f,
-                          0.0f,1.0f,0.0f,1.0f,
-                          0.0f,0.0f,1.0f,1.0f};
-//    renderWithOriginal(vVertices, colors1);
-    // use buffer
-    renderWithBuffer(vVertices2);
-
+    glBindVertexArray(vaoIds[0]);
+//    glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
+//    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
+    glDrawElements(GL_TRIANGLES,3,GL_UNSIGNED_INT,(const void *)0);
+//    glDisableVertexAttribArray(0);
+glBindVertexArray(0);
 }
 
 void TriangleSample::renderWithBuffer(const GLfloat *vVertices) {
-//    glBindVertexArray(vaoIds[0]);
-//    glBindVertexArray(vaoIds[1]);
+//    glBindVertexArray(vboIds[0]);
+//    glBindVertexArray(vboIds[1]);
 
 
     UpdateMVPMatrix(1,1,1.0f,1.0f);
@@ -181,5 +197,5 @@ void TriangleSample::renderWithOriginal(const GLfloat *vVertices, const GLfloat 
 }
 
 void TriangleSample::Destroy() {
-    glDeleteVertexArrays(1,&vaoIds[0]);
+    glDeleteVertexArrays(1,&vboIds[0]);
 }

@@ -1,9 +1,10 @@
-#version 300 es                              
-precision mediump float;   
-in vec3 v_normal;
-layout(location = 0) out vec4 outColor;
-uniform samplerCube s_texture;
-void main()                                  
-{                                            
-   outColor = texture(s_texture,v_normal);
+#version 300 es                                     
+precision mediump float;                            
+in vec2 v_texCoord;
+in float outFactor;
+layout(location = 0) out vec4 outColor;             
+uniform sampler2D s_TextureMap;                     
+void main()                                         
+{
+  outColor = texture(s_TextureMap, v_texCoord) * outFactor;
 }

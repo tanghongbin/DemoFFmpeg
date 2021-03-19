@@ -13,7 +13,8 @@ class TriangleSample : public GLBaseSample{
 
 private:
     GLuint m_ProgramObj;
-    GLuint vaoIds[2] = {1,2};
+    GLuint vboIds[2] = {1, 2};
+    GLuint vaoIds[2] = {3, 4};
     glm::mat4 m_MVPMatrix;
 
 public:
