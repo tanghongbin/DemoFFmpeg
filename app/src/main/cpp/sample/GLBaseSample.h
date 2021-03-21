@@ -14,6 +14,8 @@ protected:
 
     GLuint m_ProgramObj;
     GLuint m_TextureId;
+    GLuint m_fboTextureId;
+    GLuint m_fboId;
     GLuint m_VertexShader;
     GLuint m_FragmentShader;
     GLint m_SamplerLoc;

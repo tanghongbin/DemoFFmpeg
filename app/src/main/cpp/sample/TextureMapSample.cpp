@@ -50,7 +50,8 @@ void TextureMapSample::init()
 			"uniform sampler2D s_TextureMap;                     \n"
 			"void main()                                         \n"
 			"{\n"
-			"  outColor = texture(s_TextureMap, v_texCoord) * outFactor;\n"
+			"  outColor = texture(s_TextureMap, v_texCoord);\n"
+//			"  outColor = vec4(0.0f,1.0f,0.0f,1.0f);\n"
 			"}";
 
 	m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
@@ -97,10 +98,13 @@ void TextureMapSample::draw()
 			value
 	};
 
-	GLushort indices[] = { 0, 1, 2, 0, 3, 2 };
+//	GLushort indices[] = { 0, 1, 2, 0, 3, 2 };
 
 	// Use the program object
 	glUseProgram (m_ProgramObj);
+
+	glEnableVertexAttribArray (0);
+	glEnableVertexAttribArray (1);
 
 	// Load the vertex position
 	glVertexAttribPointer (0, 3, GL_FLOAT,
@@ -108,12 +112,11 @@ void TextureMapSample::draw()
 	// Load the texture coordinate
 	glVertexAttribPointer (1, 2, GL_FLOAT,
 							GL_FALSE, 2 * sizeof (GLfloat), textureCoords);
-	glVertexAttribPointer (2, 1, GL_FLOAT,
-						   GL_FALSE, 1 * sizeof (GLfloat), facotrs);
+//	glVertexAttribPointer (2, 1, GL_FLOAT,
+//						   GL_FALSE, 1 * sizeof (GLfloat), facotrs);
 
-	glEnableVertexAttribArray (0);
-	glEnableVertexAttribArray (1);
-	glEnableVertexAttribArray (2);
+
+//	glEnableVertexAttribArray (2);
 
 
 	LOGCATE("TextureMapSample::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
@@ -121,7 +124,6 @@ void TextureMapSample::draw()
 	long long startTime = GetSysCurrentTime();
     // Bind the RGBA map
     //upload RGBA image data
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
     long long startTimeUpload = GetSysCurrentTime();
 
@@ -134,13 +136,13 @@ void TextureMapSample::draw()
 //	LOGCATE("print texture unit:%d",m_TextureId);
 	// Set the RGBA map sampler to texture unit to 0
 	// 设置统一变量
-	glUniform1i(m_SamplerLoc, GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_TextureId);
+	glUniform1i(m_SamplerLoc, 0);
+	GLint indics[6] = {0,1,2,0,2,3};
 
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,indics);
     glBindTexture(GL_TEXTURE_2D, GL_NONE);
-
-
-
 
 }
 
