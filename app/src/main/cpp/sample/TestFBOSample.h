@@ -13,8 +13,6 @@ class TestFBOSample : public GLBaseSample{
 
 private:
     GLuint m_ProgramObj;
-    GLuint m_FBO_ProgramObj;
-    GLint m_FBO_SamplerLoc;
     GLuint vboIds[2] = {1, 2};
     GLuint vaoIds[2] = {3, 4};
     glm::mat4 m_MVPMatrix;

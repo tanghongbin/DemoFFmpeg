@@ -18,39 +18,7 @@ TestFBOSample::~TestFBOSample()
 
 void TestFBOSample::init()
 {
-	//创建原图像纹理
-	glGenTextures(1, &m_TextureId);
-	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//	 必须设置的两个属性
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D,0);
 
-
-	// 创建离屏纹理
-	glGenTextures(1,&m_fboTextureId);
-	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//	 必须设置的两个属性
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-
-	// 创建帧缓冲
-	glGenFramebuffers(1,&m_fboId);
-	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
-	glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
-	LOGCATE("log create fbo width:%d height:%d",m_RenderImage.width,m_RenderImage.height);
-	int width = 1590;
-	int height = 2385;
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_UNSIGNED_BYTE,GL_RGBA, nullptr);
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,m_fboTextureId,0);
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	char vShaderStr[] =
 			"#version 300 es                            \n"
@@ -79,7 +47,6 @@ void TestFBOSample::init()
 			"}";
 
 	m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
-	m_FBO_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
 	if (m_ProgramObj)
 	{
 		m_SamplerLoc = glGetUniformLocation(m_ProgramObj, "s_TextureMap");
@@ -89,15 +56,44 @@ void TestFBOSample::init()
 		LOGCATE("TestFBOSample::Init create program fail");
 	}
 
-	if (m_FBO_SamplerLoc)
-	{
-		m_FBO_SamplerLoc = glGetUniformLocation(m_FBO_ProgramObj, "s_TextureMap");
-	}
-	else
-	{
-		LOGCATE("m_FBO_SamplerLoc::Init create program fail");
-	}
+    //创建原图像纹理
+    glGenTextures(1, &m_TextureId);
+    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//	 必须设置的两个属性
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
+	glBindTexture(GL_TEXTURE_2D,0);
 
+
+    // 创建离屏纹理
+    glGenTextures(1,&m_fboTextureId);
+    glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//	 必须设置的两个属性
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+	glCheckError("create frame buffer");
+    // 创建帧缓冲
+    glGenFramebuffers(1,&m_fboId);
+    glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
+    glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
+    LOGCATE("log create fbo width:%d height:%d   fbotextid:%d",m_RenderImage.width,m_RenderImage.height,m_fboTextureId);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,m_fboTextureId,0);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,m_RenderImage.width,m_RenderImage.height,0,GL_UNSIGNED_BYTE,GL_RGBA, nullptr);
+	GLenum resultFramebuffer = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (resultFramebuffer != GL_FRAMEBUFFER_COMPLETE){
+        LOGCATE("frame buffer is not complete 0x%x",resultFramebuffer);
+    }
+	glCheckError("glCheckFramebufferStatus");
+	glBindTexture(GL_TEXTURE_2D, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glCheckError("create frame buffer finished");
 }
 
 void TestFBOSample::draw()
@@ -106,10 +102,6 @@ void TestFBOSample::draw()
 
 	if(m_ProgramObj == GL_NONE || m_TextureId == GL_NONE) return;
 //	LOGCATE("TestFBOSample::Draw()");
-
-
-	glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	// 左上角起始点，逆时针读取
 	GLfloat verticesCoords[] = {
@@ -136,13 +128,16 @@ void TestFBOSample::draw()
 
 	// Use the program object
 
+    glUseProgram(m_ProgramObj);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glViewport(0, 0, m_RenderImage.width, m_RenderImage.height);
+	glViewport(0, 0,screenWidth, screenHeight);
 
 	// 离屏渲染
 	glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
-	glUseProgram(m_FBO_ProgramObj);
+    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
 	// Load the vertex position
 	glEnableVertexAttribArray (0);
 	glEnableVertexAttribArray (1);
@@ -153,8 +148,7 @@ void TestFBOSample::draw()
 						   GL_FALSE, 2 * sizeof (GLfloat), textureCoords);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
-	glUniform1i(m_FBO_SamplerLoc, 0);
+	glUniform1i(m_SamplerLoc, 0);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -162,8 +156,10 @@ void TestFBOSample::draw()
 
 	glViewport(0, 0, m_RenderImage.width, m_RenderImage.height);
 
+    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
 	// 普通渲染
-	glUseProgram (m_ProgramObj);
 
 	// Load the vertex position
 	glVertexAttribPointer (0, 3, GL_FLOAT,
@@ -194,11 +190,12 @@ void TestFBOSample::draw()
 
 
 //	LOGCATE("print texture unit:%d",m_TextureId);
+
 	// Set the RGBA map sampler to texture unit to 0
 	// 设置统一变量
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
-	glUniform1i(m_SamplerLoc, 1);
+	glUniform1i(m_SamplerLoc, 0);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
     glBindTexture(GL_TEXTURE_2D, GL_NONE);
