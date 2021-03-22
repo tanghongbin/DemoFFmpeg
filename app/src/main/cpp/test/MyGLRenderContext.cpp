@@ -20,7 +20,7 @@
 MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
-    m_Sample = generateSample(6);
+    m_Sample = generateSample(9);
 }
 
 GLBaseSample *MyGLRenderContext::generateSample(int type) {

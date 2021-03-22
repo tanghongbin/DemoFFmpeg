@@ -17,10 +17,10 @@ private:
     GLuint m_VaoIds[2];
     GLuint m_VboIds[4];
     GLint m_SamplerLoc;
-    GLuint m_FboProgramObj;
+//    GLuint m_FboProgramObj;
     GLuint m_FboVertexShader;
-    GLuint m_FboFragmentShader;
-    GLint m_FboSamplerLoc;
+//    GLuint m_FboFragmentShader;
+//    GLint m_FboSamplerLoc;
 
 public:
     void init();

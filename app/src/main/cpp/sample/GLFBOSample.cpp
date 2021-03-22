@@ -78,72 +78,72 @@ void GLFBOSample::init() {
     m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
 
     // 编译链接用于离屏渲染的着色器程序
-    m_FboProgramObj = CreateProgram(vShaderStr, fFboShaderStr, m_FboVertexShader, m_FboFragmentShader);
+//    m_FboProgramObj = CreateProgram(vShaderStr, fFboShaderStr, m_FboVertexShader, m_FboFragmentShader);
 
-    if (m_ProgramObj == GL_NONE || m_FboProgramObj == GL_NONE)
+    if (m_ProgramObj == GL_NONE )
     {
         LOGCATE("FBOSample::Init m_ProgramObj == GL_NONE");
         return;
     }
     m_SamplerLoc = glGetUniformLocation(m_ProgramObj, "s_TextureMap");
-    m_FboSamplerLoc = glGetUniformLocation(m_FboProgramObj, "s_TextureMap");
+//    m_FboSamplerLoc = glGetUniformLocation(m_FboProgramObj, "s_TextureMap");
 
     // 生成 VBO ，加载顶点数据和索引数据
     // Generate VBO Ids and load the VBOs with data
-    glGenBuffers(4, m_VboIds);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vVertices), vVertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vTexCoors), vTexCoors, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[2]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vFboTexCoors), vFboTexCoors, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VboIds[3]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-//    GO_CHECK_GL_ERROR();
-
-    // 生成 2 个 VAO，一个用于普通渲染，另一个用于离屏渲染
-    // Generate VAO Ids
-    glGenVertexArrays(2, m_VaoIds);
-    // 初始化用于普通渲染的 VAO
-    // Normal rendering VAO
-    glBindVertexArray(m_VaoIds[0]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[0]);
-    glEnableVertexAttribArray(VERTEX_POS_INDX);
-    glVertexAttribPointer(VERTEX_POS_INDX, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (const void *)0);
-    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[1]);
-    glEnableVertexAttribArray(TEXTURE_POS_INDX);
-    glVertexAttribPointer(TEXTURE_POS_INDX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const void *)0);
-    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VboIds[3]);
-//    GO_CHECK_GL_ERROR();
-    glBindVertexArray(GL_NONE);
-
-
-    // 初始化用于离屏渲染的 VAO
-    // FBO off screen rendering VAO
-    glBindVertexArray(m_VaoIds[1]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[0]);
-    glEnableVertexAttribArray(VERTEX_POS_INDX);
-    glVertexAttribPointer(VERTEX_POS_INDX, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (const void *)0);
-    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[2]);
-    glEnableVertexAttribArray(TEXTURE_POS_INDX);
-    glVertexAttribPointer(TEXTURE_POS_INDX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const void *)0);
-    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VboIds[3]);
-//    GO_CHECK_GL_ERROR();
-    glBindVertexArray(GL_NONE);
+//    glGenBuffers(4, m_VboIds);
+//    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[0]);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vVertices), vVertices, GL_STATIC_DRAW);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[1]);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vTexCoors), vTexCoors, GL_STATIC_DRAW);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[2]);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vFboTexCoors), vFboTexCoors, GL_STATIC_DRAW);
+//
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VboIds[3]);
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+//
+////    GO_CHECK_GL_ERROR();
+//
+//    // 生成 2 个 VAO，一个用于普通渲染，另一个用于离屏渲染
+//    // Generate VAO Ids
+//    glGenVertexArrays(2, m_VaoIds);
+//    // 初始化用于普通渲染的 VAO
+//    // Normal rendering VAO
+//    glBindVertexArray(m_VaoIds[0]);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[0]);
+//    glEnableVertexAttribArray(VERTEX_POS_INDX);
+//    glVertexAttribPointer(VERTEX_POS_INDX, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (const void *)0);
+//    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[1]);
+//    glEnableVertexAttribArray(TEXTURE_POS_INDX);
+//    glVertexAttribPointer(TEXTURE_POS_INDX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const void *)0);
+//    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+//
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VboIds[3]);
+////    GO_CHECK_GL_ERROR();
+//    glBindVertexArray(GL_NONE);
+//
+//
+//    // 初始化用于离屏渲染的 VAO
+//    // FBO off screen rendering VAO
+//    glBindVertexArray(m_VaoIds[1]);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[0]);
+//    glEnableVertexAttribArray(VERTEX_POS_INDX);
+//    glVertexAttribPointer(VERTEX_POS_INDX, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (const void *)0);
+//    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, m_VboIds[2]);
+//    glEnableVertexAttribArray(TEXTURE_POS_INDX);
+//    glVertexAttribPointer(TEXTURE_POS_INDX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const void *)0);
+//    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+//
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VboIds[3]);
+////    GO_CHECK_GL_ERROR();
+//    glBindVertexArray(GL_NONE);
 
     // 创建并初始化图像纹理
     glGenTextures(1, &m_ImageTextureId);
@@ -170,11 +170,11 @@ void GLFBOSample::draw(){
 
     // Do FBO off screen rendering
     glBindFramebuffer(GL_FRAMEBUFFER, m_FboId);
-    glUseProgram(m_FboProgramObj);
+//    glUseProgram(m_FboProgramObj);
     glBindVertexArray(m_VaoIds[1]);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_ImageTextureId);
-    glUniform1i(m_FboSamplerLoc, 0);
+//    glUniform1i(m_FboSamplerLoc, 0);
 //    GO_CHECK_GL_ERROR();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *)0);
 //    GO_CHECK_GL_ERROR();
@@ -205,10 +205,10 @@ void GLFBOSample::Destroy(){
         glDeleteProgram(m_ProgramObj);
     }
 
-    if (m_FboProgramObj)
-    {
-        glDeleteProgram(m_FboProgramObj);
-    }
+//    if (m_FboProgramObj)
+//    {
+//        glDeleteProgram(m_FboProgramObj);
+//    }
 
     if (m_ImageTextureId)
     {
@@ -253,6 +253,7 @@ bool GLFBOSample::createFrameBufferObj()
     glBindTexture(GL_TEXTURE_2D, m_FboTextureId);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_FboTextureId, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    LOGCATE("width:%d height:%d",m_RenderImage.width,m_RenderImage.height);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER)!= GL_FRAMEBUFFER_COMPLETE) {
         LOGCATE("FBOSample::CreateFrameBufferObj glCheckFramebufferStatus status != GL_FRAMEBUFFER_COMPLETE");
         return false;

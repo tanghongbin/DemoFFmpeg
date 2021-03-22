@@ -67,33 +67,56 @@ void TestFBOSample::init()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
 	glBindTexture(GL_TEXTURE_2D,0);
 
+	createFrameBuffer();
 
-    // 创建离屏纹理
-    glGenTextures(1,&m_fboTextureId);
-    glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+}
+
+void TestFBOSample::createFrameBuffer() {// 创建离屏纹理
+	glGenTextures(1,&m_fboTextureId);
+	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 //	 必须设置的两个属性
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glCheckError("create frame buffer");
-    // 创建帧缓冲
-    glGenFramebuffers(1,&m_fboId);
-    glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
-    glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
-    LOGCATE("log create fbo width:%d height:%d   fbotextid:%d",m_RenderImage.width,m_RenderImage.height,m_fboTextureId);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,m_fboTextureId,0);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,m_RenderImage.width,m_RenderImage.height,0,GL_UNSIGNED_BYTE,GL_RGBA, nullptr);
+	// 创建帧缓冲
+	glGenFramebuffers(1,&m_fboId);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboTextureId, 0);
 	GLenum resultFramebuffer = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (resultFramebuffer != GL_FRAMEBUFFER_COMPLETE){
         LOGCATE("frame buffer is not complete 0x%x",resultFramebuffer);
     }
-	glCheckError("glCheckFramebufferStatus");
 	glBindTexture(GL_TEXTURE_2D, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
-	glCheckError("create frame buffer finished");
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+
+
+//	glGenTextures(1, &m_fboTextureId);
+//	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+//
+//	// 创建并初始化 FBO
+//	glGenFramebuffers(1, &m_fboId);
+//	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+//	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
+//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboTextureId, 0);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_UNSIGNED_BYTE, GL_RGBA, nullptr);
+//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER)!= GL_FRAMEBUFFER_COMPLETE) {
+//		LOGCATE("FBOSample::CreateFrameBufferObj glCheckFramebufferStatus status != GL_FRAMEBUFFER_COMPLETE");
+//	}
+//	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+//	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
 }
 
 void TestFBOSample::draw()
@@ -154,7 +177,7 @@ void TestFBOSample::draw()
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 
 
-	glViewport(0, 0, m_RenderImage.width, m_RenderImage.height);
+	glViewport(0, 0,screenWidth, screenHeight);
 
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);

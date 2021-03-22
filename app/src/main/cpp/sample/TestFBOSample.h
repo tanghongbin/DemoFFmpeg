@@ -27,6 +27,8 @@ public:
     void draw();
 
     void Destroy();
+
+    void createFrameBuffer();
 };
 
 #endif //TestFBOSample
