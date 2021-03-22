@@ -89,10 +89,10 @@ void MyGLRenderContext::SetImageData(int format, int width, int height, uint8_t 
 
 }
 
-void MyGLRenderContext::OnSurfaceCreated() {
+void MyGLRenderContext::OnSurfaceCreated(const char * vertexStr,const char * fragStr) {
     LOGCATE("OnSurfaceCreated");
     glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
-    m_Sample->init();
+    m_Sample->init(vertexStr,fragStr);
 }
 
 void MyGLRenderContext::OnSurfaceChanged(int width, int height) {

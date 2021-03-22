@@ -90,7 +90,7 @@ void EglContext::init() {
         return;
     }
     TriangleSample * sample = new TriangleSample;
-    sample->init();
+    sample->init("","");
     sample->draw();
     sample->Destroy();
     delete sample;

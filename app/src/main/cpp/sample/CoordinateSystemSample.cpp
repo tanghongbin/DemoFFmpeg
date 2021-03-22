@@ -28,7 +28,7 @@ CoordinateSystemSample::~CoordinateSystemSample()
     NativeImageUtil::FreeNativeImage(&m_RenderImage);
 }
 
-void CoordinateSystemSample::init() {
+void CoordinateSystemSample::init(const char * vertexStr,const char * fragStr) {
     if(m_ProgramObj)
         return;
     //create RGBA texture

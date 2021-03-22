@@ -15,7 +15,7 @@ private:
 
 public:
 
-    void init();
+    void init(const char * vertexStr,const char * fragStr);
 
     void draw();
 

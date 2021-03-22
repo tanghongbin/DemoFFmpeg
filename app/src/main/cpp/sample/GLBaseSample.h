@@ -34,7 +34,11 @@ public:
 
     int screenWidth, screenHeight;
 
-    virtual void init() = 0;
+    virtual void init(const char * vertexStr,const char * fragStr) = 0;
+
+    void init() {
+
+    }
 
     virtual void draw() = 0;
 

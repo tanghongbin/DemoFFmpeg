@@ -23,7 +23,7 @@ private:
 //    GLint m_FboSamplerLoc;
 
 public:
-    void init();
+    void init(const char * vertexStr,const char * fragStr);
 
     void draw();
 

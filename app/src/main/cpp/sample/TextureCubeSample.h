@@ -14,7 +14,7 @@ public:
 
 	virtual ~TextureCubeSample();
 
-	virtual void init();
+	virtual void init(const char * vertexStr,const char * fragStr);
 
 	virtual void draw();
 

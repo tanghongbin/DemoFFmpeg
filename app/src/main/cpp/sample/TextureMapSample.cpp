@@ -16,7 +16,7 @@ TextureMapSample::~TextureMapSample()
 	NativeImageUtil::FreeNativeImage(&m_RenderImage);
 }
 
-void TextureMapSample::init()
+void TextureMapSample::init(const char * vertexStr,const char * fragStr)
 {
 	//create RGBA texture
 	glGenTextures(1, &m_TextureId);

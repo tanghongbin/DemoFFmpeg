@@ -67,8 +67,10 @@ JNIEXPORT void JNICALL native_SetImageData
  * Method:    native_OnSurfaceCreated
  * Signature: ()V
  */
-JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-    MyGLRenderContext::GetInstance() -> OnSurfaceCreated();
+JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance,
+        jstring vertexStr,jstring fragStr) {
+    MyGLRenderContext::GetInstance() -> OnSurfaceCreated(getCharStrFromJstring(env,vertexStr),
+            getCharStrFromJstring(env,fragStr));
 }
 
 /*
@@ -221,7 +223,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnInit",           "()V",      (void *) (native_OnInit)},
         {"native_OnUnInit",         "()V",      (void *) (native_OnUnInit)},
         {"native_SetImageData",     "(III[B)V", (void *) (native_SetImageData)},
-        {"native_OnSurfaceCreated", "()V",      (void *) (native_OnSurfaceCreated)},
+        {"native_OnSurfaceCreated", "(Ljava/lang/String;Ljava/lang/String;)V",      (void *) (native_OnSurfaceCreated)},
         {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
         {"native_getVideoWidth",      "()I",      (void *) (native_getVideoWidth)},

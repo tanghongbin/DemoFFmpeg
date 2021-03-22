@@ -7,7 +7,7 @@
 #include <gtc/matrix_transform.hpp>
 #include "ParticlesSample.h"
 
-void ParticlesSample::init() {
+void ParticlesSample::init(const char * vertexStr,const char * fragStr) {
     if (m_ProgramObj)
     {
         return;

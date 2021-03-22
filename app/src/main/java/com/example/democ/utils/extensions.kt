@@ -1,8 +1,12 @@
 package com.example.democ.utils
 
+import android.content.Context
+import com.example.democ.DemoApplication
 import com.example.democ.audio.log
 import java.io.File
-import java.lang.IllegalStateException
+import java.io.FileInputStream
+import java.io.IOException
+import java.nio.charset.Charset
 
 fun getRandomStr(subdir:String,suffixName:String):String{
     val path = "/storage/emulated/0/ffmpegtest/${subdir}${System.currentTimeMillis()}${suffixName}"
@@ -29,4 +33,22 @@ object TimeTracker{
     fun trackEnd(){
         log("TimeTracker total cost:${System.currentTimeMillis() - start}")
     }
+}
+
+fun getStrFromAssets(name:String):String{
+    var str = ""
+    try {
+        val stream = DemoApplication.instance.assets.open(name)
+        // size 为字串的长度 ，这里一次性读完
+        val size: Int = stream.available()
+        val buffer = ByteArray(size)
+        stream.read(buffer)
+        stream.close()
+        str = String(buffer, Charset.defaultCharset())
+    } catch (e: IOException) {
+        // TODO Auto-generated catch block
+        e.printStackTrace()
+        return ""
+    }
+    return str
 }

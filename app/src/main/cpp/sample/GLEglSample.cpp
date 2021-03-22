@@ -11,7 +11,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-void GLEglSample::init() {
+void GLEglSample::init(const char * vertexStr,const char * fragStr) {
 // EGL config attributes
     const EGLint confAttr[] =
             {

@@ -9,6 +9,7 @@ import android.view.Surface
 import com.example.democ.R
 import com.example.democ.getAppContext
 import com.example.democ.interfaces.MsgCallback
+import com.example.democ.utils.getStrFromAssets
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -52,13 +53,16 @@ class NativeRender
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-
         native_OnSurfaceChanged(width,height)
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         setImageByType(1)
-        native_OnSurfaceCreated()
+        val vertexStr = getStrFromAssets("glsl/vetex.glsl")
+        val fragStr = getStrFromAssets("glsl/fragment.glsl")
+        log("打印顶点字符串:${vertexStr}")
+        log("打印片段字符串:${fragStr}")
+        native_OnSurfaceCreated(vertexStr,fragStr)
     }
 
     private fun setImageByType(type:Int) {
@@ -123,7 +127,7 @@ class NativeRender
 
     external fun native_SetImageData(format:Int,width:Int,height:Int,byteArray: ByteArray)
 
-    external fun native_OnSurfaceCreated()
+    external fun native_OnSurfaceCreated(vertexStr:String,fragStr:String)
 
     external fun native_OnSurfaceChanged(width:Int,height:Int)
 

@@ -8,7 +8,7 @@
 #include "CustomGLUtils.h"
 #include "ImageDef.h"
 
-void TextureSample::init() {
+void TextureSample::init(const char * vertexStr,const char * fragStr) {
     //create RGBA texture
     glGenTextures(1, &m_TextureId);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);

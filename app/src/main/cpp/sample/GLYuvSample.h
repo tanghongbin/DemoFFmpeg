@@ -16,7 +16,7 @@ private:
     GLuint m_yTextureId,m_uvTextureId;
 
 public:
-    void init();
+    void init(const char * vertexStr,const char * fragStr);
 
     void draw();
 

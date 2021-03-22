@@ -8,7 +8,7 @@
 /**
  * 废弃不使用，缘由是顶点和片段着色器编译有问题
  */
-void GLVBOEBOSample::init() {
+void GLVBOEBOSample::init(const char * vertexStr,const char * fragStr) {
 
     char vShaderStr[] = "#version 300 es                            \n"
                         "layout(location = 0) in vec4 a_position;   // 位置变量的属性位置值为 0 \n"

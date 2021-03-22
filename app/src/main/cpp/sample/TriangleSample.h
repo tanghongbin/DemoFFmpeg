@@ -22,6 +22,8 @@ public:
 
     ~TriangleSample();
 
+    void init(const char * vertexStr,const char * fragStr);
+
     void init();
 
     void draw();

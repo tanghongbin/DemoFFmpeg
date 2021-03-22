@@ -16,7 +16,7 @@ TriangleSample::~TriangleSample() {
 
 }
 
-void TriangleSample::init() {
+void TriangleSample::init(const char * vertexStr,const char * fragStr) {
 
     char vShaderStr[] =
             "#version 300 es\n"

@@ -9,7 +9,7 @@
 #include "string.h"
 #include "glm.hpp"
 
-void GLYuvSample::init() {
+void GLYuvSample::init(const char * vertexStr,const char * fragStr) {
     char vShaderStr[] = "#version 300 es\n"
                         "layout(location = 0) in vec4 a_position;\n"
                         "layout(location = 1) in vec2 a_texCoord;\n"

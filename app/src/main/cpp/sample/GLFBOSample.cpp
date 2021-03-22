@@ -10,7 +10,7 @@
 #define TEXTURE_POS_INDX 1
 
 
-void GLFBOSample::init() {
+void GLFBOSample::init(const char * vertexStr,const char * fragStr) {
 //顶点坐标
     GLfloat vVertices[] = {
             -1.0f, -1.0f, 0.0f,

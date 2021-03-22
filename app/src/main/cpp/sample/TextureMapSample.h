@@ -17,7 +17,7 @@ public:
 
 	virtual ~TextureMapSample();
 
-	virtual void init();
+	virtual void init(const char * vertexStr,const char * fragStr);
 
 	virtual void draw();
 
