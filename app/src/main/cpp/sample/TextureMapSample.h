@@ -23,6 +23,9 @@ public:
 
 	virtual void Destroy();
 
+private:
+	GLuint vboIds[2];
+
 };
 
 

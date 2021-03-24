@@ -45,7 +45,7 @@ void TestFBOSample::init(const char * vertexStr,const char * fragmentStr)
 //	 必须设置的两个属性
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_RenderImage.width, m_RenderImage.height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
 	glBindTexture(GL_TEXTURE_2D,0);
 
 	createFrameBuffer();
@@ -61,7 +61,7 @@ void TestFBOSample::createFrameBuffer() {// 创建离屏纹理
 //	 必须设置的两个属性
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_RenderImage.width, m_RenderImage.height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glCheckError("create frame buffer");
@@ -92,7 +92,7 @@ void TestFBOSample::createFrameBuffer() {// 创建离屏纹理
 //	glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
 //	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
 //	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboTextureId, 0);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_UNSIGNED_BYTE, GL_RGBA, nullptr);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_RenderImage.width, m_RenderImage.height, 0, GL_UNSIGNED_BYTE, GL_RGB, nullptr);
 //	if (glCheckFramebufferStatus(GL_FRAMEBUFFER)!= GL_FRAMEBUFFER_COMPLETE) {
 //		LOGCATE("FBOSample::CreateFrameBufferObj glCheckFramebufferStatus status != GL_FRAMEBUFFER_COMPLETE");
 //	}
@@ -110,23 +110,23 @@ void TestFBOSample::draw()
 	// 左上角起始点，逆时针读取
 	GLfloat verticesCoords[] = {
 			-1.0f,  1.0f, 0.0f,  // Position 0
-			-1.0f, -1.0f, 0.0f,  // Position 1
+			1.0f, 1.0f, 0.0f,  // Position 1
 			1.0f, -1.0f, 0.0f,   // Position 2
-			1.0f,  1.0f, 0.0f,   // Position 3
+			-1.0f,  -1.0f, 0.0f,   // Position 3
 	};
 
 	// 纹理坐标左下角起始点，顺时针
 	GLfloat textureCoords[] = {
 			0.0f,  0.0f,        // TexCoord 0
-			0.0f,  1.0f,        // TexCoord 1
+			1.0f,  0.0f,        // TexCoord 1
 			1.0f,  1.0f,        // TexCoord 2
 			1.0f,  0.0f         // TexCoord 3
 	};
 	GLfloat textureCoordsWrite[] = {
-			1.0f,  1.0f,         // TexCoord 0
-			1.0f,  0.0f,        // TexCoord 1
-			0.0f,  0.0f,        // TexCoord 2
-			0.0f,  1.0f,        // TexCoord 3
+            0.0f,  1.0f,        // TexCoord 0
+            1.0f,  1.0f,        // TexCoord 1
+            1.0f,  0.0f,        // TexCoord 2
+           0.0f,  0.0f         // TexCoord 3
 	};
 	float value = ((getRandomInt(100)) * 1.0f/ 100.f);
 //	LOGCATE("log value:%f",value);
@@ -138,13 +138,13 @@ void TestFBOSample::draw()
 
 	// Use the program object
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glViewport(0, 0,screenWidth, screenHeight);
-
     glUseProgram(m_ProgramObj);
+//    stbi_load("")
 
 	// 离屏渲染
 	glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    glViewport(0, 0,screenWidth, screenHeight);
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
@@ -177,31 +177,10 @@ void TestFBOSample::draw()
 	// Load the texture coordinate
 	glVertexAttribPointer (1, 2, GL_FLOAT,
 							GL_FALSE, 2 * sizeof (GLfloat), textureCoords);
-	glVertexAttribPointer (2, 1, GL_FLOAT,
-						   GL_FALSE, 1 * sizeof (GLfloat), facotrs);
 
 	glEnableVertexAttribArray (0);
 	glEnableVertexAttribArray (1);
-	glEnableVertexAttribArray (2);
 
-
-//	LOGCATE("TestFBOSample::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
-
-	long long startTime = GetSysCurrentTime();
-    // Bind the RGBA map
-    //upload RGBA image data
-//    glBindTexture(GL_TEXTURE_2D, m_fboTextureId);
-    long long startTimeUpload = GetSysCurrentTime();
-
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
-
-//    LOGCATE("every frame cost:%lld",GetSysCurrentTime() - startTime);
-//    LOGCATE("every frame upload cost:%lld",GetSysCurrentTime() - startTimeUpload);
-
-
-//	LOGCATE("print texture unit:%d",m_TextureId);
-
-	// Set the RGBA map sampler to texture unit to 0
 	// 设置统一变量
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_fboTextureId);

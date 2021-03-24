@@ -18,14 +18,7 @@ TextureMapSample::~TextureMapSample()
 
 void TextureMapSample::init(const char * vertexStr,const char * fragStr)
 {
-	//create RGBA texture
-	glGenTextures(1, &m_TextureId);
-	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//	 必须设置的两个属性
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
 	char vShaderStr[] =
 			"#version 300 es                            \n"
@@ -64,6 +57,27 @@ void TextureMapSample::init(const char * vertexStr,const char * fragStr)
 		LOGCATE("TextureMapSample::Init create program fail");
 	}
 
+	GLfloat verticesCoords[] = {
+//			 ------- position ---      ====texture=======
+			-1.0f,  1.0f, 0.0f,   0.0,0.0,
+			1.0f, 1.0f, 0.0f,     1.0,0.0,
+			1.0f, -1.0f, 0.0f,    1.0,1.0,
+			-1.0f,  -1.0f, 0.0f,  0.0,1.0
+	};
+//	GLint indics[6] = {0,1,2,0,3,2};
+	glGenBuffers(2,vboIds);
+	glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(verticesCoords),verticesCoords,GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER,0);
+
+	//create RGBA texture
+	glGenTextures(1, &m_TextureId);
+	glBindTexture(GL_TEXTURE_2D, m_TextureId);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//	 必须设置的两个属性
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void TextureMapSample::draw()
@@ -77,21 +91,7 @@ void TextureMapSample::draw()
 	glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
-	// 左上角起始点，逆时针读取
-	GLfloat verticesCoords[] = {
-			-1.0f,  0.5f, 0.0f,  // Position 0
-			-1.0f, -0.5f, 0.0f,  // Position 1
-			1.0f, -0.5f, 0.0f,   // Position 2
-			1.0f,  0.5f, 0.0f,   // Position 3
-	};
 
-	// 纹理坐标左下角起始点，顺时针
-	GLfloat textureCoords[] = {
-			0.0f,  0.0f,        // TexCoord 0
-			0.0f,  1.0f,        // TexCoord 1
-			1.0f,  1.0f,        // TexCoord 2
-			1.0f,  0.0f         // TexCoord 3
-	};
 	float value = ((getRandomInt(100)) * 1.0f/ 100.f);
 	LOGCATE("log value:%f",value);
 	GLfloat facotrs[] = {
@@ -103,41 +103,25 @@ void TextureMapSample::draw()
 	// Use the program object
 	glUseProgram (m_ProgramObj);
 
+	glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
 	glEnableVertexAttribArray (0);
 	glEnableVertexAttribArray (1);
 
 	// Load the vertex position
 	glVertexAttribPointer (0, 3, GL_FLOAT,
-							GL_FALSE, 3 * sizeof (GLfloat), verticesCoords);
+							GL_FALSE, 5 * sizeof (GLfloat), (const void*)(0 * sizeof(GL_FLOAT)));
 	// Load the texture coordinate
 	glVertexAttribPointer (1, 2, GL_FLOAT,
-							GL_FALSE, 2 * sizeof (GLfloat), textureCoords);
+							GL_FALSE, 5 * sizeof (GLfloat), (const void*)(3 * sizeof(GL_FLOAT)));
 //	glVertexAttribPointer (2, 1, GL_FLOAT,
 //						   GL_FALSE, 1 * sizeof (GLfloat), facotrs);
-
-
-//	glEnableVertexAttribArray (2);
-
-
-	LOGCATE("TextureMapSample::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
-
-	long long startTime = GetSysCurrentTime();
-    // Bind the RGBA map
-    //upload RGBA image data
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
-    long long startTimeUpload = GetSysCurrentTime();
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
-
-    LOGCATE("every frame cost:%lld",GetSysCurrentTime() - startTime);
-    LOGCATE("every frame upload cost:%lld",GetSysCurrentTime() - startTimeUpload);
-
 
 //	LOGCATE("print texture unit:%d",m_TextureId);
 	// Set the RGBA map sampler to texture unit to 0
 	// 设置统一变量
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_TextureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
 	glUniform1i(m_SamplerLoc, 0);
 	GLint indics[6] = {0,1,2,0,2,3};
 
