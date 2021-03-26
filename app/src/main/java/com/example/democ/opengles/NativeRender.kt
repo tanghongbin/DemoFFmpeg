@@ -58,11 +58,29 @@ class NativeRender
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         setImageByType(1)
-        val vertexStr = getStrFromAssets("glsl/vetex.glsl")
-        val fragStr = getStrFromAssets("glsl/fragment.glsl")
-        log("打印顶点字符串:${vertexStr}")
-        log("打印片段字符串:${fragStr}")
-        native_OnSurfaceCreated(vertexStr,fragStr)
+        val sampleType = 2
+        val vertexStr = getStrFromAssets(getVertexByType(sampleType))
+        val fragStr = getStrFromAssets(getFragmentStrByType(sampleType))
+//        log("打印顶点字符串:${vertexStr}")
+//        log("打印片段字符串:${fragStr}")
+        native_OnSurfaceCreated(vertexStr,fragStr,sampleType)
+    }
+
+    @Suppress("SameParameterValue")
+    private fun getFragmentStrByType(sampleType: Int):String {
+        return when(sampleType){
+            2 -> "glsl/texture/fragment.glsl"
+            10 -> "glsl/fbo/fragment.glsl"
+            else -> "glsl/fbo/fragment.glsl"
+        }
+    }
+
+    private fun getVertexByType(sampleType: Int):String {
+        return when(sampleType){
+            2 -> "glsl/texture/vetex.glsl"
+            10 -> "glsl/fbo/vetex.glsl"
+            else -> "glsl/fbo/vetex.glsl"
+        }
     }
 
     private fun setImageByType(type:Int) {
@@ -127,7 +145,7 @@ class NativeRender
 
     external fun native_SetImageData(format:Int,width:Int,height:Int,byteArray: ByteArray)
 
-    external fun native_OnSurfaceCreated(vertexStr:String,fragStr:String)
+    external fun native_OnSurfaceCreated(vertexStr:String,fragStr:String,sampleType:Int)
 
     external fun native_OnSurfaceChanged(width:Int,height:Int)
 

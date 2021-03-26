@@ -44,6 +44,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${RTMP}/libs/${CMAKE_ANDROID_ARCH_ABI}
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
+        ${CMAKE_SOURCE_DIR}/sample/high_level/*.cpp
         ${CMAKE_SOURCE_DIR}/opengles_samples/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/rtmp/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp

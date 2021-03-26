@@ -38,7 +38,7 @@ public:
 
     void SetImageData(int format, int width, int height, uint8_t *pData);
 
-    void OnSurfaceCreated(const char * vertexStr,const char * fragStr);
+    void OnSurfaceCreated(int type,const char * vertexStr,const char * fragStr);
 
     void OnSurfaceChanged(int width, int height);
 

@@ -7,6 +7,9 @@
 
 
 #include <ImageDef.h>
+#include <stb_image.h>
+#include <detail/type_mat.hpp>
+#include <gtc/type_ptr.hpp> // glm::value_ptr
 #include "GLBaseSample.h"
 
 class TextureSample : public GLBaseSample {
@@ -19,6 +22,14 @@ public:
 
     void Destroy();
 
+private:
+    stbi_uc * imageData = nullptr;
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 projection;
+
+
+    void createMvp();
 };
 
 

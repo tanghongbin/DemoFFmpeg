@@ -5,41 +5,16 @@
 
 #include "TextureSample.h"
 #include <GLES3/gl3.h>
+#include "stb_image.h"
 #include "CustomGLUtils.h"
 #include "ImageDef.h"
 
+
 void TextureSample::init(const char * vertexStr,const char * fragStr) {
-    //create RGBA texture
-    glGenTextures(1, &m_TextureId);
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
-    char vShaderStr[] =
-            "#version 300 es                            \n"
-            "layout(location = 0) in vec4 a_position;   \n"
-            "layout(location = 1) in vec2 a_texCoord;   \n"
-            "out vec2 v_texCoord;                       \n"
-            "void main()                                \n"
-            "{                                          \n"
-            "   gl_Position = a_position;               \n"
-            "   v_texCoord = a_texCoord;                \n"
-            "}                                          \n";
+    const char* vShaderStr =vertexStr;
 
-    char fShaderStr[] =
-            "#version 300 es                                     \n"
-            "precision mediump float;                            \n"
-            "in vec2 v_texCoord;                                 \n"
-            "layout(location = 0) out vec4 outColor;             \n"
-            "uniform sampler2D s_TextureMap;                     \n"
-            "void main()                                         \n"
-            "{                                                   \n"
-            "  outColor = texture(s_TextureMap, v_texCoord);     \n"
-            "}                                                   \n";
-
+    const char* fShaderStr =fragStr;
     m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
     if (m_ProgramObj)
     {
@@ -49,6 +24,35 @@ void TextureSample::init(const char * vertexStr,const char * fragStr) {
     {
         LOGCATE("TextureMapSample::Init create program fail");
     }
+
+    int64_t startTime= GetSysCurrentTime();
+    int localWidth;
+    int localHeight;
+    int nrChannels;
+    // test1,2,3 ...
+    const char * filePath = "/storage/emulated/0/ffmpegtest/filterImg/test3.jpg";
+    const char * filePath2 = "/storage/emulated/0/ffmpegtest/filterImg/test2.png";
+    bool isPng = false;
+    GLint format = GL_RGBA;
+    if (!isPng){
+        format = GL_RGB;
+    }
+    imageData = stbi_load(filePath, &localWidth, &localHeight, &nrChannels, 0);
+    LOGCATE("image width:%d height:%d channel:%d data:%p costTime:%lld",localWidth,localHeight,nrChannels,imageData,
+            (GetSysCurrentTime() - startTime));
+    startTime = GetSysCurrentTime();
+    //create RGBA texture
+    glGenTextures(1, &m_TextureId);
+    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glTexImage2D(GL_TEXTURE_2D, 0, format, localWidth,localHeight, 0, format, GL_UNSIGNED_BYTE, imageData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,m_RenderImage.ppPlane[0]);
+    glBindTexture(GL_TEXTURE_2D, GL_NONE);
+    LOGCATE("upload cost:%lld",(GetSysCurrentTime() - startTime));
+    createMvp();
 }
 
 void TextureSample::draw() {
@@ -73,22 +77,17 @@ void TextureSample::draw() {
     };
 
     GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
-
-    //upload RGBA image data
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
-    glBindTexture(GL_TEXTURE_2D, GL_NONE);
+    
 //    LOGCATE("imagewidth:%i   ---imageHeight:%i",m_RenderImage.width,m_RenderImage.height);
     // Use the program object
     glUseProgram (m_ProgramObj);
 
     // Load the vertex position
     glVertexAttribPointer (0, 3, GL_FLOAT,
-                           GL_FALSE, 3 * sizeof (GLfloat), verticesCoords);
+                           GL_FALSE, 0, verticesCoords);
     // Load the texture coordinate
     glVertexAttribPointer (1, 2, GL_FLOAT,
-                           GL_FALSE, 2 * sizeof (GLfloat), textureCoords);
+                           GL_FALSE, 0, textureCoords);
 
     glEnableVertexAttribArray (0);
     glEnableVertexAttribArray (1);
@@ -109,8 +108,24 @@ void TextureSample::Destroy()
 {
     if (m_ProgramObj)
     {
+        LOGCATE("before over %p",imageData);
+        if (imageData){
+            stbi_image_free(imageData);
+            LOGCATE("after over %p",imageData);
+            imageData = nullptr;
+        }
         glDeleteProgram(m_ProgramObj);
         glDeleteTextures(1, &m_TextureId);
     }
 
+}
+
+void TextureSample::createMvp() {
+    model = glm::rotate(model,glm::radians(-55.0f),glm::vec3(1.0f,0.0f,0.0f));
+    view = glm::translate(view,glm::vec3(0.0f,0.0f,-3.0f));
+    float ration = 1.3f;
+    projection = glm::perspective(glm::radians(45.0f),ration,0.1f,100.0f);
+    setMat4(m_ProgramObj, "model", model);
+    setMat4(m_ProgramObj, "view", view);
+    setMat4(m_ProgramObj, "projection", projection);
 }

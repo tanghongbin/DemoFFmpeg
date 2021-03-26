@@ -18,6 +18,8 @@ object Constants {
 
     val FILTER_ADD_TO_YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/filterAddToYuv.h264"
     val SWS_CONVERT_PNG = Environment.getExternalStorageDirectory().absolutePath + "/sws_after_scale.png"
+    val TEST_JPG = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/filterImg/test1.jpg"
+    val TEST_PNG = Environment.getExternalStorageDirectory().absolutePath + "${FILD_DIR}/filterImg/test2.png"
 
 
     // =================== download -=====================================

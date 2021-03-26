@@ -18,12 +18,12 @@ fun createProgram(context: Context): Int {
     val vertexCode =
         readAssetsTxt(
             context = context,
-            filePath = "glsl/vetex.glsl"
+            filePath = "glsl/fbo/vetex.glsl"
         )
     val fragmentCode =
         readAssetsTxt(
             context = context,
-            filePath = "glsl/fragment.glsl"
+            filePath = "glsl/fbo/fragment.glsl"
         )
     return createAndLinkProgram(vertexCode, fragmentCode)
 }

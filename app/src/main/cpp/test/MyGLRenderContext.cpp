@@ -20,7 +20,6 @@
 MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
-    m_Sample = generateSample(9);
 }
 
 GLBaseSample *MyGLRenderContext::generateSample(int type) {
@@ -30,27 +29,30 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             sample = new TriangleSample();
             break;
         case 2:
-            sample = new TextureMapSample();
+            sample = new TextureSample();
             break;
         case 3:
-            sample = new ParticlesSample();
+            sample = new TextureMapSample();
             break;
         case 4:
-            sample = new GLYuvSample();
+            sample = new ParticlesSample();
             break;
         case 5:
-            sample = new GLVBOEBOSample();
+            sample = new GLYuvSample();
             break;
         case 6:
-            sample = new GLFBOSample();
+            sample = new GLVBOEBOSample();
             break;
         case 7:
-            sample = new CoordinateSystemSample();
+            sample = new GLFBOSample();
             break;
         case 8:
-            sample = new TextureCubeSample();
+            sample = new CoordinateSystemSample();
             break;
         case 9:
+            sample = new TextureCubeSample();
+            break;
+        case 10:
             sample = new TestFBOSample();
             break;
     }
@@ -89,9 +91,9 @@ void MyGLRenderContext::SetImageData(int format, int width, int height, uint8_t 
 
 }
 
-void MyGLRenderContext::OnSurfaceCreated(const char * vertexStr,const char * fragStr) {
+void MyGLRenderContext::OnSurfaceCreated(int type,const char * vertexStr,const char * fragStr) {
     LOGCATE("OnSurfaceCreated");
-    glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+    m_Sample = generateSample(type);
     m_Sample->init(vertexStr,fragStr);
 }
 

@@ -13,9 +13,10 @@ class TestFBOSample : public GLBaseSample{
 
 private:
     GLuint m_ProgramObj;
-    GLuint vboIds[2] = {1, 2};
-    GLuint vaoIds[2] = {3, 4};
+    GLuint vboIds[3];
+    GLuint vaoIds[2];
     glm::mat4 m_MVPMatrix;
+    uint8_t* imageData = nullptr;
 
 public:
     TestFBOSample();
