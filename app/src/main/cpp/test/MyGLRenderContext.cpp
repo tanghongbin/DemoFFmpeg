@@ -56,7 +56,7 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             sample = new TestFBOSample();
             break;
     }
-    LOGCATE("create sample:%p",sample);
+    LOGCATE("create sample type:%d  point:%p",type,sample);
     return sample;
 }
 
@@ -68,6 +68,7 @@ MyGLRenderContext::~MyGLRenderContext() {
 void MyGLRenderContext::SetImageData(int format, int width, int height, uint8_t *pData) {
     LOGCATE("MyGLRenderContext::SetImageData format=%d, width=%d, height=%d, pData=%p", format,
             width, height, pData);
+    init(1);
     NativeImage nativeImage;
     nativeImage.format = format;
     nativeImage.width = width;
@@ -91,9 +92,8 @@ void MyGLRenderContext::SetImageData(int format, int width, int height, uint8_t 
 
 }
 
-void MyGLRenderContext::OnSurfaceCreated(int type,const char * vertexStr,const char * fragStr) {
+void MyGLRenderContext::OnSurfaceCreated(const char * vertexStr,const char * fragStr) {
     LOGCATE("OnSurfaceCreated");
-    m_Sample = generateSample(type);
     m_Sample->init(vertexStr,fragStr);
 }
 
@@ -128,6 +128,10 @@ void MyGLRenderContext::DestroyInstance() {
     }
 
 
+}
+
+void MyGLRenderContext::init(int type) {
+    if (m_Sample == nullptr) m_Sample = generateSample(type);
 }
 
 

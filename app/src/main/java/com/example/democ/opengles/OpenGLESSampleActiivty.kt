@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.activity_native_open_g_l_e_s_actiivty.*
 
 class OpenGLESSampleActiivty : AppCompatActivity() {
 
-    val render by lazy { NativeRender()  }
+    val render by lazy { NativeRender() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

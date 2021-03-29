@@ -9,7 +9,6 @@
 #include "CustomGLUtils.h"
 #include "ImageDef.h"
 
-
 void TextureSample::init(const char * vertexStr,const char * fragStr) {
 
     const char* vShaderStr =vertexStr;
@@ -37,9 +36,9 @@ void TextureSample::init(const char * vertexStr,const char * fragStr) {
     if (!isPng){
         format = GL_RGB;
     }
-    imageData = stbi_load(filePath, &localWidth, &localHeight, &nrChannels, 0);
-    LOGCATE("image width:%d height:%d channel:%d data:%p costTime:%lld",localWidth,localHeight,nrChannels,imageData,
-            (GetSysCurrentTime() - startTime));
+//    imageData = stbi_load(filePath, &localWidth, &localHeight, &nrChannels, 0);
+//    LOGCATE("image width:%d height:%d channel:%d data:%p costTime:%lld",localWidth,localHeight,nrChannels,imageData,
+//            (GetSysCurrentTime() - startTime));
     startTime = GetSysCurrentTime();
     //create RGBA texture
     glGenTextures(1, &m_TextureId);
@@ -51,8 +50,54 @@ void TextureSample::init(const char * vertexStr,const char * fragStr) {
 //    glTexImage2D(GL_TEXTURE_2D, 0, format, localWidth,localHeight, 0, format, GL_UNSIGNED_BYTE, imageData);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,m_RenderImage.ppPlane[0]);
     glBindTexture(GL_TEXTURE_2D, GL_NONE);
+    float verticesBig[] = {
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    glGenBuffers(1,&vboIds[0]);
+    glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(verticesBig),verticesBig,GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
     LOGCATE("upload cost:%lld",(GetSysCurrentTime() - startTime));
-    createMvp();
 }
 
 void TextureSample::draw() {
@@ -62,32 +107,23 @@ void TextureSample::draw() {
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
-    GLfloat verticesCoords[] = {
-            -1.0f,  0.5f, 0.0f,  // Position 0
-            -1.0f, -0.5f, 0.0f,  // Position 1
-            1.0f, -0.5f, 0.0f,   // Position 2
-            1.0f,  0.5f, 0.0f,   // Position 3
-    };
 
-    GLfloat textureCoords[] = {
-            0.0f,  0.0f,        // TexCoord 0
-            0.0f,  1.0f,        // TexCoord 1
-            1.0f,  1.0f,        // TexCoord 2
-            1.0f,  0.0f         // TexCoord 3
-    };
 
-    GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
+
+//    GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
     
 //    LOGCATE("imagewidth:%i   ---imageHeight:%i",m_RenderImage.width,m_RenderImage.height);
     // Use the program object
     glUseProgram (m_ProgramObj);
+//    glEnable(GL_DEPTH_TEST);
 
+    glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
     // Load the vertex position
     glVertexAttribPointer (0, 3, GL_FLOAT,
-                           GL_FALSE, 0, verticesCoords);
+                           GL_FALSE, 5 * sizeof(GL_FLOAT), (const void *)0);
     // Load the texture coordinate
     glVertexAttribPointer (1, 2, GL_FLOAT,
-                           GL_FALSE, 0, textureCoords);
+                           GL_FALSE, 5 * sizeof(GL_FLOAT), (const void *)(3 * sizeof(GL_FLOAT)));
 
     glEnableVertexAttribArray (0);
     glEnableVertexAttribArray (1);
@@ -99,8 +135,7 @@ void TextureSample::draw() {
     // Set the RGBA map sampler to texture unit to 0
     glUniform1i(m_SamplerLoc, 0);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
-
+    createMvp();
 }
 
 
@@ -121,11 +156,45 @@ void TextureSample::Destroy()
 }
 
 void TextureSample::createMvp() {
-    model = glm::rotate(model,glm::radians(-55.0f),glm::vec3(1.0f,0.0f,0.0f));
-    view = glm::translate(view,glm::vec3(0.0f,0.0f,-3.0f));
-    float ration = 1.3f;
-    projection = glm::perspective(glm::radians(45.0f),ration,0.1f,100.0f);
-    setMat4(m_ProgramObj, "model", model);
-    setMat4(m_ProgramObj, "view", view);
-    setMat4(m_ProgramObj, "projection", projection);
+    model = glm::mat4(1.0f);
+    view = glm::mat4(1.0f);
+    projection = glm::mat4(1.0f);
+    float second = 1.0f;
+    if (startTime == 0L){
+        startTime = GetSysCurrentTime();
+    } else {
+        second = (float)(GetSysCurrentTime() - startTime) / 1000;
+    }
+
+    glm::vec3 cubePositions[] = {
+            glm::vec3( 0.0f,  0.0f,  0.0f),
+            glm::vec3( 2.0f,  5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f, -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3( 2.4f, -0.4f, -3.5f),
+            glm::vec3(-1.7f,  3.0f, -7.5f),
+            glm::vec3( 1.3f, -2.0f, -2.5f),
+            glm::vec3( 1.5f,  2.0f, -2.5f),
+            glm::vec3( 1.5f,  0.2f, -1.5f),
+            glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
+    for(unsigned int i = 0; i < 10; i++)
+    {
+        model = glm::translate(model, cubePositions[i]);
+        float angle = 20.0f * i;
+        model = glm::rotate(model, second * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+//        model = glm::rotate(model, second * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        view = glm::translate(view,glm::vec3(0.0f,0.0f,-3.0f));
+//    LOGCATE("log width:%d height:%d",screenWidth,screenHeight);
+        float ration = (float)screenWidth / (float )screenHeight;
+        projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
+        setMat4(m_ProgramObj, "model", model);
+        setMat4(m_ProgramObj, "view", view);
+        setMat4(m_ProgramObj, "projection", projection);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+
+
 }

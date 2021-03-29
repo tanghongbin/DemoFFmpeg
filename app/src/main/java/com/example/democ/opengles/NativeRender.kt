@@ -17,11 +17,12 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 
-class NativeRender
+class NativeRender()
     : GLSurfaceView.Renderer
 {
 
     private var mCall: MsgCallback? = null
+    private var mType: Int = 0
 
     val IMAGE_FORMAT_RGBA = 0x01
     val IMAGE_FORMAT_NV21 = 0x02
@@ -34,13 +35,17 @@ class NativeRender
         // Used to load the 'native-lib' library on application startup.
 
         val TAG = "TAG"
-
         init {
             System.loadLibrary("native-render")
         }
         fun log(str: String) {
             Log.d(TAG, str)
         }
+    }
+
+    init {
+        mType = 2
+        native_OnInit(mType)
     }
 
     fun setMsgCall(block:MsgCallback){
@@ -58,12 +63,12 @@ class NativeRender
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         setImageByType(1)
-        val sampleType = 2
+        val sampleType = mType
         val vertexStr = getStrFromAssets(getVertexByType(sampleType))
         val fragStr = getStrFromAssets(getFragmentStrByType(sampleType))
 //        log("打印顶点字符串:${vertexStr}")
 //        log("打印片段字符串:${fragStr}")
-        native_OnSurfaceCreated(vertexStr,fragStr,sampleType)
+        native_OnSurfaceCreated(vertexStr,fragStr)
     }
 
     @Suppress("SameParameterValue")
@@ -139,13 +144,13 @@ class NativeRender
      */
 
 
-    external fun native_OnInit()
+    external fun native_OnInit(type:Int)
 
     external fun native_OnUnInit()
 
     external fun native_SetImageData(format:Int,width:Int,height:Int,byteArray: ByteArray)
 
-    external fun native_OnSurfaceCreated(vertexStr:String,fragStr:String,sampleType:Int)
+    external fun native_OnSurfaceCreated(vertexStr:String,fragStr:String)
 
     external fun native_OnSurfaceChanged(width:Int,height:Int)
 
