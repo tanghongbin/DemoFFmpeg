@@ -9,11 +9,8 @@
 #include "CustomGLUtils.h"
 #include "ImageDef.h"
 
-void TextureSample::init(const char * vertexStr,const char * fragStr) {
+void TextureSample::init(const char * vShaderStr,const char * fShaderStr) {
 
-    const char* vShaderStr =vertexStr;
-
-    const char* fShaderStr =fragStr;
     m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
     if (m_ProgramObj)
     {
@@ -23,6 +20,8 @@ void TextureSample::init(const char * vertexStr,const char * fragStr) {
     {
         LOGCATE("TextureMapSample::Init create program fail");
     }
+    delete vShaderStr;
+    delete fShaderStr;
 
     int64_t startTime= GetSysCurrentTime();
     int localWidth;
@@ -151,6 +150,7 @@ void TextureSample::Destroy()
         }
         glDeleteProgram(m_ProgramObj);
         glDeleteTextures(1, &m_TextureId);
+        glDeleteBuffers(1,&vboIds[0]);
     }
 
 }
@@ -172,6 +172,7 @@ void TextureSample::createMvp() {
             glm::vec3(-1.5f, -2.2f, -2.5f),
             glm::vec3(-3.8f, -2.0f, -12.3f),
             glm::vec3( 2.4f, -0.4f, -3.5f),
+
             glm::vec3(-1.7f,  3.0f, -7.5f),
             glm::vec3( 1.3f, -2.0f, -2.5f),
             glm::vec3( 1.5f,  2.0f, -2.5f),
@@ -182,10 +183,23 @@ void TextureSample::createMvp() {
     for(unsigned int i = 0; i < 10; i++)
     {
         model = glm::translate(model, cubePositions[i]);
-        float angle = 20.0f * i;
-        model = glm::rotate(model, second * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-//        model = glm::rotate(model, second * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-        view = glm::translate(view,glm::vec3(0.0f,0.0f,-3.0f));
+        float angle = 5.0f * i;
+//        if (angle == 0) angle = 20.0f;
+//        angle = glm::radians(angle);
+//        if ( i == 0 || i % 3 == 0){
+//            angle = angle * second;
+//        }
+//        LOGCATE("angle will be rotate %f",angle);
+        model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+
+
+        // create view matrix
+        float radius = 10.0f;
+        float camX = sin(second) * radius;
+        float camZ = cos(second) * radius;
+//        view = glm::translate(view,glm::vec3(0.0f,0.0f,-3.0f));
+        view = glm::lookAt(glm::vec3(camX,0.0,camZ),glm::vec3(0.0,0.0,0.0),
+                glm::vec3(0.0,1.0,0.0));
 //    LOGCATE("log width:%d height:%d",screenWidth,screenHeight);
         float ration = (float)screenWidth / (float )screenHeight;
         projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
@@ -194,6 +208,7 @@ void TextureSample::createMvp() {
         setMat4(m_ProgramObj, "projection", projection);
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
+
 
 
 

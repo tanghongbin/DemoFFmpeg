@@ -27,6 +27,28 @@ android {
         }
 
         packagingOptions {
+            pickFirst '**/libfontconfig.so'
+            pickFirst '**/libcrypto.so'
+            pickFirst '**/libavcodec.so'
+            pickFirst '**/libswscale.so'
+            pickFirst '**/libmp3lame.so'
+
+            pickFirst '**/libass.so'
+            pickFirst '**/libavfilter.so'
+            pickFirst '**/libavformat.so'
+            pickFirst '**/libavutil.so'
+            pickFirst '**/libexpat.so'
+
+            pickFirst '**/libfdk-aac.so'
+            pickFirst '**/libfreetype.so'
+            pickFirst '**/libfribidi.so'
+            pickFirst '**/libssl.so'
+            pickFirst '**/libswresample.so'
+
+            pickFirst '**/libswscale.so'
+            pickFirst '**/libx264.so'
+            pickFirst '**/libyuv.so'
+            pickFirst '**/libyuv-sample.so'
 //            doNotStrip "**.so"
 //            def abiFiltersForWrapScript = supportAbis
 //            if (rootProject.ext.useASAN && abiFiltersForWrapScript) {
@@ -40,25 +62,6 @@ android {
         ndk {
             abiFilters "armeabi-v7a"
         }
-
-
-//        if (rootProject.ext.useASAN) {
-//            sourceSets {
-//                main {
-//                    jniLibs {
-//                        srcDir {
-//                            "asan/libs"
-//                        }
-//                    }
-//                    resources {
-//                        srcDir {
-//                            "asan/res"
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
     }
 
 
@@ -76,9 +79,9 @@ android {
         }
     }
     sourceSets {
-//        main {
-//            jniLibs.srcDirs = ['libs']
-//        }
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
     }
 }
 
@@ -105,47 +108,3 @@ dependencies {
 //    implementation project(path: ':libyuv-single')
 }
 
-//task copyAsanLibs(type:Copy) {
-//    def libDir = file("$rootProject.ext.ndkDir").absolutePath + "/toolchains/llvm/prebuilt/"
-//    for (String abi : supportAbis) {
-//        def dir = new File("app/asan/libs/" + abi)
-//        dir.mkdirs()
-//        if(abi == 'armeabi-v7a' || abi == 'armeabi')
-//            abi = "arm"
-//        if(abi == "arm64-v8a")
-//            abi = "aarch64"
-//        FileTree tree = fileTree(dir: libDir).include("**/*asan*${abi}*.so")
-//        tree.each { File file ->
-//            from file
-//            into dir.absolutePath
-//        }
-//    }
-//}
-//
-////这个task将会被generate所依赖
-//task createAsanHelpUtilScript(dependsOn: copyAsanLibs) {
-//    def abis = ["armeabi-v7a"]
-//    for (String abi : abis) {
-//        def dir = new File("app/asan/res/lib/" + abi)
-//        dir.mkdirs()
-//        def helpFile = new File(dir, "wrap.sh")
-//        generateHelpUtil(helpFile, abi)
-//        println "helpFile file path " + helpFile.path
-//    }
-//}
-//
-//static def generateHelpUtil(file, abi) {
-//    if(abi == "armeabi" || abi == "armeabi-v7a")
-//        abi = "arm"
-//    if(abi == "arm64-v8a")
-//        abi = "aarch64"
-//    file.withWriter { writer ->
-//        writer.write('#!/system/bin/sh\n')
-//        writer.write('HERE="$(cd "$(dirname "$0")" && pwd)"\n')
-//        writer.write('export ASAN_OPTIONS=log_to_syslog=false,allow_user_segv_handler=1\n')
-//        writer.write('export ASAN_ACTIVATION_OPTIONS=include_if_exists=/data/local/tmp/asan.options.b\n')
-//        //LD_PRELOAD的本意是，允许程序优先加载指定的动态库
-//        writer.write("export LD_PRELOAD=\$HERE/libclang_rt.asan-${abi}-android.so\n")
-//        writer.write('\$@\n')
-//    }
-//}
