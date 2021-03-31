@@ -32,47 +32,47 @@ void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
         LOGCATE("TextureMapSample::Init lightProgram fail");
     }
     float verticesBig[] = {
-            -0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,
-            0.5f,  0.5f, -0.5f,
-            0.5f,  0.5f, -0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-            -0.5f, -0.5f,  0.5f,
-            0.5f, -0.5f,  0.5f,
-            0.5f,  0.5f,  0.5f,
-            0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-            0.5f,  0.5f,  0.5f,
-            0.5f,  0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f,  0.5f,
-            0.5f,  0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-            -0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f,  0.5f,
-            0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-            -0.5f,  0.5f, -0.5f,
-            0.5f,  0.5f, -0.5f,
-            0.5f,  0.5f,  0.5f,
-            0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
     glGenBuffers(1,&vboIds[0]);
     glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
@@ -84,8 +84,11 @@ void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
     glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
     // Load the vertex position
     glVertexAttribPointer (0, 3, GL_FLOAT,
-                           GL_FALSE, 3 * sizeof(GL_FLOAT), (const void *)0);
+                           GL_FALSE, 6 * sizeof(GL_FLOAT), (const void *)0);
     glEnableVertexAttribArray (0);
+    glVertexAttribPointer (1, 3, GL_FLOAT,
+                           GL_FALSE, 6 * sizeof(GL_FLOAT), (const void *)(3* sizeof(GLfloat)));
+    glEnableVertexAttribArray (1);
     glBindVertexArray(0);
     LOGCATE("upload cost:%lld",(GetSysCurrentTime() - startTime));
 }
@@ -96,13 +99,34 @@ void LightSample::draw() {
 
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1.0);
-    
+
+    if (second == 0L){
+        second = GetSysCurrentTime();
+    }
+    second = (GetSysCurrentTime() - second) / 1000;
+    glm::vec3 lightPos = glm::vec3( 1.2f,  1.0f,  1.0f);
+    glm::vec3 cameraPos = glm::vec3(0.0f,0.0f,-5.0f);
 //    LOGCATE("imagewidth:%i   ---imageHeight:%i",m_RenderImage.width,m_RenderImage.height);
     // Use the program object
+
     glUseProgram (m_ProgramObj);
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(lightVao);
-    createMvp();
+    setVec3(m_ProgramObj,"lightPos",lightPos);
+    setVec3(m_ProgramObj,"viewPos",cameraPos);
+    model = glm::mat4(1.0f);
+    view = glm::mat4(1.0f);
+    projection = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3( 0.0f,  0.0f,  0.0f));
+    model = glm::rotate(model, 5.0f, glm::vec3(1.0f, 0.3f, 0.0f));
+    view = glm::translate(view,cameraPos);
+    projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
+    setMat4(m_ProgramObj, "model", model);
+    setMat4(m_ProgramObj, "view", view);
+    setMat4(m_ProgramObj, "projection", projection);
+    setVec3(m_ProgramObj,"objectColor",glm::vec3(1.0f,0.5f,0.31f));
+    setVec3(m_ProgramObj,"lightColor",glm::vec3(1.0f,1.0f,1.0f));
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
     glUseProgram (lightProgram);
@@ -112,11 +136,9 @@ void LightSample::draw() {
     view = glm::mat4(1.0f);
     projection = glm::mat4(1.0f);
 
-    model = glm::translate(model, glm::vec3( 1.2f,  1.0f,  1.0f));
+    model = glm::translate(model, lightPos);
     model = glm::scale(model,  glm::vec3(0.2f));
-    float angle = 20.0f;
-    model = glm::rotate(model, 10.0f, glm::vec3(1.0f, 0.3f, 0.5f));
-    view = glm::translate(view,glm::vec3(0.0f,0.0f,-5.0f));
+    view = glm::translate(view,cameraPos);
     projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
     setMat4(lightProgram, "model", model);
     setMat4(lightProgram, "view", view);
@@ -139,26 +161,5 @@ void LightSample::Destroy()
         glDeleteVertexArrays(1,&lightVao);
         glDeleteBuffers(1,&vboIds[0]);
     }
-
-}
-
-void LightSample::createMvp() {
-    model = glm::mat4(1.0f);
-    view = glm::mat4(1.0f);
-    projection = glm::mat4(1.0f);
-
-    model = glm::translate(model, glm::vec3( 0.0f,  0.0f,  0.0f));
-    float angle = 20.0f;
-    model = glm::rotate(model, 10.0f, glm::vec3(1.0f, 0.3f, 0.5f));
-    view = glm::translate(view,glm::vec3(0.0f,0.0f,-5.0f));
-    projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
-    setMat4(m_ProgramObj, "model", model);
-    setMat4(m_ProgramObj, "view", view);
-    setMat4(m_ProgramObj, "projection", projection);
-    setVec3(m_ProgramObj,"objectColor",glm::vec3(1.0f,0.5f,0.31f));
-    setVec3(m_ProgramObj,"lightColor",glm::vec3(1.0f,1.0f,1.0f));
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
 
 }

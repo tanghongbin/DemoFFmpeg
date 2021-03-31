@@ -30,9 +30,8 @@ private:
     GLuint vboIds[2];
     GLuint lightVao;
     GLint lightProgram;
+    int64_t second;
 
-
-    void createMvp();
 };
 
 

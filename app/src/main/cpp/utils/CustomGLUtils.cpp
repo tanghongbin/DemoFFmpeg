@@ -187,19 +187,22 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
                      GLuint &vertexShaderHandle, GLuint &fragShaderHandle) {
     GLuint program = 0;
     vertexShaderHandle = LoadShader(GL_VERTEX_SHADER, pVertexShaderSource);
-//    LOGCATE("GLUtils::CreateProgram vertexShaderHandle = %d", vertexShaderHandle);
-    if (!vertexShaderHandle) return program;
-
+    if (!vertexShaderHandle){
+        LOGCATE("GLUtils::CreateProgram vertexShaderHandle error: %d", vertexShaderHandle);
+        return program;
+    }
     fragShaderHandle = LoadShader(GL_FRAGMENT_SHADER, pFragShaderSource);
-    LOGCATE("GLUtils::CreateProgram fragShaderHandle = %d", fragShaderHandle);
-    if (!fragShaderHandle) return program;
+    if (!fragShaderHandle) {
+        LOGCATE("GLUtils::CreateProgram fragShaderHandle error: %d", fragShaderHandle);
+        return program;
+    }
 
     program = glCreateProgram();
     if (program) {
         glAttachShader(program, vertexShaderHandle);
-        glCheckError("glAttachShader");
+        glCheckError("glAttachShader vertexShaderHandle");
         glAttachShader(program, fragShaderHandle);
-        glCheckError("glAttachShader");
+        glCheckError("glAttachShader fragShaderHandle");
         glLinkProgram(program);
         GLint linkStatus = GL_FALSE;
         glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
