@@ -10,6 +10,7 @@
 #include <TextureMapSample.h>
 #include <TextureCubeSample.h>
 #include <TestFBOSample.h>
+#include <LightSample.h>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
@@ -20,6 +21,7 @@
 MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
+    m_Sample = nullptr;
 }
 
 GLBaseSample *MyGLRenderContext::generateSample(int type) {
@@ -55,6 +57,9 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
         case 10:
             sample = new TestFBOSample();
             break;
+        case 11:
+            sample = new LightSample();
+            break;
     }
     LOGCATE("create sample type:%d  point:%p",type,sample);
     return sample;
@@ -62,6 +67,7 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
 
 MyGLRenderContext::~MyGLRenderContext() {
     delete m_Sample;
+    m_Sample = nullptr;
 }
 
 

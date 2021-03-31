@@ -30,11 +30,6 @@ public:
 
     void Destroy();
 
-    void renderWithOriginal(const GLfloat *vVertices, const GLfloat *colors1);
-
-    void renderWithBuffer(const GLfloat *vVertices);
-
-    void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY);
 };
 
 #endif //DEMOC_TRIANGLESAMPLE_H

@@ -29,7 +29,7 @@ public:
 
     };
 
-    ~GLBaseSample() {
+    virtual ~GLBaseSample() {
 
     };
 

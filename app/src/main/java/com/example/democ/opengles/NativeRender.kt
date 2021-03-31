@@ -34,6 +34,7 @@ class NativeRender()
     companion object {
         // Used to load the 'native-lib' library on application startup.
 
+        val FIX_TYPE = 1
         val TAG = "TAG"
         init {
             System.loadLibrary("native-render")
@@ -44,7 +45,7 @@ class NativeRender()
     }
 
     init {
-        mType = 2
+        mType = 11
         native_OnInit(mType)
     }
 
@@ -62,7 +63,7 @@ class NativeRender()
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        setImageByType(1)
+        setImageByType(FIX_TYPE)
         val sampleType = mType
         val vertexStr = getStrFromAssets(getVertexByType(sampleType))
         val fragStr = getStrFromAssets(getFragmentStrByType(sampleType))
@@ -74,16 +75,20 @@ class NativeRender()
     @Suppress("SameParameterValue")
     private fun getFragmentStrByType(sampleType: Int):String {
         return when(sampleType){
+            1 -> "glsl/triangle/fragment.glsl"
             2 -> "glsl/texture/fragment.glsl"
             10 -> "glsl/fbo/fragment.glsl"
+            11 -> "glsl/light/fragment.glsl"
             else -> "glsl/fbo/fragment.glsl"
         }
     }
 
     private fun getVertexByType(sampleType: Int):String {
         return when(sampleType){
+            1 -> "glsl/triangle/vetex.glsl"
             2 -> "glsl/texture/vetex.glsl"
             10 -> "glsl/fbo/vetex.glsl"
+            11 -> "glsl/light/vetex.glsl"
             else -> "glsl/fbo/vetex.glsl"
         }
     }
