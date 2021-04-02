@@ -192,6 +192,8 @@ set_target_properties(ssl PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}
 add_library(ass SHARED IMPORTED )
 set_target_properties(ass PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libass.so)
 
+add_library(assimp SHARED IMPORTED )
+set_target_properties(assimp PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libassimp.so)
 
 find_library(log-lib log )
 
@@ -216,6 +218,7 @@ set(third-party-libs
         fribidi
         ssl
         rtmp
+        assimp
         )
 
 # Specifies libraries CMake should link to your target library. You

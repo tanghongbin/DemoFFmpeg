@@ -42,7 +42,13 @@ private:
     float m_ScaleX = 0.0f;
     float m_ScaleY = 0.0f;
 
+    // 单个可旋转
     void UpdateMvp( int angleX, int angleY, float ratio);
+
+    // 多个不可旋转
+    void UpdateMultipleMvp( int angleX, int angleY, float ratio);
+
+
 };
 
 

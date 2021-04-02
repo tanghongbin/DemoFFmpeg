@@ -178,7 +178,7 @@ void LightSample::draw() {
     }
     float diffValue = (float)(GetSysCurrentTime() - second) / (float)1000;
 //    LOGCATE("log second:%f",diffValue);
-    glm::vec3 lightPos = glm::vec3( 1.2f,  1.0f,  2.0f);
+    glm::vec3 lightPos = glm::vec3( 0.0,  1.0f,  2.0f);
     float radius = 8.0;
     float camX = sin(diffValue) * radius;
     glm::vec3 cameraPos = glm::vec3(-3,0.0f,3.0);
@@ -192,13 +192,15 @@ void LightSample::draw() {
     UpdateMvp( m_AngleX, m_AngleY, (float) screenWidth / (float) screenHeight);
     setMat4(m_ProgramObj, "model", model);
     setMat4(m_ProgramObj, "mMvpMatrix", mMvpMatrix);
-    setFloat(m_ProgramObj,"material.shininess",64.0);
+    setFloat(m_ProgramObj,"material.shininess",8.0);
     setInt(m_ProgramObj,"textSample",0);
     setInt(m_ProgramObj,"borderSample",1);
     setInt(m_ProgramObj,"flowSample",2);
     setVec3(m_ProgramObj,"light.ambient",0.3,0.3,0.3);
     setVec3(m_ProgramObj,"light.diffuse",0.5,0.5,0.5);
     setVec3(m_ProgramObj,"light.specular",1.0,1.0,1.0);
+    setVec3(m_ProgramObj,"light.direction",camera.Front);
+    setFloat(m_ProgramObj,"light.cutOff",   glm::cos(glm::radians(12.5f)));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,mLightTexture[0]);
     glActiveTexture(GL_TEXTURE1);
@@ -234,6 +236,39 @@ void LightSample::UpdateTransformMatrix(float rotateX, float rotateY, float scal
 //    LOGCATE("BasicLightingSample::UpdateMVPMatrix angleX = %d, angleY = %d, ratio = %f", angleX,
 //            angleY, ratio);
 }
+
+void LightSample::UpdateMultipleMvp(int angleX, int angleY, float ratio) {
+    angleX = angleX % 360;
+    angleY = angleY % 360;
+
+    //转化为弧度角
+    float radiansX = static_cast<float>(MATH_PI / 180.0f * angleX);
+    float radiansY = static_cast<float>(MATH_PI / 180.0f * angleY);
+
+
+    // Projection matrix
+//glm::mat4 Projection = glm::ortho(-ratio, ratio, -1.0f, 1.0f, 0.0f, 100.0f);
+//glm::mat4 Projection = glm::frustum(-ratio, ratio, -1.0f, 1.0f, 4.0f, 100.0f);
+    glm::mat4 Projection = glm::perspective(45.0f, ratio, 0.1f, 100.f);
+
+    // View matrix
+    glm::mat4 View = glm::lookAt(
+            glm::vec3(-3, 0, 3), // Camera is at (0,0,1), in World Space
+            glm::vec3(0, 0, 0), // and looks at the origin
+            glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
+    );
+
+    // Model matrix
+    glm::mat4 Model = glm::mat4(1.0f);
+    Model = glm::scale(Model, glm::vec3(m_ScaleX, m_ScaleX, m_ScaleX));
+    Model = glm::rotate(Model, radiansX, glm::vec3(1.0f, 0.0f, 0.0f));
+    Model = glm::rotate(Model, radiansY, glm::vec3(0.0f, 1.0f, 0.0f));
+    Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 0.0f));
+
+    model = Model;
+    mMvpMatrix = Projection * View * Model;
+}
+
 
 void LightSample::UpdateMvp(int angleX, int angleY, float ratio) {
     angleX = angleX % 360;

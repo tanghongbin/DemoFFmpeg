@@ -18,22 +18,29 @@ struct Light{
   vec3 ambient;
   vec3 diffuse;
   vec3 specular;
+  vec3 direction;
+  float cutOff;
 };
 uniform Light light;
 uniform Material material;
 void main()
 {
-  vec3 ambient = light.ambient * texture(textSample,texture_vec).rgb;
-  vec3 norm = normalize(Normal);
   vec3 lightDir = normalize(lightPos - FragPos);
-  // 计算漫反射角度
-  float diff= max(dot(norm,lightDir),0.0);
-  vec3 diffuse = light.diffuse * diff * texture(textSample,texture_vec).rgb;
-  // 计算镜面强度
-  vec3 viewDir = normalize(viewPos - FragPos);
-  vec3 reflectDir = reflect(-lightDir,norm);
-  float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-  vec3 specular =  light.specular * spec  * vec3(texture(borderSample,texture_vec));
-  vec3 result = ambient + diffuse + specular + vec3(texture(flowSample,texture_vec));
-  outColor = vec4(result,1.0);
+  float theta = dot(lightDir,normalize(-light.direction));
+//  if(theta > light.cutOff){
+    vec3 ambient = light.ambient * texture(textSample,texture_vec).rgb;
+    vec3 norm = normalize(Normal);
+    // 计算漫反射角度
+    float diff= max(dot(norm,lightDir),0.0);
+    vec3 diffuse = light.diffuse * diff * texture(textSample,texture_vec).rgb;
+    // 计算镜面强度
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir,norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular =  light.specular * spec  * vec3(1.0) - vec3(texture(borderSample,texture_vec));
+    vec3 result = ambient + diffuse + specular + vec3(texture(flowSample,texture_vec));
+    outColor = vec4(result,1.0);
+//  } else {
+//    outColor = vec4(light.ambient * texture(textSample,texture_vec).rgb,1.0);
+//  }
 }
