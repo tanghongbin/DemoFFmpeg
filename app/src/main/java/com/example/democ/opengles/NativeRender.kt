@@ -191,6 +191,8 @@ class NativeRender()
 
     external fun native_UpdateTransformMatrix(rotateX:Float, rotateY:Float, scaleX:Float, scaleY:Float)
 
+    external fun native_changeSamples(num: Int)
+
     // ========  egl ctx =============
 
     external fun egl_init_2()

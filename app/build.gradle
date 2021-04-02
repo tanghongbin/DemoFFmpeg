@@ -49,6 +49,7 @@ android {
             pickFirst '**/libx264.so'
             pickFirst '**/libyuv.so'
             pickFirst '**/libyuv-sample.so'
+            pickFirst '**/libassimp.so'
 //            doNotStrip "**.so"
 //            def abiFiltersForWrapScript = supportAbis
 //            if (rootProject.ext.useASAN && abiFiltersForWrapScript) {

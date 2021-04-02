@@ -7,6 +7,13 @@
     android:orientation="vertical"
     tools:context=".opengles.OpenGLESSampleActiivty">
 
+    <Button
+        android:id="@+id/mChangeSample"
+        android:text="切换sample"
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
 
     <com.example.democ.view.MvpSurfaceView
         android:id="@+id/mSurface"

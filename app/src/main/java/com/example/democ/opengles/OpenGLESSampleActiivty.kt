@@ -10,6 +10,7 @@ import com.example.democ.R
 import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.log
 import com.example.democ.utils.Constants
+import com.example.democ.view.SampleDialog
 import kotlinx.android.synthetic.main.activity_native_open_g_l_e_s_actiivty.*
 
 class OpenGLESSampleActiivty : AppCompatActivity() {
@@ -21,6 +22,13 @@ class OpenGLESSampleActiivty : AppCompatActivity() {
         setContentView(R.layout.activity_native_open_g_l_e_s_actiivty)
         mSurface.init(this,render)
         log("打印测试地址:${Constants.TEST_JPG}")
+        mChangeSample.setOnClickListener {
+            val dialog = SampleDialog(this,R.style.DialogStyle)
+            dialog.mConfirm = {num ->
+                render.native_changeSamples(num)
+            }
+            dialog.show()
+        }
     }
 
     override fun onDestroy() {

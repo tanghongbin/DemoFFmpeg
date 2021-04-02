@@ -11,6 +11,7 @@
 #include <TextureCubeSample.h>
 #include <TestFBOSample.h>
 #include <LightSample.h>
+#include <mutex>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
@@ -143,6 +144,15 @@ void MyGLRenderContext::init(int type) {
 void MyGLRenderContext::UpdateTransformMatrix(jfloat rotateX, jfloat rotateY, jfloat scaleX,
                                               jfloat scaleY) {
     m_Sample->UpdateTransformMatrix(rotateX,rotateY,scaleX,scaleY);
+}
+
+void MyGLRenderContext::changeSamples(int num) {
+    std::unique_lock<std::mutex> lock(mutex);
+    lock.lock();
+    if (m_Sample){
+        m_Sample->Destroy();
+    }
+    m_Sample = generateSample(num);
 }
 
 

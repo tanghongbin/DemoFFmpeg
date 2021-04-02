@@ -29,6 +29,8 @@ private:
 
     GLBaseSample *m_Sample;
 
+    std::mutex mutex;
+
 
     static MyGLRenderContext *m_pContext;
 
@@ -53,6 +55,8 @@ public:
     void init(int type);
 
     void UpdateTransformMatrix(jfloat rotateX, jfloat rotateY, jfloat scaleX, jfloat scaleY);
+
+    void changeSamples(int num);
 };
 
 #endif //DEMOC_MYGLRENDERCONTEXT_H
