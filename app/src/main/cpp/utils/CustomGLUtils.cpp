@@ -308,6 +308,8 @@ const int getRandomInt(int range){
 }
 
 
+
+
 jstring getJstringFromCharStr(JNIEnv *jniEnv, const char *str) {
     jstring result = jniEnv->NewStringUTF(str);
     return result;

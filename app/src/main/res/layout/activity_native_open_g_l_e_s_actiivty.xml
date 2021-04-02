@@ -8,7 +8,7 @@
     tools:context=".opengles.OpenGLESSampleActiivty">
 
 
-    <com.example.democ.view.MyGLSurfaceView
+    <com.example.democ.view.MvpSurfaceView
         android:id="@+id/mSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

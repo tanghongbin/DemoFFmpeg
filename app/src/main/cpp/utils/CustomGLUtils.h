@@ -4,6 +4,7 @@
 
 #include <jni.h>
 #include "utils.h"
+#include "OpenGLImageDef.h"
 #include <string>
 #include <gtc/matrix_transform.hpp>
 #include <GLES3/gl3.h>
@@ -84,6 +85,10 @@ void sys_log_init();
 uint8_t *fillArrayToFrame(AVPixelFormat avPixelFormat, AVFrame *frame);
 
 const int getRandomInt(int range);
+
+static void printLoadImageInfo(LoadImageInfo imageInfo){
+    LOGCATE("打印图片信息 width:%d height:%d channel:%d",imageInfo.width,imageInfo.height,imageInfo.channels);
+}
 
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);

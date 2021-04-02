@@ -51,6 +51,8 @@ public:
     GLBaseSample *generateSample(int type);
 
     void init(int type);
+
+    void UpdateTransformMatrix(jfloat rotateX, jfloat rotateY, jfloat scaleX, jfloat scaleY);
 };
 
 #endif //DEMOC_MYGLRENDERCONTEXT_H

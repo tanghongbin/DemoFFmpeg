@@ -22,7 +22,7 @@ public:
 
     void Destroy();
 
-    void UpdateTransformMatrix(float rotateX, float rotateY, float scaleX, float scaleY);
+//    void UpdateTransformMatrix(float rotateX, float rotateY, float scaleX, float scaleY);
 
     void UpdateMVPMatrix(glm::mat4 &mvpMatrix, int angleX, int angleY, float ratio);
 

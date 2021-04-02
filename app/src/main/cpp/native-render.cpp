@@ -217,15 +217,30 @@ JNIEXPORT void JNICALL egl_init_2(JNIEnv *env, jobject instance) {
 }
 
 
+/*
+ * Class:     com_byteflow_app_MyNativeRender
+ * Method:    native_UpdateTransformMatrix
+ * Signature: (FFFF)V
+ */
+JNIEXPORT void JNICALL native_UpdateTransformMatrix(JNIEnv *env, jobject instance, jfloat rotateX, jfloat rotateY, jfloat scaleX, jfloat scaleY)
+{
+    MyGLRenderContext::GetInstance()->UpdateTransformMatrix(rotateX, rotateY, scaleX, scaleY);
+}
+
+
 
 
 static JNINativeMethod g_RenderMethods[] = {
+        // ================== opengl ========================
         {"native_OnInit",           "(I)V",      (void *) (native_OnInit)},
         {"native_OnUnInit",         "()V",      (void *) (native_OnUnInit)},
         {"native_SetImageData",     "(III[B)V", (void *) (native_SetImageData)},
         {"native_OnSurfaceCreated", "(Ljava/lang/String;Ljava/lang/String;)V",      (void *) (native_OnSurfaceCreated)},
         {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
+        {"native_UpdateTransformMatrix",     "(FFFF)V", (void *) (native_UpdateTransformMatrix)},
+
+        // =======================  ffmpeg =======================
         {"native_getVideoWidth",      "()I",      (void *) (native_getVideoWidth)},
         {"native_getVideoHeight",      "()I",      (void *) (native_getVideoHeight)},
         {"native_getTotalDuration",      "()J",      (void *) (native_getTotalDuration)},

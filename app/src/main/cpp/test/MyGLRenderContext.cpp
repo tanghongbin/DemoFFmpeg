@@ -140,5 +140,10 @@ void MyGLRenderContext::init(int type) {
     if (m_Sample == nullptr) m_Sample = generateSample(type);
 }
 
+void MyGLRenderContext::UpdateTransformMatrix(jfloat rotateX, jfloat rotateY, jfloat scaleX,
+                                              jfloat scaleY) {
+    m_Sample->UpdateTransformMatrix(rotateX,rotateY,scaleX,scaleY);
+}
+
 
 

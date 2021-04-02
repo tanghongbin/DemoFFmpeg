@@ -19,7 +19,7 @@ class OpenGLESSampleActiivty : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_native_open_g_l_e_s_actiivty)
-        mSurface.init(render)
+        mSurface.init(this,render)
         log("打印测试地址:${Constants.TEST_JPG}")
     }
 

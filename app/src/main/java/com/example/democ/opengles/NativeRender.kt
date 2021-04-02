@@ -96,7 +96,7 @@ class NativeRender()
     private fun setImageByType(type:Int) {
         when(type){
             1 -> {
-                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.lye)
+                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.test_box)
                 val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
                 bitmap.copyPixelsToBuffer(byteBuffer)
                 native_SetImageData(IMAGE_FORMAT_RGBA, bitmap.width, bitmap.height, byteBuffer.array())
@@ -188,6 +188,8 @@ class NativeRender()
     external fun native_pause()
 
     external fun native_resume()
+
+    external fun native_UpdateTransformMatrix(rotateX:Float, rotateY:Float, scaleX:Float, scaleY:Float)
 
     // ========  egl ctx =============
 

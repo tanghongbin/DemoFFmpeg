@@ -21,6 +21,7 @@ protected:
     GLint m_SamplerLoc;
     NativeImage m_RenderImage;
     int64_t startTime = 0L;
+//    glm::mat4 mMvpMartix;
 
 
 public:
@@ -58,6 +59,9 @@ public:
     }
 
     virtual void Destroy() = 0;
+
+    virtual void UpdateTransformMatrix(float rotateX, float rotateY, float scaleX,
+                                       float scaleY) {}
 
 };
 

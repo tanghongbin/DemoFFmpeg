@@ -23,6 +23,12 @@
 #define IMAGE_FORMAT_NV12_EXT       "NV12"
 #define IMAGE_FORMAT_I420_EXT       "I420"
 
+typedef struct _tag_LoadImageInfo_{
+	int width;
+	int height;
+	int channels;
+} LoadImageInfo;
+
 typedef struct _tag_NativeRectF_plus
 {
 	float left;
