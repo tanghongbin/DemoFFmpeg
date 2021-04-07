@@ -23,6 +23,11 @@ protected:
     int64_t startTime = 0L;
 //    glm::mat4 mMvpMartix;
 
+    int m_AngleX = 0;
+    int m_AngleY = 0 ;
+    float m_ScaleX = 0.0f;
+    float m_ScaleY = 0.0f;
+
 
 public:
 

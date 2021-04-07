@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.dialog_siamples.*
 
 class SampleDialog(context: Context,style:Int) : Dialog(context,style) {
     private val samples = arrayListOf<String>(
-        "Triangle","Texture","TextureMapSample","GLFBOSample","LightSample"
+        "Triangle","Texture","TextureMapSample","GLFBOSample","LightSample", "Model3DSample"
     )
     var mConfirm:(Int) -> Unit = {}
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +23,8 @@ class SampleDialog(context: Context,style:Int) : Dialog(context,style) {
         window.attributes = params
         mListView.adapter = ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,samples)
         mListView.setOnItemClickListener { parent, view, position, id ->
+//            dismiss()
             mConfirm(getNumByStr(position))
-            dismiss()
         }
     }
 
@@ -35,6 +35,7 @@ class SampleDialog(context: Context,style:Int) : Dialog(context,style) {
             "TextureMapSample" -> 3
             "GLFBOSample" -> 10
             "LightSample" -> 11
+            "Model3DSample" -> 12
             else -> 1
         }
     }

@@ -9,7 +9,9 @@ import android.view.Surface
 import com.example.democ.R
 import com.example.democ.getAppContext
 import com.example.democ.interfaces.MsgCallback
+import com.example.democ.utils.getFragmentNameByType
 import com.example.democ.utils.getStrFromAssets
+import com.example.democ.utils.getVertexNameByType
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -17,12 +19,11 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 
-class NativeRender()
+class NativeRender(val mType:Int = 1)
     : GLSurfaceView.Renderer
 {
 
     private var mCall: MsgCallback? = null
-    private var mType: Int = 0
 
     val IMAGE_FORMAT_RGBA = 0x01
     val IMAGE_FORMAT_NV21 = 0x02
@@ -45,7 +46,6 @@ class NativeRender()
     }
 
     init {
-        mType = 11
         native_OnInit(mType)
     }
 
@@ -65,33 +65,14 @@ class NativeRender()
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         setImageByType(FIX_TYPE)
         val sampleType = mType
-        val vertexStr = getStrFromAssets(getVertexByType(sampleType))
-        val fragStr = getStrFromAssets(getFragmentStrByType(sampleType))
+        val vertexStr = getStrFromAssets(getVertexNameByType(sampleType))
+        val fragStr = getStrFromAssets(getFragmentNameByType(sampleType))
 //        log("打印顶点字符串:${vertexStr}")
 //        log("打印片段字符串:${fragStr}")
         native_OnSurfaceCreated(vertexStr,fragStr)
     }
 
-    @Suppress("SameParameterValue")
-    private fun getFragmentStrByType(sampleType: Int):String {
-        return when(sampleType){
-            1 -> "glsl/triangle/fragment.glsl"
-            2 -> "glsl/texture/fragment.glsl"
-            10 -> "glsl/fbo/fragment.glsl"
-            11 -> "glsl/light/fragment.glsl"
-            else -> "glsl/fbo/fragment.glsl"
-        }
-    }
 
-    private fun getVertexByType(sampleType: Int):String {
-        return when(sampleType){
-            1 -> "glsl/triangle/vetex.glsl"
-            2 -> "glsl/texture/vetex.glsl"
-            10 -> "glsl/fbo/vetex.glsl"
-            11 -> "glsl/light/vetex.glsl"
-            else -> "glsl/fbo/vetex.glsl"
-        }
-    }
 
     private fun setImageByType(type:Int) {
         when(type){
@@ -191,7 +172,7 @@ class NativeRender()
 
     external fun native_UpdateTransformMatrix(rotateX:Float, rotateY:Float, scaleX:Float, scaleY:Float)
 
-    external fun native_changeSamples(num: Int)
+    external fun native_changeSamples(num: Int,vertexStr: String,fragStr: String)
 
     // ========  egl ctx =============
 

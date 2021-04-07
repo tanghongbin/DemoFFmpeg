@@ -10,6 +10,7 @@
     <Button
         android:id="@+id/mChangeSample"
         android:text="切换sample"
+        android:visibility="gone"
         android:layout_gravity="right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

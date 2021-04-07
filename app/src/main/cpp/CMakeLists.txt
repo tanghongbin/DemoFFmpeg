@@ -45,39 +45,8 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/sample/*.cpp
         ${CMAKE_SOURCE_DIR}/sample/high_level/*.cpp
+        ${CMAKE_SOURCE_DIR}/sample/model/*.cpp
         ${CMAKE_SOURCE_DIR}/opengles_samples/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/rtmp/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/filters/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/swscale/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/muxer/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/io/*.cpp
-        ${CMAKE_SOURCE_DIR}/render/*.cpp
-        ${CMAKE_SOURCE_DIR}/test/*.cpp
-        ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
-        ${CMAKE_SOURCE_DIR}/utils/*.cpp)
-
-#第二个库
-file(GLOB src-files2
-        ${CMAKE_SOURCE_DIR}/${libName2}.cpp
-        ${CMAKE_SOURCE_DIR}/sample/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/rtmp/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/filters/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/swscale/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/muxer/*.cpp
-        ${CMAKE_SOURCE_DIR}/ffmpegsamples/io/*.cpp
-        ${CMAKE_SOURCE_DIR}/render/*.cpp
-        ${CMAKE_SOURCE_DIR}/test/*.cpp
-        ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
-        ${CMAKE_SOURCE_DIR}/utils/*.cpp)
-
-
-file(GLOB src-files3
-        ${CMAKE_SOURCE_DIR}/${libName3}.cpp
-        ${CMAKE_SOURCE_DIR}/sample/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/rtmp/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
@@ -118,7 +87,7 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        ${src-files2})
+        ${src-files})
 
 add_library( # Sets the name of the library.
         ${libName3}
@@ -127,7 +96,7 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        ${src-files3})
+        ${src-files})
 
 
 

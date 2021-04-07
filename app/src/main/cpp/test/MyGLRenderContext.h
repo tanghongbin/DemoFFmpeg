@@ -17,6 +17,7 @@
 #include <GLEglSample.h>
 #include <CoordinateSystemSample.h>
 #include <ParticlesSample.h>
+#include <mutex>
 
 
 class MyGLRenderContext {
@@ -29,7 +30,7 @@ private:
 
     GLBaseSample *m_Sample;
 
-    std::mutex mutex;
+    std::mutex my_mutex;
 
 
     static MyGLRenderContext *m_pContext;
@@ -56,7 +57,7 @@ public:
 
     void UpdateTransformMatrix(jfloat rotateX, jfloat rotateY, jfloat scaleX, jfloat scaleY);
 
-    void changeSamples(int num);
+    void changeSamples(int num,const char * vertexStr,const char * fragStr);
 };
 
 #endif //DEMOC_MYGLRENDERCONTEXT_H

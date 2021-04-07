@@ -227,8 +227,10 @@ JNIEXPORT void JNICALL native_UpdateTransformMatrix(JNIEnv *env, jobject instanc
     MyGLRenderContext::GetInstance()->UpdateTransformMatrix(rotateX, rotateY, scaleX, scaleY);
 }
 
-JNIEXPORT void JNICALL native_changeSamples(JNIEnv *env, jobject instance,jint num) {
-    MyGLRenderContext::GetInstance()->changeSamples(num);
+JNIEXPORT void JNICALL native_changeSamples(JNIEnv *env, jobject instance,jint num,
+                                            jstring vertexStr,jstring fragStr) {
+    MyGLRenderContext::GetInstance()->changeSamples(num,getCharStrFromJstring(env,vertexStr),
+                                                    getCharStrFromJstring(env,fragStr));
 }
 
 
@@ -241,7 +243,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnSurfaceChanged", "(II)V",    (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
         {"native_UpdateTransformMatrix",     "(FFFF)V", (void *) (native_UpdateTransformMatrix)},
-        {"native_changeSamples",     "(I)V", (void *) (native_changeSamples)},
+        {"native_changeSamples",     "(ILjava/lang/String;Ljava/lang/String;)V", (void *) (native_changeSamples)},
 
         // =======================  ffmpeg =======================
         {"native_getVideoWidth",      "()I",      (void *) (native_getVideoWidth)},

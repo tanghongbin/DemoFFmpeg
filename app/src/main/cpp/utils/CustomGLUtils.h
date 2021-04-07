@@ -42,6 +42,8 @@ GLuint LoadShader(GLenum shaderType, const char *pSource);
 
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource);
 
+unsigned int TextureFromFile(const std::string path, std::string &directory);
+
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,
                      GLuint &vertexShaderHandle, GLuint &fragShaderHandle);
 
@@ -86,7 +88,7 @@ uint8_t *fillArrayToFrame(AVPixelFormat avPixelFormat, AVFrame *frame);
 
 const int getRandomInt(int range);
 
-static void printLoadImageInfo(LoadImageInfo imageInfo){
+static void logLoadImageInfo(LoadImageInfo imageInfo){
     LOGCATE("打印图片信息 width:%d height:%d channel:%d",imageInfo.width,imageInfo.height,imageInfo.channels);
 }
 

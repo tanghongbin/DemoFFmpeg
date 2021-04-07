@@ -37,11 +37,6 @@ private:
     int64_t second;
     GLuint mLightTexture[10];
 
-    int m_AngleX = 0;
-    int m_AngleY = 0 ;
-    float m_ScaleX = 0.0f;
-    float m_ScaleY = 0.0f;
-
     // 单个可旋转
     void UpdateMvp( int angleX, int angleY, float ratio);
 

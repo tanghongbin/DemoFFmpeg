@@ -34,7 +34,10 @@ void encode(AVCodecContext *pContext, AVFrame *pFrame, AVPacket *pPacket, FILE *
 GLuint LoadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = 0;
     shader = glCreateShader(shaderType);
-    if (shader == 0) return shader;
+    if (shader == 0) {
+        LOGCATE("create shader failed");
+        return shader;
+    };
 //        LOGCATE("createshader success");
     glShaderSource(shader, 1, &pSource, nullptr);
     glCompileShader(shader);
@@ -58,6 +61,45 @@ GLuint LoadShader(GLenum shaderType, const char *pSource) {
     return shader;
 }
 
+
+unsigned int TextureFromFile(const std::string path, std::string &directory)
+{
+    std::string filename = std::string(path);
+    filename = directory + '/' + filename;
+    LOGCATE("log fileName:%s",filename.c_str());
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        stbi_image_free(data);
+    }
+    else
+    {
+        LOGCATE("Texture failed to load at path: %s",path.c_str());
+        stbi_image_free(data);
+    }
+    LOGCATE("log textureId:%d path:%s directory:%s",textureID,path.c_str(),directory.c_str());
+
+    return textureID;
+}
 
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource) {
     GLuint vertexShaderHandle, fragShaderHandle;
@@ -188,12 +230,12 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
     GLuint program = 0;
     vertexShaderHandle = LoadShader(GL_VERTEX_SHADER, pVertexShaderSource);
     if (!vertexShaderHandle){
-        LOGCATE("GLUtils::CreateProgram vertexShaderHandle error: %d", vertexShaderHandle);
+        LOGCATE("GLUtils::CreateProgram vertexShaderHandle error:");
         return program;
     }
     fragShaderHandle = LoadShader(GL_FRAGMENT_SHADER, pFragShaderSource);
     if (!fragShaderHandle) {
-        LOGCATE("GLUtils::CreateProgram fragShaderHandle error: %d", fragShaderHandle);
+        LOGCATE("GLUtils::CreateProgram fragShaderHandle error:");
         return program;
     }
 

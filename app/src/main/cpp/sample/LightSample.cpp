@@ -101,25 +101,25 @@ void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
     const char *fileName = "/storage/emulated/0/ffmpegtest/filterImg/test_box_border.png";
     LoadImageInfo imageInfo;
     imageData = stbi_load(fileName,&imageInfo.width,&imageInfo.height,&imageInfo.channels,0);
-    printLoadImageInfo(imageInfo);
+    logLoadImageInfo(imageInfo);
 
     const char *fileName2 = "/storage/emulated/0/ffmpegtest/filterImg/test_box_border_rgb.png";
     LoadImageInfo imageInfo2;
     stbi_uc *imageData2 = stbi_load(fileName2, &imageInfo2.width, &imageInfo2.height,
                                     &imageInfo2.channels, 0);
-    printLoadImageInfo(imageInfo2);
+    logLoadImageInfo(imageInfo2);
 
     const char *fileName3 = "/storage/emulated/0/ffmpegtest/filterImg/test_box_green.jpg";
     LoadImageInfo imageInfo3;
     stbi_uc *imageData3 = stbi_load(fileName3, &imageInfo3.width, &imageInfo3.height,
                                     &imageInfo3.channels, 0);
-    printLoadImageInfo(imageInfo3);
+    logLoadImageInfo(imageInfo3);
 
     const char *fileName4 = "/storage/emulated/0/ffmpegtest/filterImg/test_box_robot.jpg";
     LoadImageInfo imageInfo4;
     stbi_uc *imageData4 = stbi_load(fileName4, &imageInfo4.width, &imageInfo4.height,
                                     &imageInfo4.channels, 0);
-    printLoadImageInfo(imageInfo4);
+    logLoadImageInfo(imageInfo4);
 
 
     glGenTextures(5,mLightTexture);

@@ -80,11 +80,6 @@ private:
     GLubyte* m_pParticlesColorData;
     int m_LastUsedParticle;
 
-    int m_AngleX;
-    int m_AngleY;
-
-    float m_ScaleX;
-    float m_ScaleY;
 
 };
 

@@ -12,12 +12,14 @@
 #include <TestFBOSample.h>
 #include <LightSample.h>
 #include <mutex>
+#include <Model3DSample.h>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
 #include "TextureSample.h"
 #include "GLYuvSample.h"
 #include "GLVBOEBOSample.h"
+#include "model/Model.h"
 
 MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
@@ -60,6 +62,9 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             break;
         case 11:
             sample = new LightSample();
+            break;
+        case 12:
+            sample = new Model3DSample();
             break;
     }
     LOGCATE("create sample type:%d  point:%p",type,sample);
@@ -111,12 +116,16 @@ void MyGLRenderContext::OnSurfaceChanged(int width, int height) {
     MyGLRenderContext::height = height;
     m_Sample->screenWidth = width;
     m_Sample->screenHeight = height;
-
 }
 
 void MyGLRenderContext::OnDrawFrame() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    m_Sample->draw();
+    std::unique_lock<std::mutex> lock(my_mutex,std::defer_lock);
+    if (lock.try_lock()){
+        m_Sample->draw();
+    } else {
+        LOGCATE("no get lock");
+    }
 }
 
 MyGLRenderContext *MyGLRenderContext::GetInstance() {
@@ -146,13 +155,17 @@ void MyGLRenderContext::UpdateTransformMatrix(jfloat rotateX, jfloat rotateY, jf
     m_Sample->UpdateTransformMatrix(rotateX,rotateY,scaleX,scaleY);
 }
 
-void MyGLRenderContext::changeSamples(int num) {
-    std::unique_lock<std::mutex> lock(mutex);
-    lock.lock();
+void MyGLRenderContext::changeSamples(int num,const char * vertex,const char * fragmentStr) {
+    LOGCATE("log type:%d vetex:\n\n%s \n\n%s",num,vertex,fragmentStr);
+    std::unique_lock<std::mutex> lock(my_mutex);
     if (m_Sample){
         m_Sample->Destroy();
     }
     m_Sample = generateSample(num);
+    m_Sample->init(vertex,fragmentStr);
+    glCheckError("changeSamples");
+    m_Sample->screenWidth = MyGLRenderContext::width;
+    m_Sample->screenHeight = MyGLRenderContext::height;
 }
 
 

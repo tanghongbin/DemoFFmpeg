@@ -4,6 +4,7 @@
 
 #include <CustomGLUtils.h>
 #include "TextureMapSample.h"
+#include "stb_image.h"
 
 TextureMapSample::TextureMapSample()
 {
@@ -70,14 +71,31 @@ void TextureMapSample::init(const char * vertexStr,const char * fragStr)
 	glBufferData(GL_ARRAY_BUFFER,sizeof(verticesCoords),verticesCoords,GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER,0);
 
+	     const char *fileName = "/storage/emulated/0/ffmpegtest/3d_obj/apple/textures/Apricot_02_diffuse.png";
+        LoadImageInfo imageInfo;
+        stbi_uc *imageData = stbi_load(fileName, &imageInfo.width, &imageInfo.height, &imageInfo.channels, 0);
+        logLoadImageInfo(imageInfo);
+
 	//create RGBA texture
 	glGenTextures(1, &m_TextureId);
 	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//	 必须设置的两个属性
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+////	 必须设置的两个属性
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageInfo.width, imageInfo.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+	stbi_image_free(imageData);
+
 }
 
 void TextureMapSample::draw()
@@ -121,7 +139,6 @@ void TextureMapSample::draw()
 	// 设置统一变量
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_TextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
 	glUniform1i(m_SamplerLoc, 0);
 	GLint indics[6] = {0,1,2,0,2,3};
 

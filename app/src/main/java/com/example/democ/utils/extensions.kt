@@ -46,9 +46,44 @@ fun getStrFromAssets(name:String):String{
         stream.close()
         str = String(buffer, Charset.defaultCharset())
     } catch (e: IOException) {
-        // TODO Auto-generated catch block
         e.printStackTrace()
         return ""
     }
     return str
+}
+
+
+
+@Suppress("SameParameterValue")
+fun getFragmentNameByType(sampleType: Int):String {
+    return when(sampleType){
+        1 -> "glsl/triangle/fragment.glsl"
+        2 -> "glsl/texture/fragment.glsl"
+        10 -> "glsl/fbo/fragment.glsl"
+        11 -> "glsl/light/fragment.glsl"
+        12 -> "glsl/model3d/fragment.glsl"
+        else -> "glsl/fbo/fragment.glsl"
+    }
+}
+
+/***
+ * 片段字符串by type
+ */
+fun getFragmentStrByType(sampleType: Int):String {
+    return getStrFromAssets(getFragmentNameByType(sampleType))
+}
+
+fun getVertexNameByType(sampleType: Int):String {
+    return when(sampleType){
+        1 -> "glsl/triangle/vetex.glsl"
+        2 -> "glsl/texture/vetex.glsl"
+        10 -> "glsl/fbo/vetex.glsl"
+        11 -> "glsl/light/vetex.glsl"
+        12 -> "glsl/model3d/vetex.glsl"
+        else -> "glsl/fbo/vetex.glsl"
+    }
+}
+
+fun getVertexStrByType(sampleType: Int):String {
+    return getStrFromAssets(getVertexNameByType(sampleType))
 }
