@@ -13,8 +13,8 @@ cmake_minimum_required(VERSION 3.4.1)
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libName native-render)
-set(libName2 native-ffmpegrender)
-set(libName3 native-player)
+#set(libName2 native-ffmpegrender)
+#set(libName3 native-player)
 
 #拉流-推流
 set(RTMP ${CMAKE_SOURCE_DIR}/librtmp)
@@ -81,23 +81,23 @@ add_library( # Sets the name of the library.
         ${src-files})
 
 
-add_library( # Sets the name of the library.
-        ${libName2}
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-        ${src-files})
-
-add_library( # Sets the name of the library.
-        ${libName3}
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-        ${src-files})
+#add_library( # Sets the name of the library.
+#        ${libName2}
+#
+#        # Sets the library as a shared library.
+#        SHARED
+#
+#        # Provides a relative path to your source file(s).
+#        ${src-files})
+#
+#add_library( # Sets the name of the library.
+#        ${libName3}
+#
+#        # Sets the library as a shared library.
+#        SHARED
+#
+#        # Provides a relative path to your source file(s).
+#        ${src-files})
 
 
 
@@ -206,21 +206,21 @@ target_link_libraries(${libName}
         android
         GLESv3)
 
-target_link_libraries(${libName2}
-        ${OpenSLES-lib}
-        ${log-lib}
-        ${third-party-libs}
-        EGL
-        android
-        GLESv3)
-
-target_link_libraries(${libName3}
-        ${OpenSLES-lib}
-        ${log-lib}
-        ${third-party-libs}
-        EGL
-        android
-        GLESv3)
+#target_link_libraries(${libName2}
+#        ${OpenSLES-lib}
+#        ${log-lib}
+#        ${third-party-libs}
+#        EGL
+#        android
+#        GLESv3)
+#
+#target_link_libraries(${libName3}
+#        ${OpenSLES-lib}
+#        ${log-lib}
+#        ${third-party-libs}
+#        EGL
+#        android
+#        GLESv3)
 
 #if(USEASAN)
 #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")

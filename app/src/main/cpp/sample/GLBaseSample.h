@@ -28,6 +28,8 @@ protected:
     float m_ScaleX = 0.0f;
     float m_ScaleY = 0.0f;
 
+    float mEyeZ = 3.0f;
+
 
 public:
 
@@ -64,6 +66,16 @@ public:
     }
 
     virtual void Destroy() = 0;
+
+    // 1-减少，2-增加
+    virtual void ChangeEyeZValue(int type,float zValue){
+        if (type == 1){
+            mEyeZ -= zValue;
+        } else {
+            mEyeZ += zValue;
+        }
+//        LOGCATE("currentValue:%f",mEyeZ);
+    }
 
     virtual void UpdateTransformMatrix(float rotateX, float rotateY, float scaleX,
                                        float scaleY) {}

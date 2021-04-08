@@ -12,6 +12,7 @@
 #include "stdio.h"
 #include "sys/stat.h"
 #include "stdint.h"
+#include <GLES3/gl3.h>
 
 #define IMAGE_FORMAT_RGBA           0x01
 #define IMAGE_FORMAT_NV21           0x02
@@ -27,6 +28,13 @@ typedef struct _tag_LoadImageInfo_{
 	int width;
 	int height;
 	int channels;
+	GLint getFormat(){
+		if (channels == 3) {
+			return GL_RGB;
+		} else {
+			return GL_RGBA;
+		}
+	}
 } LoadImageInfo;
 
 typedef struct _tag_NativeRectF_plus

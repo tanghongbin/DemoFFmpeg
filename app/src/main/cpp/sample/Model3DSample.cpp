@@ -21,6 +21,10 @@ void Model3DSample::init(const char * vShaderStr,const char * fShaderStr) {
     const char * path = "/storage/emulated/0/ffmpegtest/3d_obj/apple/Apricot_02_hi_poly.obj";
     const char * path2 = "/storage/emulated/0/ffmpegtest/3d_obj/naosuit/nanosuit.obj";
     mModel = new Model(path2);
+
+    GLint format;
+    glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS,&format);
+    LOGCATE("压缩数量:%d",format);
 }
 
 void Model3DSample::draw() {

@@ -56,14 +56,7 @@ fun getStrFromAssets(name:String):String{
 
 @Suppress("SameParameterValue")
 fun getFragmentNameByType(sampleType: Int):String {
-    return when(sampleType){
-        1 -> "glsl/triangle/fragment.glsl"
-        2 -> "glsl/texture/fragment.glsl"
-        10 -> "glsl/fbo/fragment.glsl"
-        11 -> "glsl/light/fragment.glsl"
-        12 -> "glsl/model3d/fragment.glsl"
-        else -> "glsl/fbo/fragment.glsl"
-    }
+    return GlslDataCenter.getFragmentStrByType(sampleType)
 }
 
 /***
@@ -74,14 +67,7 @@ fun getFragmentStrByType(sampleType: Int):String {
 }
 
 fun getVertexNameByType(sampleType: Int):String {
-    return when(sampleType){
-        1 -> "glsl/triangle/vetex.glsl"
-        2 -> "glsl/texture/vetex.glsl"
-        10 -> "glsl/fbo/vetex.glsl"
-        11 -> "glsl/light/vetex.glsl"
-        12 -> "glsl/model3d/vetex.glsl"
-        else -> "glsl/fbo/vetex.glsl"
-    }
+    return GlslDataCenter.getVertexStrByType(sampleType)
 }
 
 fun getVertexStrByType(sampleType: Int):String {

@@ -58,6 +58,9 @@ public:
     void UpdateTransformMatrix(jfloat rotateX, jfloat rotateY, jfloat scaleX, jfloat scaleY);
 
     void changeSamples(int num,const char * vertexStr,const char * fragStr);
+
+    void changeZValue(int type,float zValue);
+
 };
 
 #endif //DEMOC_MYGLRENDERCONTEXT_H

@@ -13,6 +13,7 @@
 #include <LightSample.h>
 #include <mutex>
 #include <Model3DSample.h>
+#include <DepthTestSample.h>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
@@ -65,6 +66,9 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             break;
         case 12:
             sample = new Model3DSample();
+            break;
+        case 13:
+            sample = new DepthTestSample();
             break;
     }
     LOGCATE("create sample type:%d  point:%p",type,sample);
@@ -166,6 +170,10 @@ void MyGLRenderContext::changeSamples(int num,const char * vertex,const char * f
     glCheckError("changeSamples");
     m_Sample->screenWidth = MyGLRenderContext::width;
     m_Sample->screenHeight = MyGLRenderContext::height;
+}
+
+void MyGLRenderContext::changeZValue(int type,float zValue){
+    m_Sample->ChangeEyeZValue(type,zValue);
 }
 
 

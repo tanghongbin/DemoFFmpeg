@@ -174,6 +174,8 @@ class NativeRender(val mType:Int = 1)
 
     external fun native_changeSamples(num: Int,vertexStr: String,fragStr: String)
 
+    external fun native_changeZValue(type: Int,zValue:Float)
+
     // ========  egl ctx =============
 
     external fun egl_init_2()

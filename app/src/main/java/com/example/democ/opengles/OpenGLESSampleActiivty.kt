@@ -19,16 +19,12 @@ class OpenGLESSampleActiivty : AppCompatActivity() {
         setContentView(R.layout.activity_native_open_g_l_e_s_actiivty)
         mSurface.init(this,render)
         log("打印测试地址:${Constants.TEST_JPG}")
-//        mChangeSample.setOnClickListener {
-//            val dialog = SampleDialog(this,R.style.DialogStyle)
-//            dialog.mConfirm = {num ->
-//                val vertexStr = getVertexStrByType(num)
-//                val fragStr = getFragmentStrByType(num)
-//                log("打印java层的字符串:\n\n${vertexStr} \n\n${fragStr}")
-//                render.native_changeSamples(num,vertexStr,fragStr)
-//            }
-//            dialog.show()
-//        }
+        mPlus.setOnClickListener {
+            render.native_changeZValue(2,0.5f)
+        }
+        mReduce.setOnClickListener {
+            render.native_changeZValue(1,0.5f)
+        }
     }
 
     override fun onDestroy() {

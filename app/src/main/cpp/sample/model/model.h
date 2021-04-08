@@ -15,6 +15,7 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include "mesh.h"
+#include <thread>
 
 using namespace std;
 
@@ -43,6 +44,7 @@ public:
     // draws the model, and thus all its meshes
     void Draw(Shader shader)
     {
+//        LOGCATE("isRead:%d start draw",isReady);
         for(unsigned int i = 0; i < meshes.size(); i++)
             meshes[i].Draw(shader);
     }
@@ -77,8 +79,8 @@ public:
 private:
     /*  Functions   */
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-    void loadModel(string const &path)
-    {
+    void loadModel(string const &path){
+        int64_t startTime = GetSysCurrentTime();
         // read file via ASSIMP
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -95,6 +97,7 @@ private:
 
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
+        LOGCATE("total cost:%lld",(GetSysCurrentTime() - startTime));
     }
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -195,6 +198,7 @@ private:
             // specular: texture_specularN
             // normal: texture_normalN
 
+            int64_t startTime = GetSysCurrentTime();
             // 1. diffuse maps
             vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
             textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
@@ -202,6 +206,7 @@ private:
             vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
             // 3. normal maps
+            LOGCATE("texture load time:%lld",(GetSysCurrentTime() - startTime));
 //        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 //        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 //        // 4. height maps

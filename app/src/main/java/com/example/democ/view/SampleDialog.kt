@@ -7,12 +7,11 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.ArrayAdapter
 import com.example.democ.R
+import com.example.democ.utils.GlslDataCenter
 import kotlinx.android.synthetic.main.dialog_siamples.*
 
 class SampleDialog(context: Context,style:Int) : Dialog(context,style) {
-    private val samples = arrayListOf<String>(
-        "Triangle","Texture","TextureMapSample","GLFBOSample","LightSample", "Model3DSample"
-    )
+
     var mConfirm:(Int) -> Unit = {}
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,22 +20,11 @@ class SampleDialog(context: Context,style:Int) : Dialog(context,style) {
         params.width = ViewGroup.LayoutParams.MATCH_PARENT
         params.height = ViewGroup.LayoutParams.MATCH_PARENT
         window.attributes = params
+        val samples = ArrayList(GlslDataCenter.getSampleKeys())
         mListView.adapter = ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,samples)
-        mListView.setOnItemClickListener { parent, view, position, id ->
+        mListView.setOnItemClickListener { _, _, position, _ ->
 //            dismiss()
-            mConfirm(getNumByStr(position))
-        }
-    }
-
-    private fun getNumByStr(position: Int): Int {
-        return when(samples[position]){
-            "Triangle" -> 1
-            "Texture" -> 2
-            "TextureMapSample" -> 3
-            "GLFBOSample" -> 10
-            "LightSample" -> 11
-            "Model3DSample" -> 12
-            else -> 1
+            mConfirm(GlslDataCenter.getTypeByName(samples[position]))
         }
     }
 }

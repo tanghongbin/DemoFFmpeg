@@ -233,6 +233,10 @@ JNIEXPORT void JNICALL native_changeSamples(JNIEnv *env, jobject instance,jint n
                                                     getCharStrFromJstring(env,fragStr));
 }
 
+JNIEXPORT void JNICALL native_changeZValue(JNIEnv *env, jobject instance,jint type,jfloat zValue) {
+    MyGLRenderContext::GetInstance()->changeZValue(type,zValue);
+}
+
 
 static JNINativeMethod g_RenderMethods[] = {
         // ================== opengl ========================
@@ -244,6 +248,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnDrawFrame",      "()V",      (void *) (native_OnDrawFrame)},
         {"native_UpdateTransformMatrix",     "(FFFF)V", (void *) (native_UpdateTransformMatrix)},
         {"native_changeSamples",     "(ILjava/lang/String;Ljava/lang/String;)V", (void *) (native_changeSamples)},
+        {"native_changeZValue", "(IF)V",    (void *) (native_changeZValue)},
 
         // =======================  ffmpeg =======================
         {"native_getVideoWidth",      "()I",      (void *) (native_getVideoWidth)},
