@@ -35,6 +35,7 @@ include_directories(
         rtmppusher
         test
         librtmp/include
+        opencv_3_0_0
 #        ${LIBYUV_DIR}/libs/${ANDROID_ABI}/include
 )
 
@@ -164,6 +165,9 @@ set_target_properties(ass PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}
 add_library(assimp SHARED IMPORTED )
 set_target_properties(assimp PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libassimp.so)
 
+add_library(opencv_java3 SHARED IMPORTED )
+set_target_properties(opencv_java3 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libopencv_java3.so)
+
 find_library(log-lib log )
 
 find_library(OpenSLES-lib OpenSLES)
@@ -188,7 +192,7 @@ set(third-party-libs
         ssl
         rtmp
         assimp
-        )
+        opencv_java3)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this

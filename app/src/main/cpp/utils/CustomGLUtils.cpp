@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include <thread>
 #include <iostream>
+#include <opencv2/opencv.hpp>
 
 
 extern "C" {
@@ -97,6 +98,42 @@ unsigned int TextureFromFile(const std::string path, std::string &directory)
         stbi_image_free(data);
     }
     LOGCATE("log textureId:%d path:%s directory:%s",textureID,path.c_str(),directory.c_str());
+
+    return textureID;
+}
+
+unsigned int TextureFromFileByCv(const std::string path, std::string &directory)
+{
+    std::string filename = std::string(path);
+    filename = directory + '/' + filename;
+    LOGCATE("log fileName:%s",filename.c_str());
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    // load the texture using OpenCV
+    LOGCATE("TextureFromFile Loading texture %s", filename.c_str());
+    cv::Mat textureImage = cv::imread(filename);
+    if (!textureImage.empty())
+    {
+        // opencv reads textures in BGR format, change to RGB for GL
+        cv::cvtColor(textureImage, textureImage, CV_BGR2RGB);
+        // opencv reads image from top-left, while GL expects it from bottom-left
+        // vertically flip the image
+        //cv::flip(textureImage, textureImage, 0);
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureImage.cols,
+                     textureImage.rows, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                     textureImage.data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        GO_CHECK_GL_ERROR();
+    } else {
+//        LOGCATE("TextureFromFile Texture failed to load at path: %s", path);
+    }
 
     return textureID;
 }

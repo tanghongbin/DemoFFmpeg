@@ -2,6 +2,8 @@
 precision mediump float;   
 in vec2 outTexCoords;
 uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_specular1;
+
 out vec4 fragColor;
 in vec3 Normal;
 in vec3 FragPos;
@@ -32,7 +34,7 @@ void main()
    vec3 viewDir = normalize(viewPos - FragPos);
    vec3 reflectDir = reflect(-lightDir,norm);
    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-   vec3 specular =  material.specular * spec  * lightColor;
+   vec3 specular =  material.specular * spec  * vec3(texture(texture_specular1,outTexCoords));
    vec3 result =  (ambient + diffuse + specular) * vec3(texture(texture_diffuse1,outTexCoords));
 //   fragColor = vec4(vec3(texture(texture_diffuse1,outTexCoords)),1.0);
    fragColor = vec4(result,1.0);

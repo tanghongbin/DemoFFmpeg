@@ -6,7 +6,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include "CustomGLUtils.h"
+#include "../../utils/CustomGLUtils.h"
+#include <GLES3/gl3.h>
 
 class Shader
 {
@@ -16,13 +17,13 @@ public:
     // ------------------------------------------------------------------------
     Shader(const char* vertexStr, const char* fragmentStr)
     {
-//        DEBUG_LOGCATE();
+        //DEBUG_LOGCATE();
         ID = CreateProgram(vertexStr, fragmentStr);
     }
 
     ~Shader()
     {
-//        DEBUG_LOGCATE();
+        //DEBUG_LOGCATE();
     }
 
     void Destroy()

@@ -8,8 +8,9 @@
 #include "GLES3/gl3.h"
 #include "GLBaseSample.h"
 #include <CustomGLUtils.h>
-#include <model/shader.h>
-#include <model/Model.h>
+#include "model/model.h"
+#include "model/shader.h"
+
 
 class Model3DSample : public GLBaseSample{
 

@@ -20,7 +20,7 @@ void Model3DSample::init(const char * vShaderStr,const char * fShaderStr) {
     shader = new Shader(vShaderStr,fShaderStr);
     const char * path = "/storage/emulated/0/ffmpegtest/3d_obj/apple/Apricot_02_hi_poly.obj";
     const char * path2 = "/storage/emulated/0/ffmpegtest/3d_obj/naosuit/nanosuit.obj";
-    mModel = new Model(path);
+    mModel = new Model(path2);
 }
 
 void Model3DSample::draw() {
@@ -39,15 +39,15 @@ void Model3DSample::draw() {
     glm::vec3 cameraPos = glm::vec3(-3,0.0f,3.0);
     Camera camera(cameraPos);
     shader->setVec3("lightColor",glm::vec3(1.0,1.0,1.0));
-    shader->setVec3("lightPos",lightPos);
-    shader->setVec3("viewPos",camera.Position);
+    shader->setVec3("lightPos", glm::vec3 (0.0,0.0,mModel->GetMaxViewDistance()));
+    shader->setVec3("viewPos",glm::vec3(0, 0, mModel->GetMaxViewDistance()));
     shader->setMat4("m_MVPMatrix", m_MVPMatrix);
     shader->setMat4("model", m_MvpModel);
     shader->setFloat("material.shininess",8.0);
-    shader->setFloat("material.ambient",0.25);
-    shader->setFloat("material.diffuse",0.5);
+    shader->setFloat("material.ambient",0.3);
+    shader->setFloat("material.diffuse",0.8);
     shader->setFloat("material.specular",0.3);
-    mModel->draw(shader);
+    mModel->Draw(*shader);
 }
 
 
