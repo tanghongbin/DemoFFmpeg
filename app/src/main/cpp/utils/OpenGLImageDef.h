@@ -13,6 +13,7 @@
 #include "sys/stat.h"
 #include "stdint.h"
 #include <GLES3/gl3.h>
+#include "stb_image.h"
 
 #define IMAGE_FORMAT_RGBA           0x01
 #define IMAGE_FORMAT_NV21           0x02
@@ -28,12 +29,27 @@ typedef struct _tag_LoadImageInfo_{
 	int width;
 	int height;
 	int channels;
+	stbi_uc * imageData = nullptr;
+	~_tag_LoadImageInfo_(){
+		LOGCATE("imageData before freed:%p",imageData);
+		if (imageData){
+			stbi_image_free(imageData);
+			imageData = nullptr;
+			LOGCATE("imageData has been freed:%p",imageData);
+		}
+	}
 	GLint getFormat(){
 		if (channels == 3) {
 			return GL_RGB;
 		} else {
 			return GL_RGBA;
 		}
+	}
+	void uploadImageTex2D(){
+		glTexImage2D(GL_TEXTURE_2D, 0, getFormat(), width,height, 0, getFormat(), GL_UNSIGNED_BYTE, imageData);
+	}
+	void loadImage(const char * filePath){
+		imageData = stbi_load(filePath, &width, &height, &channels, 0);
 	}
 } LoadImageInfo;
 
