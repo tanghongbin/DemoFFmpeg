@@ -24,9 +24,9 @@ void TriangleSample::init(const char * vShaderStr,const char * fShaderStr) {
     m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
     int positionSize = 9;
     GLfloat vVertices[] = {
-            -0.5f, 0.0f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f
+            -0.5f, -1.0f, 0.0f,
+            -0.5f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f
     };
     GLuint arrays[] = {
             0,1,2

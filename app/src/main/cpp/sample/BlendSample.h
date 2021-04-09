@@ -28,9 +28,10 @@ private:
     glm::mat4 view;
     glm::mat4 projection;
     GLuint vboIds[2];
+    GLuint textures[4];
 
 
-    void createMvp();
+    void createMvp(bool b);
 };
 
 
