@@ -23,7 +23,11 @@ private:
     Shader* shader;
     Model* mModel;
 
+
 public:
+
+    bool ifNeedClear = true;
+
     Model3DSample();
 
     ~Model3DSample();

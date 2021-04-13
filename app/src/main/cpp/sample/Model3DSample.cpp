@@ -20,11 +20,8 @@ void Model3DSample::init(const char * vShaderStr,const char * fShaderStr) {
     shader = new Shader(vShaderStr,fShaderStr);
     const char * path = "/storage/emulated/0/ffmpegtest/3d_obj/apple/Apricot_02_hi_poly.obj";
     const char * path2 = "/storage/emulated/0/ffmpegtest/3d_obj/naosuit/nanosuit.obj";
-    mModel = new Model(path2);
-
-    GLint format;
-    glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS,&format);
-    LOGCATE("压缩数量:%d",format);
+    const char * path3 = "/storage/emulated/0/ffmpegtest/3d_obj/nano_refract/nanosuit.obj";
+    mModel = new Model(path3);
 }
 
 void Model3DSample::draw() {
@@ -32,8 +29,10 @@ void Model3DSample::draw() {
     if (shader->ID == 0)
         return;
 
-    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    if(ifNeedClear){
+        glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(1.0, 1.0, 1.0, 1.0);
+    }
 
     UpdateMVPMatrix(m_MVPMatrix, m_AngleX, m_AngleY, (float)screenWidth / screenHeight);
     // Use the program object

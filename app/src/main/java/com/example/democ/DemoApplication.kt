@@ -1,7 +1,8 @@
 package com.example.democ
 
 import android.app.Application
-import com.libyuv.LibyuvUtil
+import android.os.Environment
+import com.example.democ.utils.FileUtils
 
 class DemoApplication : Application() {
     companion object{
@@ -9,6 +10,10 @@ class DemoApplication : Application() {
     }
     override fun onCreate() {
         super.onCreate()
+        val sdcardAssetsFolder = Environment.getExternalStorageDirectory().absolutePath + "/ffmpegtest/assets"
+        FileUtils.deleteFile(sdcardAssetsFolder)
+        FileUtils.makeFolders(sdcardAssetsFolder)
+        FileUtils.copyFilesFromAssets(this,"glsl",sdcardAssetsFolder)
         instance = this
     }
 }

@@ -8,7 +8,12 @@
 #include <string>
 #include <gtc/matrix_transform.hpp>
 #include <GLES3/gl3.h>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
+#include <stdlib.h>
 
 extern "C" {
 #include <libavutil/frame.h>
@@ -90,8 +95,25 @@ uint8_t *fillArrayToFrame(AVPixelFormat avPixelFormat, AVFrame *frame);
 
 const int getRandomInt(int range);
 
+static const std::string  readStrFromFile(const char *filePath);
+
 static void logLoadImageInfo(LoadImageInfo imageInfo){
+    readStrFromFile("");
     LOGCATE("打印图片信息 width:%d height:%d channel:%d",imageInfo.width,imageInfo.height,imageInfo.channels);
+}
+
+static const std::string  readStrFromFile(const char *filename) {
+    std::string absolutePath = std::string(GLSL_ROOT_DIR) + std::string(filename);
+    std::ifstream ifile(absolutePath);
+//将文件读入到ostringstream对象buf中
+    std::ostringstream buf;
+    char ch;
+    while(buf&&ifile.get(ch))
+        buf.put(ch);
+//    LOGCATE("log buffer:%s",buffer);
+    std::string value = buf.str();
+//    LOGCATE("log fileStr:%s",value.c_str());
+    return value;
 }
 
 static void setBool(GLuint programId, const std::string &name, bool value) {

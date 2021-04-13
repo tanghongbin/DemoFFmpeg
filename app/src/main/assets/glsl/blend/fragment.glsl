@@ -7,6 +7,6 @@ void main()
 {
   vec4 color = texture(s_TextureMap, v_texCoord);
   float avavege = (color.r + color.g + color.b)/3.0;
-  outColor = vec4(avavege,avavege,avavege,1.0);
-//  outColor = vec4(1.0,0.0,0.0,1.0);
+//  outColor = vec4(avavege,avavege,avavege,1.0);
+  outColor = color;
 }

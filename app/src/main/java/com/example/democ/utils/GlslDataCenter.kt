@@ -10,6 +10,7 @@ object GlslDataCenter {
             put("Triangle",1)
             put("Texture",2)
             put("TextureMapSample",3)
+            put("TextureCubeSample",9)
             put("GLFBOSample",10)
             put("LightSample",11)
 
@@ -21,6 +22,7 @@ object GlslDataCenter {
         vertexGlsl.apply {
             put(1,"glsl/triangle/vetex.glsl")
             put(2,"glsl/texture/vetex.glsl")
+            put(9,"glsl/cube/vetex.glsl")
             put(10,"glsl/fbo/vetex.glsl")
             put(11,"glsl/light/vetex.glsl")
             put(12,"glsl/model3d/vetex.glsl")
@@ -32,6 +34,7 @@ object GlslDataCenter {
         fragmentGlsl.apply {
             put(1,"glsl/triangle/fragment.glsl")
             put(2,"glsl/texture/fragment.glsl")
+            put(9,"glsl/cube/fragment.glsl")
             put(10,"glsl/fbo/fragment.glsl")
             put(11,"glsl/light/fragment.glsl")
             put(12,"glsl/model3d/fragment.glsl")

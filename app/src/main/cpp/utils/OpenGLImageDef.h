@@ -14,6 +14,7 @@
 #include "stdint.h"
 #include <GLES3/gl3.h>
 #include "stb_image.h"
+#include <time.h>
 
 #define IMAGE_FORMAT_RGBA           0x01
 #define IMAGE_FORMAT_NV21           0x02
@@ -26,9 +27,19 @@
 #define IMAGE_FORMAT_I420_EXT       "I420"
 
 typedef struct _tag_LoadImageInfo_{
+private:
+	int64_t getTime() {
+		struct timeval time;
+		gettimeofday(&time, NULL);
+		long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
+		return curTime;
+	}
+
+public:
 	int width;
 	int height;
 	int channels;
+	int64_t startTime;
 	stbi_uc * imageData = nullptr;
 	~_tag_LoadImageInfo_(){
 		LOGCATE("imageData before freed:%p",imageData);
@@ -45,12 +56,25 @@ typedef struct _tag_LoadImageInfo_{
 			return GL_RGBA;
 		}
 	}
+	/**
+	 * 上传2D纹理
+	 */
 	void uploadImageTex2D(){
 		glTexImage2D(GL_TEXTURE_2D, 0, getFormat(), width,height, 0, getFormat(), GL_UNSIGNED_BYTE, imageData);
+		LOGCATE("load and upload totally cost:%lld",(getTime() - startTime));
+	}
+	/***
+	 * 上传3D纹理
+	 */
+	void uploadCubeTex(GLenum face){
+		glTexImage2D(face, 0, getFormat(), width,height, 0, getFormat(), GL_UNSIGNED_BYTE, imageData);
+		LOGCATE("load and upload totally cost:%lld",(getTime() - startTime));
 	}
 	void loadImage(const char * filePath){
+		startTime = getTime();
 		imageData = stbi_load(filePath, &width, &height, &channels, 0);
 	}
+
 } LoadImageInfo;
 
 typedef struct _tag_NativeRectF_plus

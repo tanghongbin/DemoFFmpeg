@@ -26,6 +26,8 @@ protected:
     int64_t startTime = 0L;
     glm::mat4 mBaseMvpMatrix;
     glm::mat4 mBaseModel;
+    glm::mat4 mBaseProjection;
+    glm::mat4 mBaseView;
 
     int m_AngleX = 0;
     int m_AngleY = 0 ;
@@ -119,6 +121,8 @@ public:
         Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 0.0f));
 
         mBaseModel = Model;
+        mBaseView = View;
+        mBaseProjection = Projection;
 
         mBaseMvpMatrix = Projection * View * Model;
     }

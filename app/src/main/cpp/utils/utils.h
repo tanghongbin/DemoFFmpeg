@@ -15,6 +15,8 @@
 //#define ENABLE_FFMPEG_LOG false
 
 #define ROOT_DIR "/storage/emulated/0/ffmpegtest/"
+#define FILTER_IMAGE_DIR "/storage/emulated/0/ffmpegtest/filterImg/"
+#define GLSL_ROOT_DIR "/storage/emulated/0/ffmpegtest/assets/"
 
 #define COMMON_YUV_IMAGE_PATH "/storage/emulated/0/ffmpegtest/YUV_Image_840x1074.NV21"
 #define LOG_TAG "AudioDemo-JNI"

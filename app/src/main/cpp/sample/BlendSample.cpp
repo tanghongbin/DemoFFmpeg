@@ -101,11 +101,11 @@ void BlendSample::init(const char * vShaderStr,const char * fShaderStr) {
 
             // right
             0.5f, 0.5f, 0.5f,  0.0f, 1.0f,
-            0.5f, 0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f,  -0.5f, -0.5f,  1.0f, 0.0f,
             0.5f,  -0.5f, -0.5f,  1.0f, 0.0f,
             0.5f,  -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  -0.5f, -0.5f,  1.0f, 0.0f,
             0.5f, 0.5f, 0.5f,  0.0f, 1.0f,
+            0.5f, 0.5f, -0.5f,  0.0f, 1.0f,
 
             // bottom
             -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
