@@ -18,6 +18,7 @@ object GlslDataCenter {
             put("DepthTestSample",13)
             put("BlendSample",14)
             put("SeniorGLSLSample",15)
+            put("InstanceSample",16)
         }
 
         vertexGlsl.apply {
@@ -31,6 +32,7 @@ object GlslDataCenter {
             put(13,"glsl/depth_test/vetex.glsl")
             put(14,"glsl/blend/vetex.glsl")
             put(15,"glsl/seniorglsl/vetex.glsl")
+            put(16,"glsl/instance/vetex.glsl")
         }
 
         fragmentGlsl.apply {
@@ -44,6 +46,7 @@ object GlslDataCenter {
             put(13,"glsl/depth_test/fragment.glsl")
             put(14,"glsl/blend/fragment.glsl")
             put(15,"glsl/seniorglsl/fragment.glsl")
+            put(16,"glsl/instance/fragment.glsl")
         }
     }
     fun getSampleKeys():MutableList<String>{

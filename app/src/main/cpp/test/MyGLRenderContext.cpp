@@ -16,6 +16,7 @@
 #include <DepthTestSample.h>
 #include <BlendSample.h>
 #include <SeniorGLSLSample.h>
+#include <InstanceSample.h>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
@@ -77,6 +78,12 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             break;
         case 15:
             sample = new SeniorGLSLSample();
+            break;
+        case 16:
+            sample = new InstanceSample();
+            break;
+        default:
+            LOGCATE("don't support type:%d",type);
             break;
     }
     LOGCATE("create sample type:%d  point:%p",type,sample);
