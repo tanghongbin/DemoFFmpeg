@@ -3,7 +3,7 @@
 //
 
 
-#include "InstanceSample.h"
+#include "InstanceCopySample.h"
 #include <GLES3/gl3.h>
 #include <camera.h>
 #include <OpenGLImageDef.h>
@@ -12,14 +12,11 @@
 #include "CustomGLUtils.h"
 #include "ImageDef.h"
 
-void InstanceSample::init(const char * vShaderStr,const char * fShaderStr) {
+void InstanceCopySample::init(const char * vShaderStr,const char * fShaderStr) {
 
     mShader = new Shader(vShaderStr,fShaderStr);
-    mRockShader = new Shader(readStrFromFile("instance/rockvetex.glsl").c_str(),
-                             readStrFromFile("instance/fragment.glsl").c_str());
 
 //    LOGCATE("log rockshader:%p shader:%p",mRockShader,mShader);
-    mPlanModel = new Model(getModel3DPath("planet/planet.obj"));
     mRock = new Model(getModel3DPath("rock/rock.obj"));
 
     modelMatrices = new glm::mat4[amount];
@@ -39,8 +36,8 @@ void InstanceSample::init(const char * vShaderStr,const char * fShaderStr) {
         model = glm::translate(model, glm::vec3(x, y, z));
 
         // 2. 缩放：在 0.05 和 0.25f 之间缩放
-//        float scale = (rand() % 20) / 100.0f + 0.05;
-        float scale = 0.1;
+        float scale = (rand() % 20) / 100.0f + 0.05;
+//        float scale = 0.1;
         model = glm::scale(model, glm::vec3(scale));
 //        model = glm::scale(model, glm::vec3(0.001,0.001,0.001));
 
@@ -62,7 +59,7 @@ void InstanceSample::init(const char * vShaderStr,const char * fShaderStr) {
         GLsizei vec4Size = sizeof(glm::vec4);
         glBindBuffer(GL_ARRAY_BUFFER, bigDataVbo);
         glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3,4,GL_FLOAT,GL_FALSE,vec4Size,(void *)0);
+        glVertexAttribPointer(3,4,GL_FLOAT,GL_FALSE,4 * vec4Size,(void *)0);
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4,4,GL_FLOAT,GL_FALSE,4 * vec4Size,(void *)(sizeof(vec4Size)));
         glEnableVertexAttribArray(5);
@@ -81,7 +78,7 @@ void InstanceSample::init(const char * vShaderStr,const char * fShaderStr) {
 }
 
 
-void InstanceSample::draw() {
+void InstanceCopySample::draw() {
 
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -90,47 +87,40 @@ void InstanceSample::draw() {
 
 //    LOGCATE("planet has over:%p shader:%p",mRockShader,mShader);
 
+
+    UpdateMvp();
 //    return;
-    mRockShader->use();
+    mShader->use();
 //    LOGCATE("mRockShader has used");
-    mRockShader->setMat4("view",mBaseView);
-    mRockShader->setMat4("projection",mBaseProjection);
+    mShader->setMat4("view",mBaseView);
+    mShader->setMat4("projection",mBaseProjection);
+    mShader->setInt("texture_diffuse1", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mRock ->textures_loaded[0].id);
     // 绘制小行星
     for(unsigned int i = 0; i < mRock->meshes.size(); i++)
     {
         Mesh &mesh = mRock->meshes[i];
         glBindVertexArray(mesh.Vao);
         glDrawElementsInstanced(GL_TRIANGLES,mesh.indices.size(),GL_UNSIGNED_INT,0,amount);
+        glBindVertexArray(0);
     }
     LOGCATE("log totally cost:%lld",(GetSysCurrentTime() - startTime));
-
-//    return;
-    mShader->use();
-    UpdateMvp();
-//    mBaseModel = glm::translate(mBaseModel, glm::vec3(0.0f, -3.0f, 0.0f));
-    const glm::mat4 &localModel = glm::scale(mBaseModel, glm::vec3(0.2f, 0.2f, 0.2f));
-    const glm::mat4 &mvpMatrix = mBaseProjection * mBaseView * localModel;
-    mShader->setMat4("model",localModel);
-    mShader->setMat4("m_MVPMatrix",mvpMatrix);
-//    LOGCATE("planet has over:%p shader:%p",mRockShader,mShader);
-    mPlanModel->Draw(mShader);
+//    mRock->Draw()
 }
 
-void InstanceSample::Destroy()
+void InstanceCopySample::Destroy()
 {
     if (m_ProgramObj)
     {
 
         delete modelMatrices;
-        mRockShader->Destroy();
-        delete mRockShader;
-        mRockShader = 0;
+
 
         glDeleteBuffers(1,&bigDataVbo);
         glDeleteTextures(1,&m_TextureId);
         glDeleteProgram(m_ProgramObj);
-        mPlanModel->Destroy();
-        delete mPlanModel;
+
         mRock->Destroy();
         delete mRock;
     }

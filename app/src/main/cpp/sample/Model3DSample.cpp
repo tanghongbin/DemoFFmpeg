@@ -21,7 +21,8 @@ void Model3DSample::init(const char * vShaderStr,const char * fShaderStr) {
     const char * path = "/storage/emulated/0/ffmpegtest/3d_obj/apple/Apricot_02_hi_poly.obj";
     const char * path2 = "/storage/emulated/0/ffmpegtest/3d_obj/naosuit/nanosuit.obj";
     const char * path3 = "/storage/emulated/0/ffmpegtest/3d_obj/nano_refract/nanosuit.obj";
-    mModel = new Model(path3);
+    const char * path4 = "/storage/emulated/0/ffmpegtest/3d_obj/rock/rock.obj";
+    mModel = new Model(path4);
 }
 
 void Model3DSample::draw() {
@@ -50,7 +51,7 @@ void Model3DSample::draw() {
     shader->setFloat("material.ambient",0.3);
     shader->setFloat("material.diffuse",0.8);
     shader->setFloat("material.specular",0.3);
-    mModel->Draw(*shader);
+    mModel->Draw(shader);
 }
 
 

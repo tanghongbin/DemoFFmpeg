@@ -42,7 +42,7 @@ public:
     }
 
     // draws the model, and thus all its meshes
-    void Draw(Shader shader)
+    void Draw(Shader* shader)
     {
 //        LOGCATE("isRead:%d start draw",isReady);
         for(unsigned int i = 0; i < meshes.size(); i++)

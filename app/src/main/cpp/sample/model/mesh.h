@@ -30,31 +30,22 @@ struct Texture{
 
 
 class Mesh{
+
 private:
-    uint32_t Vao,Vbo,Ebo;
+    uint32_t Vbo,Ebo;
     void setupMesh() {
         glGenVertexArrays(1,&Vao);
         glGenBuffers(1,&Vbo);
         glGenBuffers(1,&Ebo);
 
+        return;
         glBindVertexArray(Vao);
-        glBindBuffer(GL_ARRAY_BUFFER,Vbo);
-        glBufferData(GL_ARRAY_BUFFER,vertices.size() * sizeof(Vertex),&vertices[0],GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,Ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER,indices.size() * sizeof(uint32_t),&indices[0],GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void *)0);
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void *)offsetof(Vertex,Normal));
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void *)offsetof(Vertex,TexCoords));
+        bindBufferInternal();
         glBindVertexArray(0);
     }
 
 public:
+    uint32_t Vao;
     std::vector<Vertex> vertices;
     std::vector<unsigned int > indices;
     std::vector<Texture> textures;
@@ -67,7 +58,23 @@ public:
 
     }
 
-    void Draw(Shader shader){
+    void bindBufferInternal() {
+        glBindBuffer(GL_ARRAY_BUFFER, Vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), &indices[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void *)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void *)offsetof(Vertex,Normal));
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void *)offsetof(Vertex,TexCoords));
+    }
+
+    void Draw(Shader* shader){
         uint32_t diffuseNr = 1;
         uint32_t specularNr = 1;
         for (uint32_t index = 0;  index < textures.size(); index++) {
@@ -80,7 +87,7 @@ public:
                 number = std::to_string(specularNr++);
             }
 //            LOGCATE("log sampler :%s index:%d id:%d",(name + number).c_str(),index,textures[index].id);
-            shader.setInt((name + number).c_str(),index);
+            shader -> setInt((name + number).c_str(),index);
             glBindTexture(GL_TEXTURE_2D,textures[index].id);
         }
 

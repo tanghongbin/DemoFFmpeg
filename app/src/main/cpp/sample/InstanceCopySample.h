@@ -2,8 +2,8 @@
 // Created by Admin on 2020/8/25.
 //
 
-#ifndef DEMOC_INSTANCESAMPLESAMPLE_H
-#define DEMOC_INSTANCESAMPLESAMPLE_H
+#ifndef DEMOC_INSTANCECOPYSAMPLESAMPLE_H
+#define DEMOC_INSTANCECOPYSAMPLESAMPLE_H
 
 
 #include <ImageDef.h>
@@ -13,7 +13,7 @@
 #include <model/model.h>
 #include "GLBaseSample.h"
 
-class InstanceSample : public GLBaseSample {
+class InstanceCopySample : public GLBaseSample {
 
 public:
 
@@ -24,15 +24,13 @@ public:
     void Destroy();
 
 private:
-    Model * mPlanModel;
     Model * mRock;
     glm::mat4 *modelMatrices;
-    unsigned int amount = 1000;
+    unsigned int amount = 100;
     GLuint bigDataVbo;
-    Shader* mRockShader;
 
 
 };
 
 
-#endif //DEMOC_INSTANCESAMPLESAMPLE_H
+#endif //DEMOC_INSTANCECOPYSAMPLESAMPLE_H

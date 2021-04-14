@@ -10,6 +10,7 @@
 #include <detail/type_mat.hpp>
 #include <gtc/type_ptr.hpp> // glm::value_ptr
 #include <gtc/matrix_transform.hpp>
+#include <model/shader.h>
 
 class GLBaseSample {
 
@@ -35,7 +36,7 @@ protected:
     float m_ScaleY = 1.0f;
 
     float mEyeZ = 3.0f;
-
+    Shader * mShader;
 
 public:
 
@@ -44,7 +45,12 @@ public:
     };
 
     virtual ~GLBaseSample() {
-
+        LOGCATE("basesample has been freed");
+        if (mShader){
+            mShader->Destroy();
+            delete mShader;
+            mShader = 0;
+        }
     };
 
     int screenWidth, screenHeight;
@@ -89,7 +95,7 @@ public:
         m_AngleY = static_cast<int>(rotateY);
         m_ScaleX = scaleX;
         m_ScaleY = scaleY;
-//        LOGCATE("log anglex:%d angleY:%d scalex:%f scaleY:%f",m_AngleX,m_AngleY,m_ScaleX,m_ScaleY);
+        LOGCATE("log anglex:%d angleY:%d scalex:%f scaleY:%f",m_AngleX,m_AngleY,m_ScaleX,m_ScaleY);
     }
 
     virtual void UpdateMvp(){

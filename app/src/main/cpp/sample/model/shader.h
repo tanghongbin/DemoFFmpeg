@@ -19,11 +19,15 @@ public:
     {
         //DEBUG_LOGCATE();
         ID = CreateProgram(vertexStr, fragmentStr);
+        if (!ID){
+            LOGCATE("create program failed:%d",ID);
+        }
     }
 
     ~Shader()
     {
         //DEBUG_LOGCATE();
+        LOGCATE("log shader has been freed;");
     }
 
     void Destroy()
