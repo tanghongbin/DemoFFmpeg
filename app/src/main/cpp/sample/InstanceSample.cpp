@@ -39,8 +39,8 @@ void InstanceSample::init(const char * vShaderStr,const char * fShaderStr) {
         model = glm::translate(model, glm::vec3(x, y, z));
 
         // 2. 缩放：在 0.05 和 0.25f 之间缩放
-//        float scale = (rand() % 20) / 100.0f + 0.05;
-        float scale = 0.1;
+        float scale = (rand() % 20) / 100.0f + 0.05;
+//        float scale = 0.1;
         model = glm::scale(model, glm::vec3(scale));
 //        model = glm::scale(model, glm::vec3(0.001,0.001,0.001));
 
@@ -60,15 +60,17 @@ void InstanceSample::init(const char * vShaderStr,const char * fShaderStr) {
         glBindVertexArray(mRock->meshes[i].Vao);
         mRock->meshes[i].bindBufferInternal();
         GLsizei vec4Size = sizeof(glm::vec4);
+        GLsizei strideSize = 4 * vec4Size;
         glBindBuffer(GL_ARRAY_BUFFER, bigDataVbo);
+        glVertexAttribPointer(3,4,GL_FLOAT,GL_FALSE,strideSize,(void *)0);
+        glVertexAttribPointer(4,4,GL_FLOAT,GL_FALSE,strideSize,(void *)(vec4Size));
+        glVertexAttribPointer(5,4,GL_FLOAT,GL_FALSE,strideSize,(void *)(2 * vec4Size));
+        glVertexAttribPointer(6,4,GL_FLOAT,GL_FALSE,strideSize,(void *)(3 * vec4Size));
+
         glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3,4,GL_FLOAT,GL_FALSE,vec4Size,(void *)0);
         glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4,4,GL_FLOAT,GL_FALSE,4 * vec4Size,(void *)(sizeof(vec4Size)));
         glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5,4,GL_FLOAT,GL_FALSE,4 * vec4Size,(void *)(2 * sizeof(vec4Size)));
         glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6,4,GL_FLOAT,GL_FALSE,4 * vec4Size,(void *)(3 * sizeof(vec4Size)));
 
         glVertexAttribDivisor(3,1);
         glVertexAttribDivisor(4,1);
@@ -90,21 +92,6 @@ void InstanceSample::draw() {
 
 //    LOGCATE("planet has over:%p shader:%p",mRockShader,mShader);
 
-//    return;
-    mRockShader->use();
-//    LOGCATE("mRockShader has used");
-    mRockShader->setMat4("view",mBaseView);
-    mRockShader->setMat4("projection",mBaseProjection);
-    // 绘制小行星
-    for(unsigned int i = 0; i < mRock->meshes.size(); i++)
-    {
-        Mesh &mesh = mRock->meshes[i];
-        glBindVertexArray(mesh.Vao);
-        glDrawElementsInstanced(GL_TRIANGLES,mesh.indices.size(),GL_UNSIGNED_INT,0,amount);
-    }
-    LOGCATE("log totally cost:%lld",(GetSysCurrentTime() - startTime));
-
-//    return;
     mShader->use();
     UpdateMvp();
 //    mBaseModel = glm::translate(mBaseModel, glm::vec3(0.0f, -3.0f, 0.0f));
@@ -114,6 +101,23 @@ void InstanceSample::draw() {
     mShader->setMat4("m_MVPMatrix",mvpMatrix);
 //    LOGCATE("planet has over:%p shader:%p",mRockShader,mShader);
     mPlanModel->Draw(mShader);
+
+    mRockShader->use();
+//    LOGCATE("mRockShader has used");
+    mRockShader->setMat4("view",mBaseView);
+    mRockShader->setMat4("projection",mBaseProjection);
+    mShader->setInt("texture_diffuse1", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mRock ->textures_loaded[0].id);
+    // 绘制小行星
+    for(unsigned int i = 0; i < mRock->meshes.size(); i++)
+    {
+        Mesh &mesh = mRock->meshes[i];
+        glBindVertexArray(mesh.Vao);
+        glDrawElementsInstanced(GL_TRIANGLES,mesh.indices.size(),GL_UNSIGNED_INT,0,amount);
+    }
+    LOGCATE("log totally cost:%lld",(GetSysCurrentTime() - startTime));
+
 }
 
 void InstanceSample::Destroy()

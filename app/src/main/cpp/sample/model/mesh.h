@@ -37,8 +37,6 @@ private:
         glGenVertexArrays(1,&Vao);
         glGenBuffers(1,&Vbo);
         glGenBuffers(1,&Ebo);
-
-        return;
         glBindVertexArray(Vao);
         bindBufferInternal();
         glBindVertexArray(0);

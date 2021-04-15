@@ -27,7 +27,7 @@ private:
     Model * mPlanModel;
     Model * mRock;
     glm::mat4 *modelMatrices;
-    unsigned int amount = 1000;
+    unsigned int amount = 10000;
     GLuint bigDataVbo;
     Shader* mRockShader;
 

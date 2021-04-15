@@ -17,14 +17,13 @@
 #include <BlendSample.h>
 #include <SeniorGLSLSample.h>
 #include <InstanceSample.h>
-#include <InstanceCopySample.h>
+#include <AntiAliasSample.h>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
 #include "TextureSample.h"
 #include "GLYuvSample.h"
 #include "GLVBOEBOSample.h"
-#include "model/Model.h"
 
 MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
@@ -84,7 +83,7 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             sample = new InstanceSample();
             break;
         case 17:
-            sample = new InstanceCopySample();
+            sample = new AntiAliasSample();
             break;
         default:
             LOGCATE("don't support type:%d",type);

@@ -2,7 +2,6 @@
 precision mediump float;
 layout(location = 0) out vec4 outColor;
 
-in vec3 Normal;
 in vec2 outTexCoords;
 uniform sampler2D texture_diffuse1;
 
