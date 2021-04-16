@@ -19,36 +19,71 @@ AntiAliasSample::~AntiAliasSample() {
 void AntiAliasSample::init(const char * vShaderStr,const char * fShaderStr) {
 
 
-    GLuint m_VertexShader;
-    GLuint m_FragmentShader;
-    m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
-    int positionSize = 9;
-    GLfloat vVertices[] = {
-            -0.5f, -1.0f, 0.0f,
-            -0.5f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f
+    mShader = new Shader(vShaderStr,fShaderStr);
+
+
+    float verticesBig[] = {
+            // back
+            -0.5f, 0.5f,  -0.5f,  0.0f, 0.0f, //左上
+            -0.5f,  -0.5f,  -0.5f,  0.0f, 1.0f, // 左下
+            0.5f,  -0.5f,  -0.5f,  1.0f, 1.0f, // 右下
+            0.5f,  -0.5f,  -0.5f,  1.0f, 1.0f, // 右下
+            0.5f, 0.5f,  -0.5f,  1.0f, 0.0f, // 右上
+            -0.5f, -0.5f,  -0.5f,  0.0f, 0.0f, // 左上
+
+            // front
+            -0.5f, 0.5f,  0.5f,  0.0f, 0.0f,//左上
+            0.5f,  -0.5f,  0.5f,  1.0f, 1.0f,// 右下
+            -0.5f,  -0.5f,  0.5f,  0.0f, 1.0f,// 左下
+            0.5f,  -0.5f,  0.5f,  1.0f, 1.0f,// 右下
+            -0.5f, 0.5f,  0.5f,  0.0f, 0.0f,//左上
+            0.5f, 0.5f,  0.5f,  1.0f, 0.0f,// 右上
+
+
+            //left
+            -0.5f, 0.5f, 0.5f,  0.0f, 1.0f,
+            -0.5f,  -0.5f, 0.5f,  1.0f, 1.0f,
+            -0.5f,  -0.5f,  -0.5f,  1.0f, 0.0f,
+            -0.5f,  -0.5f,  -0.5f,  1.0f, 0.0f,
+            -0.5f, 0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, 0.5f,  0.5f,  0.0f, 0.0f,
+
+
+            // right
+            0.5f, 0.5f, 0.5f,  0.0f, 1.0f,
+            0.5f,  -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f,  -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f, 0.5f, 0.5f,  0.0f, 1.0f,
+            0.5f, 0.5f, -0.5f,  0.0f, 1.0f,
+
+            // bottom
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+            // top
+            -0.5f, 0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, 0.5f,  -0.5f,  1.0f, 0.0f,
+            0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, 0.5f, 0.5f,  1.0f, 1.0f,
+            -0.5f, 0.5f, -0.5f,  0.0f, 1.0f,
     };
-    GLuint arrays[] = {
-            0,1,2
-    };
-//    int size = 9;
     glGenBuffers(2, vboIds);
     glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat) * positionSize,vVertices,GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboIds[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(arrays),arrays,GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(verticesBig),verticesBig,GL_STATIC_DRAW);
 
     glGenVertexArrays(1,&vaoIds[0]);
     glBindVertexArray(vaoIds[0]);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboIds[1]);
-
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(const void *)NULL);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(GLfloat) * 5,(const void *)0);
     glBindVertexArray(0);
-    glDisableVertexAttribArray(0);
 
 }
 
@@ -61,10 +96,11 @@ void AntiAliasSample::draw() {
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
     // Use the program object
-    glUseProgram(m_ProgramObj);
-
+    mShader->use();
+    UpdateMvp();
+    mShader->setMat4("mvp",mBaseMvpMatrix);
     glBindVertexArray(vaoIds[0]);
-    glDrawElements(GL_TRIANGLES,3,GL_UNSIGNED_INT,(const void *)0);
+    glDrawArrays(GL_TRIANGLES,0,36);
     glBindVertexArray(0);
 }
 
@@ -73,5 +109,6 @@ void AntiAliasSample::draw() {
 
 
 void AntiAliasSample::Destroy() {
-    glDeleteVertexArrays(1,&vboIds[0]);
+    glDeleteVertexArrays(1,&vaoIds[0]);
+    glDeleteBuffers(2,vboIds);
 }
