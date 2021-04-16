@@ -20,6 +20,10 @@ struct Light{
   vec3 specular;
   vec3 direction;
   float cutOff;
+
+  float constant;
+  float linear;
+  float quadratic;
 };
 uniform Light light;
 uniform Material material;
@@ -37,8 +41,15 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir,norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular =  light.specular * spec  * vec3(1.0) - vec3(texture(borderSample,texture_vec));
-    vec3 result = ambient + diffuse + specular + vec3(texture(flowSample,texture_vec));
+    vec3 specular =  light.specular * spec  *  vec3(texture(borderSample,texture_vec));
+
+  // 计算衰减
+  float distance = length(lightPos - FragPos);
+  float factor = 1.0 / (light.constant + distance * light.linear + distance * distance * light.quadratic);
+  ambient *= factor;
+  diffuse *= factor;
+  specular *= factor;
+    vec3 result = ambient + diffuse + specular;
     outColor = vec4(result,1.0);
 //  } else {
 //    outColor = vec4(light.ambient * texture(textSample,texture_vec).rgb,1.0);

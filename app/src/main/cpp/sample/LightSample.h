@@ -27,21 +27,11 @@ public:
 
 private:
     stbi_uc * imageData = nullptr;
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 projection;
-    glm::mat4 mMvpMatrix;
     GLuint vboIds[2];
     GLuint lightVao;
     GLint lightProgram;
     int64_t second;
     GLuint mLightTexture[10];
-
-    // 单个可旋转
-    void UpdateMvp( int angleX, int angleY, float ratio);
-
-    // 多个不可旋转
-    void UpdateMultipleMvp( int angleX, int angleY, float ratio);
 
 
 };
