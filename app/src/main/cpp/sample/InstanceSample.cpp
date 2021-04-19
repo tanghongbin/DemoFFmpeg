@@ -15,8 +15,8 @@
 void InstanceSample::init(const char * vShaderStr,const char * fShaderStr) {
 
     mShader = new Shader(vShaderStr,fShaderStr);
-    mRockShader = new Shader(readStrFromFile("instance/rockvetex.glsl").c_str(),
-                             readStrFromFile("instance/fragment.glsl").c_str());
+    mRockShader = new Shader(readGLSLStrFromFile("instance/rockvetex.glsl").c_str(),
+                             readGLSLStrFromFile("instance/fragment.glsl").c_str());
 
 //    LOGCATE("log rockshader:%p shader:%p",mRockShader,mShader);
     mPlanModel = new Model(getModel3DPath("planet/planet.obj"));

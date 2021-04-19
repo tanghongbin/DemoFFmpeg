@@ -10,7 +10,7 @@ class DemoApplication : Application() {
     }
     override fun onCreate() {
         super.onCreate()
-        val sdcardAssetsFolder = Environment.getExternalStorageDirectory().absolutePath + "/ffmpegtest/assets"
+        val sdcardAssetsFolder = Environment.getExternalStorageDirectory().absolutePath + "/ffmpegtest/assets/glsl"
         FileUtils.deleteFile(sdcardAssetsFolder)
         FileUtils.makeFolders(sdcardAssetsFolder)
         FileUtils.copyFilesFromAssets(this,"glsl",sdcardAssetsFolder)

@@ -34,6 +34,7 @@ private:
     Shader* lightShader;
 
 
+    void drawWhole(int i);
 };
 
 

@@ -78,8 +78,8 @@ void TextureCubeSample::init(const char * vShaderStr,const char * fShaderStr)
 	m_ScaleX = 3.17f;
 	m_ScaleY = 3.17f;
 
-	std::string ver = readStrFromFile("cube/innervetex.glsl");
-	std::string fragment = readStrFromFile("cube/innerfragment.glsl");
+	std::string ver = readGLSLStrFromFile("cube/innervetex.glsl");
+	std::string fragment = readGLSLStrFromFile("cube/innerfragment.glsl");
 	innershader = new Shader(ver.c_str(),fragment.c_str());
 
 	// bind vao,vbo
@@ -201,8 +201,8 @@ void TextureCubeSample::init(const char * vShaderStr,const char * fShaderStr)
 
     // 引入模型加载
 
-	std::string modelVetex = readStrFromFile("model3d/vetex.glsl");
-	std::string modelFragment = readStrFromFile("model3d/fragment.glsl");
+	std::string modelVetex = readGLSLStrFromFile("model3d/vetex.glsl");
+	std::string modelFragment = readGLSLStrFromFile("model3d/fragment.glsl");
 	sample = new Model3DSample;
 	sample->ifNeedClear = false;
 	sample->init(modelVetex.c_str(),modelFragment.c_str());

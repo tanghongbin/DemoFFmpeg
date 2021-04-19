@@ -60,46 +60,45 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main()
 {
-  vec3 lightDir = normalize(lightPos - FragPos);
 
-
-    vec3 ambient = light.ambient * texture(material.ambient,texture_vec).rgb;
-    vec3 norm = normalize(Normal);
-    // 计算漫反射角度
-    float diff= max(dot(norm,lightDir),0.0);
-    vec3 diffuse = light.diffuse * diff * texture(material.diffuse,texture_vec).rgb;
-    // 计算镜面强度
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir,norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular =  light.specular * spec  *  vec3(texture(material.specular,texture_vec));
-
-  // 计算聚光
-  float theta = dot(lightDir,normalize(-light.direction));
-  float epsilon = (light.cutOff - light.outerCutOff);
-  float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
-  diffuse  *= intensity;
-  specular *= intensity;
-
-  // 计算衰减
-  float distance = length(lightPos - FragPos);
-  float factor = 1.0 / (light.constant + distance * light.linear + distance * distance * light.quadratic);
-  ambient *= factor;
-  diffuse *= factor;
-  specular *= factor;
-    vec3 result = ambient + diffuse + specular;
-    outColor = vec4(result,1.0);
+//  vec3 lightDir = normalize(lightPos - FragPos);
+//    vec3 ambient = light.ambient * texture(material.ambient,texture_vec).rgb;
+//    vec3 norm = normalize(Normal);
+//    // 计算漫反射角度
+//    float diff= max(dot(norm,lightDir),0.0);
+//    vec3 diffuse = light.diffuse * diff * texture(material.diffuse,texture_vec).rgb;
+//    // 计算镜面强度
+//    vec3 viewDir = normalize(viewPos - FragPos);
+//    vec3 reflectDir = reflect(-lightDir,norm);
+//    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+//    vec3 specular =  light.specular * spec  *  vec3(texture(material.specular,texture_vec));
+//
+//  // 计算聚光
+//  float theta = dot(lightDir,normalize(-light.direction));
+//  float epsilon = (light.cutOff - light.outerCutOff);
+//  float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+//  diffuse  *= intensity;
+//  specular *= intensity;
+//
+//  // 计算衰减
+//  float distance = length(lightPos - FragPos);
+//  float factor = 1.0 / (light.constant + distance * light.linear + distance * distance * light.quadratic);
+//  ambient *= factor;
+//  diffuse *= factor;
+//  specular *= factor;
+//    vec3 result = ambient + diffuse + specular;
+//    outColor = vec4(result,1.0);
 
   // 属性
-//  vec3 norm = normalize(Normal);
-//  vec3 viewDir = normalize(viewPos - FragPos);
-//
-//  // 第一阶段：定向光照
-//  vec3 result = CalcDirLight(dirLight, norm, viewDir);
-//  // 第二阶段：点光源
-//  for(int i = 0; i < NR_POINT_LIGHTS; i++)
-//  result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
+  vec3 norm = normalize(Normal);
+  vec3 viewDir = normalize(viewPos - FragPos);
 
+  // 第一阶段：定向光照
+  vec3 result = CalcDirLight(dirLight, norm, viewDir);
+  // 第二阶段：点光源
+  for(int i = 0; i < NR_POINT_LIGHTS; i++)
+  result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
+  outColor = vec4(result,1.0);
 }
 
 

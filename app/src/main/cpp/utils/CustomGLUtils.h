@@ -95,14 +95,14 @@ uint8_t *fillArrayToFrame(AVPixelFormat avPixelFormat, AVFrame *frame);
 
 const int getRandomInt(int range);
 
-static const std::string  readStrFromFile(const char *filePath);
+static const std::string  readGLSLStrFromFile(const char *filePath);
 
 static void logLoadImageInfo(LoadImageInfo imageInfo){
-    readStrFromFile("");
+    readGLSLStrFromFile("");
     LOGCATE("打印图片信息 width:%d height:%d channel:%d",imageInfo.width,imageInfo.height,imageInfo.channels);
 }
 
-static const std::string  readStrFromFile(const char *filename) {
+static const std::string  readGLSLStrFromFile(const char *filename) {
     std::string absolutePath = std::string(GLSL_ROOT_DIR) + std::string(filename);
     std::ifstream ifile(absolutePath);
 //将文件读入到ostringstream对象buf中

@@ -36,7 +36,7 @@ protected:
     float m_ScaleY = 1.0f;
 
     float mEyeZ = 3.0f;
-    Shader * mShader;
+    Shader * mShader = 0;
 
 public:
 
