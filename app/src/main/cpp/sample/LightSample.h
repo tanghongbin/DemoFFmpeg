@@ -29,9 +29,9 @@ private:
     stbi_uc * imageData = nullptr;
     GLuint vboIds[2];
     GLuint lightVao;
-    GLint lightProgram;
     int64_t second;
     GLuint mLightTexture[10];
+    Shader* lightShader;
 
 
 };

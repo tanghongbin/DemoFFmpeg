@@ -13,14 +13,7 @@
 
 void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
 
-    m_ProgramObj = CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
-    if (m_ProgramObj)
-    {
-    }
-    else
-    {
-        LOGCATE("TextureMapSample::Init create program fail");
-    }
+    mShader = new Shader(vShaderStr,fShaderStr);
     const char * fragmentStr =
             "#version 300 es\n"
             "precision mediump float;                             \n"
@@ -29,10 +22,7 @@ void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
             "{                                                   \n"
             "  FragColor = vec4(1.0f,1.0f,1.0f,1.0f);     \n"
             "}";
-    lightProgram = CreateProgram(vShaderStr, fragmentStr, m_VertexShader, m_FragmentShader);
-    if (!lightProgram){
-        LOGCATE("TextureMapSample::Init lightProgram fail");
-    }
+    lightShader = new Shader(vShaderStr,fragmentStr);
     float verticesBig[] = {
                 // positions          // normals           // texture coords
                 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
@@ -168,48 +158,100 @@ void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
 
 void LightSample::draw() {
 
-    if(m_ProgramObj == GL_NONE) return;
+    if(mShader->ID == GL_NONE) return;
 
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(1.0, 1.0, 1.0, 0.5);
 
     if (second == 0L){
         second = GetSysCurrentTime();
     }
     float diffValue = (float)(GetSysCurrentTime() - second) / (float)1000;
 //    LOGCATE("log second:%f",diffValue);
-    glm::vec3 lightPos = glm::vec3( 0.0,  1.0f,  2.0f);
-    float radius = 8.0;
-    float camX = sin(diffValue) * radius;
-    glm::vec3 cameraPos = glm::vec3(-3,0.0f,3.0);
-    Camera camera(cameraPos);
 
-    glUseProgram (m_ProgramObj);
-    glEnable(GL_DEPTH_TEST);
-    glBindVertexArray(lightVao);
-    setVec3(m_ProgramObj,"lightPos",lightPos);
-    setVec3(m_ProgramObj,"viewPos",camera.Position);
     UpdateMvp();
 
-    setFloat(m_ProgramObj,"material.shininess",8.0);
-    setInt(m_ProgramObj,"textSample",0);
-    setInt(m_ProgramObj,"borderSample",1);
-    setInt(m_ProgramObj,"flowSample",2);
-    setVec3(m_ProgramObj,"light.ambient",0.3,0.3,0.3);
-    setVec3(m_ProgramObj,"light.diffuse",0.5,0.5,0.5);
-    setVec3(m_ProgramObj,"light.specular",1.0,1.0,1.0);
-    setVec3(m_ProgramObj,"light.direction",-0.2f, -1.0f, -0.3f);
-    setFloat(m_ProgramObj,"light.constant",1.0f);
-    setFloat(m_ProgramObj,"light.linear",0.09f);
-    setFloat(m_ProgramObj,"light.quadratic",0.032f);
+    float radius = 8.0;
+    float camX = sin(diffValue) * radius;
+    glm::vec3 cameraPos = glm::vec3(0.0f,0.0f,3.0f);
+    Camera camera(cameraPos);
+    glm::vec3 lightPos = camera.Position;
 
-    setFloat(m_ProgramObj,"light.cutOff",   glm::cos(glm::radians(12.5f)));
+    mShader->use();
+    glEnable(GL_DEPTH_TEST);
+    glBindVertexArray(lightVao);
+
+//    mShader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+//    mShader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+//    mShader->setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+//    mShader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
+    // positions of the point lights
+    glm::vec3 pointLightPositions[] = {
+            glm::vec3( 0.7f,  0.2f,  2.0f),
+            glm::vec3( 2.3f, -3.3f, -4.0f),
+            glm::vec3(-4.0f,  2.0f, -12.0f),
+            glm::vec3( 0.0f,  0.0f, -3.0f)
+    };
+
+    // point light 1
+//    mShader->setVec3("pointLights[0].position", pointLightPositions[0]);
+//    mShader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+//    mShader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+//    mShader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+//    mShader->setFloat("pointLights[0].constant", 1.0f);
+//    mShader->setFloat("pointLights[0].linear", 0.09);
+//    mShader->setFloat("pointLights[0].quadratic", 0.032);
+//    // point light 2
+//    mShader->setVec3("pointLights[1].position", pointLightPositions[1]);
+//    mShader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+//    mShader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+//    mShader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+//    mShader->setFloat("pointLights[1].constant", 1.0f);
+//    mShader->setFloat("pointLights[1].linear", 0.09);
+//    mShader->setFloat("pointLights[1].quadratic", 0.032);
+//    // point light 3
+//    mShader->setVec3("pointLights[2].position", pointLightPositions[2]);
+//    mShader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+//    mShader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+//    mShader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+//    mShader->setFloat("pointLights[2].constant", 1.0f);
+//    mShader->setFloat("pointLights[2].linear", 0.09);
+//    mShader->setFloat("pointLights[2].quadratic", 0.032);
+//    // point light 4
+//    mShader->setVec3("pointLights[3].position", pointLightPositions[3]);
+//    mShader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+//    mShader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+//    mShader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+//    mShader->setFloat("pointLights[3].constant", 1.0f);
+//    mShader->setFloat("pointLights[3].linear", 0.09);
+//    mShader->setFloat("pointLights[3].quadratic", 0.032);
+//
+    mShader->setFloat("material.shininess",8.0);
+    mShader->setInt("material.ambient",0);
+    mShader->setInt("material.diffuse",1);
+    mShader->setInt("material.specular",2);
+
+    mShader->setVec3("lightPos",lightPos);
+    mShader->setVec3("viewPos",camera.Position);
+    mShader->setVec3("light.direction",camera.Front);
+
+    mShader->setVec3("light.ambient",0.3,0.3,0.3);
+    mShader->setVec3("light.diffuse",0.5,0.5,0.5);
+    mShader->setVec3("light.specular",1.0,1.0,1.0);
+    mShader->setFloat("light.constant",1.0f);
+    mShader->setFloat("light.linear",0.09f);
+    mShader->setFloat("light.quadratic",0.032f);
+    mShader->setFloat("light.cutOff",   glm::cos(glm::radians(12.5f)));
+    mShader->setFloat("light.outerCutOff",   glm::cos(glm::radians(17.5f)));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,mLightTexture[0]);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D,mLightTexture[2]);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D,mLightTexture[3]);
+
+
 
         glm::vec3 cubePositions[] = {
             glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -230,25 +272,27 @@ void LightSample::draw() {
         resultModel = glm::translate(mBaseModel, cubePositions[i]);
         float angle = 20.0f * i;
         resultModel = glm::rotate(resultModel, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        setMat4(m_ProgramObj,"model", resultModel);
-        setMat4(m_ProgramObj,"mMvpMatrix",mBaseProjection * mBaseView * resultModel);
+        mShader->setMat4("model", resultModel);
+        mShader->setMat4("mMvpMatrix",mBaseProjection * mBaseView * resultModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
 
 
-    glUseProgram (lightProgram);
+    lightShader->use();
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(lightVao);
     glm::mat4 model = glm::mat4();
     glm::mat4 projection = glm::mat4(1.0f);
-    model = glm::translate(model, lightPos);
-    model = glm::scale(model,  glm::vec3(0.2f));
-    projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
-    setMat4(lightProgram, "model", model);
-    setMat4(lightProgram, "view", mBaseView);
-    setMat4(lightProgram, "projection", projection);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    for (int i = 0; i < 1; ++i) {
+        model = glm::translate(model, pointLightPositions[i]);
+        model = glm::scale(model,  glm::vec3(0.2f));
+        projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
+        lightShader->setMat4("model", model);
+        lightShader->setMat4( "view", mBaseView);
+        lightShader->setMat4( "projection", projection);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 }
 
 void LightSample::UpdateTransformMatrix(float rotateX, float rotateY, float scaleX, float scaleY)
@@ -273,6 +317,10 @@ void LightSample::Destroy()
             stbi_image_free(imageData);
             LOGCATE("after over %p",imageData);
             imageData = nullptr;
+        }
+        if (lightShader){
+            lightShader->Destroy();
+            delete lightShader;
         }
         glDeleteTextures(10,mLightTexture);
         glDeleteProgram(m_ProgramObj);
