@@ -18,6 +18,7 @@
 #include <SeniorGLSLSample.h>
 #include <InstanceSample.h>
 #include <AntiAliasSample.h>
+#include <ShadowSample.h>
 #include "CustomGLUtils.h"
 #include "TriangleSample.h"
 #include "MyGLRenderContext.h"
@@ -84,6 +85,9 @@ GLBaseSample *MyGLRenderContext::generateSample(int type) {
             break;
         case 17:
             sample = new AntiAliasSample();
+            break;
+        case 18:
+            sample = new ShadowSample();
             break;
         default:
             LOGCATE("don't support type:%d",type);

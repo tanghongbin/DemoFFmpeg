@@ -95,7 +95,7 @@ public:
         m_AngleY = static_cast<int>(rotateY);
         m_ScaleX = scaleX;
         m_ScaleY = scaleY;
-        LOGCATE("log anglex:%d angleY:%d scalex:%f scaleY:%f",m_AngleX,m_AngleY,m_ScaleX,m_ScaleY);
+//        LOGCATE("log anglex:%d angleY:%d scalex:%f scaleY:%f",m_AngleX,m_AngleY,m_ScaleX,m_ScaleY);
     }
 
     virtual void UpdateMvp(){
