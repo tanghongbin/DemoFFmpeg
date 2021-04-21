@@ -37,7 +37,7 @@ public:
 
     void generateFbo();
 
-    void renderScene(Shader *pShader);
+    void renderScene(Shader *pShader, bool b);
 
     void ConfigureShaderAndMatrices();
 };

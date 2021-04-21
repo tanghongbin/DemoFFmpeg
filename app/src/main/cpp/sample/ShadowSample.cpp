@@ -177,37 +177,37 @@ void ShadowSample::draw() {
 
     if (!mShader->ID) return;
 
-    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-
-    glViewport(0,0,SHADOW_WIDTH,SHADOW_HEIGHT);
-    glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    ConfigureShaderAndMatrices();
-    renderScene(shadowShader);
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+//    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glClearColor(1.0, 1.0, 1.0, 1.0);
 //
-    glViewport(0,0,SHADOW_WIDTH,SHADOW_HEIGHT);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    mShader->use();
-    glBindVertexArray(vaoIds[2]);
-    mShader->setInt("type",2);
-    mShader->setInt("material.diffuse",3);
-    mShader->setInt("isNormalTexture",1);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D,depthTexture);
-    glDrawArrays(GL_TRIANGLES,0,6);
-//    renderScene(mShader);
+//    glViewport(0,0,SHADOW_WIDTH,SHADOW_HEIGHT);
+//    glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
+//    glClear(GL_DEPTH_BUFFER_BIT);
+//    ConfigureShaderAndMatrices();
+//    renderScene(shadowShader, true);
+//    glBindFramebuffer(GL_FRAMEBUFFER,0);
+//
+    glViewport(0,0,screenWidth,screenHeight);
+    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    renderScene(mShader, false);
 }
 
 /**
  * 渲染场景
  */
-void ShadowSample::renderScene(Shader *mShader) {
+void ShadowSample::renderScene(Shader *pShader, bool isRenderDepth) {
     glEnable(GL_DEPTH_TEST);
     // Use the program object
-    UpdateMvp();
+//    UpdateMvp();
+    // View matrix
+    glm::mat4 View = glm::lookAt(
+            glm::vec3(-1.0, 3.0, 3.0), // Camera is at (0,0,1), in World Space
+            glm::vec3(0.0, 0.0, 0.0), // and looks at the origin
+            glm::vec3(0.0, 1.0, 0.0)  // Head is up (set to 0,-1,0 to look upside-down)
+    );
+    glm::mat4 Model = glm::mat4(1.0f);
+    glm::mat4 Projection = glm::perspective(45.0f, (float )screenWidth/(float )screenHeight, 0.1f, 100.f);
+    glm::mat4 mMvp;
     // 画灯
     glm::vec3 lightColor = glm::vec3 (1.0,1.0,1.0);
     glm::vec3 lightPos = glm::vec3(0.0f,  3.0f, 0.0f);
@@ -228,53 +228,58 @@ void ShadowSample::renderScene(Shader *mShader) {
     GLfloat near_plane = 1.0f, far_plane = 7.5f;
     glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
     glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 1.0f, 0.0f));
-    mBaseProjection = lightProjection;
-    mBaseView = lightView;
-    mBaseMvpMatrix = lightProjection * lightView * mBaseModel;
+                                      glm::vec3(0.0f, 1.0f, 0.0f));
+if (isRenderDepth){
+    Projection = lightProjection;
+    View = lightView;
+}
+    mMvp = Projection * View * Model;
+
 /***------阴影矩阵---------***/
 
     // 画矩形
-    mShader->use();
-    mShader->setMat4("mvp", mBaseMvpMatrix);
-    mShader->setMat4("model", mBaseModel);
+    pShader->use();
+//    pShader->setMat4("mvp", mMvp);
+//    pShader->setMat4("model", Model);
+//
+//    pShader->setFloat("material.shininess", 8.0);
+//    pShader->setInt("material.ambient", 0);
+//    pShader->setInt("material.diffuse", 0);
+//    pShader->setInt("material.specular", 0);
+//
+//    pShader->setVec3("pointLight.lightColor", lightColor);
+//    pShader->setVec3("pointLight.position", lightPos);
+//    pShader->setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
+//    pShader->setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
+//    pShader->setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
+//    pShader->setFloat("pointLight.constant", 1.0f);
+//    pShader->setFloat("pointLight.linear", 0.09);
+//    pShader->setFloat("pointLight.quadratic", 0.032);
+//    pShader->setVec3("viewPos", glm::vec3(0.0, 0.0, 3.0));
+//    pShader->setMat4("lightSpaceMatrix",lightProjection * lightView);
 
-    mShader->setFloat("material.shininess", 8.0);
-    mShader->setInt("material.ambient", 0);
-    mShader->setInt("material.diffuse", 0);
-    mShader->setInt("material.specular", 0);
 
-    mShader->setVec3("pointLight.lightColor", lightColor);
-    mShader->setVec3("pointLight.position", lightPos);
-    mShader->setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
-    mShader->setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-    mShader->setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
-    mShader->setFloat("pointLight.constant", 1.0f);
-    mShader->setFloat("pointLight.linear", 0.09);
-    mShader->setFloat("pointLight.quadratic", 0.032);
-    mShader->setVec3("viewPos", glm::vec3(0.0, 0.0, 3.0));
-
-
-    glBindVertexArray(vaoIds[0]);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
-    mShader->setInt("type", 0);
-    glDrawArrays(GL_TRIANGLES,0,36);
-    glBindVertexArray(0);
+//    glBindVertexArray(vaoIds[0]);
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+//    pShader->setInt("type", 0);
+//    glDrawArrays(GL_TRIANGLES,0,36);
+//    glBindVertexArray(0);
 
     // 画地板
-    glm::mat4 model = mBaseModel;
-    model = glm::translate(model,glm::vec3(0.0,0.0,0.0f));
-    glm::mat4 mvp = mBaseProjection * mBaseView * model;
-    mShader->setMat4("mvp", mvp);
-    mShader->setMat4("model", model);
+    pShader->setMat4("mvp", mMvp);
+    pShader->setMat4("model", Model);
     glBindVertexArray(vaoIds[1]);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, mTextureIds[0]);
-    mShader->setInt("material.ambient", 1);
-    mShader->setInt("material.diffuse", 1);
-    mShader->setInt("material.specular", 1);
-    mShader->setInt("type", 1);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    pShader->setInt("shadowMap", 2);
+    pShader->setVec3("viewPos",glm::vec3(-1.0, 3.0, 3.0));
+    pShader->setInt("material.ambient", 1);
+    pShader->setInt("material.diffuse", 1);
+    pShader->setInt("material.specular", 1);
+    pShader->setInt("type", 1);
     glDrawArrays(GL_TRIANGLES,0,6);
 }
 
@@ -307,6 +312,8 @@ void ShadowSample::Destroy() {
     glDeleteVertexArrays(4,vaoIds);
     glDeleteBuffers(4,vboIds);
     glDeleteFramebuffers(1,&m_fboId);
+    glDeleteTextures(2,mTextureIds);
+    glDeleteTextures(1,&m_TextureId);
     if (lightShader){
         lightShader->Destroy();
         delete lightShader;

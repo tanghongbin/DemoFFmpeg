@@ -7,21 +7,19 @@ layout(location = 2) in vec3 a_normal;
 out vec3 v_normal;
 out vec2 TexCoords;
 out vec3 FragPos;
+out vec4 FragPosLightSpace;
+
+
 uniform mat4 mvp;
 uniform mat4 model;
 uniform int isNormalTexture;
+uniform mat4 lightSpaceMatrix;
 
 void main()                              
 {
-
+   gl_Position = mvp * a_position;
    TexCoords = a_texCoords;
-   if (isNormalTexture == 1) {
-      gl_Position = a_position;
-   } else {
-      gl_Position = mvp * a_position;
-   }
-
-   FragPos = vec3(model * a_position);
    v_normal = mat3(transpose(inverse(model))) * a_normal;
-
+   FragPos = vec3(model * a_position);
+   FragPosLightSpace = lightSpaceMatrix * (vec4(FragPos,1.0));
 }
