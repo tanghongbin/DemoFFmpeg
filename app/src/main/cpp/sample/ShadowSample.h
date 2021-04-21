@@ -13,12 +13,13 @@ class ShadowSample : public GLBaseSample{
 
 private:
     GLuint m_ProgramObj;
-    GLuint vboIds[2];
-    GLuint vaoIds[2];
-    GLuint mFboId;
+    GLuint vboIds[4];
+    GLuint vaoIds[4];
     GLuint mTextureIds[2];
     glm::mat4 m_MVPMatrix;
     Shader* lightShader = 0;
+    Shader* shadowShader = 0;
+    GLuint depthTexture;
     const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
 public:
@@ -36,7 +37,7 @@ public:
 
     void generateFbo();
 
-    void renderScene();
+    void renderScene(Shader *pShader);
 
     void ConfigureShaderAndMatrices();
 };

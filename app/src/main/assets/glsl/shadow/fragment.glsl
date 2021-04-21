@@ -28,7 +28,7 @@ struct Material{
 uniform Material material;
 uniform PointLight pointLight;
 uniform vec3 viewPos;
-// 1-是地板
+// 1-是地板,2-是深度渲染
 uniform int type;
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -36,21 +36,25 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 void main()                                  
 {
    // 属性
-//   if(type == 1){
-//      outColor = texture(material.diffuse,TexCoords);
-//   } else {
+   if(type == 1){
+      outColor = texture(material.diffuse,TexCoords);
+   } else if (type == 2){
+      outColor = vec4(vec3(texture(material.diffuse,TexCoords).r),1.0);
+   } else {
       vec3 norm = normalize(v_normal);
       vec3 viewDir = normalize(viewPos - FragPos);
       vec3 result = CalcPointLight(pointLight, norm, FragPos, viewDir);
       outColor = vec4(result,1.0);
-//   }
+   }
 
 }
 
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
-   vec3 lightDir = normalize(light.position - fragPos);
+   // 这里用平行光
+//   vec3 lightDir = normalize(light.position - fragPos);
+   vec3 lightDir = normalize(vec3(-3.0,3.0,-2.0));
    // 漫反射着色
    float diff = max(dot(normal, lightDir), 0.0);
    // 镜面光着色

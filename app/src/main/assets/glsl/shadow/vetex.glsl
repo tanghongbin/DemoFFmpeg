@@ -9,12 +9,18 @@ out vec2 TexCoords;
 out vec3 FragPos;
 uniform mat4 mvp;
 uniform mat4 model;
+uniform int isNormalTexture;
 
 void main()                              
 {
 
    TexCoords = a_texCoords;
-   gl_Position = mvp * a_position;
+   if (isNormalTexture == 1) {
+      gl_Position = a_position;
+   } else {
+      gl_Position = mvp * a_position;
+   }
+
    FragPos = vec3(model * a_position);
    v_normal = mat3(transpose(inverse(model))) * a_normal;
 
