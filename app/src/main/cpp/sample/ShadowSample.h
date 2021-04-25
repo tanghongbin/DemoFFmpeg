@@ -17,8 +17,9 @@ private:
     GLuint vaoIds[4];
     GLuint mTextureIds[2];
     glm::mat4 m_MVPMatrix;
-    Shader* lightShader = 0;
-    Shader* shadowShader = 0;
+    Shader* mLightShader = 0;
+    Shader* mShadowShader = 0;
+    Shader* mShadowShowShader = 0;
     GLuint depthTexture;
     const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
@@ -37,9 +38,11 @@ public:
 
     void generateFbo();
 
-    void renderScene(Shader *pShader, bool b);
+    void renderScene(Shader *pShader);
 
     void ConfigureShaderAndMatrices();
+
+    void renderSimpleQuarter(Shader *pShader);
 };
 
 #endif //DEMOC_SHADOWSAMPLESAMPLE_H

@@ -32,7 +32,7 @@ uniform PointLight pointLight;
 uniform vec3 viewPos;
 // 1-是地板,2-是深度渲染
 uniform int type;
-uniform sampler2D shadowMap;
+uniform sampler2DShadow shadowMap;
 
 /**点光源计算***/
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
@@ -50,14 +50,14 @@ void main()
    vec3 viewDir = normalize(viewPos - FragPos);
 //   vec3 result = CalcPointLight(pointLight, norm, FragPos, viewDir);
    // 显示全部过程
-   vec3 lightDir = normalize(vec3(-3.0,3.0,-2.0));
+   vec3 lightDir = normalize(vec3(-1.0,1.0,-1.0));
    // 漫反射着色
    float diff = max(dot(normal, lightDir), 0.0);
    // 镜面光着色
    vec3 reflectDir = reflect(-lightDir, normal);
    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
    // 衰减
-   float distance    = length(pointLight.position - FragPos);
+//   float distance    = length(pointLight.position - FragPos);
    //   float attenuation = 1.0 / (pointLight.constant + pointLight.linear * distance +
    //   pointLight.quadratic * (distance * distance));
    // 暂时不考虑衰减
@@ -71,12 +71,18 @@ void main()
    ambient  *= attenuation;
    diffuse  *= attenuation;
    specular *= attenuation;
-
    // 计算阴影
 //   float shadow = ShadowCalculation(FragPosLightSpace);
-//   float shadow = ShadowCalculation(FragPosLightSpace);
-//   vec3 lighting = (ambient + (1.0 - 0.0) * (diffuse + specular)) * color;
-   outColor = vec4((ambient + diffuse + specular) * color,1.0);
+   float shadow = textureProj(shadowMap,FragPosLightSpace);
+   vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
+//   outColor = vec4(lighting,1.0);
+
+
+//   // 执行透视除法
+//   vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
+//   // 变换到[0,1]的范围
+//   projCoords = projCoords * 0.5 + 0.5;
+   outColor = vec4(lighting,1.0);
 
 //   outColor = CalShadowAll();
 
@@ -90,7 +96,7 @@ vec4 CalShadowAll(){
    vec3 ambient = 0.15 * color;
    // Diffuse
 //   vec3 lightDir = normalize(lightPos - FragPos);
-   vec3 lightDir = normalize(vec3(-3.0,3.0,0.0));
+   vec3 lightDir = normalize(vec3(-1.0,1.0,-1.0));
    float diff = max(dot(lightDir, normal), 0.0);
    vec3 diffuse = diff * lightColor;
    // Specular
@@ -102,9 +108,9 @@ vec4 CalShadowAll(){
    vec3 specular = spec * lightColor;
    // 计算阴影
    float shadow = ShadowCalculation(FragPosLightSpace);
-//   vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
+   vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
 
-   vec3 lighting = (ambient + (1.0 - 0.0) * (diffuse + specular)) * color;
+//   vec3 lighting = (ambient + (1.0 - 0.0) * (diffuse + specular)) * color;
 
    vec4 result = vec4(lighting, 1.0f);
    return result;
