@@ -23,6 +23,12 @@ private:
     GLuint depthTexture;
     const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
+    glm::vec3 models [3] = {
+            glm::vec3 (-0.7f, 0.5f,0.0f),
+            glm::vec3 (0.5f,0.0f,0.0f),
+            glm::vec3 (0.3f,0.0f,0.3f),
+    };
+
 public:
     ShadowSample();
 
@@ -42,7 +48,12 @@ public:
 
     void ConfigureShaderAndMatrices();
 
-    void renderSimpleQuarter(Shader *pShader);
+    void renderSimpleTexture(Shader *pShader);
+
+    void drawFloor(const Shader *pShader, const glm::mat4 &View, const glm::mat4 &Projection) const;
+
+    void renderSimpleFbo(Shader *pShader);
+
 };
 
 #endif //DEMOC_SHADOWSAMPLESAMPLE_H

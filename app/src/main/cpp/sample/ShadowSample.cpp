@@ -103,13 +103,13 @@ void ShadowSample::init(const char * vShaderStr,const char * fShaderStr) {
     // bind vao,vbo
     float verticesFloor[] = {
             // position,texcoords,normal
-            -25.0, -1.0, -25.0,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-            -25.0f, -1.0, 25.0,  0.0f, 25.0f,  0.0f,  0.0f, 1.0f,
-            25.0f,  -1.0, 25.0,  25.0f, 25.0f,  0.0f,  0.0f, 1.0f,
+            -25.0, -0.5, -25.0,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+            -25.0f, -0.5, 25.0,  0.0f, 25.0f,  0.0f,  0.0f, 1.0f,
+            25.0f, -0.5, 25.0,  25.0f, 25.0f,  0.0f,  0.0f, 1.0f,
 
-            25.0f,  -1.0, 25.0,  25.0f, 25.0f,  0.0f,  0.0f, 1.0f,
-            25.0,  -1.0, -25.0,  25.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-            -25.0, -1.0, -25.0,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+            25.0f,  -0.5, 25.0,  25.0f, 25.0f,  0.0f,  0.0f, 1.0f,
+            25.0,  -0.5, -25.0,  25.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+            -25.0, -0.5, -25.0,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
 
 
     };
@@ -177,16 +177,18 @@ void ShadowSample::generateFbo() {
                  SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 
 
     glGenFramebuffers(1,&m_fboId);
     glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
     glDrawBuffers(1,&none);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,depthTexture,0);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,depthTexture,0);
+//    glActiveTexture(GL_TEXTURE0);
+
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE){
         LOGCATE("shadowSample glCheckFramebufferStatus != GL_FRAMEBUFFER_COMPLETE  error:0x%x",status);
@@ -200,32 +202,31 @@ void ShadowSample::draw() {
 
     if (!mShader->ID) return;
 
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    glClearColor(1.0, 1.0, 1.0, 1.0);
-
-//    glViewport(0,0,screenWidth,screenHeight);
-//    renderFbo(mShadowShader);
-//    return;
-
+    glEnable(GL_DEPTH_TEST);
 
     glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
     glViewport(0,0,SHADOW_WIDTH,SHADOW_HEIGHT);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear( GL_DEPTH_BUFFER_BIT);
+    glColorMask ( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+    glEnable ( GL_POLYGON_OFFSET_FILL );
     glClearColor(1.0, 1.0, 1.0, 1.0);
-    renderScene(mShadowShader);
+    glCullFace(GL_FRONT);
+    renderSimpleFbo(mShadowShader);
+    glCullFace(GL_BACK);
+    glDisable( GL_POLYGON_OFFSET_FILL );
     glBindFramebuffer(GL_FRAMEBUFFER,0);
-//
+    glColorMask ( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+
     glViewport(0,0,screenWidth,screenHeight);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClearColor(1.0, 1.0, 1.0, 1.0);
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_2D, m_TextureId);
-//    glActiveTexture(GL_TEXTURE1);
-//    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, mTextureIds[0]);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
     renderScene(mShader);
-//    renderSimpleQuarter(mShadowShowShader);
 
 }
 
@@ -236,7 +237,7 @@ void ShadowSample::renderScene(Shader *pShader) {
     // Use the program object
     UpdateMvp();
     // View matrix
-    glm::vec3 viewPos = glm::vec3(-1.0, 2.0, 2.0);
+    glm::vec3 viewPos = glm::vec3(-1.0, 2.0, 3.0);
     glm::mat4 View = glm::lookAt(
             viewPos, // Camera is at (0,0,1), in World Space
             glm::vec3(0.0, 0.0, 0.0), // and looks at the origin
@@ -248,7 +249,7 @@ void ShadowSample::renderScene(Shader *pShader) {
     // 画灯
     glm::vec3 lightColor = glm::vec3 (1.0);
     glm::vec3 lightPos = glm::vec3(0.0f,  3.0f, 0.0f);
-    glm::vec3 ambientColor = glm::vec3 (0.2);
+    glm::vec3 ambientColor = glm::vec3 (0.5);
 
     mMvp = Projection * View * Model;
 
@@ -256,17 +257,11 @@ void ShadowSample::renderScene(Shader *pShader) {
 
     GLfloat near_plane = 1.0f, far_plane = 7.5f;
     glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-    glm::mat4 lightView = glm::lookAt(viewPos, glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::mat4 lightView = glm::lookAt(glm::vec3 (-2.0f,4.0f,-1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                                       glm::vec3(0.0f, 1.0f, 0.0f));
 
 /***------阴影矩阵---------***/
 
-
-glm::vec3 models [] = {
-        glm::vec3 (-0.3f,0.0f,0.0f),
-        glm::vec3 (0.5f,-0.5f,0.0f),
-        glm::vec3 (0.3f,-1.0f,0.3f),
-};
     // 画箱子
 
     pShader->use();
@@ -276,14 +271,17 @@ glm::vec3 models [] = {
     pShader->setVec3("pointLight.lightColor", lightColor);
     pShader->setVec3("pointLight.position", lightPos);
     pShader->setVec3("pointLight.ambient", ambientColor);
-    pShader->setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
+    pShader->setVec3("pointLight.diffuse", 1.0f, 1.0f, 1.0f);
     pShader->setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
     pShader->setFloat("pointLight.constant", 1.0f);
     pShader->setFloat("pointLight.linear", 0.09);
     pShader->setFloat("pointLight.quadratic", 0.032);
     pShader->setMat4("lightSpaceMatrix",lightProjection * lightView);
 
-    for (int i = 0; i < 3; ++i) {
+    drawFloor(pShader, View, Projection);
+
+
+    for (int i = 0; i < models->length(); ++i) {
         glm::mat4 currentModel = glm::translate(Model,models[i]);
         currentModel = glm::scale(currentModel,glm::vec3(0.3f,0.3f,0.3f));
         if (i == 2) {
@@ -303,8 +301,14 @@ glm::vec3 models [] = {
         glBindVertexArray(0);
     }
 
-    return;
 
+
+}
+
+
+void
+ShadowSample::drawFloor(const Shader *pShader, const glm::mat4 &View,
+                        const glm::mat4 &Projection) const {
     glm::mat4 floorModel = glm::mat4(1.0f);
     glm::mat4 floorMvp = Projection * View * floorModel;
     // 画地板
@@ -314,25 +318,23 @@ glm::vec3 models [] = {
     pShader->setInt("material.diffuse", 1);
     pShader->setInt("material.specular", 1);
     pShader->setInt("shadowMap", 2);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, mTextureIds[0]);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    pShader->setInt("renderType", 1);
 
     glBindVertexArray(vaoIds[1]);
     glDrawArrays(GL_TRIANGLES,0,6);
+    pShader->setInt("renderType", 0);
 }
 
 
-void ShadowSample::renderSimpleQuarter(Shader *pShader) {
+void ShadowSample::renderSimpleTexture(Shader *pShader) {
 
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glClearColor ( 1.0f, 1.0f, 1.0f, 1.0f );
+//    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//    glClearColor ( 1.0f, 1.0f, 1.0f, 1.0f );
 
     pShader->use();
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
-    pShader->setInt("shadowMap", 0);
+    pShader->setInt("shadowMap", 2);
 
     glBindVertexArray(vaoIds[2]);
     glDrawArrays(GL_TRIANGLES,0,6);
@@ -361,6 +363,44 @@ void ShadowSample::Destroy() {
         mShadowShowShader->Destroy();
         delete mShadowShowShader;
         mShadowShowShader = 0;
+    }
+}
+
+void ShadowSample::renderSimpleFbo(Shader *pShader) {
+// Use the program object
+
+
+// 以光的视角去渲染图形
+    GLfloat near_plane = 1.0f, far_plane = 7.5f;
+    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    glm::mat4 lightView = glm::lookAt(glm::vec3 (-2.0f,4.0f,-1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                                      glm::vec3(0.0f, 1.0f, 0.0f));
+    // 画箱子
+
+    pShader->use();
+
+
+    glm::mat4 floorModel = glm::mat4(1.0f);
+    glm::mat4 floorMvp = lightProjection * lightView * floorModel;
+    // 画地板
+    pShader->setMat4("mvp", floorMvp);
+    glBindVertexArray(vaoIds[1]);
+    glDrawArrays(GL_TRIANGLES,0,6);
+
+
+    for (int i = 0; i < models->length(); ++i) {
+        glm::mat4 Model = glm::mat4(1.0f);
+        glm::mat4 currentModel = glm::translate(Model,models[i]);
+        currentModel = glm::scale(currentModel,glm::vec3(0.5f,0.5,0.5f));
+        if (i == 2) {
+            currentModel = glm::rotate(currentModel,10.0f,glm::vec3(1.0,1.0,0.0));
+            currentModel = glm::scale(currentModel,glm::vec3(0.5f,0.5f,0.5f));
+        }
+        glm::mat4 mMvp = lightProjection * lightView * currentModel;
+        pShader->setMat4("mvp", mMvp);
+        glBindVertexArray(vaoIds[0]);
+        glDrawArrays(GL_TRIANGLES,0,36);
+        glBindVertexArray(0);
     }
 }
 
