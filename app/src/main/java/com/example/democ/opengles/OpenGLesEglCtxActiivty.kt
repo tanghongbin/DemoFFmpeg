@@ -4,6 +4,7 @@ import android.content.Context
 import android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.os.UserManager
 import android.util.Log
 import com.example.democ.R

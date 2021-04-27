@@ -22,6 +22,7 @@ object GlslDataCenter {
 
             put("AntiAliasSample",17)
             put("ShadowSample",18)
+            put("ShadowCubeSample",19)
         }
 
         vertexGlsl.apply {
@@ -38,6 +39,8 @@ object GlslDataCenter {
             put(16,"glsl/instance/vetex.glsl")
             put(17,"glsl/antialias/vetex.glsl")
             put(18,"glsl/shadow/vetex.glsl")
+
+            put(19,"glsl/shadowcube/vetex.glsl")
         }
 
         fragmentGlsl.apply {
@@ -54,6 +57,7 @@ object GlslDataCenter {
             put(16,"glsl/instance/fragment.glsl")
             put(17,"glsl/antialias/fragment.glsl")
             put(18,"glsl/shadow/fragment.glsl")
+            put(19,"glsl/shadowcube/fragment.glsl")
         }
     }
     fun getSampleKeys():MutableList<String>{
