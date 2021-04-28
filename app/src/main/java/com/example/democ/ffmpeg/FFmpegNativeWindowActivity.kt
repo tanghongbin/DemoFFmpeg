@@ -20,7 +20,7 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 //        result
 //       val result =  SpUtils.getString("url")
 //        result ?:
-        Constants.RTMP_WINDOW_PUSH
+        Constants.MP4_PLAY_PATH
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

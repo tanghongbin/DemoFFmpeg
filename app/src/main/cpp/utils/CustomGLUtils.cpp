@@ -172,7 +172,6 @@ void
 setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,
                      int *renderWidth, int *renderHeight) {
     if (videoWidth > videoHeight) {
-
         if (nativeWindowHeight > nativeWindowWidth) {
             float scaleSmallWidthRation = videoWidth * 1.0f / nativeWindowWidth;
             *renderWidth = nativeWindowWidth;
@@ -197,6 +196,7 @@ setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWid
             *renderWidth = static_cast<int>(videoWidth / scaleSmallHeightRation);
         }
     }
+    LOGCATE("renderWidth:%d renderHeight:%d",*renderWidth,*renderHeight);
 }
 
 void syslog_print(void *ptr, int level, const char *fmt, va_list vl) {

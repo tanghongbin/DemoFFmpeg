@@ -27,6 +27,7 @@ extern "C" {
 
 #include <libavcodec/avcodec.h>
 
+
 /*
  * Class:     com_byteflow_app_MyNativeRender
  * Method:    native_OnInit

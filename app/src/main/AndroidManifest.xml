@@ -28,7 +28,11 @@
         <activity android:name=".ffmpeg.FFmpegAboutActivity" />
         <activity android:name=".ffmpeg.FFmpegRtmpNativeActivity" />
         <activity android:name=".ffmpeg.FFmpegRtmpJavaHwActivity" />
-        <activity android:name=".ffmpeg.FFmpegNativeWindowActivity" />
+        <activity android:name=".ffmpeg.FFmpegNativeWindowActivity"
+            android:screenOrientation="landscape"
+            >
+
+        </activity>
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

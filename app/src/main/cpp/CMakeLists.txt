@@ -13,8 +13,8 @@ cmake_minimum_required(VERSION 3.4.1)
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libName native-render)
-#set(libName2 native-ffmpegrender)
-#set(libName3 native-player)
+set(libName2 native-ffmpegrender)
+set(libName3 native-player)
 
 #拉流-推流
 set(RTMP ${CMAKE_SOURCE_DIR}/librtmp)
@@ -60,7 +60,41 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/*.cpp)
 
+file(GLOB src-files2
+        ${CMAKE_SOURCE_DIR}/${libName2}.cpp
+        ${CMAKE_SOURCE_DIR}/sample/*.cpp
+        ${CMAKE_SOURCE_DIR}/sample/high_level/*.cpp
+        ${CMAKE_SOURCE_DIR}/sample/model/*.cpp
+        ${CMAKE_SOURCE_DIR}/opengles_samples/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/rtmp/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/filters/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/swscale/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/muxer/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/io/*.cpp
+        ${CMAKE_SOURCE_DIR}/render/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/*.cpp
+        ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
+        ${CMAKE_SOURCE_DIR}/utils/*.cpp)
 
+file(GLOB src-files3
+        ${CMAKE_SOURCE_DIR}/${libName3}.cpp
+        ${CMAKE_SOURCE_DIR}/sample/*.cpp
+        ${CMAKE_SOURCE_DIR}/sample/high_level/*.cpp
+        ${CMAKE_SOURCE_DIR}/sample/model/*.cpp
+        ${CMAKE_SOURCE_DIR}/opengles_samples/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/rtmp/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/encode/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/capturer/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/filters/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/swscale/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/muxer/*.cpp
+        ${CMAKE_SOURCE_DIR}/ffmpegsamples/io/*.cpp
+        ${CMAKE_SOURCE_DIR}/render/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/*.cpp
+        ${CMAKE_SOURCE_DIR}/utils/helpers/*.cpp
+        ${CMAKE_SOURCE_DIR}/utils/*.cpp)
 
 
 
@@ -81,23 +115,23 @@ add_library( # Sets the name of the library.
         ${src-files})
 
 
-#add_library( # Sets the name of the library.
-#        ${libName2}
-#
-#        # Sets the library as a shared library.
-#        SHARED
-#
-#        # Provides a relative path to your source file(s).
-#        ${src-files})
-#
-#add_library( # Sets the name of the library.
-#        ${libName3}
-#
-#        # Sets the library as a shared library.
-#        SHARED
-#
-#        # Provides a relative path to your source file(s).
-#        ${src-files})
+add_library( # Sets the name of the library.
+        ${libName2}
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        ${src-files2})
+
+add_library( # Sets the name of the library.
+        ${libName3}
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        ${src-files3})
 
 
 
@@ -206,21 +240,21 @@ target_link_libraries(${libName}
         android
         GLESv3)
 
-#target_link_libraries(${libName2}
-#        ${OpenSLES-lib}
-#        ${log-lib}
-#        ${third-party-libs}
-#        EGL
-#        android
-#        GLESv3)
-#
-#target_link_libraries(${libName3}
-#        ${OpenSLES-lib}
-#        ${log-lib}
-#        ${third-party-libs}
-#        EGL
-#        android
-#        GLESv3)
+target_link_libraries(${libName2}
+        ${OpenSLES-lib}
+        ${log-lib}
+        ${third-party-libs}
+        EGL
+        android
+        GLESv3)
+
+target_link_libraries(${libName3}
+        ${OpenSLES-lib}
+        ${log-lib}
+        ${third-party-libs}
+        EGL
+        android
+        GLESv3)
 
 #if(USEASAN)
 #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
