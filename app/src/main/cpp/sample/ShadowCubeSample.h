@@ -47,6 +47,7 @@ public:
 
     void renderSimpleFbo(Shader *pShader);
 
+    void drawOutBox(Shader* pshader, glm::mat4 mvp);
 };
 
 #endif //DEMOC_SHADOWCUBESAMPLESAMPLE_H

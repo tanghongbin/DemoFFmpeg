@@ -11,8 +11,9 @@ in vec2 texture_vec;
 struct Material{
   float shininess;
   sampler2D ambient;
-    sampler2D diffuse;
-    sampler2D specular;
+  sampler2D diffuse;
+  sampler2D specular;
+  sampler2D normal;
 };
 struct Light{
   vec3 ambient;
@@ -90,7 +91,9 @@ void main()
 //    outColor = vec4(result,1.0);
 
   // 属性
-  vec3 norm = normalize(Normal);
+  vec3 norm = texture(material.normal,texture_vec).rgb;
+  norm = normalize(norm * 2.0 - 1.0);
+
   vec3 viewDir = normalize(viewPos - FragPos);
 
   // 第一阶段：定向光照
@@ -113,7 +116,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
   // 合并结果
   vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, texture_vec));
   vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, texture_vec));
-  vec3 specular = light.specular * spec * vec3(texture(material.specular, texture_vec));
+  vec3 specular = light.specular * spec * vec3(texture(material.diffuse, texture_vec));
   return (ambient + diffuse + specular);
 }
 
@@ -132,7 +135,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
   // 合并结果
   vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, texture_vec));
   vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, texture_vec));
-  vec3 specular = light.specular * spec * vec3(texture(material.specular, texture_vec));
+  vec3 specular = light.specular * spec * vec3(texture(material.diffuse, texture_vec));
   ambient  *= attenuation;
   diffuse  *= attenuation;
   specular *= attenuation;

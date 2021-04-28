@@ -80,31 +80,27 @@ void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
     glBindVertexArray(0);
     LOGCATE("upload cost:%lld",(GetSysCurrentTime() - startTime));
 
-    const char *fileName = "/storage/emulated/0/ffmpegtest/filterImg/test_box_border.png";
+    const char *fileName = "/storage/emulated/0/ffmpegtest/filterImg/brickwall.jpg";
     LoadImageInfo imageInfo;
-    imageData = stbi_load(fileName,&imageInfo.width,&imageInfo.height,&imageInfo.channels,0);
-    logLoadImageInfo(imageInfo);
+    imageInfo.loadImage(fileName);
 
     const char *fileName2 = "/storage/emulated/0/ffmpegtest/filterImg/test_box_border_rgb.png";
     LoadImageInfo imageInfo2;
-    stbi_uc *imageData2 = stbi_load(fileName2, &imageInfo2.width, &imageInfo2.height,
-                                    &imageInfo2.channels, 0);
-    logLoadImageInfo(imageInfo2);
+    imageInfo2.loadImage(fileName2);
 
     const char *fileName3 = "/storage/emulated/0/ffmpegtest/filterImg/test_box_green.jpg";
     LoadImageInfo imageInfo3;
-    stbi_uc *imageData3 = stbi_load(fileName3, &imageInfo3.width, &imageInfo3.height,
-                                    &imageInfo3.channels, 0);
-    logLoadImageInfo(imageInfo3);
+    imageInfo3.loadImage(fileName3);
 
     const char *fileName4 = "/storage/emulated/0/ffmpegtest/filterImg/test_box_robot.jpg";
     LoadImageInfo imageInfo4;
-    stbi_uc *imageData4 = stbi_load(fileName4, &imageInfo4.width, &imageInfo4.height,
-                                    &imageInfo4.channels, 0);
-    logLoadImageInfo(imageInfo4);
+    imageInfo4.loadImage(fileName4);
 
+    const char *fileName5 = "/storage/emulated/0/ffmpegtest/filterImg/brickwall_normal.jpg";
+    LoadImageInfo imageInfo5;
+    imageInfo5.loadImage(fileName5);
 
-    glGenTextures(5,mLightTexture);
+    glGenTextures(10,mLightTexture);
     glBindTexture(GL_TEXTURE_2D,mLightTexture[0]);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -117,34 +113,38 @@ void LightSample::init(const char * vShaderStr,const char * fShaderStr) {
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imageInfo.width,imageInfo.height,0,GL_RGBA,GL_UNSIGNED_BYTE,imageData);
+    imageInfo.uploadImageTex2D();
 
     glBindTexture(GL_TEXTURE_2D,mLightTexture[2]);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imageInfo2.width,imageInfo2.height,0,GL_RGBA,GL_UNSIGNED_BYTE,imageData2);
+    imageInfo2.uploadImageTex2D();
 
     glBindTexture(GL_TEXTURE_2D,mLightTexture[3]);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imageInfo3.width,imageInfo3.height,0,GL_RGBA,GL_UNSIGNED_BYTE,imageData3);
+    imageInfo3.uploadImageTex2D();
 
     glBindTexture(GL_TEXTURE_2D,mLightTexture[4]);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imageInfo4.width,imageInfo4.height,0,GL_RGBA,GL_UNSIGNED_BYTE,imageData4);
+    imageInfo4.uploadImageTex2D();
 
+    glBindTexture(GL_TEXTURE_2D,mLightTexture[5]);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    imageInfo5.uploadImageTex2D();
 
     glBindTexture(GL_TEXTURE_2D,0);
-    stbi_image_free(imageData2);
-    stbi_image_free(imageData3);
-    stbi_image_free(imageData4);
+
 }
 
 
@@ -153,7 +153,7 @@ void LightSample::draw() {
     if(mShader->ID == GL_NONE) return;
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 1; ++i) {
         drawWhole(i);
     }
 }
@@ -168,7 +168,7 @@ void LightSample::drawWhole(int index) {
     };
     glm::vec4 sizes[4] = {
             // 0.0,0.0 位于左下角
-            glm::vec4 (0.0,0.0,screenWidth/2,screenHeight/2),
+            glm::vec4 (0.0,0.0,screenWidth,screenHeight),
             glm::vec4 (0.0,screenHeight/2,screenWidth/2,screenHeight/2),
             glm::vec4 (screenWidth/2, screenHeight/2, screenWidth/2, screenHeight/2),
             glm::vec4 (screenWidth/2,0.0f,screenWidth/2,screenHeight/2),
@@ -245,10 +245,6 @@ void LightSample::drawWhole(int index) {
     mShader->setFloat("pointLights[3].linear", 0.09);
     mShader->setFloat("pointLights[3].quadratic", 0.032);
 //
-    mShader->setFloat("material.shininess", 8.0);
-    mShader->setInt("material.ambient", 0);
-    mShader->setInt("material.diffuse", 1);
-    mShader->setInt("material.specular", 2);
 
     mShader->setVec3("lightPos", lightPos);
     mShader->setVec3("viewPos", camera.Position);
@@ -262,12 +258,19 @@ void LightSample::drawWhole(int index) {
     mShader->setFloat("light.quadratic", 0.032f);
     mShader->setFloat("light.cutOff", cos(glm::radians(12.5f)));
     mShader->setFloat("light.outerCutOff", cos(glm::radians(17.5f)));
+
+    mShader->setFloat("material.shininess", 8.0);
+    mShader->setInt("material.ambient", 0);
+    mShader->setInt("material.diffuse", 0);
+    mShader->setInt("material.specular", 0);
+    mShader->setInt("material.normal", 1);
+
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mLightTexture[0]);
+    glBindTexture(GL_TEXTURE_2D, mLightTexture[1]);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, mLightTexture[2]);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, mLightTexture[3]);
+    glBindTexture(GL_TEXTURE_2D, mLightTexture[5]);
+//    glActiveTexture(GL_TEXTURE2);
+//    glBindTexture(GL_TEXTURE_2D, mLightTexture[3]);
 
 
     glm::vec3 cubePositions[] = {
@@ -335,12 +338,6 @@ void LightSample::Destroy()
 {
     if (m_ProgramObj)
     {
-        LOGCATE("before over %p",imageData);
-        if (imageData){
-            stbi_image_free(imageData);
-            LOGCATE("after over %p",imageData);
-            imageData = nullptr;
-        }
         if (lightShader){
             lightShader->Destroy();
             delete lightShader;

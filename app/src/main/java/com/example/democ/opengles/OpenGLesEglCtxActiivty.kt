@@ -18,5 +18,6 @@ class OpenGLesEglCtxActiivty : AppCompatActivity() {
         setContentView(R.layout.empty_layout)
         val render = NativeRender()
         render.egl_init_2()
+        Handler()
     }
 }

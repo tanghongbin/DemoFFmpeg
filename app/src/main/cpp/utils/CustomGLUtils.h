@@ -54,6 +54,9 @@ unsigned int TextureFromFileByCv(const std::string path, std::string &directory)
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,
                      GLuint &vertexShaderHandle, GLuint &fragShaderHandle);
 
+GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,
+                     GLuint &vertexShaderHandle, GLuint &fragShaderHandle,
+                     const char *geometryShaderSouce,GLuint &geometryHandle);
 
 void DeleteProgram(GLuint program);
 

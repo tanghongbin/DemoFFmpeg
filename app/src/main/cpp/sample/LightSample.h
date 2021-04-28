@@ -26,7 +26,6 @@ public:
                                float scaleY);
 
 private:
-    stbi_uc * imageData = nullptr;
     GLuint vboIds[2];
     GLuint lightVao;
     int64_t second;

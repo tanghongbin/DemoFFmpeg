@@ -4,7 +4,7 @@
 
 #include "ShadowCubeSample.h"
 
-
+// 点阴影暂时不会生效
 ShadowCubeSample::ShadowCubeSample() {
 
 }
@@ -164,51 +164,65 @@ void ShadowCubeSample::init(const char * vShaderStr,const char * fShaderStr) {
     glBindVertexArray(0);
 
 
+    float value = 25;
     // bind vao,vbo
     float verticesOutBox[] = {
             // position,texcoords,normal
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+            -value, -value, -value,  0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+            value, -value, -value,  value, 0.0f,  0.0f,  0.0f, -1.0f,
+            value,  value, -value,  value, value,  0.0f,  0.0f, -1.0f,
+            value,  value, -value,  value, value,  0.0f,  0.0f, -1.0f,
+            -value,  value, -value,  0.0f, value,  0.0f,  0.0f, -1.0f,
+            -value, -value, -value,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
 
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,   0.0f,  0.0f,  1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,   0.0f,  0.0f,  1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,   0.0f,  0.0f,  1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,   0.0f,  0.0f,  1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,   0.0f,  0.0f,  1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,   0.0f,  0.0f,  1.0f,
+            -value, -value,  value,  0.0f, 0.0f,   0.0f,  0.0f,  1.0f,
+            value, -value,  value,  value, 0.0f,   0.0f,  0.0f,  1.0f,
+            value,  value,  value,  value, value,   0.0f,  0.0f,  1.0f,
+            value,  value,  value,  value, value,   0.0f,  0.0f,  1.0f,
+            -value,  value,  value,  0.0f, value,   0.0f,  0.0f,  1.0f,
+            -value, -value,  value,  0.0f, 0.0f,   0.0f,  0.0f,  1.0f,
 
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+            -value,  value,  value,  value, 0.0f,  1.0f,  0.0f,  0.0f,
+            -value,  value, -value,  value, value,  1.0f,  0.0f,  0.0f,
+            -value, -value, -value,  0.0f, value,  1.0f,  0.0f,  0.0f,
+            -value, -value, -value,  0.0f, value,  1.0f,  0.0f,  0.0f,
+            -value, -value,  value,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+            -value,  value,  value,  value, 0.0f,  1.0f,  0.0f,  0.0f,
 
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+            value,  value,  value,  value, 0.0f,  1.0f,  0.0f,  0.0f,
+            value,  value, -value,  value, value,  1.0f,  0.0f,  0.0f,
+            value, -value, -value,  0.0f, value,  1.0f,  0.0f,  0.0f,
+            value, -value, -value,  0.0f, value,  1.0f,  0.0f,  0.0f,
+            value, -value,  value,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+            value,  value,  value,  value, 0.0f,  1.0f,  0.0f,  0.0f,
 
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+            -value, -value, -value,  0.0f, value,  0.0f, -1.0f,  0.0f,
+            value, -value, -value,  value, value,  0.0f, -1.0f,  0.0f,
+            value, -value,  value,  value, 0.0f,  0.0f, -1.0f,  0.0f,
+            value, -value,  value,  value, 0.0f,  0.0f, -1.0f,  0.0f,
+            -value, -value,  value,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+            -value, -value, -value,  0.0f, value,  0.0f, -1.0f,  0.0f,
 
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,   0.0f,  1.0f,  0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,   0.0f,  1.0f,  0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,   0.0f,  1.0f,  0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,   0.0f,  1.0f,  0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,   0.0f,  1.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,   0.0f,  1.0f,  0.0f
+            -value,  value, -value,  0.0f, value,   0.0f,  1.0f,  0.0f,
+            value,  value, -value,  value, value,   0.0f,  1.0f,  0.0f,
+            value,  value,  value,  value, 0.0f,   0.0f,  1.0f,  0.0f,
+            value,  value,  value,  value, 0.0f,   0.0f,  1.0f,  0.0f,
+            -value,  value,  value,  0.0f, 0.0f,   0.0f,  1.0f,  0.0f,
+            -value,  value, -value,  0.0f, value,   0.0f,  1.0f,  0.0f
     };
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[3]);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(verticesOutBox),verticesOutBox,GL_STATIC_DRAW);
+
+    glBindVertexArray(vaoIds[3]);
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[3]);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(GLfloat) * 8,(const void *)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(GLfloat) * 8,(const void *)(sizeof(GLfloat) * 3));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(GLfloat) * 8,(const void *)(sizeof(GLfloat) * 5));
+    glBindVertexArray(0);
 }
 
 void ShadowCubeSample::generateFbo() {
@@ -252,18 +266,18 @@ void ShadowCubeSample::draw() {
 
     glEnable(GL_DEPTH_TEST);
 
-    glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
-    glViewport(0,0,SHADOW_WIDTH,SHADOW_HEIGHT);
-    glClear( GL_DEPTH_BUFFER_BIT);
-    glColorMask ( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
-    glEnable ( GL_POLYGON_OFFSET_FILL );
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-    glCullFace(GL_FRONT);
-    renderSimpleFbo(mShadowShader);
-    glCullFace(GL_BACK);
-    glDisable( GL_POLYGON_OFFSET_FILL );
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
-    glColorMask ( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+//    glBindFramebuffer(GL_FRAMEBUFFER,m_fboId);
+//    glViewport(0,0,SHADOW_WIDTH,SHADOW_HEIGHT);
+//    glClear( GL_DEPTH_BUFFER_BIT);
+//    glColorMask ( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+//    glEnable ( GL_POLYGON_OFFSET_FILL );
+//    glClearColor(1.0, 1.0, 1.0, 1.0);
+//    glCullFace(GL_FRONT);
+//    renderSimpleFbo(mShadowShader);
+//    glCullFace(GL_BACK);
+//    glDisable( GL_POLYGON_OFFSET_FILL );
+//    glBindFramebuffer(GL_FRAMEBUFFER,0);
+//    glColorMask ( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 
     glViewport(0,0,screenWidth,screenHeight);
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -327,7 +341,7 @@ void ShadowCubeSample::renderScene(Shader *pShader) {
     pShader->setMat4("lightSpaceMatrix",lightProjection * lightView);
 
     for (int i = 0; i < models->length(); ++i) {
-        glm::mat4 currentModel = glm::translate(Model,models[i]);
+        glm::mat4 currentModel = glm::translate(mBaseModel,models[i]);
         currentModel = glm::scale(currentModel,glm::vec3(0.3f,0.3f,0.3f));
         if (i == 2) {
             currentModel = glm::rotate(currentModel,10.0f,glm::vec3(1.0,1.0,0.0));
@@ -346,6 +360,13 @@ void ShadowCubeSample::renderScene(Shader *pShader) {
         glBindVertexArray(0);
     }
 
+
+    glm::mat4 currentModel = mBaseModel;
+    mMvp = Projection * View * currentModel;
+    pShader->setInt("material.ambient", 1);
+    pShader->setInt("material.diffuse", 1);
+    pShader->setInt("material.specular", 1);
+    drawOutBox(pShader, mMvp);
 
 
 }
@@ -394,6 +415,13 @@ void ShadowCubeSample::renderSimpleFbo(Shader *pShader) {
         glDrawArrays(GL_TRIANGLES,0,36);
         glBindVertexArray(0);
     }
+}
+
+void ShadowCubeSample::drawOutBox(Shader* pshader, glm::mat4 mvp) {
+    pshader->setMat4("mvp", mvp);
+    glBindVertexArray(vaoIds[3]);
+    glDrawArrays(GL_TRIANGLES,0,36);
+    glBindVertexArray(0);
 }
 
 

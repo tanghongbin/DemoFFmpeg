@@ -264,6 +264,15 @@ bool checkNegativeReturn(int ret, const char *string) {
 
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,
                      GLuint &vertexShaderHandle, GLuint &fragShaderHandle) {
+    GLuint geometry;
+    return CreateProgram(pVertexShaderSource,pFragShaderSource,vertexShaderHandle,fragShaderHandle,
+                         nullptr,geometry);
+}
+
+
+GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,
+                     GLuint &vertexShaderHandle, GLuint &fragShaderHandle,const char *geometryShaderSouce,
+                     GLuint &geometryHandle){
     GLuint program = 0;
     vertexShaderHandle = LoadShader(GL_VERTEX_SHADER, pVertexShaderSource);
     if (!vertexShaderHandle){
