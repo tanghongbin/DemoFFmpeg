@@ -1,6 +1,11 @@
 package com.example.democ.utils
 
 import android.content.Context
+import android.graphics.Color
+import android.os.Build
+import android.view.View
+import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.DemoApplication
 import com.example.democ.audio.log
 import java.io.File
@@ -72,4 +77,29 @@ fun getVertexNameByType(sampleType: Int):String {
 
 fun getVertexStrByType(sampleType: Int):String {
     return getStrFromAssets(getVertexNameByType(sampleType))
+}
+
+/**
+@author 汤洪斌
+@time 2019/3/19 0019 9:10
+@version 1.0
+@describe 保持屏幕敞亮
+ */
+fun AppCompatActivity.keepScreenOn() {
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+}
+
+/**
+@author 汤洪斌
+@time 2019/3/19 0019 9:10
+@version 1.0
+@describe 设置全屏
+ */
+fun AppCompatActivity.fullScreen() {
+    if (Build.VERSION.SDK_INT >= 21) {
+        val decorView = window.decorView
+        val option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        decorView.systemUiVisibility = option
+        window.statusBarColor = Color.TRANSPARENT
+    }
 }

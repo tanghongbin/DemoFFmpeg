@@ -190,7 +190,6 @@ void VideoGLRender::OnDrawFrame() {
     switch (m_RenderImage.format)
     {
         case IMAGE_FORMAT_RGBA:
-            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_TextureIds[0]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);
             glBindTexture(GL_TEXTURE_2D, GL_NONE);
@@ -198,7 +197,6 @@ void VideoGLRender::OnDrawFrame() {
         case IMAGE_FORMAT_NV21:
         case IMAGE_FORMAT_NV12:
             //upload Y plane data
-            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_TextureIds[0]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_RenderImage.width,
                          m_RenderImage.height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
@@ -206,7 +204,6 @@ void VideoGLRender::OnDrawFrame() {
             glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
             //update UV plane data
-            glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, m_TextureIds[1]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, m_RenderImage.width >> 1,
                          m_RenderImage.height >> 1, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
@@ -215,7 +212,6 @@ void VideoGLRender::OnDrawFrame() {
             break;
         case IMAGE_FORMAT_I420:
             //upload Y plane data
-            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_TextureIds[0]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_RenderImage.width,
                          m_RenderImage.height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
@@ -223,7 +219,6 @@ void VideoGLRender::OnDrawFrame() {
             glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
             //update U plane data
-            glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, m_TextureIds[1]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_RenderImage.width >> 1,
                          m_RenderImage.height >> 1, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
@@ -231,7 +226,6 @@ void VideoGLRender::OnDrawFrame() {
             glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
             //update V plane data
-            glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, m_TextureIds[2]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_RenderImage.width >> 1,
                          m_RenderImage.height >> 1, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,

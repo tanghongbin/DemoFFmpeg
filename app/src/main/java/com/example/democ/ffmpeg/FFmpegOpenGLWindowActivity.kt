@@ -11,6 +11,8 @@ import com.example.democ.interfaces.MsgCallback
 import com.example.democ.render.FFmpegOpenGLRender
 import com.example.democ.render.FFmpegRender
 import com.example.democ.utils.Constants
+import com.example.democ.utils.fullScreen
+import com.example.democ.utils.keepScreenOn
 import kotlinx.android.synthetic.main.activity_ffmpeg_opengl_window.*
 
 class FFmpegOpenGLWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
@@ -23,12 +25,14 @@ class FFmpegOpenGLWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 //        result
 //       val result =  SpUtils.getString("url")
 //        result ?:
-        Constants.MP4_PLAY_PATH
+        Constants.MP4_PLAY_BIG_PATH
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ffmpeg_opengl_window)
         mSurface.holder.addCallback(this)
+        fullScreen()
+        keepScreenOn()
         render = FFmpegRender()
         render.setMsgCallback(object : MsgCallback {
             override fun callback(type: Int) {

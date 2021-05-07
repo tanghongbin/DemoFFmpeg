@@ -19,8 +19,8 @@ void OpenGLFFmpegDecoder::init(AVCodecContext *codeCtx, _jobject *instance, _job
 
     vec2 &dimesion = VideoGLRender::GetInstance()->m_ScreenSize;
     // todo 暂时写死
-    int windowWidth = 1080;
-    int windowHeight = 2159;
+    int windowWidth = 2159;
+    int windowHeight = 1080;
     m_VideoWidth = codeCtx->width;
     m_VideoHeight = codeCtx->height;
 

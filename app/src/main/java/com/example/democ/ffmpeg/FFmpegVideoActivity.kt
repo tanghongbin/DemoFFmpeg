@@ -36,7 +36,6 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
 
             }
         })
-        keepScreenOn()
         mPause.setOnClickListener {
             if (isResume){
                 mNativeRender.native_pause()
@@ -90,12 +89,3 @@ class FFmpegVideoActivity : AppCompatActivity(), SurfaceHolder.Callback,MsgCallb
     }
 }
 
-/**
-@author 汤洪斌
-@time 2019/3/19 0019 9:10
-@version 1.0
-@describe 保持屏幕敞亮
- */
-fun AppCompatActivity.keepScreenOn() {
-    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-}

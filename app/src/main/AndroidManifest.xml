@@ -30,7 +30,7 @@
         <activity android:name=".ffmpeg.FFmpegRtmpJavaHwActivity" />
         <activity android:name=".ffmpeg.FFmpegNativeWindowActivity"
             android:theme="@style/AppThemeNoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="landscape">
 
         </activity>
         <activity android:name=".SplashActivity">
@@ -48,7 +48,10 @@
             <!-- </intent-filter> -->
 
         </activity>
-        <activity android:name=".ffmpeg.FFmpegOpenGLWindowActivity" />
+        <activity android:name=".ffmpeg.FFmpegOpenGLWindowActivity"
+            android:theme="@style/AppThemeNoActionBar"
+            android:screenOrientation="landscape"
+            />
         <activity android:name=".ffmpeg.FFmpegTextureActivity" />
         <activity android:name=".ffmpeg.FFmpegTestNewCameraHelperActivity" />
         <activity android:name=".ffmpeg.FFmpegConvertYuvActivity" />

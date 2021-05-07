@@ -39,7 +39,6 @@ class FFmpegRtmpJavaHwActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        keepScreenOn()
         setContentView(R.layout.activity_rtmp_java_hw)
         mMuxerHelper = HwEncoderHelper(mRtmpJavaSurface)
         mRtmpJavaStart.setOnClickListener(this)
