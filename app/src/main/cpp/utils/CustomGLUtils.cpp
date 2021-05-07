@@ -196,7 +196,12 @@ setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWid
             *renderWidth = static_cast<int>(videoWidth / scaleSmallHeightRation);
         }
     }
-    LOGCATE("renderWidth:%d renderHeight:%d",*renderWidth,*renderHeight);
+    LOGCATE("nativeWindowWidth:%d nativeWindowHeight:%d\n "
+            "videoWidth:%d videoHeight:%d \n"
+            "renderWidth:%d renderHeight:%d",
+            nativeWindowWidth,nativeWindowHeight,
+            videoWidth,videoHeight,
+            *renderWidth,*renderHeight);
 }
 
 void syslog_print(void *ptr, int level, const char *fmt, va_list vl) {
@@ -339,8 +344,23 @@ void sendMsg(int type, jobject obj, const char *funcName, const char *funcSinagu
         LOGCATE("send msg can't find method id");
         return;
     }
-    jniEnv->CallVoidMethod(obj, id, type);
+    jniEnv->CallVoidMethod(obj, id, 100,100);
     LOGCATE("sendmsg success type:%d", type);
+    if (isAttach) JavaVmManager::detachCurrentThread();
+}
+
+void sendMsgWithCallback(jobject obj, const char *funcName, const char *funcSinagure, MsgCallback* callback) {
+    bool isAttach = false;
+    JNIEnv *jniEnv = JavaVmManager::GetEnv(&isAttach);
+    jclass classes = jniEnv->GetObjectClass(obj);
+    jmethodID id = jniEnv->GetMethodID(classes,
+                                       funcName, funcSinagure);
+    if (id == nullptr || classes == nullptr || obj == nullptr) {
+        LOGCATE("send msg can't find method id");
+        return;
+    }
+    LOGCATE("prepare send msg " );
+    callback -> call(jniEnv,obj,id);
     if (isAttach) JavaVmManager::detachCurrentThread();
 }
 

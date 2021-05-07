@@ -25,6 +25,7 @@ long TimeAsyncHelper::async(){
 //                "videoCurTime:%ld syncDiffer:%d",curTime,startTime,eapseTime,curStamp,differss);
 //    }
 
+//    av_frame_get_best_effort_timestamp
 //    LOGCATE("print timebase:%",av_q2d(*timeBase));
     if (curStamp > eapseTime){
         auto differ = static_cast<unsigned int>(curStamp - eapseTime);
@@ -41,24 +42,35 @@ void TimeAsyncHelper::updateTimeStamp(bool isPkt, AVPacket *pkt, AVFrame *frame,
     if (startTime == -1L) {
         startTime = GetSysCurrentTime();
     }
-
+    AVMediaType logType = AVMEDIA_TYPE_VIDEO;
     if (isPkt){
         if (pkt->dts > 0 && pkt->dts != AV_NOPTS_VALUE){
             curStamp = static_cast<long int>(pkt->dts * av_q2d(pContext->streams[stream_index]->time_base) * 1000);
-//            LOGCATE("pkt's dts:%lld dts_value:%ld",pkt->dts,curStamp);
+            if (pContext->streams[stream_index]->codecpar->codec_type == logType){
+                LOGCATE("video pkt's dts:%lld",pkt->dts);
+            }
         }
 //        LOGCATE("print pkt-dts:%lld",pkt->dts);
     } else {
+        if (pContext->streams[stream_index]->codecpar->codec_type == logType){
+            LOGCATE("video frame-pts:%lld",frame->pts);
+        }
         if (frame->pkt_dts != AV_NOPTS_VALUE){
             curStamp = static_cast<long int>(frame->pkt_dts * av_q2d(pContext->streams[stream_index]->time_base) * 1000);
 //            LOGCATE("frame's pkt_dts:%lld pkt_dts_value:%ld",frame->pkt_dts,curStamp);
+            if (pContext->streams[stream_index]->codecpar->codec_type == logType){
+//                LOGCATE("video frame-pkt_dts:%lld",frame->pkt_dts);
+            }
         } else if (frame->pts != AV_NOPTS_VALUE){
             curStamp = static_cast<long int>(frame->pts * av_q2d(pContext->streams[stream_index]->time_base) * 1000);
-//            LOGCATE("frame's pts:%lld pts_value:%ld",frame->pts,curStamp);
+            if (pContext->streams[stream_index]->codecpar->codec_type == logType){
+//                LOGCATE("video frame-pts:%lld",frame->pts);
+            }
         } else {
             curStamp = 0;
 //            LOGCATE("frame's pkt_dts and pts is invalid");
         }
-//        LOGCATE("print frame-pkt_dts:%lld frame-pts",frame->pkt_dts,frame->pts);
+
+
     }
 }

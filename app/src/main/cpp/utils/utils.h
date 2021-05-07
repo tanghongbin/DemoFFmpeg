@@ -12,8 +12,8 @@
 /**
  * 是否启用ffmpeg日志
  */
-#define ENABLE_FFMPEG_LOG true
-//#define ENABLE_FFMPEG_LOG false
+//#define ENABLE_FFMPEG_LOG true
+#define ENABLE_FFMPEG_LOG false
 
 #define ROOT_DIR "/storage/emulated/0/ffmpegtest/"
 #define FILTER_IMAGE_DIR "/storage/emulated/0/ffmpegtest/filterImg/"
@@ -26,6 +26,9 @@
 #define LOGCATE_LEVEL(level,...) ((void)__android_log_vprint(level,LOG_TAG,__VA_ARGS__))
 //#define ALOG(level, TAG, ...)    ((void)__android_log_vprint(level, TAG, __VA_ARGS__))
 #define MATH_PI 3.1415926535897932384626433832802
+
+#define RENDER_DIMENSION_CALLBACK "renderDimensionCallFromJni"
+#define DECODE_READY_DURATION "onDecodeReadyDuration"
 
 static std::string getModel3DPath(const char * fileName){
     std::string result = std::string (MODEL3D_ROOT_DIR) + std::string (fileName);

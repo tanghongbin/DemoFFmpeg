@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ffmpeg.FFmpegNativeWindowActivity">
+    tools:context=".ffmpeg.FFmpegOpenGLWindowActivity">
 
-    <SurfaceView
+    <com.example.democ.view.MyGLSurfaceView
         android:layout_gravity="center"
         android:id="@+id/mSurface"
         android:layout_width="match_parent"
@@ -22,4 +22,6 @@
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+
 </FrameLayout>

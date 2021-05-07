@@ -9,121 +9,6 @@
 std::mutex VideoGLRender::m_Mutex;
 VideoGLRender* VideoGLRender::s_Instance = nullptr;
 
-static char vShaderStr[] =
-        "#version 300 es\n"
-        "layout(location = 0) in vec4 a_position;\n"
-        "layout(location = 1) in vec2 a_texCoord;\n"
-        "uniform mat4 u_MVPMatrix;\n"
-        "out vec2 v_texCoord;\n"
-        "void main()\n"
-        "{\n"
-        "    gl_Position = u_MVPMatrix * a_position;\n"
-        "    v_texCoord = a_texCoord;\n"
-        "}";
-
-static char fShaderStr[] =
-        "#version 300 es\n"
-        "precision highp float;\n"
-        "in vec2 v_texCoord;\n"
-        "layout(location = 0) out vec4 outColor;\n"
-        "uniform sampler2D s_texture0;\n"
-        "uniform sampler2D s_texture1;\n"
-        "uniform sampler2D s_texture2;\n"
-        "uniform int u_nImgType;// 1:RGBA, 2:NV21, 3:NV12, 4:I420\n"
-        "\n"
-        "void main()\n"
-        "{\n"
-        "\n"
-        "    if(u_nImgType == 1) //RGBA\n"
-        "    {\n"
-        "        outColor = texture(s_texture0, v_texCoord);\n"
-        "    }\n"
-        "    else if(u_nImgType == 2) //NV21\n"
-        "    {\n"
-        "        vec3 yuv;\n"
-        "        yuv.x = texture(s_texture0, v_texCoord).r;\n"
-        "        yuv.y = texture(s_texture1, v_texCoord).a - 0.5;\n"
-        "        yuv.z = texture(s_texture1, v_texCoord).r - 0.5;\n"
-        "        highp vec3 rgb = mat3(1.0,       1.0,     1.0,\n"
-        "        0.0, \t-0.344, \t1.770,\n"
-        "        1.403,  -0.714,     0.0) * yuv;\n"
-        "        outColor = vec4(rgb, 1.0);\n"
-        "\n"
-        "    }\n"
-        "    else if(u_nImgType == 3) //NV12\n"
-        "    {\n"
-        "        vec3 yuv;\n"
-        "        yuv.x = texture(s_texture0, v_texCoord).r;\n"
-        "        yuv.y = texture(s_texture1, v_texCoord).r - 0.5;\n"
-        "        yuv.z = texture(s_texture1, v_texCoord).a - 0.5;\n"
-        "        highp vec3 rgb = mat3(1.0,       1.0,     1.0,\n"
-        "        0.0, \t-0.344, \t1.770,\n"
-        "        1.403,  -0.714,     0.0) * yuv;\n"
-        "        outColor = vec4(rgb, 1.0);\n"
-        "    }\n"
-        "    else if(u_nImgType == 4) //I420\n"
-        "    {\n"
-        "        vec3 yuv;\n"
-        "        yuv.x = texture(s_texture0, v_texCoord).r;\n"
-        "        yuv.y = texture(s_texture1, v_texCoord).r - 0.5;\n"
-        "        yuv.z = texture(s_texture2, v_texCoord).r - 0.5;\n"
-        "        highp vec3 rgb = mat3(1.0,       1.0,     1.0,\n"
-        "                              0.0, \t-0.344, \t1.770,\n"
-        "                              1.403,  -0.714,     0.0) * yuv;\n"
-        "        outColor = vec4(rgb, 1.0);\n"
-        "    }\n"
-        "    else\n"
-        "    {\n"
-        "        outColor = vec4(1.0);\n"
-        "    }\n"
-        "}";
-
-static char fMeshShaderStr[] =
-        "//dynimic mesh 动态网格\n"
-        "#version 300 es\n"
-        "precision highp float;\n"
-        "in vec2 v_texCoord;\n"
-        "layout(location = 0) out vec4 outColor;\n"
-        "uniform sampler2D s_TextureMap;//采样器\n"
-        "uniform float u_Offset;\n"
-        "uniform vec2 u_TexSize;\n"
-        "void main()\n"
-        "{\n"
-        "    vec2 imgTexCoord = v_texCoord * u_TexSize;\n"
-        "    float sideLength = u_TexSize.y / 6.0;\n"
-        "    float maxOffset = 0.15 * sideLength;\n"
-        "    float x = mod(imgTexCoord.x, floor(sideLength));\n"
-        "    float y = mod(imgTexCoord.y, floor(sideLength));\n"
-        "\n"
-        "    float offset = u_Offset * maxOffset;\n"
-        "\n"
-        "    if(offset <= x\n"
-        "    && x <= sideLength - offset\n"
-        "    && offset <= y\n"
-        "    && y <= sideLength - offset)\n"
-        "    {\n"
-        "        outColor = texture(s_TextureMap, v_texCoord);\n"
-        "    }\n"
-        "    else\n"
-        "    {\n"
-        "        outColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
-        "    }\n"
-        "}";
-
-static char fGrayShaderStr[] =
-        "//黑白滤镜\n"
-        "#version 300 es\n"
-        "precision highp float;\n"
-        "in vec2 v_texCoord;\n"
-        "layout(location = 0) out vec4 outColor;\n"
-        "uniform sampler2D s_TextureMap;//采样器\n"
-        "void main()\n"
-        "{\n"
-        "    outColor = texture(s_TextureMap, v_texCoord);\n"
-        "    if(v_texCoord.x > 0.5)\n"
-        "        outColor = vec4(vec3(outColor.r*0.299 + outColor.g*0.587 + outColor.b*0.114), outColor.a);\n"
-        "}";
-
 GLfloat verticesCoords[] = {
         -1.0f,  1.0f, 0.0f,  // Position 0
         -1.0f, -1.0f, 0.0f,  // Position 1
@@ -143,7 +28,10 @@ GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
 
 VideoGLRender::~VideoGLRender() {
     NativeOpenGLImageUtil::FreeNativeImage(&m_RenderImage);
-
+    glDeleteTextures(TEXTURE_NUM,m_TextureIds);
+    shader->Destroy();
+    delete shader;
+    shader = 0;
 }
 
 VideoGLRender::VideoGLRender() {
@@ -189,38 +77,46 @@ void VideoGLRender::UpdateMVPMatrix(int angleX, int angleY, float scaleX, float 
     glm::mat4 Projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
     //glm::mat4 Projection = glm::frustum(-ratio, ratio, -1.0f, 1.0f, 4.0f, 100.0f);
     //glm::mat4 Projection = glm::perspective(45.0f,ratio, 0.1f,100.f);
-
+    mProjection = Projection;
     // View matrix
     glm::mat4 View = glm::lookAt(
             glm::vec3(0, 0, 4), // Camera is at (0,0,1), in World Space
             glm::vec3(0, 0, 0), // and looks at the origin
             glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
     );
+    mView = View;
 
     // Model matrix
     glm::mat4 Model = glm::mat4(1.0f);
     Model = glm::scale(Model, glm::vec3(scaleX, scaleY, 1.0f));
+    Model = glm::scale(Model, glm::vec3(1.0f));
     Model = glm::rotate(Model, radiansX, glm::vec3(1.0f, 0.0f, 0.0f));
     Model = glm::rotate(Model, radiansY, glm::vec3(0.0f, 1.0f, 0.0f));
+//    Model = glm::rotate(Model, 270.0f, glm::vec3(0.0f, 0.0f, 1.0f));
     Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 0.0f));
 
+    mModel = Model;
     m_MVPMatrix = Projection * View * Model;
 
 }
 
 void VideoGLRender::OnSurfaceCreated() {
     LOGCATE("VideoGLRender::OnSurfaceCreated");
-
-    m_ProgramObj = CreateProgram(vShaderStr, fShaderStr);
-    if (!m_ProgramObj)
-    {
-        LOGCATE("VideoGLRender::OnSurfaceCreated create program fail");
-        return;
+    // 1-正常，2-网格，3-灰色
+    int type = 1;
+    if ( type == 1) {
+        shader = new Shader(readGLSLStrFromFile("opengl_window/vetex.glsl").c_str(),
+                            readGLSLStrFromFile("opengl_window/fragment.glsl").c_str());
+    } else if (type == 2) {
+        shader = new Shader(readGLSLStrFromFile("opengl_window/vetex.glsl").c_str(),
+                            readGLSLStrFromFile("opengl_window/meshfrag.glsl").c_str());
+    } else {
+        shader = new Shader(readGLSLStrFromFile("opengl_window/vetex.glsl").c_str(),
+                            readGLSLStrFromFile("opengl_window/grayfrag.glsl").c_str());
     }
 
     glGenTextures(TEXTURE_NUM, m_TextureIds);
     for (int i = 0; i < TEXTURE_NUM ; ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, m_TextureIds[i]);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -258,8 +154,15 @@ void VideoGLRender::OnSurfaceCreated() {
 
     glBindVertexArray(GL_NONE);
 
-    UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
     m_TouchXY = vec2(0.5f, 0.5f);
+
+    LoadImageInfo imageInfo;
+    imageInfo.loadImage("/storage/emulated/0/ffmpegtest/filterImg/test_box.png");
+    glBindTexture(GL_TEXTURE_2D,m_TextureIds[3]);
+    imageInfo.uploadImageTex2D();
+    glBindTexture(GL_TEXTURE_2D,0);
+
+
 }
 
 void VideoGLRender::OnSurfaceChanged(int w, int h) {
@@ -272,7 +175,7 @@ void VideoGLRender::OnSurfaceChanged(int w, int h) {
 
 void VideoGLRender::OnDrawFrame() {
     glClear(GL_COLOR_BUFFER_BIT);
-    if(m_ProgramObj == GL_NONE|| m_RenderImage.ppPlane[0] == nullptr) return;
+    if(shader->ID == GL_NONE|| m_RenderImage.ppPlane[0] == nullptr) return;
     LOGCATE("VideoGLRender::OnDrawFrame [w, h]=[%d, %d], format=%d", m_RenderImage.width, m_RenderImage.height, m_RenderImage.format);
     m_FrameIndex++;
 
@@ -282,6 +185,7 @@ void VideoGLRender::OnDrawFrame() {
 
     // upload image data
 
+    LOGCATE("log render format:%d",m_RenderImage.format);
     std::unique_lock<std::mutex> lock(m_Mutex);
     switch (m_RenderImage.format)
     {
@@ -339,33 +243,46 @@ void VideoGLRender::OnDrawFrame() {
     }
     lock.unlock();
 
+    UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
 
     // Use the program object
-    glUseProgram (m_ProgramObj);
+    shader->use();
 
     glBindVertexArray(m_VaoId);
 
-    setMat4(m_ProgramObj, "u_MVPMatrix", m_MVPMatrix);
+    shader -> setMat4( "u_MVPMatrix", m_MVPMatrix);
 
     for (int i = 0; i < TEXTURE_NUM; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, m_TextureIds[i]);
         char samplerName[64] = {0};
         sprintf(samplerName, "s_texture%d", i);
-        setInt(m_ProgramObj, samplerName, i);
+        shader -> setInt( samplerName, i);
     }
 
     //float time = static_cast<float>(fmod(m_FrameIndex, 60) / 50);
     //setFloat(m_ProgramObj, "u_Time", time);
 
     float offset = (sin(m_FrameIndex * MATH_PI / 25) + 1.0f) / 2.0f;
-    setFloat(m_ProgramObj, "u_Offset", offset);
-    setVec2(m_ProgramObj, "u_TexSize", vec2(m_RenderImage.width, m_RenderImage.height));
-    setInt(m_ProgramObj, "u_nImgType", m_RenderImage.format);
+    shader -> setFloat("u_Offset", offset);
+    shader -> setVec2("u_TexSize", vec2(m_RenderImage.width, m_RenderImage.height));
+    shader -> setInt("u_nImgType", m_RenderImage.format);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *)0);
     LOGCATE("draw frame spend time:%jd",GetSysCurrentTime() - cur);
 
+
+    // 画水印
+    shader -> setInt("u_nImgType", 1);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_TextureIds[3]);
+    shader -> setInt("s_texture0", 0);
+
+    mModel = glm::scale(mModel,glm::vec3(0.25f));
+    mModel = glm::translate(mModel,glm::vec3(-3.0f,2.0f,0.0f));
+    m_MVPMatrix = mProjection * mView * mModel;
+    shader -> setMat4( "u_MVPMatrix", m_MVPMatrix);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *)0);
 }
 
 VideoGLRender *VideoGLRender::GetInstance() {
@@ -379,6 +296,11 @@ VideoGLRender *VideoGLRender::GetInstance() {
 
     }
     return s_Instance;
+}
+
+bool VideoGLRender::checkInstanceExist() {
+    std::lock_guard<std::mutex> lock(m_Mutex);
+    return s_Instance != nullptr;
 }
 
 void VideoGLRender::ReleaseInstance() {

@@ -114,7 +114,6 @@ class NativeRender(val mType:Int = 1)
 
     private fun nativeMsgCallback(type: Int){
         log("java layer has received msg:${type} call:${mCall}")
-
         mHandler.post {
             mCall?.callback(type)
         }

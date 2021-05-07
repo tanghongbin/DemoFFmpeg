@@ -5,6 +5,7 @@
 #include <jni.h>
 #include "utils.h"
 #include "OpenGLImageDef.h"
+#include "Callback.h"
 #include <string>
 #include <gtc/matrix_transform.hpp>
 #include <GLES3/gl3.h>
@@ -62,6 +63,7 @@ void DeleteProgram(GLuint program);
 
 void sendMsg(int type, jobject obj, const char *funcName, const char *funcSinagure);
 
+void sendMsgWithCallback(jobject obj, const char *funcName,const char *funcSinagure, MsgCallback* callback);
 
 void testLocalThread();
 

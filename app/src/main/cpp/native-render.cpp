@@ -7,7 +7,7 @@
 #include <android/log.h>
 #include <EGLRender.h>
 #include <VideoRender.h>
-#include <PlayMp4Instance.h>
+#include <Mp4Demo.h>
 #include <encode/EncodeYuvToJpg.h>
 #include <EglContext.h>
 #include "utils/helpers/JavaVmManager.h"
@@ -114,7 +114,7 @@ JNIEXPORT void JNICALL testThread(JNIEnv *env, jobject instance) {
 
 }
 
-PlayMp4Instance* playMp4Instance;
+Mp4Demo* mp4Demo;
 
 /**
  * 播放本地MP4文件
@@ -123,15 +123,15 @@ PlayMp4Instance* playMp4Instance;
  */
 JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface) {
     LOGCATE("prepare play mp4");
-    if (playMp4Instance != nullptr){
-        playMp4Instance->unInit();
-        delete playMp4Instance;
-        playMp4Instance = nullptr;
+    if (mp4Demo != nullptr){
+        mp4Demo->unInit();
+        delete mp4Demo;
+        mp4Demo = nullptr;
     }
-    playMp4Instance = new PlayMp4Instance();
+    mp4Demo = new Mp4Demo();
     const char * playUrl = env->GetStringUTFChars(url,0);
     LOGCATE("prepare init mp4 , detected address %s",playUrl);
-    playMp4Instance->init(playUrl,env,instance,surface,2);
+    mp4Demo->init(playUrl, env, instance, surface, 2);
 }
 
 
@@ -152,12 +152,12 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged
  */
 JNIEXPORT void JNICALL native_seekPosition
         (JNIEnv *env, jobject instance, jint position) {
-    playMp4Instance->seekPosition(position);
+    mp4Demo->seekPosition(position);
 }
 
 JNIEXPORT jlong JNICALL native_getTotalDuration
         (JNIEnv *env, jobject instance, jint position) {
-    return playMp4Instance->totalDuration;
+    return mp4Demo->totalDuration;
 }
 
 
@@ -195,12 +195,12 @@ JNIEXPORT void JNICALL native_eglUnInit(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT void JNICALL native_pause(JNIEnv *env, jobject instance) {
-    playMp4Instance->pauseManual();
+    mp4Demo->pauseManual();
 
 }
 
 JNIEXPORT void JNICALL native_resume(JNIEnv *env, jobject instance) {
-    playMp4Instance->resume();
+    mp4Demo->resume();
 }
 
 JNIEXPORT void JNICALL native_eglSetImageData(JNIEnv *env, jobject instance,  jint width, jint height,

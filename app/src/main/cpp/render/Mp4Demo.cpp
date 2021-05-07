@@ -4,18 +4,18 @@
 
 #include <CustomGLUtils.h>
 #include <helpers/JavaVmManager.h>
-#include "PlayMp4Instance.h"
+#include "Mp4Demo.h"
 #include "VideoRender.h"
 #include "BaseRender.h"
 #include "AudioRender.h"
 #include "YuvToImageRender.h"
 #include "OpenGLFFmpegDecoder.h"
 
-jobject PlayMp4Instance::mNativeRender = nullptr;
-long PlayMp4Instance::totalDuration = 0;
+jobject Mp4Demo::mNativeRender = nullptr;
+long Mp4Demo::totalDuration = 0;
 
 
-void PlayMp4Instance::init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface,int videoType) {
+void Mp4Demo::init(const char *url, JNIEnv *jniEnv, jobject nativeRender, jobject surface, int videoType) {
     LOGCATE("init has started");
     strcpy(mPlayUrl, url);
     LOGCATE("init has reached address playUrl:%s", mPlayUrl);
@@ -28,7 +28,7 @@ void PlayMp4Instance::init(const char *url, JNIEnv *jniEnv, jobject nativeRender
     LOGCATE("thread has started");
 }
 
-void PlayMp4Instance::unInit() {
+void Mp4Demo::unInit() {
     bool isAttach = false;
     JNIEnv *jniEnv = JavaVmManager::GetEnv(&isAttach);
     jniEnv->DeleteGlobalRef(mNativeRender);
@@ -45,7 +45,7 @@ void PlayMp4Instance::unInit() {
 }
 
 
-void PlayMp4Instance::seekPosition(int position) {
+void Mp4Demo::seekPosition(int position) {
 
     BaseRender::setupSeekPosition(position, 2);
     BaseRender::setupSeekPosition(position, 1);
@@ -76,9 +76,9 @@ BaseRender *getRender(jint type) {
 }
 
 void
-PlayMp4Instance::createThreadForPlay(PlayMp4Instance *selfInstance, _jobject *instance,
-                                     const char *localUrl, _jobject *pJobject,
-                                     jint type) {
+Mp4Demo::createThreadForPlay(Mp4Demo *selfInstance, _jobject *instance,
+                             const char *localUrl, _jobject *pJobject,
+                             jint type) {
 
     LOGCATE("播放地址:%s", localUrl);
 
@@ -180,10 +180,10 @@ PlayMp4Instance::createThreadForPlay(PlayMp4Instance *selfInstance, _jobject *in
 }
 
 
-void PlayMp4Instance::decodeLoop(PlayMp4Instance *pInstance, AVFormatContext *mFormatContext,
-                                 AVCodecContext *decode_context,
-                                 AVPacket *packet, AVFrame *frame, BaseRender *baseRender,
-                                 jobject pJobject, int m_StreamIndex) {
+void Mp4Demo::decodeLoop(Mp4Demo *pInstance, AVFormatContext *mFormatContext,
+                         AVCodecContext *decode_context,
+                         AVPacket *packet, AVFrame *frame, BaseRender *baseRender,
+                         jobject pJobject, int m_StreamIndex) {
     //9.解码循环
 
     for (;;) {
@@ -202,7 +202,7 @@ void PlayMp4Instance::decodeLoop(PlayMp4Instance *pInstance, AVFormatContext *mF
         baseRender->seekPositionFunc(m_StreamIndex, mFormatContext, decode_context);
 
         int result = av_read_frame(mFormatContext, packet);
-//        LOGCATE("log result after seek %d",result);
+        LOGCATE("log result after seek %d",result);
         int frameCount = 0;
         while (result >= 0) { // 读取帧
             if (packet->stream_index == m_StreamIndex) {
@@ -229,13 +229,13 @@ void PlayMp4Instance::decodeLoop(PlayMp4Instance *pInstance, AVFormatContext *mF
     LOGCATE("decode done");
 }
 
-void PlayMp4Instance::resume() {
+void Mp4Demo::resume() {
     mPlayStatus = RESUME;
     std::unique_lock<std::mutex> lock(mMutex);
     signal.notify_all();
 }
 
-void PlayMp4Instance::pauseManual() {
+void Mp4Demo::pauseManual() {
     mPlayStatus = PAUSE;
 }
 

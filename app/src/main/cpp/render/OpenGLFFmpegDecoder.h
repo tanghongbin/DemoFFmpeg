@@ -16,8 +16,8 @@ private:
     uint8_t *m_FrameBuffer;
     int m_VideoWidth;
     int m_VideoHeight;
-    int m_RenderWidth;
-    int m_RenderHeight;
+    static int m_RenderWidth;
+    static int m_RenderHeight;
 
 public:
     void init(AVCodecContext *pContext, _jobject *instance, _jobject *pJobject);

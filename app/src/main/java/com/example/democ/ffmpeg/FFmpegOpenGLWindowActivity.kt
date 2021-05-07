@@ -1,23 +1,21 @@
 package com.example.democ.ffmpeg
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
-import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.SeekBar
+import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
-import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
+import com.example.democ.render.FFmpegOpenGLRender
 import com.example.democ.render.FFmpegRender
 import com.example.democ.utils.Constants
-import com.example.democ.utils.SpUtils
-import kotlinx.android.synthetic.main.activity_f_fmpeg_native_window.*
+import kotlinx.android.synthetic.main.activity_ffmpeg_opengl_window.*
 
-class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
+class FFmpegOpenGLWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
-    lateinit var render:FFmpegRender
+    lateinit var render: FFmpegRender
     var isPortait = true
     private val mPlayPath:String by lazy {
 //       val result =  if (intent.getStringExtra("path").isNullOrBlank()) MuxerManager.MP4_PLAY_PATH
@@ -29,10 +27,10 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_f_fmpeg_native_window)
+        setContentView(R.layout.activity_ffmpeg_opengl_window)
         mSurface.holder.addCallback(this)
         render = FFmpegRender()
-        render.setMsgCallback(object : MsgCallback{
+        render.setMsgCallback(object : MsgCallback {
             override fun callback(type: Int) {
 
             }
@@ -71,6 +69,7 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
             }
 
         })
+        mSurface.init(render)
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -86,6 +85,6 @@ class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
         // 1-音频，2-视频
         log("log play address :${mPlayPath}")
-        render.playMP4(mPlayPath, holder?.surface)
+        render.playMP4(mPlayPath, null)
     }
 }

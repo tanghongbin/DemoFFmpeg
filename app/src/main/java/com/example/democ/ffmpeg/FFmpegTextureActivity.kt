@@ -9,7 +9,6 @@ import com.example.camera.listener.CameraPictureListener
 import com.example.camera.listener.CameraYUVDataListener
 import com.example.camera.manager.CameraSurfaceManager
 import com.example.democ.R
-import kotlinx.android.synthetic.main.activity_f_fmpeg_open_g_l.*
 
 class FFmpegTextureActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.PreviewCallback,
     CameraPictureListener, CameraYUVDataListener {
@@ -19,7 +18,7 @@ class FFmpegTextureActivity : AppCompatActivity(), SurfaceHolder.Callback, Camer
 private lateinit var mCameraHelper:CameraSurfaceManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_f_fmpeg_open_g_l)
+        setContentView(R.layout.activity_ffmpeg_opengl_window)
         init()
     }
 
@@ -64,7 +63,7 @@ private lateinit var mCameraHelper:CameraSurfaceManager
     }
 
     override fun onPictureBitmap(btmp: Bitmap?) {
-        mGlImage.setImageBitmap(btmp)
+//        mGlImage.setImageBitmap(btmp)
     }
 
     override fun onCallback(srcData: ByteArray?) {

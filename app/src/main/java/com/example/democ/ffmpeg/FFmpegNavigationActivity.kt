@@ -34,7 +34,7 @@ class FFmpegNavigationActivity : AppCompatActivity() {
     private val arrays = arrayOf(
         FFmpegAboutActivity::class.java,
         FFmpegConvertYuvActivity::class.java,
-        FFmpegOpenGLActivity::class.java,
+        FFmpegOpenGLWindowActivity::class.java,
         FFmpegVideoActivity::class.java,
         FFmpegTextureActivity::class.java,
         FFmpegNativeWindowActivity::class.java,

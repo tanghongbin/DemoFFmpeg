@@ -29,6 +29,7 @@ private:
     uint8_t *m_FrameBuffer;
     time_t lastTime;
     long long mLastTime;
+    static int64_t duration;
 
 
 public:
@@ -51,6 +52,8 @@ public:
     int getRenderType(){
         return 1;
     }
+    void onDecodeReady(AVFormatContext * formatContext,AVCodecContext *codecContext,jobject instance);
+
 
 
 };

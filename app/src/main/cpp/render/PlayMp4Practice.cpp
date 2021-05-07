@@ -23,9 +23,11 @@ extern "C" {
 
 void PlayMp4Practice::init(const char *url, JNIEnv *jniEnv, jobject renderInstance,
                            jobject surface, int type) {
-    strcpy(mUrl, url);
-    mRenderInstance = jniEnv->NewGlobalRef(renderInstance);
-    mSurface = jniEnv->NewGlobalRef(surface);
+    if (mRenderInstance == nullptr) {
+        strcpy(mUrl, url);
+        mRenderInstance = jniEnv->NewGlobalRef(renderInstance);
+        mSurface = jniEnv->NewGlobalRef(surface);
+    }
     LOGCATE("play address is:%s", mUrl);
     mThread = new thread(createPlayProcess, this, mRenderInstance, mSurface, type);
     LOGCATE("print thread name:%s", mThread->get_id());
@@ -82,6 +84,7 @@ PlayMp4Practice::createPlayProcess(PlayMp4Practice *pPractice, jobject renderIns
 
     BaseRender *baseRender = pPractice->createRender(type);
     baseRender->init(codecContext, renderInstance, surface);
+    baseRender->onDecodeReady(avFormatContext,codecContext,renderInstance);
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
     if (ENABLE_AV_FILTER) {
@@ -137,6 +140,8 @@ void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender 
     TimeAsyncHelper *asyncHelper = new TimeAsyncHelper;
     int ret;
     while (isLoop) {
+//        stbi_load()
+        pRender->seekPositionFunc(stream_index,pContext,codecContext);
         ret = av_read_frame(pContext, pPacket);
         if (ret < 0) {
             LOGCATE("av_read_frame error:%s", av_err2str(ret));
@@ -156,7 +161,9 @@ void PlayMp4Practice::decodeLoop(AVPacket *pPacket, AVFrame *pFrame, BaseRender 
             pRender->eachPacket(pPacket, codecContext);
             while (avcodec_receive_frame(codecContext, pFrame) == 0) {
                 asyncHelper->updateTimeStamp(false, pPacket, pFrame, pContext, stream_index);
-                asyncHelper->async();
+                if (!asyncHelper->assertDtsIsValid()) {
+                    goto LoopEnd;
+                }
                 pRender->draw_frame(codecContext, pFrame, pJobject1);
             }
         }
@@ -270,6 +277,15 @@ void PlayMp4Practice::decodeLoopWithFilter(AVPacket *pPacket, AVFrame *pFrame, B
     LOGCATE("loop end");
 
 }
+
+
+
+void PlayMp4Practice::seekPosition(int position) {
+    BaseRender::setupSeekPosition(position, 2);
+    BaseRender::setupSeekPosition(position, 1);
+
+}
+
 
 void PlayMp4Practice::stopPlay() {
     isLoop = false;

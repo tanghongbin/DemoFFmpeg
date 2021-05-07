@@ -9,7 +9,7 @@
 #include <CustomGLUtils.h>
 #include <YuvToImageRender.h>
 #include <OpenGLFFmpegRender.h>
-#include <PlayMp4Instance.h>
+#include <Mp4Demo.h>
 #include <VideoGLRender.h>
 #include <PlayMp4Practice.h>
 #include <helpers/JavaVmManager.h>
@@ -64,7 +64,7 @@ extern "C" {
 
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-//    VideoGLRender::GetInstance()->OnSurfaceCreated();
+    VideoGLRender::GetInstance()->OnSurfaceCreated();
 }
 
 /*
@@ -74,7 +74,7 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
  */
 JNIEXPORT void JNICALL native_OnSurfaceChanged
         (JNIEnv *env, jobject instance, jint width, jint height) {
-//    VideoGLRender::GetInstance()->OnSurfaceChanged(width, height);
+    VideoGLRender::GetInstance()->OnSurfaceChanged(width, height);
 // 正常情况下这样设置
 //    FFmpegEncodeVideo::getInstance()->mWindow_width = height;
 //    FFmpegEncodeVideo::getInstance()->mWindow_height = width;
@@ -94,7 +94,9 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged
  * Signature: ()V
  */
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
-//    VideoGLRender::GetInstance()->OnDrawFrame();
+    if (VideoGLRender::checkInstanceExist()){
+        VideoGLRender::GetInstance()->OnDrawFrame();
+    }
 }
 
 JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance,jstring jstring1) {
@@ -157,16 +159,16 @@ JNIEXPORT void JNICALL native_audioTest(JNIEnv *env, jobject instance, jint type
     }
 }
 
-PlayMp4Instance *playMp4Instance;
+Mp4Demo *mp4Demo;
 
 PlayMp4Practice *playMp4Practice;
 
 JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
     AudioRecordPlayHelper::destroyInstance();
     FFmpegEncodeAudio::destroyInstance();
-    if (playMp4Instance) {
-        delete playMp4Instance;
-        playMp4Instance = nullptr;
+    if (mp4Demo) {
+        delete mp4Demo;
+        mp4Demo = nullptr;
     }
     if (playMp4Practice) {
         playMp4Practice->stopPlay();
@@ -185,25 +187,30 @@ JNIEXPORT void JNICALL native_unInit(JNIEnv *env, jobject instance) {
 //JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface,jint type) {
 //    LOGCATE("prepare play mp4");
 //    LOGCATE("prepare play mp4");
-//    if (playMp4Instance != nullptr){
-//        playMp4Instance->unInit();
-//        delete playMp4Instance;
-//        playMp4Instance = nullptr;
+//    if (mp4Demo != nullptr){
+//        mp4Demo->unInit();
+//        delete mp4Demo;
+//        mp4Demo = nullptr;
 //    }
-//    playMp4Instance = new PlayMp4Instance();
+//    mp4Demo = new Mp4Demo();
 //    const char * playUrl = env->GetStringUTFChars(url,0);
 //    LOGCATE("prepare init mp4 , detected address %s",playUrl);
-//    playMp4Instance->init(playUrl,env,instance,surface,type);
+//    mp4Demo->init(playUrl,env,instance,surface,type);
 //}
+
+JNIEXPORT void JNICALL native_seekPosition
+        (JNIEnv *env, jobject instance, jint position) {
+    playMp4Practice->seekPosition(position);
+}
 
 
 JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance, jstring url, jobject surface) {
-    LOGCATE("prepare play mp4");
     playMp4Practice = new PlayMp4Practice();
     const char *playUrl = env->GetStringUTFChars(url, 0);
-    LOGCATE("prepare init mp4 , detected address %s", playUrl);
+    // 1-音频，2-nativewindow，4-opengles_window
+    int type = surface != nullptr ? 2 : 4;
     playMp4Practice->init(playUrl, env, instance, surface, 1);
-    playMp4Practice->init(playUrl, env, instance, surface, 2);
+    playMp4Practice->init(playUrl, env, instance, surface, type);
 }
 
 JNIEXPORT void JNICALL native_encodeFrame(JNIEnv *env, jobject instance,
@@ -456,7 +463,8 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_encodeavmuxer_OnSurfaceCreated", "()V",                                         (void *) (native_encodeavmuxer_OnSurfaceCreated)},
         {"native_encodeavmuxer_OnSurfaceChanged", "(II)V",                                       (void *) (native_encodeavmuxer_OnSurfaceChanged)},
         {"native_encodeavmuxer_encodeFrame",      "([B)V",                                       (void *) (native_encodeavmuxer_encodeFrame)},
-
+//        {"getVideoDimensions",      "()[I",                                       (void *) (getVideoDimensions)},
+        {"native_seekPosition",      "(I)V",      (void *) (native_seekPosition)},
 
         /**
          * ================================    直播模块 =====================================

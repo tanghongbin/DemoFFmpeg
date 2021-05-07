@@ -14,10 +14,13 @@ extern "C" {
 #include <helpers/JavaVmManager.h>
 #include "VideoRender.h"
 #include "utils.h"
-#include "PlayMp4Instance.h"
+#include "Mp4Demo.h"
+#include "utils.h"
+
 
 int VideoRender::m_RenderWidth = 0;
 int VideoRender::m_RenderHeight = 0;
+int64_t VideoRender::duration = 0;
 
 
 void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *pJobject) {
@@ -60,7 +63,14 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize, m_FrameBuffer, AV_PIX_FMT_RGBA,
                          m_VideoWidth, m_VideoHeight, 1);
 
-    sendMsg(MSG_TYPE_READY, instance, MSG_CALLBACK_FUNCTION_NAME, "(I)V");
+    class CallA : public MsgCallback {
+    public:
+        void call(JNIEnv* jni,jobject obj,jmethodID methodId){
+            LOGCATE("call has called child jni:%p obj:%p methodId:%p",&jni,obj,methodId);
+            jni->CallVoidMethod(obj,methodId,m_RenderWidth,m_RenderHeight);
+        }
+    } callback;
+    sendMsgWithCallback(instance, RENDER_DIMENSION_CALLBACK, "(II)V",(MsgCallback*)&callback);
 
     LOGCATE("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
             windowHeight, m_RenderWidth, m_RenderHeight);
@@ -138,6 +148,19 @@ void VideoRender::displayToSurface(AVFrame *pFrame) {
 //解锁当前 Window ，渲染缓冲区数据
     ANativeWindow_unlockAndPost(m_NativeWindow);
 
+}
+
+void VideoRender::onDecodeReady(AVFormatContext * formatContext,AVCodecContext *codecContext,jobject instance){
+    duration = formatContext->duration / AV_TIME_BASE;
+    LOGCATE("打印时长:%lld",duration);
+    class CallA : public MsgCallback {
+    public:
+        void call(JNIEnv* jni,jobject obj,jmethodID methodId){
+            LOGCATE("call has called child jni:%p obj:%p methodId:%p",&jni,obj,methodId);
+            jni->CallVoidMethod(obj,methodId,(int)duration);
+        }
+    } callback;
+    sendMsgWithCallback(instance, DECODE_READY_DURATION, "(I)V",(MsgCallback*)&callback);
 }
 
 void VideoRender::eachPacket(AVPacket *packet, AVCodecContext *pContext) {

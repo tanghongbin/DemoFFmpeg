@@ -27,8 +27,9 @@ public:
 
     JavaVM *mVm;
     char mUrl[1024];
-    jobject mRenderInstance;
-    jobject mSurface;
+    jobject mRenderInstance = nullptr;
+    jobject mSurface = nullptr;
+    int width,height;
 
     void init(const char* url,JNIEnv* jniEnv,jobject renderInstance,jobject surface,int type);
 
@@ -57,6 +58,8 @@ public:
                     int i);
 
     void stopPlay();
+
+    void seekPosition(int position);
 };
 
 

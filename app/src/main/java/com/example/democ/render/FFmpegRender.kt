@@ -1,13 +1,20 @@
 package com.example.democ.render
 
 import android.opengl.GLSurfaceView
+import android.os.Handler
 import android.view.Surface
 import com.example.democ.audio.log
+import com.example.democ.interfaces.MsgCallback
+import com.example.democ.opengles.NativeRender
 import com.example.democ.utils.Constants
+import com.example.democ.utils.LogUtils
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 class FFmpegRender : GLSurfaceView.Renderer{
+
+    private var mCallBack:MsgCallback? = null
+    private val mHandler = Handler()
 
     companion object{
         init {
@@ -19,9 +26,14 @@ class FFmpegRender : GLSurfaceView.Renderer{
         val IMAGE_FORMAT_NV12 = 0x03
         val IMAGE_FORMAT_I420 = 0x04
     }
+
+    fun setMsgCallback(call:MsgCallback){
+        mCallBack = call
+    }
+
     override fun onDrawFrame(gl: GL10?) {
         native_OnDrawFrame()
-        log("java layer draw frame")
+//        log("java layer draw frame")
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -38,7 +50,34 @@ class FFmpegRender : GLSurfaceView.Renderer{
 
     }
 
+    // =============== native 回调部分  =====================
+
+    private fun nativeMsgCallback(type: Int){
+        log("java layer has received msg :${type}")
+        NativeRender.log("java layer has received msg:${type} call:${mCallBack}")
+        mHandler.post {
+            mCallBack?.callback(type)
+        }
+    }
+    
+    private fun renderDimensionCallFromJni(renderWidth:Int,renderHeight:Int){
+        mHandler.post {
+            log("打印width:${renderWidth} height:${renderHeight}")
+            mCallBack?.renderSizeDimensionChanged(renderWidth,renderHeight)
+        }
+    }
+    private fun onDecodeReadyDuration(duration:Int){
+        mHandler.post {
+            mCallBack?.processRangeSetup(0,duration)
+            log("时长：${duration}")
+        }
+    }
+
     // ==============   播放部分 ======================
+
+    external fun native_seekPosition(position:Int)
+
+    external fun getVideoDimensions():Array<Int>
 
     external fun native_OnSurfaceCreated()
 
@@ -95,6 +134,8 @@ class FFmpegRender : GLSurfaceView.Renderer{
     external fun native_encodeavmuxer_encodeFrame(byteArray: ByteArray)
 
     external fun native_getSimpleInfo():String
+
+
 
     //混合音视频
 //    external fun muxAv()

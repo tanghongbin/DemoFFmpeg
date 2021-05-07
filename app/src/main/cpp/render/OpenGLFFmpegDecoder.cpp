@@ -12,24 +12,19 @@ extern "C" {
 #include "OpenGLFFmpegRender.h"
 #include <VideoGLRender.h>
 
+int OpenGLFFmpegDecoder::m_RenderWidth = 0;
+int OpenGLFFmpegDecoder::m_RenderHeight = 0;
 
 void OpenGLFFmpegDecoder::init(AVCodecContext *codeCtx, _jobject *instance, _jobject *pJobject) {
 
-    int windowWidth = OpenGLFFmpegRender::mWindowWidth;
-    int windowHeight = OpenGLFFmpegRender::mWindowHeight;
+    vec2 &dimesion = VideoGLRender::GetInstance()->m_ScreenSize;
+    // todo 暂时写死
+    int windowWidth = 1080;
+    int windowHeight = 2159;
+    m_VideoWidth = codeCtx->width;
+    m_VideoHeight = codeCtx->height;
 
-    if (m_VideoWidth > m_VideoHeight) {
-        if (windowWidth < windowHeight * m_VideoWidth / m_VideoHeight) {
-            m_RenderWidth = windowWidth;
-            m_RenderHeight = windowWidth * m_VideoHeight / m_VideoWidth;
-        } else {
-            m_RenderWidth = windowHeight * m_VideoWidth / m_VideoHeight;
-            m_RenderHeight = windowHeight;
-        }
-    } else {
-        m_RenderWidth = m_VideoHeight;
-        m_RenderHeight = m_VideoWidth;
-    }
+    setupRenderDimension(windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
 
     //2. 获取转换的上下文
     m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight,
@@ -46,8 +41,14 @@ void OpenGLFFmpegDecoder::init(AVCodecContext *codeCtx, _jobject *instance, _job
     av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize, m_FrameBuffer, AV_PIX_FMT_RGBA,
                          m_VideoWidth, m_VideoHeight, 1);
 
-
-
+    class CallA : public MsgCallback {
+    public:
+        void call(JNIEnv* jni,jobject obj,jmethodID methodId){
+            LOGCATE("call has called child jni:%p obj:%p methodId:%p",&jni,obj,methodId);
+            jni->CallVoidMethod(obj,methodId,m_RenderWidth,m_RenderHeight);
+        }
+    } callback;
+    sendMsgWithCallback(instance, RENDER_DIMENSION_CALLBACK, "(II)V",(MsgCallback*)&callback);
 
 }
 

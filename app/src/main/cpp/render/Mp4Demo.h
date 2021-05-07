@@ -20,7 +20,7 @@ enum PLAY_STATUS{
     PAUSE
 };
 
-class PlayMp4Instance {
+class Mp4Demo {
 
 private:
     char mPlayUrl[2048] = {0};
@@ -44,13 +44,13 @@ public:
 
     void seekPosition(int position);
 
-    static void createThreadForPlay(PlayMp4Instance* selefInstance, _jobject *instance, const char *localUrl, _jobject *pJobject,jint type);
+    static void createThreadForPlay(Mp4Demo* selefInstance, _jobject *instance, const char *localUrl, _jobject *pJobject, jint type);
 
     void
-    decodeLoop(PlayMp4Instance *pInstance, AVFormatContext *mFormatContext,
+    decodeLoop(Mp4Demo *pInstance, AVFormatContext *mFormatContext,
                AVCodecContext *decode_context,
-               AVPacket *packet, AVFrame *frame,BaseRender* baseRender,
-               jobject pJobject,int m_StreamIndex);
+               AVPacket *packet, AVFrame *frame, BaseRender* baseRender,
+               jobject pJobject, int m_StreamIndex);
 
     void resume();
 

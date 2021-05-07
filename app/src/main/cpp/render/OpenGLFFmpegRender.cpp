@@ -153,7 +153,6 @@ void OpenGLFFmpegRender::onDrawFrame() {
     GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
 
     //upload RGBA image data
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
     unique_lock<mutex> lock(m_Mutex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_RenderImage.ppPlane[0]);

@@ -11,8 +11,8 @@ extern "C" {
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 
-long BaseRender::mSeekAudioPosition = 0;
-long BaseRender::mSeekVideoPosition = 0;
+long BaseRender::mSeekAudioPosition = -1;
+long BaseRender::mSeekVideoPosition = -1;
 
 void AudioRender::init(AVCodecContext *codeCtx, _jobject *instance, _jobject *pJobject) {
     //1. 生成 resample 上下文，设置输入和输出的通道数、采样率以及采样格式，初始化上下文

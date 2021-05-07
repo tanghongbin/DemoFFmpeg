@@ -6,7 +6,7 @@
 #include <CustomGLUtils.h>
 #include <YuvToImageRender.h>
 #include <OpenGLFFmpegRender.h>
-#include <PlayMp4Instance.h>
+#include <Mp4Demo.h>
 #include <VideoGLRender.h>
 #include <PlayMp4Practice.h>
 
@@ -33,7 +33,7 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
 JNIEXPORT void JNICALL native_OnSurfaceChanged
         (JNIEnv *env, jobject instance, jint width, jint height) {
     VideoGLRender::GetInstance() -> OnSurfaceChanged(width,height);
-//    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
+    OpenGLFFmpegRender::getInstance() -> onSurfaceChanged(width,height);
 //    YuvToImageRender::mWindowWidth = width;
 //    YuvToImageRender::mWindowHeight = height;
 }
@@ -47,7 +47,7 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
     VideoGLRender::GetInstance() -> OnDrawFrame();
 }
 
-PlayMp4Instance* playMp4Instance;
+Mp4Demo* mp4Demo;
 
 PlayMp4Practice* playMp4Practice;
 
@@ -59,15 +59,15 @@ PlayMp4Practice* playMp4Practice;
 //JNIEXPORT void JNICALL playMP4(JNIEnv *env, jobject instance,jstring url,jobject surface,jint type) {
 //    LOGCATE("prepare play mp4");
 //    LOGCATE("prepare play mp4");
-//    if (playMp4Instance != nullptr){
-//        playMp4Instance->unInit();
-//        delete playMp4Instance;
-//        playMp4Instance = nullptr;
+//    if (mp4Demo != nullptr){
+//        mp4Demo->unInit();
+//        delete mp4Demo;
+//        mp4Demo = nullptr;
 //    }
-//    playMp4Instance = new PlayMp4Instance();
+//    mp4Demo = new Mp4Demo();
 //    const char * playUrl = env->GetStringUTFChars(url,0);
 //    LOGCATE("prepare init mp4 , detected address %s",playUrl);
-//    playMp4Instance->init(playUrl,env,instance,surface,type);
+//    mp4Demo->init(playUrl,env,instance,surface,type);
 //}
 
 
