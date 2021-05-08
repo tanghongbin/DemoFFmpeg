@@ -3,8 +3,7 @@ package com.example.democ.audio
 import android.media.MediaCodec
 import android.media.MediaFormat
 import android.media.MediaMuxer
-import android.os.Environment
-import com.example.democ.utils.getRandomStr
+import com.example.common_base.utils.getRandomStr
 import java.nio.ByteBuffer
 
 class MuxerManager {
@@ -31,7 +30,8 @@ class MuxerManager {
 //        }
 //        val result = file.createNewFile()
 //        log("文件创建结果:${result}")
-        val path = getRandomStr("hwencodemp4/",".mp4")
+        val path =
+            getRandomStr("hwencodemp4/", ".mp4")
         muxer = MediaMuxer(path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
 //        log("初始化成功")
     }

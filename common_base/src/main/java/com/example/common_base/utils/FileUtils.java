@@ -1,4 +1,4 @@
-package com.example.democ.utils;
+package com.example.common_base.utils;
 
 import android.content.Context;
 import android.content.res.AssetManager;

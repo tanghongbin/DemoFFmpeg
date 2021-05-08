@@ -8,9 +8,10 @@ import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.example.common_base.DemoApplication
 import com.example.democ.audio.*
 import com.example.democ.opengles.EmptyActivity
-import com.tbruyelle.rxpermissions2.RxPermissions
+import com.example.common_base.utils.requestCustomPermissions
 
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Runnable
@@ -158,18 +159,3 @@ fun getAppContext():Context{
     return DemoApplication.instance
 }
 
-fun AppCompatActivity.requestCustomPermissions(success: () -> Unit) {
-    RxPermissions(this).request(android.Manifest.permission.RECORD_AUDIO,
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.READ_EXTERNAL_STORAGE,
-        android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        .subscribe {
-            log("权限请求结果:${it}")
-            if (it) {
-                success()
-            } else {
-                MainActivity.log("请求失败")
-            }
-        }
-
-}

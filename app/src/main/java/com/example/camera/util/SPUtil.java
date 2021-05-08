@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 
-import com.example.democ.DemoApplication;
+import com.example.common_base.DemoApplication;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

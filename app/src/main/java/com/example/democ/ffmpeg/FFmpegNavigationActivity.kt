@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.hwencoder.FFmpegHwEncodeMuxerActivity
+import com.example.ijkplayer_demo.FFmpegIjkPlayerActivity
 import kotlinx.android.synthetic.main.activity_splash.*
 
 
@@ -45,7 +46,8 @@ class FFmpegNavigationActivity : AppCompatActivity() {
         FFmpegHwEncodeMuxerActivity::class.java,
         FFmpegRtmpNativeActivity::class.java,
         FFmpegRtmpJavaHwActivity::class.java,
-        FFmpegTestNewCameraHelperActivity::class.java
+        FFmpegTestNewCameraHelperActivity::class.java,
+        FFmpegIjkPlayerActivity::class.java
     )
 
 

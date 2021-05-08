@@ -9,9 +9,9 @@ import android.view.Surface
 import com.example.democ.R
 import com.example.democ.getAppContext
 import com.example.democ.interfaces.MsgCallback
-import com.example.democ.utils.getFragmentNameByType
-import com.example.democ.utils.getStrFromAssets
-import com.example.democ.utils.getVertexNameByType
+import com.example.common_base.utils.getFragmentNameByType
+import com.example.common_base.utils.getStrFromAssets
+import com.example.common_base.utils.getVertexNameByType
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -65,8 +65,12 @@ class NativeRender(val mType:Int = 1)
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         setImageByType(FIX_TYPE)
         val sampleType = mType
-        val vertexStr = getStrFromAssets(getVertexNameByType(sampleType))
-        val fragStr = getStrFromAssets(getFragmentNameByType(sampleType))
+        val vertexStr = getStrFromAssets(
+            getVertexNameByType(sampleType)
+        )
+        val fragStr = getStrFromAssets(
+            getFragmentNameByType(sampleType)
+        )
 //        log("打印顶点字符串:${vertexStr}")
 //        log("打印片段字符串:${fragStr}")
         native_OnSurfaceCreated(vertexStr,fragStr)

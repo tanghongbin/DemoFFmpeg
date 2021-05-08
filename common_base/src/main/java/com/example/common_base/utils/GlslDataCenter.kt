@@ -1,10 +1,13 @@
-package com.example.democ.utils
+package com.example.common_base.utils
 
 object GlslDataCenter {
     private val sampleKeyValue = LinkedHashMap<String,Int>()
     private val vertexGlsl = LinkedHashMap<Int,String>()
     private val fragmentGlsl = LinkedHashMap<Int,String>()
     init {
+
+
+        // ========================  GLSL ==========================
         // 显示键值对
         sampleKeyValue.apply {
             put("Triangle",1)
@@ -59,6 +62,7 @@ object GlslDataCenter {
             put(18,"glsl/shadow/fragment.glsl")
             put(19,"glsl/shadowcube/fragment.glsl")
         }
+        // ==========================  GLSL End ==============================
     }
     fun getSampleKeys():MutableList<String>{
         return ArrayList(sampleKeyValue.keys)

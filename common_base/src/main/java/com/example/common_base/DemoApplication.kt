@@ -1,8 +1,8 @@
-package com.example.democ
+package com.example.common_base
 
 import android.app.Application
 import android.os.Environment
-import com.example.democ.utils.FileUtils
+import com.example.common_base.utils.FileUtils
 
 class DemoApplication : Application() {
     companion object{

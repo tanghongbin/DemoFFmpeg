@@ -5,9 +5,6 @@ import android.os.Bundle
 import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.utils.Constants
-import com.example.democ.utils.getFragmentStrByType
-import com.example.democ.utils.getVertexStrByType
-import com.example.democ.view.SampleDialog
 import kotlinx.android.synthetic.main.activity_native_open_g_l_e_s_actiivty.*
 
 class OpenGLESSampleActiivty : AppCompatActivity() {

@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
-import com.example.democ.audio.log
-import com.example.democ.utils.getFragmentStrByType
-import com.example.democ.utils.getVertexStrByType
 import com.example.democ.view.SampleDialog
 import kotlinx.android.synthetic.main.activity_splash.*
 

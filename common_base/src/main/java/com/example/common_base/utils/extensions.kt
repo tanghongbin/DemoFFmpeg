@@ -1,17 +1,22 @@
-package com.example.democ.utils
+package com.example.common_base.utils
 
-import android.content.Context
 import android.graphics.Color
+import android.opengl.GLSurfaceView
 import android.os.Build
+import android.util.Log
+import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import com.example.democ.DemoApplication
-import com.example.democ.audio.log
+import com.example.common_base.DemoApplication
+import com.tbruyelle.rxpermissions2.RxPermissions
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.nio.charset.Charset
+
+fun log(str:String,tag:String = "DemoC"){
+    Log.d(tag,str)
+}
 
 fun getRandomStr(subdir:String,suffixName:String):String{
     val path = "/storage/emulated/0/ffmpegtest/${subdir}${System.currentTimeMillis()}${suffixName}"
@@ -68,7 +73,11 @@ fun getFragmentNameByType(sampleType: Int):String {
  * 片段字符串by type
  */
 fun getFragmentStrByType(sampleType: Int):String {
-    return getStrFromAssets(getFragmentNameByType(sampleType))
+    return getStrFromAssets(
+        getFragmentNameByType(
+            sampleType
+        )
+    )
 }
 
 fun getVertexNameByType(sampleType: Int):String {
@@ -76,7 +85,11 @@ fun getVertexNameByType(sampleType: Int):String {
 }
 
 fun getVertexStrByType(sampleType: Int):String {
-    return getStrFromAssets(getVertexNameByType(sampleType))
+    return getStrFromAssets(
+        getVertexNameByType(
+            sampleType
+        )
+    )
 }
 
 /**
@@ -102,4 +115,37 @@ fun AppCompatActivity.fullScreen() {
         decorView.systemUiVisibility = option
         window.statusBarColor = Color.TRANSPARENT
     }
+}
+
+fun AppCompatActivity.requestCustomPermissions(success: () -> Unit) {
+    RxPermissions(this)
+        .request(android.Manifest.permission.RECORD_AUDIO,
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.READ_EXTERNAL_STORAGE,
+        android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        .subscribe {
+            log("权限请求结果:${it}")
+            if (it) {
+                success()
+            } else {
+                log("请求失败")
+            }
+        }
+
+}
+
+fun SurfaceView.changeScreenSize(width:Int,height:Int){
+    val params = layoutParams
+    params.width = width
+    params.height = height
+    layoutParams = params
+    requestLayout()
+}
+
+fun GLSurfaceView.changeScreenSize(width:Int,height:Int){
+    val params = layoutParams
+    params.width = width
+    params.height = height
+    layoutParams = params
+    requestLayout()
 }

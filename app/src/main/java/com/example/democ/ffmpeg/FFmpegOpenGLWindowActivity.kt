@@ -8,11 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
-import com.example.democ.render.FFmpegOpenGLRender
 import com.example.democ.render.FFmpegRender
 import com.example.democ.utils.Constants
-import com.example.democ.utils.fullScreen
-import com.example.democ.utils.keepScreenOn
+import com.example.common_base.utils.fullScreen
+import com.example.common_base.utils.keepScreenOn
 import kotlinx.android.synthetic.main.activity_ffmpeg_opengl_window.*
 
 class FFmpegOpenGLWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {

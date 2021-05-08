@@ -1,2 +1,4 @@
+include ':common_base'
+include ':ijkplayer-demo'
 rootProject.name='DemoFFmpeg'
 include ':app', ':libyuv-single'

@@ -4,10 +4,9 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.ArrayAdapter
 import com.example.democ.R
-import com.example.democ.utils.GlslDataCenter
+import com.example.common_base.utils.GlslDataCenter
 import kotlinx.android.synthetic.main.dialog_siamples.*
 
 class SampleDialog(context: Context,style:Int) : Dialog(context,style) {

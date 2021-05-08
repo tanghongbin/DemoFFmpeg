@@ -7,7 +7,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.example.camera.Contacts;
-import com.example.democ.DemoApplication;
 
 import java.io.IOException;
 import java.util.List;

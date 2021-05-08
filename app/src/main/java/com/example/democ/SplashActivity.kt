@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import com.example.common_base.utils.requestCustomPermissions
 import com.example.democ.activity.AudioTestActivity
 import com.example.democ.activity.ThreadTestActivity
 import com.example.democ.ffmpeg.*

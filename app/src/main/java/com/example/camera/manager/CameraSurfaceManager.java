@@ -20,7 +20,7 @@ import com.example.camera.listener.CameraPictureListener;
 import com.example.camera.listener.CameraYUVDataListener;
 import com.example.camera.util.CameraUtil;
 import com.example.camera.util.SPUtil;
-import com.example.democ.DemoApplication;
+import com.example.common_base.DemoApplication;
 
 import java.io.ByteArrayOutputStream;
 
