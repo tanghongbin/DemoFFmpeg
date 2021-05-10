@@ -19,6 +19,7 @@ class FFmpegAboutActivity : AppCompatActivity(),View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ffmpeg_about)
         render = FFmpegRender()
+        render.native_testReadFile()
         val str = render.native_getSimpleInfo()
         mFFmpegText.text = str
         log("字符串是否包含:${str.contains("rtmp")}")

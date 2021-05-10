@@ -30,6 +30,7 @@
 #include <encode/FFmpegEncodeAVToLiveRtmp.h>
 #include <rtmp.h>
 #include <rtmp/RtmpClient.h>
+#include <curl/curl.h>
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/democ/render/FFmpegRender"
@@ -244,27 +245,46 @@ JNIEXPORT void JNICALL native_videoEncodeUnInit(JNIEnv *env, jobject instance) {
 
 //SingleNodeList< const char *> *listHelper;
 
-JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
-//    if (!listHelper) listHelper = new SingleNodeList<const char * >();
-//
-//    TimeTracker::trackBegin();
-//    std::thread *thread1 = new std::thread(addNum, listHelper);
-//    std::thread *thread2 = new std::thread(addNum, listHelper);
-//
-//    thread1->join();
-//    thread2->join();
-//
-//    int start = 1;
-//    while (listHelper->popFirst()) {
-//        start++;
-//    }
-//    TimeTracker::trackOver();
-//    LOGCATE("this is times:%d", start);
-//    if (listHelper) {
-//        delete listHelper;
-//        listHelper = nullptr;
-//    }
+size_t print_html( void *ptr, size_t size, size_t nmemb, void *stream)
+{
+    int len = size*nmemb;
+    char *buf = new char[len+1];
 
+    memcpy(buf, ptr, len);
+
+    buf[len] = '\0';
+
+    LOGCATE("success result:%s\n", buf);
+
+    delete [] buf;
+
+    return len;
+}
+
+void request(){
+    CURL * curl = NULL;
+    CURLcode  ret;
+    curl = curl_easy_init();
+    const char * url = "www.baidu.com";
+    curl_easy_setopt(curl,CURLOPT_URL,url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, print_html);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1); /* 打开debug */
+//    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, "Authorization: eyJ0IjoiMSIsInYiOiIxIiwiYiI6IjEifQ.Dc2FzJsp36Zypd1da7SosFly0IZVYv1QfuZPkZXZdA8OHM3fZHo5fc6JwURRqOdlOBuoizMg0ibmKR1IKYGkYHG5nr55LMoS.ojmQpiLs9NYE0Uzf6EF9qsrHm7P3DG92nboOWUE-PSE");
+
+    ret = curl_easy_perform(curl);
+    if (ret != CURLE_OK) {
+        LOGCATE("curl_easy_perform error");
+        return ;
+    }
+
+    curl_easy_cleanup(curl);
+}
+
+JNIEXPORT void JNICALL native_testReadFile(JNIEnv *env, jobject instance) {
+
+    std::thread* thread = new std::thread(request);
+    thread->join();
+    delete thread;
 }
 
 

@@ -51,6 +51,7 @@ android {
             pickFirst '**/libyuv-sample.so'
             pickFirst '**/libassimp.so'
             pickFirst '**/libopencv_java3.so'
+            pickFirst '**/libcurl.so'
 //            doNotStrip "**.so"
 //            def abiFiltersForWrapScript = supportAbis
 //            if (rootProject.ext.useASAN && abiFiltersForWrapScript) {

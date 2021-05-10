@@ -202,6 +202,9 @@ set_target_properties(assimp PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_A
 add_library(opencv_java3 SHARED IMPORTED )
 set_target_properties(opencv_java3 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libopencv_java3.so)
 
+add_library(curl SHARED IMPORTED )
+set_target_properties(curl PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libcurl.so)
+
 find_library(log-lib log )
 
 find_library(OpenSLES-lib OpenSLES)
@@ -226,7 +229,8 @@ set(third-party-libs
         ssl
         rtmp
         assimp
-        opencv_java3)
+        opencv_java3
+        curl)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
