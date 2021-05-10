@@ -13,7 +13,7 @@ class CameraAsyncDataHelper {
         while (!isStop) {
             if (linkedQueue.size > 0){
                 val result = linkedQueue.poll()
-                log("data is null $result")
+//                log("data is null $result")
                 result?.let {
                     mListener?.onCallback(it)
                 }
