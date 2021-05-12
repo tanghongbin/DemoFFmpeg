@@ -3,16 +3,13 @@ package com.example.democ.ffmpeg
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
-import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import com.example.democ.R
-import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
 import com.example.democ.render.FFmpegRender
-import com.example.democ.utils.Constants
-import com.example.democ.utils.SpUtils
+import com.example.common_base.utils.Constants
 import kotlinx.android.synthetic.main.activity_f_fmpeg_native_window.*
 
 class FFmpegNativeWindowActivity : AppCompatActivity(), SurfaceHolder.Callback {

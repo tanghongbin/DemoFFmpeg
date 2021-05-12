@@ -6,7 +6,7 @@ import android.media.MediaFormat
 import android.os.Build
 import android.view.Surface
 import androidx.annotation.RequiresApi
-import com.example.democ.utils.Constants
+import com.example.common_base.utils.Constants
 
 class VideoDecodeManager {
 

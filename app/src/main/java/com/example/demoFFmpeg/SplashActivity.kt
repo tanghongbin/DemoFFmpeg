@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.common_base.utils.requestCustomPermissions
+import com.example.customplayer.activity.CustomPlayerListActivity
 import com.example.democ.MainActivity
 import com.example.democ.activity.AudioTestActivity
 import com.example.democ.ffmpeg.FFmpegNavigationActivity
@@ -20,7 +21,8 @@ class SplashActivity : AppCompatActivity() {
         AudioTestActivity::class.java,
         FFmpegNavigationActivity::class.java,
         OpenGLESNavigationActivity::class.java,
-        FFmpegIjkPlayerActivity::class.java
+        FFmpegIjkPlayerActivity::class.java,
+        CustomPlayerListActivity::class.java
     )
     fun putIndex(position:Int){
         getSharedPreferences("demoC", Context.MODE_PRIVATE).edit()

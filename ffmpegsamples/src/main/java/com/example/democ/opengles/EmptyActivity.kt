@@ -3,24 +3,18 @@ package com.example.democ.opengles
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ConfigurationInfo
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.GLUtils
 import android.os.Bundle
-import androidx.core.graphics.BitmapCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.democ.R
-import com.example.democ.array2Buffer
+import com.example.common_base.utils.array2Buffer
 import com.example.democ.audio.log
-import com.example.democ.createProgram
-import com.example.democ.createTextureId
+import com.example.common_base.utils.createProgram
+import com.example.common_base.utils.createTextureId
 import kotlinx.android.synthetic.main.open_gles_layout.*
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -128,7 +122,8 @@ class EmptyActivity : FragmentActivity() {
 
 
         override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) { // 设置背景清理颜色为灰色
-            mProgramHandle = createProgram(applicationContext)
+            mProgramHandle =
+                createProgram(applicationContext)
 //获取vPosition索引
             vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, "a_Position")
             texCoordLoc = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate")

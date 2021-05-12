@@ -12,6 +12,9 @@ ext {
 
     dependencies = [
 
-            "appcompat-v7": 'androidx.appcompat:appcompat:1.1.0'
+            "appcompat-v7": 'androidx.appcompat:appcompat:1.1.0',
+            "glide:glide"                  : "com.github.bumptech.glide:glide:4.11.0",
+            "glide:compiler"               : "com.github.bumptech.glide:compiler:4.11.0",
+            "okhttp3-integration"          : "com.github.bumptech.glide:okhttp3-integration:4.11.0@aar",
     ]
 }

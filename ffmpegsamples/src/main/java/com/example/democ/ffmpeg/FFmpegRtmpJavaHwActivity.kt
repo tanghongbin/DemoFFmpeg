@@ -13,7 +13,7 @@ import com.example.democ.interfaces.OutputEncodedDataListener
 import com.example.democ.interfaces.OutputInitListener
 import com.example.democ.render.FFmpegRender
 import com.example.democ.rtmp.packer.rtmp.RtmpPacker
-import com.example.democ.utils.Constants
+import com.example.common_base.utils.Constants
 import kotlinx.android.synthetic.main.activity_rtmp_java_hw.*
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicInteger

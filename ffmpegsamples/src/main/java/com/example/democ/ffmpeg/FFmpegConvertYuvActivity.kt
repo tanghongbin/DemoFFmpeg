@@ -7,10 +7,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
-import com.example.democ.audio.MuxerManager
 import com.example.democ.audio.log
 import com.example.democ.render.FFmpegRender
-import com.example.democ.utils.Constants
+import com.example.common_base.utils.Constants
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode.*
 import kotlinx.coroutines.*
 import java.io.File

@@ -3,13 +3,12 @@ package com.example.democ.ffmpeg
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
-import android.view.WindowManager
 import android.widget.SeekBar
 import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
 import com.example.democ.opengles.NativeRender
-import com.example.democ.utils.Constants.SLIGHT_MP4_VIDEO_PATH
+import com.example.common_base.utils.Constants.SLIGHT_MP4_VIDEO_PATH
 import com.example.democ.utils.MSG_TYPE_ONREADY
 import kotlinx.android.synthetic.main.activity_f_fmpeg_video.*
 

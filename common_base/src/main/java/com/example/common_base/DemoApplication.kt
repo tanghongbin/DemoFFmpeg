@@ -15,5 +15,6 @@ class DemoApplication : Application() {
         FileUtils.makeFolders(sdcardAssetsFolder)
         FileUtils.copyFilesFromAssets(this,"glsl",sdcardAssetsFolder)
         instance = this
+//        ContextManager.init(this)
     }
 }

@@ -4,9 +4,8 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.democ.R
-import com.example.democ.audio.MuxerManager
 import com.example.democ.render.FFmpegRender
-import com.example.democ.utils.Constants
+import com.example.common_base.utils.Constants
 import kotlinx.android.synthetic.main.activity_f_fmpeg_filter_add_to_yuv.*
 import java.io.File
 

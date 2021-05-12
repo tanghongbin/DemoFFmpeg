@@ -1,0 +1,100 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    //构建版本
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+    //默认的配置
+    defaultConfig {
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+
+//                packagingOptions {
+//            pickFirst '**/libfontconfig.so'
+//            pickFirst '**/libcrypto.so'
+//            pickFirst '**/libavcodec.so'
+//            pickFirst '**/libswscale.so'
+//            pickFirst '**/libmp3lame.so'
+//
+//            pickFirst '**/libass.so'
+//            pickFirst '**/libavfilter.so'
+//            pickFirst '**/libavformat.so'
+//            pickFirst '**/libavutil.so'
+//            pickFirst '**/libexpat.so'
+//
+//            pickFirst '**/libfdk-aac.so'
+//            pickFirst '**/libfreetype.so'
+//            pickFirst '**/libfribidi.so'
+//            pickFirst '**/libssl.so'
+//            pickFirst '**/libswresample.so'
+//
+//            pickFirst '**/libswscale.so'
+//            pickFirst '**/libx264.so'
+//            pickFirst '**/libyuv.so'
+//            pickFirst '**/libyuv-sample.so'
+//            pickFirst '**/libassimp.so'
+//            pickFirst '**/libopencv_java3.so'
+//            pickFirst '**/libcurl.so'
+////            doNotStrip "**.so"
+////            def abiFiltersForWrapScript = supportAbis
+////            if (rootProject.ext.useASAN && abiFiltersForWrapScript) {
+////                def exclude_abis = ["armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "mips", "mips64"]
+////                        .findAll { !(it in abiFiltersForWrapScript) }
+////                        .collect { "**/" + it + "/wrap.sh" }
+////                excludes += exclude_abis
+////            }
+//        }
+
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+//    externalNativeBuild {
+//        cmake {
+//            path "src/main/cpp/CMakeLists.txt"
+//            version "3.10.2"
+//        }
+//    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+dependencies {
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    api project(path: ':common_base')
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+
+}

@@ -6,8 +6,7 @@ import android.view.Surface
 import com.example.democ.audio.log
 import com.example.democ.interfaces.MsgCallback
 import com.example.democ.opengles.NativeRender
-import com.example.democ.utils.Constants
-import com.example.democ.utils.LogUtils
+import com.example.common_base.utils.Constants
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 

@@ -4,10 +4,8 @@ import android.graphics.BitmapFactory
 import android.opengl.GLSurfaceView
 import android.view.Surface
 import com.example.democ.R
-import com.example.democ.audio.MuxerManager
-import com.example.democ.audio.log
 import com.example.democ.getAppContext
-import com.example.democ.utils.Constants
+import com.example.common_base.utils.Constants
 import java.nio.ByteBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10

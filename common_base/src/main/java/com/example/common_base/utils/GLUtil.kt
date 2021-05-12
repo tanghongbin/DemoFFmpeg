@@ -1,15 +1,13 @@
-package com.example.democ
+package com.example.common_base.utils
 
 import android.content.Context
 import android.opengl.GLES20
-import com.example.democ.audio.log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
+import android.view.View
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.example.common_base.DemoApplication
+import kotlinx.coroutines.*
+import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -27,7 +25,10 @@ fun createProgram(context: Context): Int {
             context = context,
             filePath = "glsl/fbo/fragment.glsl"
         )
-    return createAndLinkProgram(vertexCode, fragmentCode)
+    return createAndLinkProgram(
+        vertexCode,
+        fragmentCode
+    )
 }
 
 fun createAndLinkProgram(vertexCode: String, fragmentCode: String): Int {
@@ -35,8 +36,14 @@ fun createAndLinkProgram(vertexCode: String, fragmentCode: String): Int {
     var programHandle = GLES20.glCreateProgram()
     if (programHandle != 0) {
         //编译shader
-        val vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, vertexCode)
-        val fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, fragmentCode)
+        val vertexShaderHandle = compileShader(
+            GLES20.GL_VERTEX_SHADER,
+            vertexCode
+        )
+        val fragmentShaderHandle = compileShader(
+            GLES20.GL_FRAGMENT_SHADER,
+            fragmentCode
+        )
         //绑定shader和program
         GLES20.glAttachShader(programHandle, vertexShaderHandle)
         GLES20.glAttachShader(programHandle, fragmentShaderHandle)
@@ -168,3 +175,30 @@ fun array2Buffer(array: ShortArray): ShortBuffer {
     return buffer
 }
 
+
+fun <T>Any.runAsyncTask(asyncBlock:() -> T,mainBlock:(T) -> Unit = {}){
+    val job = Job()
+    val scope = CoroutineScope(job)
+    scope.launch(Dispatchers.IO) {
+        val result = asyncBlock()
+        withContext(Dispatchers.Main){
+            mainBlock(result)
+        }
+        job.cancelAndJoin()
+        log("协成任务结束")
+    }
+}
+
+fun Any.inflateView(layoutId:Int):View{
+    return View.inflate(DemoApplication.instance,layoutId,null)
+}
+
+fun displayLocalImage(url:String?,imageView: ImageView){
+    if (url.isNullOrBlank()){
+        return
+    }
+    Glide.with(DemoApplication.instance)
+        .load(url)
+        .centerCrop()
+        .into(imageView)
+}
