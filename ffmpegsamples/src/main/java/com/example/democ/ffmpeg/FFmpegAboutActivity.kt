@@ -1,16 +1,13 @@
 package com.example.democ.ffmpeg
 
-import android.bluetooth.BluetoothClass
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.render.FFmpegRender
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_audio.*
 import kotlinx.android.synthetic.main.activity_ffmpeg_about.*
-import java.util.regex.Pattern
 
 class FFmpegAboutActivity : AppCompatActivity(),View.OnClickListener {
 

@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.democ">
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
+    package="com.example.demoFFmpeg">
 
     <application
         android:name="com.example.common_base.DemoApplication"
@@ -19,20 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".hwencoder.FFmpegHwEncodeMuxerActivity"></activity>
-        <activity android:name=".ffmpeg.FFmpegEncodeAVToMp4Activity" />
-        <activity android:name=".ffmpeg.FFmpegFilterAddToYuvActivity" />
-        <activity android:name=".ffmpeg.FFmpegEncodeVideoActivity" />
-        <activity android:name=".ffmpeg.FFmpegEncodeAudioActivity" />
-        <activity android:name=".ffmpeg.FFmpegNavigationActivity" />
-        <activity android:name=".ffmpeg.FFmpegAboutActivity" />
-        <activity android:name=".ffmpeg.FFmpegRtmpNativeActivity" />
-        <activity android:name=".ffmpeg.FFmpegRtmpJavaHwActivity" />
-        <activity android:name=".ffmpeg.FFmpegNativeWindowActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:screenOrientation="landscape">
 
-        </activity>
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,50 +18,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".opengles.TestThreadActivity">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-
-        </activity>
-        <activity android:name=".ffmpeg.FFmpegOpenGLWindowActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:screenOrientation="landscape"
-            />
-        <activity android:name=".ffmpeg.FFmpegTextureActivity" />
-        <activity android:name=".ffmpeg.FFmpegTestNewCameraHelperActivity" />
-        <activity android:name=".ffmpeg.FFmpegConvertYuvActivity" />
-        <activity android:name=".activity.ThreadTestActivity" />
-        <activity android:name=".opengles.OpenGLESNavigationActivity" />
-        <activity
-            android:name=".ffmpeg.FFmpegVideoActivity"
-            android:configChanges="keyboard|screenSize">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
-        <activity android:name=".opengles.OpenGLImageReaderActivity">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
-        <activity android:name=".opengles.NativeEglTestActivity" />
-        <activity android:name=".opengles.OpenGLESSampleActiivty" />
-        <activity android:name=".opengles.OpenGLesEglCtxActiivty" />
-
-        <activity android:name=".activity.AudioTestActivity" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".opengles.EmptyActivity" />
     </application>
-
 </manifest>

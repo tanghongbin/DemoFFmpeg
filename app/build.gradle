@@ -26,41 +26,7 @@ android {
             }
         }
 
-        packagingOptions {
-            pickFirst '**/libfontconfig.so'
-            pickFirst '**/libcrypto.so'
-            pickFirst '**/libavcodec.so'
-            pickFirst '**/libswscale.so'
-            pickFirst '**/libmp3lame.so'
 
-            pickFirst '**/libass.so'
-            pickFirst '**/libavfilter.so'
-            pickFirst '**/libavformat.so'
-            pickFirst '**/libavutil.so'
-            pickFirst '**/libexpat.so'
-
-            pickFirst '**/libfdk-aac.so'
-            pickFirst '**/libfreetype.so'
-            pickFirst '**/libfribidi.so'
-            pickFirst '**/libssl.so'
-            pickFirst '**/libswresample.so'
-
-            pickFirst '**/libswscale.so'
-            pickFirst '**/libx264.so'
-            pickFirst '**/libyuv.so'
-            pickFirst '**/libyuv-sample.so'
-            pickFirst '**/libassimp.so'
-            pickFirst '**/libopencv_java3.so'
-            pickFirst '**/libcurl.so'
-//            doNotStrip "**.so"
-//            def abiFiltersForWrapScript = supportAbis
-//            if (rootProject.ext.useASAN && abiFiltersForWrapScript) {
-//                def exclude_abis = ["armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "mips", "mips64"]
-//                        .findAll { !(it in abiFiltersForWrapScript) }
-//                        .collect { "**/" + it + "/wrap.sh" }
-//                excludes += exclude_abis
-//            }
-        }
 
         ndk {
             abiFilters "armeabi-v7a"
@@ -75,17 +41,17 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.10.2"
-        }
-    }
-    sourceSets {
-        main {
-            jniLibs.srcDirs = ['libs']
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            path "src/main/cpp/CMakeLists.txt"
+//            version "3.10.2"
+//        }
+//    }
+//    sourceSets {
+//        main {
+//            jniLibs.srcDirs = ['libs']
+//        }
+//    }
 }
 
 dependencies {
@@ -93,15 +59,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     api project(path: ':common_base')
     implementation project(path: ':ijkplayer-demo')
+    implementation project(path: ':ffmpegsamples')
 
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0"
-    implementation 'net.butterflytv.utils:rtmp-client:3.0.1'
 //    implementation project(path: ':libyuv-single')
 }
 

@@ -36,7 +36,7 @@ public class RtmpPacker implements Packer, AnnexbHelper.AnnexbNaluListener {
     public static final int PCM = 7;
     public static final int YUV = 8;
 
-    private Packer.OnPacketListener packetListener;
+    private OnPacketListener packetListener;
     private boolean isHeaderWrite;
     private boolean isKeyFrameWrite;
 

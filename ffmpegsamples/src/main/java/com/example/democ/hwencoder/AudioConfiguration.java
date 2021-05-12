@@ -106,7 +106,7 @@ public final class AudioConfiguration {
             return this;
         }
 
-        public AudioConfiguration.Builder setMediaCodec(boolean meidaCodec) {
+        public Builder setMediaCodec(boolean meidaCodec) {
             this.mediaCodec = meidaCodec;
             return this;
         }

@@ -6,15 +6,14 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.democ.R
 import com.example.democ.hwencoder.FFmpegHwEncodeMuxerActivity
-import com.example.ijkplayer_demo.FFmpegIjkPlayerActivity
-import kotlinx.android.synthetic.main.activity_splash.*
+import kotlinx.android.synthetic.main.dialog_siamples.*
 
 
 class FFmpegNavigationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+        setContentView(R.layout.activity_list)
         val arrayStr = arrays.map {
             it.simpleName
         }
@@ -46,8 +45,7 @@ class FFmpegNavigationActivity : AppCompatActivity() {
         FFmpegHwEncodeMuxerActivity::class.java,
         FFmpegRtmpNativeActivity::class.java,
         FFmpegRtmpJavaHwActivity::class.java,
-        FFmpegTestNewCameraHelperActivity::class.java,
-        FFmpegIjkPlayerActivity::class.java
+        FFmpegTestNewCameraHelperActivity::class.java
     )
 
 

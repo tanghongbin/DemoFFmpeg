@@ -12,8 +12,8 @@ import com.example.common_base.DemoApplication
 import com.example.democ.audio.*
 import com.example.democ.opengles.EmptyActivity
 import com.example.common_base.utils.requestCustomPermissions
-
 import kotlinx.android.synthetic.main.activity_main.*
+
 import java.lang.Runnable
 
 

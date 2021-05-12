@@ -1,15 +1,16 @@
-package com.example.democ
+package com.example.demoFFmpeg
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AppCompatActivity
 import com.example.common_base.utils.requestCustomPermissions
+import com.example.democ.MainActivity
 import com.example.democ.activity.AudioTestActivity
-import com.example.democ.activity.ThreadTestActivity
-import com.example.democ.ffmpeg.*
-import com.example.democ.opengles.*
+import com.example.democ.ffmpeg.FFmpegNavigationActivity
+import com.example.democ.opengles.OpenGLESNavigationActivity
+import com.example.ijkplayer_demo.FFmpegIjkPlayerActivity
 import kotlinx.android.synthetic.main.activity_splash.*
 
 class SplashActivity : AppCompatActivity() {
@@ -18,8 +19,8 @@ class SplashActivity : AppCompatActivity() {
         MainActivity::class.java,
         AudioTestActivity::class.java,
         FFmpegNavigationActivity::class.java,
-        OpenGLESNavigationActivity::class.java
-
+        OpenGLESNavigationActivity::class.java,
+        FFmpegIjkPlayerActivity::class.java
     )
     fun putIndex(position:Int){
         getSharedPreferences("demoC", Context.MODE_PRIVATE).edit()
