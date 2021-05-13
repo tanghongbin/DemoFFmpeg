@@ -12,6 +12,7 @@ import com.example.customplayer.bean.VideoInfo
 
 class PlayerListAdapter : RecyclerView.Adapter<PlayerListHolder>() {
     private val mList = arrayListOf<VideoInfo>()
+    private var mBlock:((Int,VideoInfo) -> Unit)? = null
 
     fun addList(data:List<VideoInfo>){
         mList.addAll(data)
@@ -31,6 +32,13 @@ class PlayerListAdapter : RecyclerView.Adapter<PlayerListHolder>() {
         displayLocalImage(item.thumbnailData,image)
         holder.itemView.findViewById<TextView>(R.id.mName).text = item.title
         holder.itemView.findViewById<TextView>(R.id.mDuration).text = item.durationTime
+        holder.itemView.setOnClickListener {
+            mBlock?.invoke(position,mList[position])
+        }
+    }
+
+    fun setOnItemClickListener(block:(Int,VideoInfo) -> Unit){
+        mBlock = block
     }
 
 }

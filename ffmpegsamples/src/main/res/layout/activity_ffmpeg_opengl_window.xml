@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ffmpeg.FFmpegOpenGLWindowActivity">
 
-    <com.example.democ.view.MyGLSurfaceView
+    <com.example.common_base.view.MyGLSurfaceView
         android:layout_gravity="center"
         android:id="@+id/mSurface"
         android:layout_width="match_parent"

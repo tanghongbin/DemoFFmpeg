@@ -1,0 +1,111 @@
+cmake_minimum_required(VERSION 3.4.1)
+
+
+set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
+# ffmpegrender player render
+set(libName native-customplayer)
+
+include_directories(
+        include
+        play_header)
+
+#指定 rtmp 静态库文件目录
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${RTMP}/libs/${CMAKE_ANDROID_ARCH_ABI}")
+
+file(GLOB src-files
+        ${CMAKE_SOURCE_DIR}/${libName}.cpp
+        ${CMAKE_SOURCE_DIR}/play/render/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/mediaprocess/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/utils/*.cpp)
+
+
+#添加静态库
+add_library(avcodec SHARED IMPORTED )
+set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libavcodec.so)
+add_library(avfilter SHARED IMPORTED )
+set_target_properties(avfilter PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libavfilter.so)
+add_library(avformat SHARED IMPORTED )
+set_target_properties(avformat PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libavformat.so)
+add_library(avutil SHARED IMPORTED )
+set_target_properties(avutil PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libavutil.so)
+
+add_library(swresample SHARED IMPORTED )
+set_target_properties(swresample PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libswresample.so)
+add_library(swscale SHARED IMPORTED )
+set_target_properties(swscale PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libswscale.so)
+add_library(mp3 SHARED IMPORTED )
+set_target_properties(mp3 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libmp3lame.so)
+add_library(x264 SHARED IMPORTED )
+set_target_properties(x264 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libx264.so)
+add_library(fdk-aac SHARED IMPORTED )
+set_target_properties(fdk-aac PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfdk-aac.so)
+
+# ass crypto expat fontconfig freetype fribidi ssl
+add_library(crypto SHARED IMPORTED )
+set_target_properties(crypto PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libcrypto.so)
+add_library(expat SHARED IMPORTED )
+set_target_properties(expat PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libexpat.so)
+add_library(fontconfig SHARED IMPORTED )
+set_target_properties(fontconfig PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfontconfig.so)
+add_library(freetype SHARED IMPORTED )
+set_target_properties(freetype PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfreetype.so)
+
+add_library(fribidi SHARED IMPORTED )
+set_target_properties(fribidi PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfribidi.so)
+add_library(ssl SHARED IMPORTED )
+set_target_properties(ssl PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libssl.so)
+add_library(ass SHARED IMPORTED )
+set_target_properties(ass PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libass.so)
+add_library(assimp SHARED IMPORTED )
+set_target_properties(assimp PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libassimp.so)
+add_library(opencv_java3 SHARED IMPORTED )
+set_target_properties(opencv_java3 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libopencv_java3.so)
+add_library(curl SHARED IMPORTED )
+set_target_properties(curl PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libcurl.so)
+
+
+find_library(log-lib log )
+
+find_library(OpenSLES-lib OpenSLES)
+
+set(third-party-libs
+        avcodec
+        avfilter
+        avformat
+        avutil
+        swresample
+        swscale
+        mp3
+        x264
+        #        libyuv
+        ass
+        crypto
+        fdk-aac
+        expat
+        fontconfig
+        freetype
+        fribidi
+        ssl
+#        rtmp
+        assimp
+        opencv_java3
+        curl)
+
+add_library( # Sets the name of the library.
+        ${libName}
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        ${src-files})
+
+target_link_libraries(${libName}
+        ${OpenSLES-lib}
+        ${log-lib}
+        ${third-party-libs}
+        EGL
+        android
+        GLESv3)
+
+

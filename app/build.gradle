@@ -59,8 +59,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     api project(path: ':common_base')
     implementation project(path: ':ijkplayer-demo')
-    implementation project(path: ':ffmpegsamples')
-    implementation project(path: ':customplayer')
 
 //    implementation project(path: ':libyuv-single')
 }

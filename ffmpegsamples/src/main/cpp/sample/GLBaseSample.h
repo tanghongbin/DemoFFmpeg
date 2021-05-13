@@ -41,7 +41,7 @@ protected:
 public:
 
     GLBaseSample() {
-
+        uint32_t
     };
 
     virtual ~GLBaseSample() {
@@ -58,7 +58,6 @@ public:
     virtual void init(const char * vertexStr,const char * fragStr) = 0;
 
     void init() {
-
     }
 
     virtual void draw() = 0;

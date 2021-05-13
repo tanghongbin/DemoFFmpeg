@@ -1,5 +1,6 @@
 package com.example.common_base.utils
 
+import android.Manifest
 import android.graphics.Color
 import android.opengl.GLSurfaceView
 import android.os.Build
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.common_base.DemoApplication
+import com.ruiyi.mvvmlib.permission.EasyPermission
 import com.tbruyelle.rxpermissions2.RxPermissions
 import java.io.File
 import java.io.IOException
@@ -118,17 +120,18 @@ fun AppCompatActivity.fullScreen() {
 }
 
 fun AppCompatActivity.requestCustomPermissions(success: () -> Unit) {
-    RxPermissions(this)
-        .request(android.Manifest.permission.RECORD_AUDIO,
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.READ_EXTERNAL_STORAGE,
-        android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        .subscribe {
-            log("权限请求结果:${it}")
-            if (it) {
+    // 要检查授权
+    EasyPermission.init(this)
+        .permissions(
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO)
+        .onForwardToSettings { deniedList ->
+            showForwardToSettingsDialog(deniedList)
+        }
+        .request { allGranted, _, _ ->
+            if (allGranted) {
                 success()
-            } else {
-                log("请求失败")
             }
         }
 

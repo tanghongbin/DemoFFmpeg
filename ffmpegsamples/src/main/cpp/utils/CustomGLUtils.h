@@ -42,7 +42,10 @@ typedef struct test_params_struct {
 } TestParams;
 
 
-void glCheckError(const char *pGLOperation);
+void glCheckError(const char *pGLOperation) {
+    GLenum error = glGetError();
+    LOGCATE("GLUtils::glCheckError GL Operation %s() glError (0x%x)\n", pGLOperation, error);
+}
 
 GLuint LoadShader(GLenum shaderType, const char *pSource);
 

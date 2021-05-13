@@ -156,7 +156,7 @@ class PlayerModule {
                 videoInfo.bucketId = bucketId
                 videoInfo.bucketDisplayName = bucketDisplayName
                 videoInfo.bookmark = bookmark
-                log("videoInfo = $videoInfo")
+//                log("videoInfo = $videoInfo")
                 videoList.add(videoInfo)
             } while (cursor.moveToNext())
             cursor.close()
