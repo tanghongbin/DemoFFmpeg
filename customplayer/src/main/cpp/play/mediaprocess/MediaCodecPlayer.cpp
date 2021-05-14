@@ -6,8 +6,8 @@
 #include <render/VideoRender.h>
 
 void MediaCodecPlayer::Init(){
-    videoRender = new VideoRender;
-    videoRender->Init();
+//    videoRender = new VideoRender;
+//    videoRender->Init();
 }
 
 void MediaCodecPlayer::OnSurfaceCreated() {
@@ -19,11 +19,11 @@ void MediaCodecPlayer::OnSurfaceChanged(int width, int height)  {
 }
 
 void MediaCodecPlayer::OnDrawFrame() {
-    videoRender->DrawFrame();
+//    videoRender->DrawFrame();
 }
 
 void MediaCodecPlayer::Destroy() {
-    videoRender->Destroy();
-    delete videoRender;
+//    videoRender->Destroy();
+//    delete videoRender;
 }
 

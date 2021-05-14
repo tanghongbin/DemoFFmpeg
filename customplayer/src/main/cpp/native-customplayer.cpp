@@ -51,6 +51,7 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
+    if (mediaPlayer == NULL) return;
     mediaPlayer->Destroy();
     delete mediaPlayer;
     mediaPlayer = NULL;

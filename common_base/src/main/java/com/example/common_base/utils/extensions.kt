@@ -1,6 +1,7 @@
 package com.example.common_base.utils
 
 import android.Manifest
+import android.content.Context
 import android.graphics.Color
 import android.opengl.GLSurfaceView
 import android.os.Build
@@ -8,10 +9,15 @@ import android.util.Log
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.common_base.DemoApplication
 import com.ruiyi.mvvmlib.permission.EasyPermission
 import com.tbruyelle.rxpermissions2.RxPermissions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.nio.charset.Charset
@@ -50,7 +56,7 @@ object TimeTracker{
 fun getStrFromAssets(name:String):String{
     var str = ""
     try {
-        val stream = DemoApplication.instance.assets.open(name)
+        val stream = DemoApplication.getInstance().assets.open(name)
         // size 为字串的长度 ，这里一次性读完
         val size: Int = stream.available()
         val buffer = ByteArray(size)
@@ -151,4 +157,11 @@ fun GLSurfaceView.changeScreenSize(width:Int,height:Int){
     params.height = height
     layoutParams = params
     requestLayout()
+}
+
+fun Context.toastSafe(str:String?){
+    val coroutineScope = CoroutineScope(Job())
+    coroutineScope.launch(Dispatchers.Main) {
+        Toast.makeText(DemoApplication.getInstance(),str,Toast.LENGTH_SHORT).show()
+    }
 }

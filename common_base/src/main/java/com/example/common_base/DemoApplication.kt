@@ -6,15 +6,17 @@ import com.example.common_base.utils.FileUtils
 
 class DemoApplication : Application() {
     companion object{
-        lateinit var instance:Application
+        fun getInstance():Application{
+            return instance_!!
+        }
+        private var instance_:Application? = null
     }
     override fun onCreate() {
         super.onCreate()
+        instance_ = this
         val sdcardAssetsFolder = Environment.getExternalStorageDirectory().absolutePath + "/ffmpegtest/assets/glsl"
         FileUtils.deleteFile(sdcardAssetsFolder)
         FileUtils.makeFolders(sdcardAssetsFolder)
         FileUtils.copyFilesFromAssets(this,"glsl",sdcardAssetsFolder)
-        instance = this
-//        ContextManager.init(this)
     }
 }

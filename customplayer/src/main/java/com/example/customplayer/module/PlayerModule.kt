@@ -18,9 +18,7 @@ import kotlin.collections.ArrayList
 
 class PlayerModule {
 
-    companion object{
-        val tempPathDir = DemoApplication.instance.cacheDir.path + File.separator + "demoFFmpegThubm"
-    }
+    private val tempPathDir by lazy { DemoApplication.getInstance().cacheDir.path + File.separator + "demoFFmpegThubm" }
 
     private val sLocalVideoColumns = arrayOf<String>(
         MediaStore.Video.Media._ID,  // 视频id
@@ -58,16 +56,16 @@ class PlayerModule {
 
     fun loadVideoList(block:(List<VideoInfo>) -> Unit){
         runAsyncTask({
-            loadVideoList_()
+            internalLoadVideoList()
         },{
             block(it)
         })
     }
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    private fun loadVideoList_():List<VideoInfo>{
+    private fun internalLoadVideoList():List<VideoInfo>{
         val videoList = ArrayList<VideoInfo>()
-        val cursor: Cursor = DemoApplication.instance.contentResolver.query(
+        val cursor: Cursor = DemoApplication.getInstance().contentResolver.query(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI, sLocalVideoColumns,
             null, null, null
         )

@@ -10,7 +10,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.PlayerDetailActivity"></activity>
+        <activity android:name=".activity.PlayerDetailActivity"
+            android:theme="@style/AppThemeNoActionBar"
+            android:configChanges="screenSize|orientation">
+
+        </activity>
         <activity android:name=".activity.CustomPlayerListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

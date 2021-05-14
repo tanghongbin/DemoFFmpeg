@@ -190,14 +190,14 @@ fun <T>Any.runAsyncTask(asyncBlock:() -> T,mainBlock:(T) -> Unit = {}){
 }
 
 fun Any.inflateView(layoutId:Int):View{
-    return View.inflate(DemoApplication.instance,layoutId,null)
+    return View.inflate(DemoApplication.getInstance(),layoutId,null)
 }
 
 fun displayLocalImage(url:String?,imageView: ImageView){
     if (url.isNullOrBlank()){
         return
     }
-    Glide.with(DemoApplication.instance)
+    Glide.with(DemoApplication.getInstance())
         .load(url)
         .centerCrop()
         .into(imageView)

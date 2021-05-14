@@ -16,7 +16,7 @@ class MyGLSurfaceView @JvmOverloads constructor(context: Context?, attrs: Attrib
 
     fun init(render:Renderer) {
         val activityManager: ActivityManager =
-            DemoApplication.instance.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            DemoApplication.getInstance().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val configurationInfo: ConfigurationInfo = activityManager.deviceConfigurationInfo
         val supportsEs3: Boolean = configurationInfo.reqGlEsVersion >= 0x30000
 

@@ -21,7 +21,6 @@ class VideoDecodeManager {
         mediaFormat = MediaFormat.createVideoFormat("video/avc", 1280, 720)
         mediaExtractor = MediaExtractor()
         //MP4 文件存放位置
-        //MP4 文件存放位置
         mediaExtractor?.setDataSource(Constants.MP4_PLAY_PATH)
         for (index in 0 until mediaExtractor!!.trackCount) {
             val trackFormat = mediaExtractor?.getTrackFormat(index)
@@ -48,8 +47,8 @@ class VideoDecodeManager {
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         override fun run() {
             while (!isClosed){
-                val index = mediaCodec!!.dequeueInputBuffer(-1)
-                log("prepare decode video index:${index}")
+                val index = mediaCodec!!.dequeueInputBuffer(1000)
+//                log("prepare decode video index:${index}")
                 if (index >= 0){
                     val buffer = mediaCodec?.getInputBuffer(index)
                     buffer?.apply {
@@ -62,9 +61,12 @@ class VideoDecodeManager {
                         }
                     }
                 }
-                log("读取视频数据:${index}")
+//                log("读取视频数据:${index}")
                 val info = MediaCodec.BufferInfo()
                 val outIndex = mediaCodec!!.dequeueOutputBuffer(info,0)
+                if (outIndex == 0){
+
+                }
                 if (outIndex >= 0) {
                     mediaCodec?.releaseOutputBuffer(outIndex, true)
                 }

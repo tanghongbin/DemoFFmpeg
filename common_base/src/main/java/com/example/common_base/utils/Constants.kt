@@ -34,4 +34,8 @@ object Constants {
 
     val HW_MEDIA_CODEC_TIMEOUT = 12000
     val MAX_VIDEO_SEEK_BAR_PROGRESS = 100
+
+    val TIME_UNIT_US = 1000 * 1000L
+    val TIME_UNIT_MS = TIME_UNIT_US / 1000L
+    val TIME_UNIT_SEC = TIME_UNIT_MS / 1000L
 }
