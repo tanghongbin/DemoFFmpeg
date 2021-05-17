@@ -10,7 +10,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.PlayerDetailActivity"
+        <activity android:name=".activity.PlayerMediaActivity"
+            android:theme="@style/AppThemeNoActionBar"
+            android:configChanges="screenSize|orientation">
+
+        </activity>
+
+        <activity android:name=".activity.PlayerDecodeHwActivity"
             android:theme="@style/AppThemeNoActionBar"
             android:configChanges="screenSize|orientation">
 

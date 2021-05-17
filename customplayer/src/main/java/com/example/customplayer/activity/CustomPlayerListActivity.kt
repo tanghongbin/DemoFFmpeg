@@ -3,7 +3,6 @@ package com.example.customplayer.activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.common_base.utils.log
 import com.example.common_base.utils.requestCustomPermissions
@@ -30,7 +29,7 @@ class CustomPlayerListActivity : AppCompatActivity() {
         mRecyclePlayer.layoutManager = layoutManager
         val adapter = PlayerListAdapter()
         adapter.setOnItemClickListener { i, videoInfo ->
-            startActivity(Intent(this,PlayerDetailActivity::class.java).apply {
+            startActivity(Intent(this,PlayerDecodeHwActivity::class.java).apply {
                 putExtra("url",videoInfo.data)
             })
         }
