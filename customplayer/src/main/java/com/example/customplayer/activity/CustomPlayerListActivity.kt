@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.common_base.utils.log
 import com.example.common_base.utils.requestCustomPermissions
 import com.example.customplayer.R
+import com.example.customplayer.activity.ffmpeg.PlayerDecodeFFmpegActivity
+import com.example.customplayer.activity.hw.PlayerDecodeHwActivity
 import com.example.customplayer.adapter.PlayerListAdapter
 import com.example.customplayer.module.PlayerModule
 import com.example.customplayer.player.CustomPlayer
@@ -29,7 +31,7 @@ class CustomPlayerListActivity : AppCompatActivity() {
         mRecyclePlayer.layoutManager = layoutManager
         val adapter = PlayerListAdapter()
         adapter.setOnItemClickListener { i, videoInfo ->
-            startActivity(Intent(this,PlayerDecodeHwActivity::class.java).apply {
+            startActivity(Intent(this, PlayerDecodeFFmpegActivity::class.java).apply {
                 putExtra("url",videoInfo.data)
             })
         }
@@ -37,7 +39,5 @@ class CustomPlayerListActivity : AppCompatActivity() {
         mModule.loadVideoList {
             adapter.addList(it)
         }
-        val player = CustomPlayer()
-        log(player.nativeGetInfo())
     }
 }

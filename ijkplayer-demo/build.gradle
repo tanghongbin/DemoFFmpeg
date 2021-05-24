@@ -1,15 +1,15 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-}
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
 
     defaultConfig {
+        applicationId "com.example.ijkplayer_demo"
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -33,6 +33,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 
 dependencies {
@@ -42,7 +47,7 @@ dependencies {
 
 //    # required, enough for most devices.
     implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
-    implementation 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
+//    implementation 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
 
 //    # Other ABIs: optional
 //    implementation 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
@@ -51,5 +56,8 @@ dependencies {
 //    implementation 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
 
 //    # ExoPlayer as IMediaPlayer: optional, experimental
-    implementation 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.8'
+//    implementation 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.8'
+    api project(path: ':common_base')
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 }

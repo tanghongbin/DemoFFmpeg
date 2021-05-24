@@ -1,5 +1,6 @@
 package com.example.ijkplayer_demo
 
+import android.opengl.GLSurfaceView
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -8,39 +9,42 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.example.common_base.utils.changeScreenSize
-import tv.danmaku.ijk.media.player.IMediaPlayer
+import com.example.common_base.utils.log
+import com.example.common_base.utils.requestCustomPermissions
+import kotlinx.android.synthetic.main.activity_ijk_player.*
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 
 class FFmpegIjkPlayerActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
-    private lateinit var mSurfaceView: SurfaceView
     private val mMediaPlayer by lazy { IjkMediaPlayer() }
+    private val mUrl by lazy { FVL_MY_LOGO }
 
     companion object{
+        val prefix = Environment.getExternalStorageDirectory().absolutePath
         val FILD_VIDEO_DIR = "/ffmpegtest/videos"
-        val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_VIDEO_DIR}/video.mp4"
-        val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "${FILD_VIDEO_DIR}/blackanimal.mp4"
+        val FVL_MY_LOGO = prefix + "${FILD_VIDEO_DIR}/my_logo.flv"
+        val MP4_PLAY_PATH = prefix + "${FILD_VIDEO_DIR}/video.mp4"
+        val MP4_PLAY_BIG_PATH = prefix + "${FILD_VIDEO_DIR}/blackanimal.mp4"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ijk_player)
-        IjkMediaPlayer.loadLibrariesOnce(null)
-        IjkMediaPlayer.native_profileBegin("libijkplayer.so")
-        mSurfaceView = findViewById<SurfaceView>(R.id.mSurfaceView)
-        mSurfaceView.holder.addCallback(this)
+        requestCustomPermissions {
+            mIjkSurface.holder.addCallback(this)
+        }
     }
 
-    private fun init(surface: Surface) {
-        mMediaPlayer.setSurface(surface)
+    private fun init() {
+        log("has init success")
         mMediaPlayer.setOnErrorListener { iMediaPlayer, i, i2 ->
             logd("errorCode:${i} errorCode2:${i2}")
-            true
+            false
         }
         mMediaPlayer.setOnVideoSizeChangedListener { p0, width, height, p3, p4 ->
-            mSurfaceView.changeScreenSize(width,height)
+            mIjkSurface!!.changeScreenSize(width,height)
         }
-        mMediaPlayer.dataSource = MP4_PLAY_BIG_PATH
+        mMediaPlayer.dataSource = mUrl
         mMediaPlayer.setOnPreparedListener {
             mMediaPlayer.start()
         }
@@ -60,7 +64,8 @@ class FFmpegIjkPlayerActivity : AppCompatActivity(), SurfaceHolder.Callback {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        init(holder!!.surface!!)
+        mMediaPlayer.setSurface(holder!!.surface)
+        init()
     }
 
 

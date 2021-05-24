@@ -7,8 +7,11 @@
 
 #include <jni.h>
 #include <mediaprocess/MediaCodecPlayer.h>
+#include <utils/JavaVmManager.h>
+#include <utils/MsgLoopHelper.h>
 #include "mediaprocess/AbsCustomMediaPlayer.h"
 #include "mediaprocess/FFmpegMediaPlayer.h"
+#include "play_header/utils/CustomSafeQueue.h"
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomPlayer"
@@ -21,11 +24,7 @@ extern "C" {
 #endif
 
 JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
-    jclass jclass1 = env->GetObjectClass(instance);
-    jmethodID methodId = env->GetMethodID(jclass1,"receiveMsgFromJni","(III)V");
-    if (methodId){
-        env->CallVoidMethod(jclass1,methodId,1,2,3);
-    }
+    MsgLoopHelper::getInstance()->sendMsg(Message::obtain(1,2,3));
     return env->NewStringUTF("你好吗，朋友");
 }
 
@@ -36,13 +35,16 @@ JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
 AbsCustomMediaPlayer* mediaPlayer;
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
+    JavaVmManager::setInstance(env,instance);
     mediaPlayer = new MediaCodecPlayer;
     mediaPlayer->Init();
+    MsgLoopHelper::getInstance()->initMsgLoop();
+    LOGCATE("has enter env:%p instance:%p",env,instance);
+
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint width,jint height) {
-    if (mediaPlayer != NULL)
-    mediaPlayer->OnSurfaceChanged(width,height);
+    if (mediaPlayer != NULL) mediaPlayer->OnSurfaceChanged(width,height);
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
@@ -55,6 +57,8 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
     mediaPlayer->Destroy();
     delete mediaPlayer;
     mediaPlayer = NULL;
+    JavaVmManager::destroyInstance();
+    MsgLoopHelper::getInstance()->destroyInstance();
 }
 
 
@@ -111,7 +115,7 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p) {
     if (regRet != JNI_TRUE) {
         return JNI_ERR;
     }
-//    JavaVmManager::initVm(env);
+    JavaVmManager::initVm(env);
 //    if (av_jni_set_java_vm(jvm, NULL) < 0) {
 //        return JNI_ERR;
 //    }

@@ -1,7 +1,9 @@
 package com.example.common_base.utils
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.opengl.GLSurfaceView
 import android.os.Build
@@ -164,4 +166,8 @@ fun Context.toastSafe(str:String?){
     coroutineScope.launch(Dispatchers.Main) {
         Toast.makeText(DemoApplication.getInstance(),str,Toast.LENGTH_SHORT).show()
     }
+}
+
+fun Activity.createIntent(clazz: Class<*>):Intent{
+    return Intent(this,clazz)
 }

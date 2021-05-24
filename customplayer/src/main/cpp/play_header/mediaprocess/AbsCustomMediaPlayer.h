@@ -6,8 +6,13 @@
 #define DEMOFFMPEG_ABSCUSTOMMEDIAPLAYER_H
 
 #include <cstdint>
+#include <utils/CustomSafeQueue.h>
+#include <utils/Message.h>
+#include <utils/JavaVmManager.h>
+#include <thread>
 
 class AbsCustomMediaPlayer{
+
 public:
     virtual void Init() = 0;
     virtual void OnSurfaceCreated() {  };
