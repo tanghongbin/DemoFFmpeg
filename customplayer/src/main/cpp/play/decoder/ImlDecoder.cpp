@@ -3,11 +3,20 @@
 //
 
 #include <decoder/ImlDecoder.h>
+#include <render/VideoDataConverter.h>
 
 
 BaseDataCoverter *AudioDecoder::createConverter()  {
     return new AudioDataConverter;
 }
 
+
+BaseDataCoverter *VideoDecoder::createConverter()  {
+    return new VideoDataConverter;
+}
+
+void VideoDecoder::drawVideoFrame()  {
+    if (mDataConverter) mDataConverter->drawVideoFrame();
+}
 
 

@@ -18,5 +18,6 @@ public:
     virtual void Init(AVCodecContext* codecContext) = 0;
     virtual void covertData(AVFrame *data) = 0;
     virtual void Destroy() = 0;
+    virtual void drawVideoFrame() {};
 };
 #endif //DEMOFFMPEG_BASEDATACOVERTER_H

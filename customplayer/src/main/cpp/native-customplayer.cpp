@@ -37,7 +37,8 @@ JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
  */
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer != NULL) mediaPlayer->OnSurfaceCreated();
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint width,jint height) {

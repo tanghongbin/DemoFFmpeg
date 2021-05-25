@@ -12,4 +12,11 @@ class AudioDecoder : public BaseDecoder{
     BaseDataCoverter * createConverter();
 };
 
+class VideoDecoder : public BaseDecoder{
+protected:
+    BaseDataCoverter * createConverter();
+public:
+    void drawVideoFrame();
+};
+
 #endif //DEMOFFMPEG_IMLDECODER_H

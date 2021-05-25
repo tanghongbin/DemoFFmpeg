@@ -73,7 +73,7 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     }
     baseDecoder->OnDecodeReady(formatCtx, currentStreamIndex);
     // start loop
-    baseDecoder->decodeLoop(formatCtx, codeCtx, currentStreamIndex);
+    baseDecoder->decodeLoop(formatCtx, codeCtx, currentStreamIndex, baseDecoder);
     
     EndRecycle:
     if (ret < 0) {
@@ -89,12 +89,13 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     LOGCATE("all ctx are freed");
 }
 
-void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx, int streamIndex) {
+void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i,
+                             BaseDecoder *baseDecoder) {
     // alloc packet,frame
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
-    BaseDataCoverter* dataConverter = createConverter();
-    dataConverter->Init(codeCtx);
+    baseDecoder -> mDataConverter = createConverter();
+    baseDecoder -> mDataConverter ->Init(pCodecContext);
     int ret;
     call(reinterpret_cast<long>(getJniPlayerFromJava()));
     while (isRunning){
@@ -109,16 +110,16 @@ void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx
         // seek to target
         if (mManualSeekPosition != -1){
             int64_t targetPosition = mManualSeekPosition * AV_TIME_BASE;
-            ret = avformat_seek_file(formatCtx,-1,INT64_MIN,targetPosition,INT64_MAX,0);
+            ret = avformat_seek_file(pContext, -1, INT64_MIN, targetPosition, INT64_MAX, 0);
             if (ret == 0){
-                avcodec_flush_buffers(codeCtx);
+                avcodec_flush_buffers(pCodecContext);
             } else {
                 LOGCATE("error seek file:%s",av_err2str(ret));
             }
             mManualSeekPosition = -1;
         }
 
-        ret = av_read_frame(formatCtx,packet);
+        ret = av_read_frame(pContext, packet);
         if (ret == AVERROR_EOF){
             LOGCATE("start to read AVERROR_EOF %d",ret);
             MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_COMPLETE,0,0));
@@ -129,24 +130,24 @@ void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx
             goto DecodeLoopEnd;
         }
 
-        if (packet->stream_index == streamIndex){
-            ret = avcodec_send_packet(codeCtx,packet);
+        if (packet->stream_index == i){
+            ret = avcodec_send_packet(pCodecContext, packet);
             if (ret < 0){
                 LOGCATE("avcodec_send_packet error:%s",av_err2str(ret));
                 goto innerEnd;
             }
 
             // caculate timestamp only audio
-            if (formatCtx->streams[streamIndex]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
+            if (pContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
                 double currentDtsDuration =
-                        packet->dts * av_q2d(formatCtx->streams[streamIndex]->time_base);
+                        packet->dts * av_q2d(pContext->streams[i]->time_base);
                 int currentProgress = (int)currentDtsDuration;
-                LOGCATE("current time:%d",currentProgress);
+//                LOGCATE("current time:%d",currentProgress);
                 MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED,currentProgress,0));
             }
-            while (avcodec_receive_frame(codeCtx,frame) == 0){
+            while (avcodec_receive_frame(pCodecContext, frame) == 0){
 //                LOGCATE("avcodec_receive_frame receive success");
-                dataConverter->covertData(frame);
+                baseDecoder -> mDataConverter ->covertData(frame);
             }
         }
         innerEnd:
@@ -155,8 +156,9 @@ void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx
 
     DecodeLoopEnd:
     LOGCATE("loop has end ret:%d errorStr:%s",ret,av_err2str(ret));
-    dataConverter->Destroy();
-    delete dataConverter;
+    baseDecoder -> mDataConverter ->Destroy();
+    delete baseDecoder -> mDataConverter;
+    baseDecoder -> mDataConverter = nullptr;
     av_packet_unref(packet);
     av_packet_free(&packet);
     av_frame_free(&frame);

@@ -9,6 +9,8 @@
 
 class BaseRender{
 
+protected:
+    Shader* shader = 0;
 public:
     BaseRender(){}
     virtual ~BaseRender(){
@@ -17,7 +19,6 @@ public:
             delete shader;
         }
     }
-    Shader* shader = 0;
     virtual void Init() = 0;
     virtual void DrawFrame() = 0;
     virtual void Destroy() = 0;

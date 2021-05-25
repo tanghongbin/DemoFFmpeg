@@ -23,15 +23,18 @@ private:
     bool isRunning = true;
     bool isStarted;
     int mManualSeekPosition = -1;
-    void decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i);
+    void decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i,
+                    BaseDecoder *pDecoder);
     void OnDecodeReady(AVFormatContext *pContext, int i);
 protected:
     // 1-音频，2-视频
     int appointMediaType;
+
 protected:
     BaseRender* render;
     virtual BaseDataCoverter * createConverter() = 0;
 public:
+    BaseDataCoverter* mDataConverter = 0;
     PrepareCall call;
     void setMediaType(int mediaType) {
         appointMediaType = mediaType;

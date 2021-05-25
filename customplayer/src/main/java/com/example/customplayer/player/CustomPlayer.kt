@@ -89,8 +89,6 @@ class CustomPlayer() : GLSurfaceView.Renderer {
         native_OnSurfaceCreated()
     }
 
-
-
     /***===================  native function **************************/
 
     external fun nativeGetInfo():String
