@@ -15,7 +15,6 @@ void BaseDecoder::Init(const char * url){
     if (appointMediaType == 0){
         LOGCATE("you must setup appoing type");
         exit(0);
-        return;
     }
     mUrl = url;
     readThread = new std::thread(BaseDecoder::createReadThread, this);
@@ -72,7 +71,7 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
         result = av_err2str(ret);
         goto EndRecycle;
     }
-
+    baseDecoder->OnDecodeReady(formatCtx, currentStreamIndex);
     // start loop
     baseDecoder->decodeLoop(formatCtx, codeCtx, currentStreamIndex);
     
@@ -94,28 +93,40 @@ void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx
     // alloc packet,frame
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
-    BaseDataCoverter* dataConverter = new AudioDataConverter;
+    BaseDataCoverter* dataConverter = createConverter();
     dataConverter->Init(codeCtx);
     int ret;
     call(reinterpret_cast<long>(getJniPlayerFromJava()));
     while (isRunning){
         // pause
-//        std::unique_lock<std::mutex> lockGuard(customMutex);
-//        if (!isStarted){
-//            LOGCATE("start to wait");
-//            condition.wait(lockGuard);
-//        }
-//        lockGuard.unlock();
+        std::unique_lock<std::mutex> uniqueLock(customMutex);
+        if (!isStarted){
+            LOGCATE("start to wait");
+            condition.wait(uniqueLock);
+        }
+        uniqueLock.unlock();
+
+        // seek to target
+        if (mManualSeekPosition != -1){
+            int64_t targetPosition = mManualSeekPosition * AV_TIME_BASE;
+            ret = avformat_seek_file(formatCtx,-1,INT64_MIN,targetPosition,INT64_MAX,0);
+            if (ret == 0){
+                avcodec_flush_buffers(codeCtx);
+            } else {
+                LOGCATE("error seek file:%s",av_err2str(ret));
+            }
+            mManualSeekPosition = -1;
+        }
 
         ret = av_read_frame(formatCtx,packet);
         if (ret == AVERROR_EOF){
             LOGCATE("start to read AVERROR_EOF %d",ret);
             MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_COMPLETE,0,0));
-            goto EndRecycle;
+            goto DecodeLoopEnd;
         }else if(ret < 0){
             LOGCATE("start to read error  %d",ret);
             MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_ERROR,ret,0,av_err2str(ret)));
-            goto EndRecycle;
+            goto DecodeLoopEnd;
         }
 
         if (packet->stream_index == streamIndex){
@@ -123,6 +134,15 @@ void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx
             if (ret < 0){
                 LOGCATE("avcodec_send_packet error:%s",av_err2str(ret));
                 goto innerEnd;
+            }
+
+            // caculate timestamp only audio
+            if (formatCtx->streams[streamIndex]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
+                double currentDtsDuration =
+                        packet->dts * av_q2d(formatCtx->streams[streamIndex]->time_base);
+                int currentProgress = (int)currentDtsDuration;
+                LOGCATE("current time:%d",currentProgress);
+                MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED,currentProgress,0));
             }
             while (avcodec_receive_frame(codeCtx,frame) == 0){
 //                LOGCATE("avcodec_receive_frame receive success");
@@ -133,7 +153,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx
         av_packet_unref(packet);
     }
 
-    EndRecycle:
+    DecodeLoopEnd:
     LOGCATE("loop has end ret:%d errorStr:%s",ret,av_err2str(ret));
     dataConverter->Destroy();
     delete dataConverter;
@@ -142,8 +162,35 @@ void BaseDecoder::decodeLoop(AVFormatContext *formatCtx, AVCodecContext *codeCtx
     av_frame_free(&frame);
 }
 
-void BaseDecoder::destroyThread(){
+void BaseDecoder::Destroy(){
+    isRunning = false;
+    condition.notify_one();
     readThread->join();
     delete readThread;
     readThread = nullptr;
+}
+
+void BaseDecoder::Start(){
+    std::lock_guard<std::mutex> lockGuard(customMutex);
+    isStarted = true;
+    condition.notify_one();
+}
+
+void BaseDecoder::Stop(){
+    std::lock_guard<std::mutex> lockGuard(customMutex);
+    isStarted = false;
+}
+
+void BaseDecoder::ManualSeekPosition(int position){
+    std::lock_guard<std::mutex> lockGuard(customMutex);
+    mManualSeekPosition = position;
+}
+
+
+void BaseDecoder::OnDecodeReady(AVFormatContext *pContext, int streamIndex) {
+    int64_t result = pContext->duration / (1000 * 1000);
+    LOGCATE("audio duration is :%lld",result);
+    if (pContext->streams[streamIndex]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
+        MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_DURATION,0,(int)result));
+    }
 }

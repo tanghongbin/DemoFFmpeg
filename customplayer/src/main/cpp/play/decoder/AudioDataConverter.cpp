@@ -56,7 +56,6 @@ void AudioDataConverter::covertData(AVFrame * pFrame){
 
 }
 
-
 void AudioDataConverter::Destroy(){
     free(m_AudioOutBuffer);
     openSlesRender->UnInit();

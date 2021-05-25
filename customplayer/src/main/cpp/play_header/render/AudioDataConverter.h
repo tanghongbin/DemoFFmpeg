@@ -20,6 +20,7 @@ public:
     void Destroy() ;
     void covertData(AVFrame* data) ;
 
+
 private:
     SwrContext *m_SwrContext;
     int m_BufferSize;

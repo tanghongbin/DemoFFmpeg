@@ -23,7 +23,7 @@ public:
     void Prepare() ;
     void Start() ;
     void Stop() ;
-    void SeekTo(long second) ;
+    void SeekTo(int second) ;
 };
 
 #endif //DEMOFFMPEG_FFMPEGMEDIAPLAYER_H

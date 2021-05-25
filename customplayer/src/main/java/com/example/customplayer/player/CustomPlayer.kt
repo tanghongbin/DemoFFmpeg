@@ -18,6 +18,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
         private const val MSG_SEEK_PROGRESS_CHANGED = 3
         private const val MSG_COMPLETE = 4
         private const val MSG_ERROR = 5
+        private const val MSG_DURATION = 6
 
         init {
             System.loadLibrary("native-customplayer")
@@ -34,6 +35,10 @@ class CustomPlayer() : GLSurfaceView.Renderer {
     private var mOnSeekProgressChangeListener: OnSeekProgressChangeListener? = null
     private var mOnCompleteListener: OnCompleteListener? = null
     private var mOnErrorListener: OnErrorListener? = null
+    private var mOnDurationListener: OnDurationListener? = null
+    fun setOnDurationListener(listener:OnDurationListener){
+        mOnDurationListener = listener
+    }
     fun setPrepareListener(listener:OnPreparedListener){
         mOnPreparedListener = listener
     }
@@ -59,6 +64,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
                 MSG_SEEK_PROGRESS_CHANGED -> mOnSeekProgressChangeListener?.onProgress(msg.arg1)
                 MSG_COMPLETE -> mOnCompleteListener?.onComplete()
                 MSG_ERROR -> mOnErrorListener?.onError(msg.arg1,msg.obj.toString())
+                MSG_DURATION -> mOnDurationListener?.onDuration(msg.arg1,msg.arg2)
             }
         }
     }
@@ -106,7 +112,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
 
     external fun native_stop()
 
-    external fun native_seekTo(seconds:Long)
+    external fun native_seekTo(seconds:Int)
 
     external fun native_init()
 

@@ -10,7 +10,7 @@ jobject JavaVmManager::instance = nullptr;
 
 void JavaVmManager::detachCurrentThread() {
     javaVm->DetachCurrentThread();
-    LOGCATE("detach thread success");
+//    LOGCATE("detach thread success");
 }
 
 void JavaVmManager::initVm(JNIEnv *jniEnv)  {

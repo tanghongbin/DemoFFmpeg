@@ -63,10 +63,10 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
 
 JNIEXPORT void JNICALL native_init(JNIEnv *env, jobject instance) {
     JavaVmManager::setInstance(env,instance);
+    MsgLoopHelper::initMsgLoop();
     FFmpegMediaPlayer *mediaPlayer = new FFmpegMediaPlayer;
     setJniPlayerToJava(env,mediaPlayer);
     mediaPlayer->Init();
-    MsgLoopHelper::initMsgLoop();
     LOGCATE("has enter env:%p instance:%p",env,instance);
 }
 
@@ -89,8 +89,10 @@ JNIEXPORT void JNICALL native_stop(JNIEnv *env, jobject instance) {
     mediaPlayer->Stop();
 }
 
-JNIEXPORT void JNICALL native_seekTo(JNIEnv *env, jobject instance,jlong seekProgress) {
-
+JNIEXPORT void JNICALL native_seekTo(JNIEnv *env, jobject instance,jint seekProgress) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer == NULL) return;
+    mediaPlayer->SeekTo(seekProgress);
 }
 
 JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring url) {
@@ -115,7 +117,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_prepare",               "()V",            (void *) (native_prepare)},
         {"native_start",               "()V",            (void *) (native_start)},
         {"native_stop",               "()V",            (void *) (native_stop)},
-        {"native_seekTo",               "(J)V",            (void *) (native_seekTo)},
+        {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
         {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)}
 };
 

@@ -9,6 +9,9 @@ interface OnVideoSizeChangeListener{
 interface OnSeekProgressChangeListener{
     fun onProgress(progress:Int)
 }
+interface OnDurationListener{
+    fun onDuration(min:Int,max:Int)
+}
 interface OnCompleteListener{
     fun onComplete()
 }

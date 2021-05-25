@@ -3,6 +3,7 @@ package com.example.common_base
 import android.app.Application
 import android.os.Environment
 import com.example.common_base.utils.FileUtils
+import com.squareup.leakcanary.LeakCanary
 
 class DemoApplication : Application() {
     companion object{
@@ -18,5 +19,6 @@ class DemoApplication : Application() {
         FileUtils.deleteFile(sdcardAssetsFolder)
         FileUtils.makeFolders(sdcardAssetsFolder)
         FileUtils.copyFilesFromAssets(this,"glsl",sdcardAssetsFolder)
+        LeakCanary.install(this)
     }
 }
