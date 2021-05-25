@@ -3,6 +3,7 @@
 //
 
 #include <mediaprocess/FFmpegMediaPlayer.h>
+#include <decoder/AudioDecoder.h>
 
 void FFmpegMediaPlayer::Init(){
 
@@ -24,3 +25,22 @@ void FFmpegMediaPlayer::Destroy() {
 
 }
 
+void FFmpegMediaPlayer::Prepare() {
+    LOGCATE("start FFmpegMediaPlayer prepare");
+    audioDecoder = new AudioDecoder;
+    audioDecoder->call = prepareReady;
+    audioDecoder->setMediaType(1);
+    audioDecoder->Init(mUrl);
+}
+
+void FFmpegMediaPlayer::Start() {
+
+}
+
+void FFmpegMediaPlayer::Stop() {
+
+}
+
+void FFmpegMediaPlayer::SeekTo(long second) {
+
+}

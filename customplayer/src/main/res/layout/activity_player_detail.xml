@@ -28,4 +28,13 @@
         android:layout_width="match_parent"
         android:layout_height="35dp"/>
 
+    <ImageView
+        android:id="@+id/mPlayPause"
+        android:layout_gravity="bottom|center_horizontal"
+        android:src="@mipmap/live_pause"
+        android:layout_width="50dp"
+        android:layout_height="50dp">
+
+    </ImageView>
+
 </FrameLayout>

@@ -9,6 +9,7 @@
 #include <mediaprocess/MediaCodecPlayer.h>
 #include <utils/JavaVmManager.h>
 #include <utils/MsgLoopHelper.h>
+
 #include "mediaprocess/AbsCustomMediaPlayer.h"
 #include "mediaprocess/FFmpegMediaPlayer.h"
 #include "play_header/utils/CustomSafeQueue.h"
@@ -23,8 +24,10 @@
 extern "C" {
 #endif
 
+#include <libavcodec/jni.h>
+
 JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
-    MsgLoopHelper::getInstance()->sendMsg(Message::obtain(1,2,3));
+    MsgLoopHelper::sendMsg(Message::obtain(5,2,3));
     return env->NewStringUTF("你好吗，朋友");
 }
 
@@ -32,33 +35,68 @@ JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
 /***
  *  ==============================  GL callback ===============================
  */
-AbsCustomMediaPlayer* mediaPlayer;
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-    JavaVmManager::setInstance(env,instance);
-    mediaPlayer = new MediaCodecPlayer;
-    mediaPlayer->Init();
-    MsgLoopHelper::getInstance()->initMsgLoop();
-    LOGCATE("has enter env:%p instance:%p",env,instance);
 
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint width,jint height) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer != NULL) mediaPlayer->OnSurfaceChanged(width,height);
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer != NULL)
     mediaPlayer->OnDrawFrame();
 }
 
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer == NULL) return;
     mediaPlayer->Destroy();
     delete mediaPlayer;
     mediaPlayer = NULL;
     JavaVmManager::destroyInstance();
-    MsgLoopHelper::getInstance()->destroyInstance();
+    MsgLoopHelper::destroyInstance();
+}
+
+JNIEXPORT void JNICALL native_init(JNIEnv *env, jobject instance) {
+    JavaVmManager::setInstance(env,instance);
+    FFmpegMediaPlayer *mediaPlayer = new FFmpegMediaPlayer;
+    setJniPlayerToJava(env,mediaPlayer);
+    mediaPlayer->Init();
+    MsgLoopHelper::initMsgLoop();
+    LOGCATE("has enter env:%p instance:%p",env,instance);
+}
+
+JNIEXPORT void JNICALL native_prepare(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    LOGCATE("native_prepare:%p",mediaPlayer);
+    if (mediaPlayer == NULL) return;
+    mediaPlayer->Prepare();
+}
+
+JNIEXPORT void JNICALL native_start(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer == NULL) return;
+    mediaPlayer->Start();
+}
+
+JNIEXPORT void JNICALL native_stop(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer == NULL) return;
+    mediaPlayer->Stop();
+}
+
+JNIEXPORT void JNICALL native_seekTo(JNIEnv *env, jobject instance,jlong seekProgress) {
+
+}
+
+JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring url) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer != NULL)
+        mediaPlayer->SetDataUrl(getCharStrFromJstring(env,url));
 }
 
 
@@ -73,6 +111,12 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnDrawFrame",               "()V",            (void *) (native_OnDrawFrame)},
         {"native_OnDestroy",               "()V",            (void *) (native_OnDestroy)},
 
+        {"native_init",               "()V",            (void *) (native_init)},
+        {"native_prepare",               "()V",            (void *) (native_prepare)},
+        {"native_start",               "()V",            (void *) (native_start)},
+        {"native_stop",               "()V",            (void *) (native_stop)},
+        {"native_seekTo",               "(J)V",            (void *) (native_seekTo)},
+        {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)}
 };
 
 
@@ -116,16 +160,13 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p) {
         return JNI_ERR;
     }
     JavaVmManager::initVm(env);
-//    if (av_jni_set_java_vm(jvm, NULL) < 0) {
-//        return JNI_ERR;
-//    }
-//    if (ENABLE_FFMPEG_LOG) {
-//        LOGCATE("system log has been init");
-//        sys_log_init();
-//    }
-
-//    HelloTest().test1();
-
+    if (av_jni_set_java_vm(jvm, NULL) < 0) {
+        return JNI_ERR;
+    }
+    if (ENABLE_FFMPEG_LOG) {
+        LOGCATE("system log has been init");
+        sys_log_init();
+    }
     return JNI_VERSION_1_6;
 }
 

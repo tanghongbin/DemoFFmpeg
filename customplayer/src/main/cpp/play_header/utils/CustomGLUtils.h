@@ -5,6 +5,7 @@
 #include <jni.h>
 #include "utils.h"
 #include "OpenGLImageDef.h"
+#include "JavaVmManager.h"
 #include <string>
 #include <glm/gtc/matrix_transform.hpp>
 #include <GLES3/gl3.h>
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <iostream>
 #include <stdlib.h>
+#include <mediaprocess/AbsCustomMediaPlayer.h>
 
 
 extern "C" {
@@ -112,6 +114,24 @@ static const std::string  readGLSLStrFromFile(const char *filename) {
     std::string value = buf.str();
 //    LOGCATE("log fileStr:%s",value.c_str());
     return value;
+}
+
+static void setJniPlayerToJava(JNIEnv* env,AbsCustomMediaPlayer* mediaPlayer){
+    jobject instance = JavaVmManager::getObjInstance();
+    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativePlayer","J");
+    env->SetLongField(instance, jfieldId, reinterpret_cast<jlong>(mediaPlayer));
+}
+
+static AbsCustomMediaPlayer* getJniPlayerFromJava(){
+    bool isAttach;
+    JNIEnv* env = JavaVmManager::GetEnv(&isAttach);
+    jobject instance = JavaVmManager::getObjInstance();
+    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativePlayer","J");
+    jlong point = env->GetLongField(instance,jfieldId);
+//    if (isAttach){
+//        JavaVmManager::detachCurrentThread();
+//    }
+    return reinterpret_cast<AbsCustomMediaPlayer *>(point);
 }
 
 static void setBool(GLuint programId, const std::string &name, bool value) {

@@ -21,22 +21,22 @@ private:
 
     void destroyMsgLoop();
 
-
-public:
     static MsgLoopHelper* getInstance(){
         if (instance == nullptr) instance = new MsgLoopHelper;
         return instance;
     }
+
+
+public:
     static void destroyInstance(){
         getInstance()->destroyMsgLoop();
         delete instance;
         instance = nullptr;
     }
 
-    void initMsgLoop();
+    static void initMsgLoop();
 
-
-    void sendMsg(Message* msg);
+    static void sendMsg(Message* msg);
 
 };
 

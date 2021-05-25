@@ -16,7 +16,9 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/${libName}.cpp
         ${CMAKE_SOURCE_DIR}/play/render/*.cpp
         ${CMAKE_SOURCE_DIR}/play/mediaprocess/*.cpp
-        ${CMAKE_SOURCE_DIR}/play/utils/*.cpp)
+        ${CMAKE_SOURCE_DIR}/play/utils/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/decoder/*.cpp
+        ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp)
 
 
 #添加静态库

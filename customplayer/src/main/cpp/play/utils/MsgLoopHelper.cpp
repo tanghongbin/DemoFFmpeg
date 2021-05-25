@@ -20,11 +20,11 @@ void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
         jobject javaPlayerIns = JavaVmManager::getObjInstance();
 //        LOGCATE("check instance  instance:%p",);
         jclass jclass1 = env->GetObjectClass(JavaVmManager::getObjInstance());
-        jmethodID methodId = env->GetMethodID(jclass1,"receivePlayerMsgFromJni","(III)V");
+        jmethodID methodId = env->GetMethodID(jclass1,"receivePlayerMsgFromJni","(IIILjava/lang/String;)V");
         if (methodId){
             jstring result = env->NewStringUTF(message->msg.c_str());
 //            LOGCATE("current thread :%d",GetCurrent());
-            env->CallVoidMethod(javaPlayerIns,methodId,message->type,message->arg1,message->arg2);
+            env->CallVoidMethod(javaPlayerIns,methodId,message->type,message->arg1,message->arg2,result);
         }
         if (isAttach){
             JavaVmManager::detachCurrentThread();
@@ -36,11 +36,11 @@ void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
     LOGCATE("loop msg has end");
 }
 void MsgLoopHelper::initMsgLoop(){
-    msgThread = new std::thread(prepareMsgLoop,this);
+    getInstance()->msgThread = new std::thread(prepareMsgLoop,getInstance());
 }
 
 void MsgLoopHelper::sendMsg(Message *msg){
-    safeQueue->pushLast(msg);
+    getInstance()->safeQueue->pushLast(msg);
 }
 
 void MsgLoopHelper::destroyMsgLoop(){

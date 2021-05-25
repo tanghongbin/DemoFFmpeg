@@ -9,8 +9,8 @@ import com.example.customplayer.interfaces.*
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-@Suppress("KotlinJniMissingFunction")
-class CustomPlayer : GLSurfaceView.Renderer {
+@Suppress("KotlinJniMissingFunction", "FunctionName")
+class CustomPlayer() : GLSurfaceView.Renderer {
     companion object{
         // communicate code
         private const val MSG_PREPARED = 1
@@ -23,6 +23,12 @@ class CustomPlayer : GLSurfaceView.Renderer {
             System.loadLibrary("native-customplayer")
         }
     }
+    init {
+        native_init()
+    }
+
+    private var mNativePlayer:Long = 0L
+
     private var mOnPreparedListener: OnPreparedListener? = null
     private var mOnVideoSizeChangeListener: OnVideoSizeChangeListener? = null
     private var mOnSeekProgressChangeListener: OnSeekProgressChangeListener? = null
@@ -58,14 +64,9 @@ class CustomPlayer : GLSurfaceView.Renderer {
     }
 
 
-    private fun receivePlayerMsgFromJni(type:Int,arg1:Int,arg2:Int){
-        mHandler.obtainMessage(type,arg1,arg2).sendToTarget()
+    private fun receivePlayerMsgFromJni(type:Int,arg1:Int,arg2:Int,msg:String){
+        mHandler.obtainMessage(type,arg1,arg2,msg).sendToTarget()
     }
-
-    private fun sfsf() {
-//        mHandler.sendEmptyMessage(1)
-    }
-
 
     /*******
      * ====================   callback ================================
@@ -96,10 +97,19 @@ class CustomPlayer : GLSurfaceView.Renderer {
 
     external fun native_OnDestroy()
 
+    //================  播放 方法 ===========================
+    external fun native_setDataUrl(url:String)
+
+    external fun native_prepare()
+
+    external fun native_start()
+
+    external fun native_stop()
+
+    external fun native_seekTo(seconds:Long)
+
+    external fun native_init()
+
+
     /**====================  native function end **********************/
-
-
-    inner class CustomHandler : Handler() {
-
-    }
 }

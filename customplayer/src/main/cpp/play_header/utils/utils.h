@@ -12,8 +12,8 @@
 /**
  * 是否启用ffmpeg日志
  */
-//#define ENABLE_FFMPEG_LOG true
-#define ENABLE_FFMPEG_LOG false
+#define ENABLE_FFMPEG_LOG true
+//#define ENABLE_FFMPEG_LOG false
 
 #define ROOT_DIR "/storage/emulated/0/ffmpegtest/"
 #define FILTER_IMAGE_DIR "/storage/emulated/0/ffmpegtest/filterImg/"
@@ -29,6 +29,16 @@
 
 #define RENDER_DIMENSION_CALLBACK "renderDimensionCallFromJni"
 #define DECODE_READY_DURATION "onDecodeReadyDuration"
+
+// native给java通信
+#define JNI_COMMUNICATE_TYPE_PREPARED 1
+#define JNI_COMMUNICATE_TYPE_VIDEO_SIZE_CHANGED 2
+#define JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED 3
+#define JNI_COMMUNICATE_TYPE_COMPLETE 4
+#define JNI_COMMUNICATE_TYPE_ERROR 5
+
+
+typedef void (*PrepareCall) (long);
 
 static std::string getModel3DPath(const char * fileName){
     std::string result = std::string (MODEL3D_ROOT_DIR) + std::string (fileName);
