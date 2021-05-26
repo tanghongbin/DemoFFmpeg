@@ -27,9 +27,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
     init {
         native_init()
     }
-
     private var mNativePlayer:Long = 0L
-
     private var mOnPreparedListener: OnPreparedListener? = null
     private var mOnVideoSizeChangeListener: OnVideoSizeChangeListener? = null
     private var mOnSeekProgressChangeListener: OnSeekProgressChangeListener? = null

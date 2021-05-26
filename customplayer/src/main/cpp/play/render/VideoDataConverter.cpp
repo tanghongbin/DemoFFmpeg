@@ -22,24 +22,28 @@ void VideoDataConverter::Init(AVCodecContext* codeCtx){
     }
 }
 
-void VideoDataConverter::InitVideoRender(){
-    videoRender = new VideoRender;
-    videoRender->Init();
-}
-
 void VideoDataConverter::Destroy(){
+    LOGCATE("targetFrame:%p targetData:%p swsCtx:%p videoRender:%p",targetFrame,targetData,swsCtx,videoRender);
+    isDestroyed = true;
     if (targetFrame) av_frame_free(&targetFrame);
     av_free(targetData);
     sws_freeContext(swsCtx);
-    videoRender->Destroy();
-    delete videoRender;
+    if (videoRender){
+        videoRender->Destroy();
+        delete videoRender;
+        videoRender = nullptr;
+    }
 }
 
 void VideoDataConverter::covertData(AVFrame* data){
     int ret = sws_scale(swsCtx,data->data,data->linesize,targetFrame->width,targetFrame->height,
             targetFrame->data,targetFrame->linesize);
+//    LOGCATE("log sws_scale result:%s",av_err2str(ret));
+    if (videoRender) videoRender->copyImage(data);
+
 }
 
 void VideoDataConverter::drawVideoFrame(){
+    if (isDestroyed) return;
     if (videoRender) videoRender->DrawFrame();
 }

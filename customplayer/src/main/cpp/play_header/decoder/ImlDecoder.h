@@ -7,6 +7,7 @@
 
 #include "BaseDecoder.h"
 #include <cstdint>
+#include <render/VideoRender.h>
 
 class AudioDecoder : public BaseDecoder{
     BaseDataCoverter * createConverter();
@@ -16,6 +17,8 @@ class VideoDecoder : public BaseDecoder{
 protected:
     BaseDataCoverter * createConverter();
 public:
+    VideoDecoder();
+    VideoRender* videoRender;
     void drawVideoFrame();
 };
 

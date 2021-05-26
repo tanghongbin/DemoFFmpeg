@@ -28,6 +28,11 @@
 
 typedef struct _tag_LoadImageInfo_{
 private:
+	int width;
+	int height;
+	int channels;
+	int64_t startTime;
+	stbi_uc * imageData = nullptr;
 	int64_t getTime() {
 		struct timeval time;
 		gettimeofday(&time, NULL);
@@ -36,11 +41,7 @@ private:
 	}
 
 public:
-	int width;
-	int height;
-	int channels;
-	int64_t startTime;
-	stbi_uc * imageData = nullptr;
+
 	~_tag_LoadImageInfo_(){
 		LOGCATE("imageData before freed:%p",imageData);
 		if (imageData){

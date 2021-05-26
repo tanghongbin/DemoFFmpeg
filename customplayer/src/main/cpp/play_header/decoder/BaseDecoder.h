@@ -18,8 +18,6 @@ private:
     static void createReadThread(BaseDecoder* baseDecoder);
     std::thread* readThread;
     const char * mUrl;
-    std::mutex customMutex;
-    std::condition_variable condition;
     bool isRunning = true;
     bool isStarted;
     int mManualSeekPosition = -1;
@@ -30,10 +28,15 @@ protected:
     // 1-音频，2-视频
     int appointMediaType;
 
+
 protected:
     BaseRender* render;
     virtual BaseDataCoverter * createConverter() = 0;
 public:
+    std::mutex customMutex;
+    std::condition_variable condition;
+    std::mutex createSurfaceMutex;
+    std::condition_variable createSurfaceCondition;
     BaseDataCoverter* mDataConverter = 0;
     PrepareCall call;
     void setMediaType(int mediaType) {

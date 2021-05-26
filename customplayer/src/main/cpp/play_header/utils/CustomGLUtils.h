@@ -97,11 +97,6 @@ const int getRandomInt(int range);
 
 static const std::string  readGLSLStrFromFile(const char *filePath);
 
-static void logLoadImageInfo(LoadImageInfo imageInfo){
-    readGLSLStrFromFile("");
-    LOGCATE("打印图片信息 width:%d height:%d channel:%d",imageInfo.width,imageInfo.height,imageInfo.channels);
-}
-
 static const std::string  readGLSLStrFromFile(const char *filename) {
     std::string absolutePath = std::string(GLSL_ROOT_DIR) + std::string(filename);
     std::ifstream ifile(absolutePath);

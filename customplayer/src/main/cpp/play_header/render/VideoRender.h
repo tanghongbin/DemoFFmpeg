@@ -12,12 +12,15 @@ private:
     GLuint textures[4];
     GLuint vboIds[4];
     GLuint vaoIds[2];
+    std::mutex customMutex;
+    std::condition_variable conditionVariable;
 
 public:
-
+    NativeOpenGLImage * nativeOpenGlImage;
      void Init();
      void DrawFrame() ;
-     void Destroy() ;
+     void Destroy();
+     void copyImage(AVFrame *openGlImage);
 };
 
 #endif //DEMOFFMPEG_VIDEORENDER_H

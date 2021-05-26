@@ -7,16 +7,23 @@
 #include <render/VideoDataConverter.h>
 
 void FFmpegMediaPlayer::Init(){
-
+    audioDecoder = new AudioDecoder;
+    audioDecoder->call = prepareReady;
+    audioDecoder->setMediaType(1);
+    videoDecoder = new VideoDecoder;
+    videoDecoder->call = prepareReady;
+    videoDecoder->setMediaType(2);
 }
 
 void FFmpegMediaPlayer::OnSurfaceCreated() {
-    if (videoDecoder){
-        VideoDecoder* decoder = dynamic_cast<VideoDecoder *>(videoDecoder);
-        BaseDataCoverter *videoConverter = decoder->mDataConverter;
-        VideoDataConverter * resultVideo = dynamic_cast<VideoDataConverter *>(videoConverter);
-        resultVideo->InitVideoRender();
-    }
+    VideoDecoder* videoResult = dynamic_cast<VideoDecoder *>(videoDecoder);
+    VideoRender *render = new VideoRender;
+    render->Init();
+    std::unique_lock<std::mutex> uniqueLock(videoDecoder->createSurfaceMutex);
+    videoResult->videoRender = render;
+    videoDecoder->createSurfaceCondition.notify_one();
+    uniqueLock.unlock();
+    LOGCATE("OnSurfaceCreated create render success:%p videoResult:%p",render,videoResult->videoRender);
 }
 
 void FFmpegMediaPlayer::OnSurfaceChanged(int width, int height)  {
@@ -41,13 +48,7 @@ void FFmpegMediaPlayer::Destroy() {
 
 void FFmpegMediaPlayer::Prepare() {
     LOGCATE("start FFmpegMediaPlayer prepare");
-    audioDecoder = new AudioDecoder;
-    audioDecoder->call = prepareReady;
-    audioDecoder->setMediaType(1);
     audioDecoder->Init(mUrl);
-    videoDecoder = new VideoDecoder;
-    videoDecoder->call = prepareReady;
-    videoDecoder->setMediaType(2);
     videoDecoder->Init(mUrl);
 }
 

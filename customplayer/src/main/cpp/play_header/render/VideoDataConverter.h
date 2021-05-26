@@ -21,13 +21,13 @@ private:
     int targetWidth,targetHeight;
     uint8_t * targetData;
     AVFrame* targetFrame;
-    VideoRender* videoRender;
+    bool isDestroyed = false;
 public:
+    VideoRender* videoRender = 0;
     void Init(AVCodecContext* codecContext) ;
     void Destroy() ;
     void covertData(AVFrame* data);
     void drawVideoFrame();
-    void InitVideoRender();
 
     SwsContext *swsCtx;
 };

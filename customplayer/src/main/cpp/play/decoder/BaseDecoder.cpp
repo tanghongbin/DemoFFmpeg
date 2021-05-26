@@ -3,6 +3,8 @@
 #include <thread>
 #include <utils/MsgLoopHelper.h>
 #include <render/AudioDataConverter.h>
+#include <decoder/ImlDecoder.h>
+#include <render/VideoDataConverter.h>
 
 //
 // Created by Admin on 2021/5/24.
@@ -28,7 +30,6 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     int currentStreamIndex;
     AVCodec *codeC;
     AVCodecContext *codeCtx = nullptr;
-    
     if (!formatCtx){
         ret = -1;
         result = "avformat_alloc_context falied";
@@ -89,12 +90,25 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     LOGCATE("all ctx are freed");
 }
 
-void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i,
+void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int stream_index,
                              BaseDecoder *baseDecoder) {
     // alloc packet,frame
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
     baseDecoder -> mDataConverter = createConverter();
+    if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
+       VideoDecoder* videoResult = dynamic_cast<VideoDecoder *>(baseDecoder);
+       VideoDataConverter * videoConverter = dynamic_cast<VideoDataConverter *>(baseDecoder->mDataConverter);
+        std::unique_lock<std::mutex> uniqueLock(createSurfaceMutex);
+       if (!videoResult->videoRender){
+           LOGCATE("before wait decodeLoop videoRender is null:%p",videoResult->videoRender);
+           createSurfaceCondition.wait(uniqueLock);
+           LOGCATE("after wait decodeLoop videoRender is null:%p",videoResult->videoRender);
+       }
+       uniqueLock.unlock();
+       videoConverter->videoRender = videoResult->videoRender;
+       LOGCATE("decodeLoop set render success:%p",videoResult->videoRender);
+    }
     baseDecoder -> mDataConverter ->Init(pCodecContext);
     int ret;
     call(reinterpret_cast<long>(getJniPlayerFromJava()));
@@ -130,7 +144,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
             goto DecodeLoopEnd;
         }
 
-        if (packet->stream_index == i){
+        if (packet->stream_index == stream_index){
             ret = avcodec_send_packet(pCodecContext, packet);
             if (ret < 0){
                 LOGCATE("avcodec_send_packet error:%s",av_err2str(ret));
@@ -138,9 +152,9 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
             }
 
             // caculate timestamp only audio
-            if (pContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
+            if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
                 double currentDtsDuration =
-                        packet->dts * av_q2d(pContext->streams[i]->time_base);
+                        packet->dts * av_q2d(pContext->streams[stream_index]->time_base);
                 int currentProgress = (int)currentDtsDuration;
 //                LOGCATE("current time:%d",currentProgress);
                 MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED,currentProgress,0));

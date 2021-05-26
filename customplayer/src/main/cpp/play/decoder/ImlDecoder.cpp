@@ -19,4 +19,8 @@ void VideoDecoder::drawVideoFrame()  {
     if (mDataConverter) mDataConverter->drawVideoFrame();
 }
 
+VideoDecoder::VideoDecoder()  {
+    videoRender = 0;
+}
+
 
