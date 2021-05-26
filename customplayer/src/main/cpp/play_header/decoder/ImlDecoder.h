@@ -18,7 +18,6 @@ protected:
     BaseDataCoverter * createConverter();
 public:
     VideoDecoder();
-    VideoRender* videoRender;
     void drawVideoFrame();
 };
 

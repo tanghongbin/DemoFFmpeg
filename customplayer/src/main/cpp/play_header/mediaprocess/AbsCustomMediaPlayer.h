@@ -25,9 +25,9 @@ protected:
         AbsCustomMediaPlayer* mediaPlayer = reinterpret_cast<AbsCustomMediaPlayer *>(mediaPlayerLong);
         std::lock_guard<std::mutex> uniqueLock(mediaPlayer->absMutex);
         mediaPlayer->prepareCount++;
+        LOGCATE("onPrepared send msg success %d",mediaPlayer->prepareCount);
         // todo 后面去掉
         if (mediaPlayer->prepareCount == 1){
-            LOGCATE("onPrepared send msg success");
             MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_PREPARED,0,0));
         }
     }
@@ -46,6 +46,9 @@ public:
     virtual void Start() = 0;
     virtual void Stop() = 0;
     virtual void SeekTo(int second) = 0;
+    AbsCustomMediaPlayer(){
+        prepareCount = 0;
+    }
 };
 
 #endif //DEMOFFMPEG_ABSCUSTOMMEDIAPLAYER_H

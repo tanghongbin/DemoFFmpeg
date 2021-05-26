@@ -18,12 +18,11 @@ extern "C" {
 
 class VideoDataConverter : public BaseDataCoverter{
 private:
-    int targetWidth,targetHeight;
+    int targetWidth,targetHeight,videoWidth,videoHeight;
     uint8_t * targetData;
     AVFrame* targetFrame;
     bool isDestroyed = false;
 public:
-    VideoRender* videoRender = 0;
     void Init(AVCodecContext* codecContext) ;
     void Destroy() ;
     void covertData(AVFrame* data);

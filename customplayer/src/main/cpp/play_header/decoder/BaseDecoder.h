@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <render/BaseRender.h>
 #include <render/AudioDataConverter.h>
+#include <render/VideoRender.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -27,12 +28,11 @@ private:
 protected:
     // 1-音频，2-视频
     int appointMediaType;
-
-
 protected:
     BaseRender* render;
     virtual BaseDataCoverter * createConverter() = 0;
 public:
+    VideoRender* videoRender = 0;
     std::mutex customMutex;
     std::condition_variable condition;
     std::mutex createSurfaceMutex;
@@ -47,6 +47,7 @@ public:
     void Start();
     void Stop();
     void ManualSeekPosition(int position);
+    BaseDecoder();
 };
 
 #endif //DEMOFFMPEG_BASEDECODER_H

@@ -19,6 +19,7 @@
 #define FILTER_IMAGE_DIR "/storage/emulated/0/ffmpegtest/filterImg/"
 #define GLSL_ROOT_DIR "/storage/emulated/0/ffmpegtest/assets/glsl/"
 #define MODEL3D_ROOT_DIR "/storage/emulated/0/ffmpegtest/3d_obj/"
+#define TEST_IMAGE_DIR "/storage/emulated/0/ffmpegtest/testImages"
 
 #define COMMON_YUV_IMAGE_PATH "/storage/emulated/0/ffmpegtest/YUV_Image_840x1074.NV21"
 #define LOG_TAG "AudioDemo-JNI"

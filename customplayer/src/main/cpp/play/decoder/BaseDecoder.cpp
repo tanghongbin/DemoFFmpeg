@@ -97,17 +97,15 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
     AVFrame *frame = av_frame_alloc();
     baseDecoder -> mDataConverter = createConverter();
     if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
-       VideoDecoder* videoResult = dynamic_cast<VideoDecoder *>(baseDecoder);
-       VideoDataConverter * videoConverter = dynamic_cast<VideoDataConverter *>(baseDecoder->mDataConverter);
         std::unique_lock<std::mutex> uniqueLock(createSurfaceMutex);
-       if (!videoResult->videoRender){
-           LOGCATE("before wait decodeLoop videoRender is null:%p",videoResult->videoRender);
+       if (!baseDecoder->videoRender){
+           LOGCATE("before wait decodeLoop videoRender is null:%p",baseDecoder->videoRender);
            createSurfaceCondition.wait(uniqueLock);
-           LOGCATE("after wait decodeLoop videoRender is null:%p",videoResult->videoRender);
+           LOGCATE("after wait decodeLoop videoRender is null:%p",baseDecoder->videoRender);
        }
        uniqueLock.unlock();
-       videoConverter->videoRender = videoResult->videoRender;
-       LOGCATE("decodeLoop set render success:%p",videoResult->videoRender);
+        baseDecoder->mDataConverter->videoRender = baseDecoder->videoRender;
+       LOGCATE("decodeLoop set render success:%p",baseDecoder->videoRender);
     }
     baseDecoder -> mDataConverter ->Init(pCodecContext);
     int ret;
@@ -118,6 +116,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
         if (!isStarted){
             LOGCATE("start to wait");
             condition.wait(uniqueLock);
+            LOGCATE("start to wait is over");
         }
         uniqueLock.unlock();
 
@@ -202,6 +201,13 @@ void BaseDecoder::ManualSeekPosition(int position){
     mManualSeekPosition = position;
 }
 
+BaseDecoder::BaseDecoder(){
+    readThread = 0;
+    isRunning = true;
+    isStarted = false;
+    render = 0;
+    mDataConverter = 0;
+}
 
 void BaseDecoder::OnDecodeReady(AVFormatContext *pContext, int streamIndex) {
     int64_t result = pContext->duration / (1000 * 1000);

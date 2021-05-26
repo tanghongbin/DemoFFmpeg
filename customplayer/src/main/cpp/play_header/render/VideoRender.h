@@ -6,21 +6,22 @@
 #define DEMOFFMPEG_VIDEORENDER_H
 
 #include "BaseRender.h"
+#define TEXTURE_NUM 4
 
 class VideoRender : public BaseRender{
 private:
-    GLuint textures[4];
+    GLuint textures[TEXTURE_NUM];
     GLuint vboIds[4];
     GLuint vaoIds[2];
-    std::mutex customMutex;
-    std::condition_variable conditionVariable;
+    std::mutex renderMutex;
+    std::condition_variable renderCondition;
 
 public:
-    NativeOpenGLImage * nativeOpenGlImage;
+    NativeOpenGLImage nativeOpenGlImage;
      void Init();
      void DrawFrame() ;
      void Destroy();
-     void copyImage(AVFrame *openGlImage);
+     void copyImage(NativeOpenGLImage *openGlImage);
 };
 
 #endif //DEMOFFMPEG_VIDEORENDER_H

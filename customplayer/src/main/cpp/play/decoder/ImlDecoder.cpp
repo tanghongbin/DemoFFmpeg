@@ -4,6 +4,7 @@
 
 #include <decoder/ImlDecoder.h>
 #include <render/VideoDataConverter.h>
+#include <render/OpenGLFFmpegConverter.h>
 
 
 BaseDataCoverter *AudioDecoder::createConverter()  {
@@ -12,7 +13,7 @@ BaseDataCoverter *AudioDecoder::createConverter()  {
 
 
 BaseDataCoverter *VideoDecoder::createConverter()  {
-    return new VideoDataConverter;
+    return new OpenGLFFmpegConverter;
 }
 
 void VideoDecoder::drawVideoFrame()  {

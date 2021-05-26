@@ -307,7 +307,7 @@ public:
 
 		FILE *fp = fopen(imgPath, "wb");
 
-//		LOGCATE("DumpNativeImage fp=%p, file=%s", fp, imgPath);
+		LOGCATE("DumpNativeImage fp=%p, file=%s", fp, imgPath);
 
 		if(fp)
 		{
