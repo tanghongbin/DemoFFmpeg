@@ -22,51 +22,22 @@ void OpenGLFFmpegConverter::Init(AVCodecContext *codeCtx) {
     m_VideoHeight = codeCtx->height;
 
     setupRenderDimension(windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
-
-    //2. 获取转换的上下文
-    m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight,
-                                  codeCtx->pix_fmt,
-                                  m_RenderWidth, m_RenderHeight, AV_PIX_FMT_RGBA,
-                                  SWS_FAST_BILINEAR, NULL, NULL, NULL);
-
-
-    m_RGBAFrame = av_frame_alloc();
-//计算 Buffer 的大小
-    int bufferSize = av_image_get_buffer_size(AV_PIX_FMT_RGBA, m_VideoWidth, m_VideoHeight, 1);
-    m_FrameBuffer = (uint8_t *) av_malloc(bufferSize * sizeof(uint8_t));
-
-    av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize, m_FrameBuffer, AV_PIX_FMT_RGBA,
-                         m_VideoWidth, m_VideoHeight, 1);
-    
     
 }
 
 
 void OpenGLFFmpegConverter::Destroy() {
-    isDestroy = true;
-
-    if (m_SwsContext != nullptr) {
-        sws_freeContext(m_SwsContext);
-        m_SwsContext = nullptr;
-    }
-    //4. 释放资源
-    if (m_RGBAFrame != nullptr) {
-        av_frame_free(&m_RGBAFrame);
-        m_RGBAFrame = nullptr;
-    }
-    if (m_FrameBuffer != nullptr) {
-        free(m_FrameBuffer);
-        m_FrameBuffer = nullptr;
-    }
+    isDestroyed = true;
     if (videoRender){
         videoRender->Destroy();
         delete videoRender;
         videoRender = nullptr;
     }
+    LOGCATE("OpenGLFFmpegConverter destroy over videoRender:%p currentTime:%lld",videoRender,GetSysCurrentTime());
 }
 
 void OpenGLFFmpegConverter::covertData(AVFrame *frame) {
-    if (isDestroy || videoRender == 0) return;
+    if (isDestroyed || videoRender == 0) return;
     int currentPixfmt = frame->format;
     NativeOpenGLImage image;
 //    LOGCATE("print format :%d",currentPixfmt);
@@ -109,12 +80,12 @@ void OpenGLFFmpegConverter::covertData(AVFrame *frame) {
         image.ppPlane[0] = frame->data[0];
     } else {
 
-        sws_scale(m_SwsContext, frame->data, frame->linesize, 0,
-                  m_VideoHeight, m_RGBAFrame->data, m_RGBAFrame->linesize);
-        image.format = IMAGE_FORMAT_RGBA;
-        image.width = m_RenderWidth;
-        image.height = m_RenderHeight;
-        image.ppPlane[0] = m_RGBAFrame->data[0];
+//        sws_scale(m_SwsContext, frame->data, frame->linesize, 0,
+//                  m_VideoHeight, m_RGBAFrame->data, m_RGBAFrame->linesize);
+//        image.format = IMAGE_FORMAT_RGBA;
+//        image.width = m_RenderWidth;
+//        image.height = m_RenderHeight;
+//        image.ppPlane[0] = m_RGBAFrame->data[0];
     }
 //    LOGCATE("decode success");
     videoRender->copyImage(&image);
@@ -122,6 +93,9 @@ void OpenGLFFmpegConverter::covertData(AVFrame *frame) {
 
 
 void OpenGLFFmpegConverter::drawVideoFrame(){
-    if (isDestroy) return;
-    if (videoRender) videoRender->DrawFrame();
+        if (isDestroyed || videoRender == nullptr) {
+            return;
+        }
+    LOGCATE("prepare render videoRender:%p isDestroyed:%d time:%lld",videoRender,isDestroyed,GetSysCurrentTime());
+        videoRender->DrawFrame();
 }

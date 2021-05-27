@@ -12,12 +12,12 @@ void VideoRender::Init(){
             readGLSLStrFromFile("videoplay/fragment.glsl").c_str());
 
     GLfloat vetex[] = {
-            -1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
-            1.0f, -1.0f, -1.0f,  1.0f, 0.0f,
-            1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-            1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f,  0.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
+            1.0f, -1.0f, 0.0f,  1.0f, 1.0f,
+            1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,  0.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
     };
     glGenBuffers(4,vboIds);
     glGenVertexArrays(2,vaoIds);
@@ -47,12 +47,15 @@ void VideoRender::Init(){
 
 void VideoRender::DrawFrame() {
 
+    if (renderIsFinish) return;
     glClearColor(1.0,1.0,1.0,1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // upload texture
-    glBindTexture(GL_TEXTURE_2D,textures[0]);
-    std::unique_lock<std::mutex> uniqueLock(renderMutex);
+
+    LOGCATE("prepare lock and draw count:%d time:%lld  this point:%p",count++,GetSysCurrentTime(),this);
+    std::unique_lock<std::mutex> uniqueLock(renderMutex,std::defer_lock);
+    uniqueLock.lock();
     if (nativeOpenGlImage.width != 0 && nativeOpenGlImage.height != 0){
         glBindTexture(GL_TEXTURE_2D, textures[0]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, nativeOpenGlImage.width,
@@ -75,7 +78,7 @@ void VideoRender::DrawFrame() {
         glBindTexture(GL_TEXTURE_2D, GL_NONE);
     }
     uniqueLock.unlock();
-
+//    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);
     // draw
     shader->use();
     glBindVertexArray(vaoIds[0]);
@@ -90,16 +93,26 @@ void VideoRender::DrawFrame() {
 }
 
 void VideoRender::Destroy() {
+    std::lock_guard<std::mutex> lockGuard(renderMutex);
+    renderIsFinish = true;
     glDeleteBuffers(4,vboIds);
     glDeleteVertexArrays(2,vaoIds);
     glDeleteTextures(4,textures);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
+    LOGCATE("delete video render is success");
+}
+
+VideoRender::~VideoRender(){
+    renderIsFinish = true;
+LOGCATE("VideoRender is destroyed");
 }
 
 void VideoRender::copyImage(NativeOpenGLImage *srcImage){
 //    LOGCATE("log image params width:%d height:%d format:%d data:%p",
 //            srcImage->width,srcImage->height,srcImage->format,srcImage->ppPlane[0]);
+    LOGCATE("prepare lock and copyImage");
     std::lock_guard<std::mutex> lockGuard(renderMutex);
+    if (renderIsFinish) return;
     if (nativeOpenGlImage.ppPlane[0] == nullptr){
         nativeOpenGlImage.width = srcImage->width;
         nativeOpenGlImage.height = srcImage->height;

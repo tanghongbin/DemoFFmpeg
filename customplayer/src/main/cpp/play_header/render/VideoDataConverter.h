@@ -21,7 +21,6 @@ private:
     int targetWidth,targetHeight,videoWidth,videoHeight;
     uint8_t * targetData;
     AVFrame* targetFrame;
-    bool isDestroyed = false;
 public:
     void Init(AVCodecContext* codecContext) ;
     void Destroy() ;

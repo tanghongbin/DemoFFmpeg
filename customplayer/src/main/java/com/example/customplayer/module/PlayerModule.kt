@@ -187,16 +187,16 @@ class PlayerModule {
             outStream.close()
             b?.recycle()
         } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
+//            e.printStackTrace()
         } catch (e: RuntimeException) {
-            e.printStackTrace()
+//            e.printStackTrace()
         }catch (e:Exception){
-            e.printStackTrace()
+//            e.printStackTrace()
         } finally {
             try {
                 retriever.release()
             } catch (e: RuntimeException) {
-                e.printStackTrace()
+//                e.printStackTrace()
             }
         }
         return fileName

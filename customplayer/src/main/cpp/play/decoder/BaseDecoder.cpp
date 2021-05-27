@@ -207,6 +207,9 @@ BaseDecoder::BaseDecoder(){
     isStarted = false;
     render = 0;
     mDataConverter = 0;
+    videoRender = 0;
+    mDataConverter = 0;
+    mManualSeekPosition = -1;
 }
 
 void BaseDecoder::OnDecodeReady(AVFormatContext *pContext, int streamIndex) {

@@ -21,7 +21,7 @@ private:
     const char * mUrl;
     bool isRunning = true;
     bool isStarted;
-    int mManualSeekPosition = -1;
+    int mManualSeekPosition;
     void decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i,
                     BaseDecoder *pDecoder);
     void OnDecodeReady(AVFormatContext *pContext, int i);
@@ -32,12 +32,12 @@ protected:
     BaseRender* render;
     virtual BaseDataCoverter * createConverter() = 0;
 public:
-    VideoRender* videoRender = 0;
+    VideoRender* videoRender;
     std::mutex customMutex;
     std::condition_variable condition;
     std::mutex createSurfaceMutex;
     std::condition_variable createSurfaceCondition;
-    BaseDataCoverter* mDataConverter = 0;
+    BaseDataCoverter* mDataConverter;
     PrepareCall call;
     void setMediaType(int mediaType) {
         appointMediaType = mediaType;

@@ -20,15 +20,10 @@ extern "C" {
 class OpenGLFFmpegConverter : public BaseDataCoverter {
 
 private:
-    SwsContext *m_SwsContext;
-    AVFrame *m_RGBAFrame;
-    uint8_t *m_FrameBuffer;
     int m_VideoWidth;
     int m_VideoHeight;
     static int m_RenderWidth;
     static int m_RenderHeight;
-    VideoRender* videoRender = 0;
-    bool isDestroy = false;
 
 public:
 

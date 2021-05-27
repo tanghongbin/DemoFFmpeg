@@ -15,6 +15,8 @@ private:
     GLuint vaoIds[2];
     std::mutex renderMutex;
     std::condition_variable renderCondition;
+    int count = 0;
+    bool renderIsFinish = false;
 
 public:
     NativeOpenGLImage nativeOpenGlImage;
@@ -22,6 +24,7 @@ public:
      void DrawFrame() ;
      void Destroy();
      void copyImage(NativeOpenGLImage *openGlImage);
+     ~VideoRender();
 };
 
 #endif //DEMOFFMPEG_VIDEORENDER_H
