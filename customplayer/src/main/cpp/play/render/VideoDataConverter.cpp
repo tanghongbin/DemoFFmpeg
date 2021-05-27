@@ -32,11 +32,7 @@ void VideoDataConverter::Destroy(){
     if (targetFrame) av_frame_free(&targetFrame);
     av_free(targetData);
     sws_freeContext(swsCtx);
-    if (videoRender){
-        videoRender->Destroy();
-        delete videoRender;
-        videoRender = nullptr;
-    }
+
 }
 
 void VideoDataConverter::covertData(AVFrame* srcFrame){
@@ -56,11 +52,10 @@ void VideoDataConverter::covertData(AVFrame* srcFrame){
     targetIamge.format = IMAGE_FORMAT_RGBA;
     targetIamge.ppPlane[0] = targetFrame->data[0];
 //    LOGCATE("log sws_scale result:%s",av_err2str(ret));
-    if (videoRender) videoRender->copyImage(&targetIamge);
+
 
 }
 
 void VideoDataConverter::drawVideoFrame(){
-    if (isDestroyed) return;
-    if (videoRender) videoRender->DrawFrame();
+
 }

@@ -22,6 +22,14 @@ void BaseDecoder::Init(const char * url){
     readThread = new std::thread(BaseDecoder::createReadThread, this);
 }
 
+void BaseDecoder::resolveConvertResult(void * decoder,void * data){
+//    LOGCATE("resolveConvertResult receive data");
+    BaseDecoder* baseDecoder = static_cast<BaseDecoder *>(decoder);
+    if (baseDecoder->appointMediaType == 2 && baseDecoder->videoRender){
+        baseDecoder->videoRender->copyImage(static_cast<NativeOpenGLImage *>(data));
+    }
+}
+
 void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     AVFormatContext *formatCtx = avformat_alloc_context();
     int ret;
@@ -103,8 +111,9 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
            createSurfaceCondition.wait(uniqueLock);
            LOGCATE("after wait decodeLoop videoRender is null:%p",baseDecoder->videoRender);
        }
-       uniqueLock.unlock();
-        baseDecoder->mDataConverter->videoRender = baseDecoder->videoRender;
+        uniqueLock.unlock();
+        baseDecoder->mDataConverter->convertResult = BaseDecoder::resolveConvertResult;
+        baseDecoder->mDataConverter->baseDecoder = this;
        LOGCATE("decodeLoop set render success:%p",baseDecoder->videoRender);
     }
     baseDecoder -> mDataConverter ->Init(pCodecContext);
@@ -178,6 +187,11 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
 }
 
 void BaseDecoder::Destroy(){
+    if (videoRender){
+        videoRender->Destroy();
+        delete videoRender;
+        videoRender = 0;
+    }
     isRunning = false;
     condition.notify_one();
     readThread->join();
@@ -205,7 +219,6 @@ BaseDecoder::BaseDecoder(){
     readThread = 0;
     isRunning = true;
     isStarted = false;
-    render = 0;
     mDataConverter = 0;
     videoRender = 0;
     mDataConverter = 0;

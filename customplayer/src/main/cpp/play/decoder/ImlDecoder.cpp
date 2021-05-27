@@ -13,11 +13,12 @@ BaseDataCoverter *AudioDecoder::createConverter()  {
 
 
 BaseDataCoverter *VideoDecoder::createConverter()  {
+    OpenGLFFmpegConverter* glfFmpegConverter = new OpenGLFFmpegConverter;
     return new OpenGLFFmpegConverter;
 }
 
 void VideoDecoder::drawVideoFrame()  {
-    if (mDataConverter) mDataConverter->drawVideoFrame();
+    if (videoRender) videoRender->DrawFrame();
 }
 
 VideoDecoder::VideoDecoder()  {

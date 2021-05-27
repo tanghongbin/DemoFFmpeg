@@ -11,7 +11,7 @@
 class FFmpegMediaPlayer : public AbsCustomMediaPlayer{
 
 private:
-//    BaseDecoder* audioDecoder = 0;
+    BaseDecoder* audioDecoder = 0;
     BaseDecoder* videoDecoder = 0;
 
 public:

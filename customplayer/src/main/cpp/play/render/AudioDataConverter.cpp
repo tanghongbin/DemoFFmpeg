@@ -61,3 +61,4 @@ void AudioDataConverter::Destroy(){
     openSlesRender->UnInit();
     delete openSlesRender;
 }
+

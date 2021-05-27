@@ -22,22 +22,16 @@ void OpenGLFFmpegConverter::Init(AVCodecContext *codeCtx) {
     m_VideoHeight = codeCtx->height;
 
     setupRenderDimension(windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
-    
+    LOGCATE("createConverter 打印函数地址：%p",convertResult);
 }
 
 
 void OpenGLFFmpegConverter::Destroy() {
     isDestroyed = true;
-    if (videoRender){
-        videoRender->Destroy();
-        delete videoRender;
-        videoRender = nullptr;
-    }
-    LOGCATE("OpenGLFFmpegConverter destroy over videoRender:%p currentTime:%lld",videoRender,GetSysCurrentTime());
 }
 
 void OpenGLFFmpegConverter::covertData(AVFrame *frame) {
-    if (isDestroyed || videoRender == 0) return;
+    if (isDestroyed) return;
     int currentPixfmt = frame->format;
     NativeOpenGLImage image;
 //    LOGCATE("print format :%d",currentPixfmt);
@@ -88,14 +82,5 @@ void OpenGLFFmpegConverter::covertData(AVFrame *frame) {
 //        image.ppPlane[0] = m_RGBAFrame->data[0];
     }
 //    LOGCATE("decode success");
-    videoRender->copyImage(&image);
-}
-
-
-void OpenGLFFmpegConverter::drawVideoFrame(){
-        if (isDestroyed || videoRender == nullptr) {
-            return;
-        }
-    LOGCATE("prepare render videoRender:%p isDestroyed:%d time:%lld",videoRender,isDestroyed,GetSysCurrentTime());
-        videoRender->DrawFrame();
+    convertResult(baseDecoder,&image);
 }

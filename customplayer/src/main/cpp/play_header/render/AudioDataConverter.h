@@ -16,6 +16,7 @@ extern "C" {
 
 class AudioDataConverter : public BaseDataCoverter{
 public:
+
     void Init(AVCodecContext* codecContext) ;
     void Destroy() ;
     void covertData(AVFrame* data) ;

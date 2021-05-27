@@ -41,6 +41,7 @@
 
 
 typedef void (*PrepareCall) (long);
+typedef void (*ConvertResult) (void * decoder,void * data);
 
 static std::string getModel3DPath(const char * fileName){
     std::string result = std::string (MODEL3D_ROOT_DIR) + std::string (fileName);

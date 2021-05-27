@@ -26,7 +26,6 @@ public:
     void Destroy() ;
     void covertData(AVFrame* data);
     void drawVideoFrame();
-
     SwsContext *swsCtx;
 };
 

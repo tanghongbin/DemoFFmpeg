@@ -30,7 +30,7 @@ public:
      void Init(AVCodecContext* codecContext);
      void covertData(AVFrame *data);
      void Destroy();
-     void drawVideoFrame();
+
 };
 
 

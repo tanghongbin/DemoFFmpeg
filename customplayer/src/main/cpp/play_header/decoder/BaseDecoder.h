@@ -17,6 +17,7 @@ extern "C" {
 class BaseDecoder{
 private:
     static void createReadThread(BaseDecoder* baseDecoder);
+
     std::thread* readThread;
     const char * mUrl;
     bool isRunning = true;
@@ -29,9 +30,9 @@ protected:
     // 1-音频，2-视频
     int appointMediaType;
 protected:
-    BaseRender* render;
     virtual BaseDataCoverter * createConverter() = 0;
 public:
+    static void resolveConvertResult(void * decoder,void * data);
     VideoRender* videoRender;
     std::mutex customMutex;
     std::condition_variable condition;
