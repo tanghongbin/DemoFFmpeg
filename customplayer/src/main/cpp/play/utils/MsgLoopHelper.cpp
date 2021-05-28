@@ -49,4 +49,6 @@ void MsgLoopHelper::destroyMsgLoop(){
     msgThread->join();
     delete msgThread;
     msgThread = nullptr;
+    delete instance;
+    instance = nullptr;
 }

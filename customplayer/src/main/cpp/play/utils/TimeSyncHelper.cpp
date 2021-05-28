@@ -53,7 +53,7 @@ bool TimeSyncHelper::syncTime(bool isPkt,AVPacket* packet,AVFrame* frame,AVForma
             frameIsValid = false;
         }
         pastDuration = avDuration;
-        LOGCATE("log sysDuration:%lld avduration:%lld waitSys:%lld",sysDuration,avDuration,waitSysTime);
+//        LOGCATE("log sysDuration:%lld avduration:%lld waitSys:%lld",sysDuration,avDuration,waitSysTime);
     }
     return frameIsValid;
 }

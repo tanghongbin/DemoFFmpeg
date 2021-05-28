@@ -106,7 +106,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
     // alloc packet,frame
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
-    TimeSyncHelper* timeHelper = new TimeSyncHelper;
+    auto* timeHelper = new TimeSyncHelper;
     baseDecoder -> mDataConverter = createConverter();
     if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
         std::unique_lock<std::mutex> uniqueLock(createSurfaceMutex);
@@ -118,7 +118,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
         uniqueLock.unlock();
         baseDecoder->mDataConverter->convertResult = BaseDecoder::resolveConvertResult;
         baseDecoder->mDataConverter->baseDecoder = this;
-        VideoDecoder* videoDecoder = dynamic_cast<VideoDecoder *>(baseDecoder);
+        auto* videoDecoder = dynamic_cast<VideoDecoder *>(baseDecoder);
         videoDecoder -> OnSizeReady();
        LOGCATE("decodeLoop set render success:%p",baseDecoder->videoRender);
     }
