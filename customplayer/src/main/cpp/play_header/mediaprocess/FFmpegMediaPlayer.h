@@ -17,7 +17,7 @@ private:
 public:
     void Init();
     void OnSurfaceCreated();
-    void OnSurfaceChanged(int width,int height);
+    void OnSurfaceChanged(int oreration,int width,int height);
     void OnDrawFrame();
     void Destroy();
     void Prepare() ;

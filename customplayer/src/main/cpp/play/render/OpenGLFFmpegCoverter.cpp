@@ -9,20 +9,9 @@ extern "C" {
 
 #include "../../play_header/render/OpenGLFFmpegConverter.h"
 
-int OpenGLFFmpegConverter::m_RenderWidth = 0;
-int OpenGLFFmpegConverter::m_RenderHeight = 0;
 
 void OpenGLFFmpegConverter::Init(AVCodecContext *codeCtx) {
 
-//    vec2 &dimesion = VideoGLRender::GetInstance()->m_ScreenSize;
-    // todo 暂时写死
-    int windowWidth = 2159;
-    int windowHeight = 1080;
-    m_VideoWidth = codeCtx->width;
-    m_VideoHeight = codeCtx->height;
-
-    setupRenderDimension(windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
-    LOGCATE("createConverter 打印函数地址：%p",convertResult);
 }
 
 

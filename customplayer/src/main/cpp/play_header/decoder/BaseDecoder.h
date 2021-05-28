@@ -29,9 +29,11 @@ private:
 protected:
     // 1-音频，2-视频
     int appointMediaType;
+
 protected:
     virtual BaseDataCoverter * createConverter() = 0;
 public:
+    AVCodecContext* codeCtx;
     static void resolveConvertResult(void * decoder,void * data);
     VideoRender* videoRender;
     std::mutex customMutex;

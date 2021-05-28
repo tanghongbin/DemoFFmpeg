@@ -84,7 +84,7 @@ bool checkNegativeReturn(int ret, const char *string);
 void NvToYUV420p(const uint8_t *image_src, uint8_t *image_dst, int image_width, int image_height);
 
 void
-setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,
+setupRenderDimension(int orientation,int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,
                      int *renderWidth, int *renderHeight);
 
 void syslog_print(void *ptr, int level, const char *fmt, va_list vl);

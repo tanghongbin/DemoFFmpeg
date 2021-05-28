@@ -21,8 +21,25 @@ void VideoDecoder::drawVideoFrame()  {
     if (videoRender) videoRender->DrawFrame();
 }
 
+void VideoDecoder::OnSurfaceChanged(int oreration,int windowW,int windowH){
+    windowWidth = windowW;
+    windowHeight = windowH;
+    mOreration = oreration;
+    OnSizeReady();
+}
+
 VideoDecoder::VideoDecoder()  {
     videoRender = 0;
+    codeCtx = 0;
+}
+
+void VideoDecoder::OnSizeReady() {
+    if (codeCtx == nullptr || videoRender == nullptr) return;
+    int m_VideoWidth = codeCtx->width;
+    int m_VideoHeight = codeCtx->height;
+    int m_RenderWidth,m_RenderHeight;
+    setupRenderDimension(mOreration,windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
+    videoRender->OnRenderSizeChanged(windowWidth,windowHeight,m_RenderWidth,m_RenderHeight);
 }
 
 

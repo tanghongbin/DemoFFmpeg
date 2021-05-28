@@ -4,6 +4,7 @@ import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import com.example.common_base.DemoApplication
 import com.example.common_base.utils.log
 import com.example.customplayer.interfaces.*
 import javax.microedition.khronos.egl.EGLConfig
@@ -80,7 +81,9 @@ class CustomPlayer() : GLSurfaceView.Renderer {
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-        native_OnSurfaceChanged(width,height)
+        val orientation = DemoApplication.getInstance().resources.configuration.orientation
+        log("查看屏幕方向:${orientation}")
+        native_OnSurfaceChanged(orientation,width,height)
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -93,7 +96,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
 
     private external fun native_OnSurfaceCreated()
 
-    private external fun native_OnSurfaceChanged(width:Int,height:Int)
+    private external fun native_OnSurfaceChanged (oreration:Int,width:Int,height:Int)
 
     private external fun native_OnDrawFrame()
 

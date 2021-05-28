@@ -17,12 +17,14 @@ private:
     std::condition_variable renderCondition;
     int count = 0;
     bool renderIsFinish = false;
+    int renderWidth,renderHeight,widthOffset,heightOffset;
 
 public:
     NativeOpenGLImage nativeOpenGlImage;
      void Init();
      void DrawFrame() ;
      void Destroy();
+     void OnRenderSizeChanged(int windowWidth,int windowHeight,int renderW,int renderH);
      void copyImage(NativeOpenGLImage *openGlImage);
      ~VideoRender();
 };

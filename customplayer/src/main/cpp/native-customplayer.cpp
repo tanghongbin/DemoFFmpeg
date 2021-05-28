@@ -41,9 +41,9 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
     if (mediaPlayer != NULL) mediaPlayer->OnSurfaceCreated();
 }
 
-JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint width,jint height) {
+JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint oretenation,jint width,jint height) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL) mediaPlayer->OnSurfaceChanged(width,height);
+    if (mediaPlayer != NULL) mediaPlayer->OnSurfaceChanged(oretenation,width,height);
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
@@ -110,7 +110,7 @@ JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring u
 static JNINativeMethod g_RenderMethods[] = {
         {"nativeGetInfo",               "()Ljava/lang/String;",            (void *) (nativeGetInfo)},
         {"native_OnSurfaceCreated",               "()V",            (void *) (native_OnSurfaceCreated)},
-        {"native_OnSurfaceChanged",               "(II)V",            (void *) (native_OnSurfaceChanged)},
+        {"native_OnSurfaceChanged",               "(III)V",            (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",               "()V",            (void *) (native_OnDrawFrame)},
         {"native_OnDestroy",               "()V",            (void *) (native_OnDestroy)},
 

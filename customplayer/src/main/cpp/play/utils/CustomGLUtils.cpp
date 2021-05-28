@@ -128,9 +128,10 @@ long long GetSysCurrentTime() {
  * @param renderWidth
  * @param renderHeight
  */
-void
-setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWidth, int videoHeight,
-                     int *renderWidth, int *renderHeight) {
+void setupRenderDimension(int orientation,int nativeWindowWidth, int nativeWindowHeight, int videoWidth,
+        int videoHeight,int *renderWidth, int *renderHeight) {
+
+    // 横屏视频
     if (videoWidth > videoHeight) {
         if (nativeWindowHeight > nativeWindowWidth) {
             float scaleSmallWidthRation = videoWidth * 1.0f / nativeWindowWidth;
@@ -144,9 +145,9 @@ setupRenderDimension(int nativeWindowWidth, int nativeWindowHeight, int videoWid
                 *renderHeight = nativeWindowHeight;
                 *renderWidth = static_cast<int>(nativeWindowHeight * scaleVideoRation);
             }
-
         }
     } else {
+        // 竖屏视频
         float scaleSmallHeightRation = videoHeight * 1.0f / nativeWindowHeight;
         if (nativeWindowHeight > nativeWindowWidth) {
             *renderWidth = nativeWindowWidth;

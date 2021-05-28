@@ -47,8 +47,10 @@ void VideoRender::Init(){
 
 void VideoRender::DrawFrame() {
 //    LOGCATE("im still draw");
+
     if (!shader || shader->ID == 0) return;
-    glClearColor(1.0,1.0,1.0,1.0);
+    glViewport(widthOffset,heightOffset,renderWidth,renderHeight);
+    glClearColor(0.0,0.0,0.0,1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     // upload texture
     std::unique_lock<std::mutex> uniqueLock(renderMutex,std::defer_lock);
@@ -118,4 +120,36 @@ void VideoRender::copyImage(NativeOpenGLImage *srcImage){
         NativeOpenGLImageUtil::AllocNativeImage(&nativeOpenGlImage);
     }
     NativeOpenGLImageUtil::CopyNativeImage(srcImage,&nativeOpenGlImage);
+}
+
+
+void VideoRender::OnRenderSizeChanged(int windowW,int windowH,int renderW,int renderH){
+    if (windowW < windowH) {
+        // 竖屏
+        if (renderW > renderH) {
+            widthOffset = 0;
+            heightOffset = (windowH - renderH) / 2;
+            renderWidth = renderW;
+            renderHeight = renderH;
+        } else {
+            widthOffset = (windowW - renderW) / 2;
+            heightOffset = 0;
+            renderWidth = renderW;
+            renderHeight = renderH;
+        }
+    } else {
+        if (renderW < renderH) {
+            widthOffset = 0;
+            heightOffset = (windowH - renderH) / 2;
+            renderWidth = renderW;
+            renderHeight = renderH;
+        } else {
+            widthOffset = (windowW - renderW) / 2;
+            heightOffset = 0;
+            renderWidth = renderW;
+            renderHeight = renderH;
+        }
+    }
+    LOGCATE("log offsetW:%d offsetH:%d windowW:%d windowH:%d renderW:%d renderH:%d",widthOffset,heightOffset,
+            windowW,windowH,renderWidth,renderHeight);
 }

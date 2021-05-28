@@ -36,8 +36,8 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     std::string result = "";
     AVMediaType mediaType;
     int currentStreamIndex;
+    AVCodecContext * codeCtx = nullptr;
     AVCodec *codeC;
-    AVCodecContext *codeCtx = nullptr;
     if (!formatCtx){
         ret = -1;
         result = "avformat_alloc_context falied";
@@ -65,7 +65,7 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
         ret = -1;
         goto EndRecycle;
     }
-    codeCtx = avcodec_alloc_context3(codeC);
+    codeCtx = baseDecoder -> codeCtx = avcodec_alloc_context3(codeC);
     if (!codeCtx){
         result = "can't find codec";
         ret = -1;
@@ -114,6 +114,8 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
         uniqueLock.unlock();
         baseDecoder->mDataConverter->convertResult = BaseDecoder::resolveConvertResult;
         baseDecoder->mDataConverter->baseDecoder = this;
+        VideoDecoder* videoDecoder = dynamic_cast<VideoDecoder *>(baseDecoder);
+        videoDecoder -> OnSizeReady();
        LOGCATE("decodeLoop set render success:%p",baseDecoder->videoRender);
     }
     baseDecoder -> mDataConverter ->Init(pCodecContext);

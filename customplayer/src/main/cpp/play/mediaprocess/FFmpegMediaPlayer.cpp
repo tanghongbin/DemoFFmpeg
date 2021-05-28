@@ -19,15 +19,18 @@ void FFmpegMediaPlayer::OnSurfaceCreated() {
     VideoDecoder* videoResult = dynamic_cast<VideoDecoder *>(videoDecoder);
     VideoRender *render = new VideoRender;
     render->Init();
-    std::unique_lock<std::mutex> uniqueLock(videoDecoder->createSurfaceMutex);
     videoResult->videoRender = render;
-    videoDecoder->createSurfaceCondition.notify_one();
-    uniqueLock.unlock();
     LOGCATE("OnSurfaceCreated create render success:%p videoResult:%p",render,videoResult->videoRender);
 }
 
-void FFmpegMediaPlayer::OnSurfaceChanged(int width, int height)  {
-
+void FFmpegMediaPlayer::OnSurfaceChanged(int oreration,int width, int height)  {
+    std::unique_lock<std::mutex> uniqueLock(videoDecoder->createSurfaceMutex);
+    videoDecoder->createSurfaceCondition.notify_one();
+    uniqueLock.unlock();
+    if (videoDecoder) {
+        VideoDecoder* videoResult = dynamic_cast<VideoDecoder *>(videoDecoder);
+        videoResult->OnSurfaceChanged(oreration,width,height);
+    }
 }
 
 void FFmpegMediaPlayer::OnDrawFrame() {

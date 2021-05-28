@@ -34,7 +34,7 @@ protected:
 public:
     virtual void Init() = 0;
     virtual void OnSurfaceCreated() {  };
-    virtual void OnSurfaceChanged(int width,int height) {  };
+    virtual void OnSurfaceChanged(int oreration,int width,int height) {  };
     virtual void OnDrawFrame() {  };
     virtual void DecodeFrame(uint8_t* data) {};
     virtual void Destroy() = 0;

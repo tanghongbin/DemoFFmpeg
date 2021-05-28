@@ -16,9 +16,15 @@ class AudioDecoder : public BaseDecoder{
 class VideoDecoder : public BaseDecoder{
 protected:
     BaseDataCoverter * createConverter();
+    int windowWidth;
+    int windowHeight;
+    // 1-竖屏，2-横屏
+    int mOreration;
 public:
     VideoDecoder();
     void drawVideoFrame();
+    void OnSurfaceChanged(int oreration,int width,int height);
+    void OnSizeReady();
 };
 
 #endif //DEMOFFMPEG_IMLDECODER_H

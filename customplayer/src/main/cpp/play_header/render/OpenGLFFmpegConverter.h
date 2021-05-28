@@ -20,10 +20,6 @@ extern "C" {
 class OpenGLFFmpegConverter : public BaseDataCoverter {
 
 private:
-    int m_VideoWidth;
-    int m_VideoHeight;
-    static int m_RenderWidth;
-    static int m_RenderHeight;
 
 public:
 
