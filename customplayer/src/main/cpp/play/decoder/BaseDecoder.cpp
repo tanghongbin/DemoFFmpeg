@@ -5,6 +5,7 @@
 #include <render/AudioDataConverter.h>
 #include <decoder/ImlDecoder.h>
 #include <render/VideoDataConverter.h>
+#include <utils/TimeSyncHelper.h>
 
 //
 // Created by Admin on 2021/5/24.
@@ -61,13 +62,15 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     }
     codeC = avcodec_find_decoder(formatCtx->streams[currentStreamIndex]->codecpar->codec_id);
     if (!codeC){
+        LOGCATE("this type:%d  codeId:%d h264:%d",mediaType
+                ,formatCtx->streams[currentStreamIndex]->codecpar->codec_id,AV_CODEC_ID_H264);
         result = "can't find codec";
         ret = -1;
         goto EndRecycle;
     }
     codeCtx = baseDecoder -> codeCtx = avcodec_alloc_context3(codeC);
     if (!codeCtx){
-        result = "can't find codec";
+        result = "can't avcodec_alloc_context3";
         ret = -1;
         goto EndRecycle;
     }
@@ -103,6 +106,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
     // alloc packet,frame
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
+    TimeSyncHelper* timeHelper = new TimeSyncHelper;
     baseDecoder -> mDataConverter = createConverter();
     if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
         std::unique_lock<std::mutex> uniqueLock(createSurfaceMutex);
@@ -137,6 +141,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
             ret = avformat_seek_file(pContext, -1, INT64_MIN, targetPosition, INT64_MAX, 0);
             if (ret == 0){
                 avcodec_flush_buffers(pCodecContext);
+                timeHelper->resetTime();
             } else {
                 LOGCATE("error seek file:%s",av_err2str(ret));
             }
@@ -155,12 +160,14 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
         }
 
         if (packet->stream_index == stream_index){
+            if (!timeHelper->syncTime(true,packet,frame,pContext,stream_index)){
+                continue;
+            }
             ret = avcodec_send_packet(pCodecContext, packet);
             if (ret < 0){
                 LOGCATE("avcodec_send_packet error:%s",av_err2str(ret));
                 goto innerEnd;
             }
-
             // caculate timestamp only audio
             if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
                 double currentDtsDuration =
@@ -171,6 +178,9 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
             }
             while (avcodec_receive_frame(pCodecContext, frame) == 0){
 //                LOGCATE("avcodec_receive_frame receive success");
+                if (!timeHelper->syncTime(false,packet,frame,pContext,stream_index)){
+                    goto innerEnd;;
+                }
                 baseDecoder -> mDataConverter ->covertData(frame);
             }
         }
@@ -180,6 +190,8 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
 
     DecodeLoopEnd:
     LOGCATE("loop has end ret:%d errorStr:%s",ret,av_err2str(ret));
+    delete timeHelper;
+    timeHelper = nullptr;
     baseDecoder -> mDataConverter ->Destroy();
     delete baseDecoder -> mDataConverter;
     baseDecoder -> mDataConverter = nullptr;

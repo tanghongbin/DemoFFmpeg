@@ -18,6 +18,7 @@ object Constants {
     val MP4_PORTAIT_PATH = Environment.getExternalStorageDirectory().absolutePath + "$FILD_VIDEO_DIR/test5.mp4"
     val MP4_PLAY_PATH = Environment.getExternalStorageDirectory().absolutePath + "$FILD_VIDEO_DIR/video.mp4"
     val MP4_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "$FILD_VIDEO_DIR/blackanimal.mp4"
+    val MKV_PLAY_BIG_PATH = Environment.getExternalStorageDirectory().absolutePath + "$FILD_VIDEO_DIR/test-movie.mkv"
     val SLIGHT_MP4_VIDEO_PATH = Environment.getExternalStorageDirectory().absolutePath + "$FILD_VIDEO_DIR/test5.mp4"
     val YUV_PATH = Environment.getExternalStorageDirectory().absolutePath + "$FILD_DIR/YUV_Image_840x1074.NV21"
     val ENCODE_VIDEO_PATH = Environment.getExternalStorageDirectory().absolutePath + "$FILD_VIDEO_DIR/encodeVideo.h264"

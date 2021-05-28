@@ -16,6 +16,7 @@ import com.example.common_base.utils.Constants.TIME_UNIT_SEC
 import com.example.common_base.utils.Constants.TIME_UNIT_US
 import com.example.common_base.utils.changeScreenSize
 import com.example.common_base.utils.log
+import com.example.common_base.utils.toastSafe
 import com.example.customplayer.R
 import com.example.customplayer.interfaces.*
 import com.example.customplayer.player.CustomPlayer
@@ -60,19 +61,21 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
         }
         mSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) mPlayer.native_seekTo(seekBar?.progress ?: 0)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                mPlayer.native_seekTo(seekBar?.progress ?: 0)
+
             }
 
         })
         setupListener()
         mPlayer.native_setDataUrl(mUrl)
         mPlayer.native_prepare()
+        log("打印当前时间java:${System.currentTimeMillis()}")
     }
 
     private fun setupListener() {
@@ -91,6 +94,7 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
         mPlayer.setOnErrorListener(object : OnErrorListener {
             override fun onError(code: Int, str: String) {
                 log("errorCode:${code} str:${str}")
+                toastSafe("播放失败 $str")
             }
         })
         mPlayer.setOnDurationListener(object : OnDurationListener{
@@ -107,6 +111,7 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
     }
 
     override fun onDestroy() {
+        log("打印指针：${mPlayer.mNativePlayer}")
         mPlayer.native_OnDestroy()
         super.onDestroy()
     }
