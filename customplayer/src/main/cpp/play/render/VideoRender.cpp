@@ -50,7 +50,7 @@ void VideoRender::DrawFrame() {
 
     if (!shader || shader->ID == 0) return;
     glViewport(widthOffset,heightOffset,renderWidth,renderHeight);
-    glClearColor(0.0,0.0,0.0,0.0);
+    glClearColor(0.0,0.0,0.0,1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     // upload texture
     std::unique_lock<std::mutex> uniqueLock(renderMutex,std::defer_lock);
@@ -75,6 +75,9 @@ void VideoRender::DrawFrame() {
                      nativeOpenGlImage.height >> 1, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
                      nativeOpenGlImage.ppPlane[2]);
         glBindTexture(GL_TEXTURE_2D, GL_NONE);
+    } else {
+        uniqueLock.unlock();
+        return;
     }
     uniqueLock.unlock();
 //    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);

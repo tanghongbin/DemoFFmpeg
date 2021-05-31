@@ -12,7 +12,7 @@
 
 void TimeSyncHelper::resetTime(){
     pastDuration = 0L;
-    LOGCATE("log resetTime:%lld",pastDuration);
+//    LOGCATE("log resetTime:%lld",pastDuration);
 }
 
 TimeSyncHelper::TimeSyncHelper(){
