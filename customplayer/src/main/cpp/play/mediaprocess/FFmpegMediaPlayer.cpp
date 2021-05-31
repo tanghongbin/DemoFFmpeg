@@ -5,7 +5,6 @@
 #include <mediaprocess/FFmpegMediaPlayer.h>
 #include <decoder/ImlDecoder.h>
 #include <render/VideoDataConverter.h>
-#include "../decoder/Test.h"
 
 void FFmpegMediaPlayer::Init(){
     audioDecoder = new AudioDecoder;
