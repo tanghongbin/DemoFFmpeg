@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <mediaprocess/AbsCustomMediaPlayer.h>
+#include <encoder/AbsMediaMuxer.h>
 
 
 extern "C" {
@@ -111,10 +112,10 @@ static const std::string  readGLSLStrFromFile(const char *filename) {
     return value;
 }
 
-static void setJniPlayerToJava(JNIEnv* env,AbsCustomMediaPlayer* mediaPlayer){
+static void setJniPointToJava(JNIEnv* env, const char * fieldName,const char * signature,void* p){
     jobject instance = JavaVmManager::getObjInstance();
-    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativePlayer","J");
-    env->SetLongField(instance, jfieldId, reinterpret_cast<jlong>(mediaPlayer));
+    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),fieldName,signature);
+    env->SetLongField(instance, jfieldId, reinterpret_cast<jlong>(p));
 }
 
 static AbsCustomMediaPlayer* getJniPlayerFromJava(){
@@ -128,6 +129,19 @@ static AbsCustomMediaPlayer* getJniPlayerFromJava(){
 //    }
     return reinterpret_cast<AbsCustomMediaPlayer *>(point);
 }
+
+static AbsMediaMuxer* getJniMuxerFromJava(){
+    bool isAttach;
+    JNIEnv* env = JavaVmManager::GetEnv(&isAttach);
+    jobject instance = JavaVmManager::getObjInstance();
+    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativeMuxer","J");
+    jlong point = env->GetLongField(instance,jfieldId);
+//    if (isAttach){
+//        JavaVmManager::detachCurrentThread();
+//    }
+    return reinterpret_cast<AbsMediaMuxer *>(point);
+}
+
 
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);

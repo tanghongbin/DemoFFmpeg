@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
-set(libName native-customplayer)
+set(libName native-mediacontroller)
 
 include_directories(
         include
@@ -18,6 +18,7 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/play/mediaprocess/*.cpp
         ${CMAKE_SOURCE_DIR}/play/utils/*.cpp
         ${CMAKE_SOURCE_DIR}/play/decoder/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/encoder/*.cpp
         ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp)
 
 

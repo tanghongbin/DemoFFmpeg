@@ -8,16 +8,12 @@ import android.os.Bundle
 import android.view.SurfaceHolder
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
-import com.example.avutils.audio.decoder.AudioDecodeManager
 import com.example.avutils.video.decoder.OutputFormatChangeListener
-import com.example.avutils.video.decoder.VideoDecodeManager
-import com.example.common_base.utils.Constants
-import com.example.common_base.utils.Constants.TIME_UNIT_SEC
 import com.example.common_base.utils.Constants.TIME_UNIT_US
 import com.example.common_base.utils.changeScreenSize
 import com.example.common_base.utils.log
 import com.example.customplayer.R
-import com.example.customplayer.player.CustomPlayer
+import com.example.customplayer.player.CustomMediaController
 import kotlinx.android.synthetic.main.activity_player_detail.*
 import java.util.concurrent.TimeUnit
 
@@ -27,7 +23,7 @@ import java.util.concurrent.TimeUnit
 class PlayerMediaActivity : AppCompatActivity(), SurfaceHolder.Callback,
     OutputFormatChangeListener {
     private val mUrl by lazy { intent.getStringExtra("url") }
-    private val mPlayer by lazy { CustomPlayer() }
+    private val mPlayer by lazy { CustomMediaController() }
     private val mMediaPlayer by lazy { MediaPlayer() }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {

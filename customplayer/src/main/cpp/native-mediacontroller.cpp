@@ -9,13 +9,14 @@
 #include <mediaprocess/MediaCodecPlayer.h>
 #include <utils/JavaVmManager.h>
 #include <utils/MsgLoopHelper.h>
+#include <encoder/FFmpegMediaMuxer.h>
 
 #include "mediaprocess/AbsCustomMediaPlayer.h"
 #include "mediaprocess/FFmpegMediaPlayer.h"
 #include "play_header/utils/CustomSafeQueue.h"
 
 
-#define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomPlayer"
+#define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomMediaController"
 
 
 #ifdef __cplusplus
@@ -33,7 +34,7 @@ JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
 
 
 /***
- *  ==============================  GL callback ===============================
+ *  ============================== 播放器 GL callback ===============================
  */
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
@@ -54,20 +55,36 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
 
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer == NULL) return;
-    mediaPlayer->Destroy();
-    delete mediaPlayer;
-    mediaPlayer = NULL;
+    if (mediaPlayer) {
+        mediaPlayer->Destroy();
+        delete mediaPlayer;
+        mediaPlayer = NULL;
+    }
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (mediaMuxer){
+        mediaMuxer->Destroy();
+        delete mediaMuxer;
+        mediaMuxer = NULL;
+    }
     JavaVmManager::destroyInstance();
     MsgLoopHelper::destroyInstance();
 }
 
-JNIEXPORT void JNICALL native_init(JNIEnv *env, jobject instance) {
+JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
     JavaVmManager::setInstance(env,instance);
     MsgLoopHelper::initMsgLoop();
     FFmpegMediaPlayer *mediaPlayer = new FFmpegMediaPlayer;
-    setJniPlayerToJava(env,mediaPlayer);
+    setJniPointToJava(env,"mNativePlayer","J", mediaPlayer);
     mediaPlayer->Init();
+    LOGCATE("has enter env:%p instance:%p",env,instance);
+}
+
+
+JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance) {
+    JavaVmManager::setInstance(env,instance);
+    MsgLoopHelper::initMsgLoop();
+    FFmpegMediaMuxer *mediaMuxer = new FFmpegMediaMuxer;
+    setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
     LOGCATE("has enter env:%p instance:%p",env,instance);
 }
 
@@ -102,6 +119,18 @@ JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring u
         mediaPlayer->SetDataUrl(getCharStrFromJstring(env,url));
 }
 
+/****
+ * ============================   编码视频，音频，合并部分  ==========================
+ * *****/
+
+JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance) {
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (mediaMuxer == NULL) return;
+    char resultPath[128];
+    sprintf(resultPath,"/storage/emulated/0/ffmpegtest/encodeVideos/%lld%s",GetSysCurrentTime(),"-test.mp4");
+    mediaMuxer->init(resultPath);
+}
+
 
 /***
  *  ===================================   注释方法部分   ==================================
@@ -114,12 +143,15 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnDrawFrame",               "()V",            (void *) (native_OnDrawFrame)},
         {"native_OnDestroy",               "()V",            (void *) (native_OnDestroy)},
 
-        {"native_init",               "()V",            (void *) (native_init)},
+        {"native_init_player",               "()V",            (void *) (native_init_player)},
+        {"native_init_muxer",               "()V",            (void *) (native_init_muxer)},
         {"native_prepare",               "()V",            (void *) (native_prepare)},
         {"native_start",               "()V",            (void *) (native_start)},
         {"native_stop",               "()V",            (void *) (native_stop)},
         {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
-        {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)}
+        {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
+
+        {"startTestEncode",               "()V",            (void *) (startTestEncode)},
 };
 
 

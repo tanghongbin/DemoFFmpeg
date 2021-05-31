@@ -11,7 +11,8 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 @Suppress("KotlinJniMissingFunction", "FunctionName")
-class CustomPlayer() : GLSurfaceView.Renderer {
+// 1-播放器，2-muxer合成器
+class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
     companion object{
         // communicate code
         private const val MSG_PREPARED = 1
@@ -22,13 +23,17 @@ class CustomPlayer() : GLSurfaceView.Renderer {
         private const val MSG_DURATION = 6
 
         init {
-            System.loadLibrary("native-customplayer")
+            System.loadLibrary("native-mediacontroller")
         }
     }
     init {
-        native_init()
+        when(type){
+            1 -> native_init_player()
+            2 -> native_init_muxer()
+        }
     }
-    var mNativePlayer:Long = 0L
+    private var mNativePlayer:Long = 0L
+    private var mNativeMuxer:Long = 0L
     private var mOnPreparedListener: OnPreparedListener? = null
     private var mOnVideoSizeChangeListener: OnVideoSizeChangeListener? = null
     private var mOnSeekProgressChangeListener: OnSeekProgressChangeListener? = null
@@ -74,7 +79,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
     }
 
     /*******
-     * ====================   callback ================================
+     * ====================  Surface  callback ================================
      */
     override fun onDrawFrame(gl: GL10?) {
         native_OnDrawFrame()
@@ -90,7 +95,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
         native_OnSurfaceCreated()
     }
 
-    /***===================  native function **************************/
+    /***=================== Surface native function **************************/
 
     external fun nativeGetInfo():String
 
@@ -102,7 +107,7 @@ class CustomPlayer() : GLSurfaceView.Renderer {
 
     external fun native_OnDestroy()
 
-    //================  播放 方法 ===========================
+    /****================ 播放器 player 播放 方法 ===========================**/
     external fun native_setDataUrl(url:String)
 
     external fun native_prepare()
@@ -113,8 +118,11 @@ class CustomPlayer() : GLSurfaceView.Renderer {
 
     external fun native_seekTo(seconds:Int)
 
-    external fun native_init()
+    external fun native_init_player()
 
+    /**====================  编码器  encoder 方法 **********************/
 
-    /**====================  native function end **********************/
+    external fun native_init_muxer()
+
+    external fun startTestEncode()
 }

@@ -17,6 +17,7 @@
 
 #define ROOT_DIR "/storage/emulated/0/ffmpegtest/"
 #define FILTER_IMAGE_DIR "/storage/emulated/0/ffmpegtest/filterImg/"
+#define MUXER_AV_FOLDER "/storage/emulated/0/ffmpegtest/encodeVideos/"
 #define GLSL_ROOT_DIR "/storage/emulated/0/ffmpegtest/assets/glsl/"
 #define MODEL3D_ROOT_DIR "/storage/emulated/0/ffmpegtest/3d_obj/"
 #define TEST_IMAGE_DIR "/storage/emulated/0/ffmpegtest/testImages"

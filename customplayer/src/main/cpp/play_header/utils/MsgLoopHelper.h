@@ -29,6 +29,7 @@ private:
 
 public:
     static void destroyInstance(){
+        if (instance == nullptr) return;
         getInstance()->destroyMsgLoop();
         delete instance;
         instance = nullptr;

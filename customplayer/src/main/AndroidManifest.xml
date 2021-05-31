@@ -10,30 +10,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".activity.hw.PlayerMediaActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:configChanges="screenSize|orientation">
-
-        </activity>
-
-        <activity android:name=".activity.ffmpeg.PlayerDecodeFFmpegActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:configChanges="screenSize|orientation">
-
-        </activity>
-
-        <activity android:name=".activity.hw.PlayerDecodeHwActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:configChanges="screenSize|orientation">
-
-        </activity>
-
-        <activity android:name=".activity.hw.PlayerDecodeHwOpenGLESActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:configChanges="screenSize|orientation">
-
-        </activity>
+        <activity android:name=".activity.ffmpeg.FFmpegMuxerActivity"></activity>
+        <activity
+            android:name=".activity.hw.PlayerMediaActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar"></activity>
+        <activity
+            android:name=".activity.ffmpeg.PlayerDecodeFFmpegActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar"></activity>
+        <activity
+            android:name=".activity.hw.PlayerDecodeHwActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar"></activity>
+        <activity
+            android:name=".activity.hw.PlayerDecodeHwOpenGLESActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar"></activity>
         <activity android:name=".activity.CustomPlayerListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

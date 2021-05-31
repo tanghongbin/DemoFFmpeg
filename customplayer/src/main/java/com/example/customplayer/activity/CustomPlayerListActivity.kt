@@ -4,14 +4,12 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.common_base.utils.log
 import com.example.common_base.utils.requestCustomPermissions
 import com.example.customplayer.R
+import com.example.customplayer.activity.ffmpeg.FFmpegMuxerActivity
 import com.example.customplayer.activity.ffmpeg.PlayerDecodeFFmpegActivity
-import com.example.customplayer.activity.hw.PlayerDecodeHwActivity
 import com.example.customplayer.adapter.PlayerListAdapter
 import com.example.customplayer.module.PlayerModule
-import com.example.customplayer.player.CustomPlayer
 import kotlinx.android.synthetic.main.activity_custom_player_list.*
 
 class CustomPlayerListActivity : AppCompatActivity() {
@@ -38,6 +36,9 @@ class CustomPlayerListActivity : AppCompatActivity() {
         mRecyclePlayer.adapter = adapter
         mModule.loadVideoList {
             adapter.addList(it)
+        }
+        startMuxer.setOnClickListener {
+            startActivity(Intent(this,FFmpegMuxerActivity::class.java))
         }
     }
 }
