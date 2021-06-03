@@ -499,12 +499,12 @@ static AVFrame *get_video_frame(OutputStream *ost)
                 exit(1);
             }
         }
-        fill_yuv_image(ost->tmp_frame, ost->next_pts, c->width, c->height);
+        fill_yuv_image(ost->tmp_frame, ost->next_pts, c->width, c->height, nullptr);
         sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
                   ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
                   ost->frame->linesize);
     } else {
-        fill_yuv_image(ost->frame, ost->next_pts, c->width, c->height);
+        fill_yuv_image(ost->frame, ost->next_pts, c->width, c->height, nullptr);
     }
 
     ost->frame->pts = ost->next_pts++;
@@ -518,7 +518,7 @@ static AVFrame *get_video_frame(OutputStream *ost)
  */
 static int write_video_frame(AVFormatContext *oc, OutputStream *ost)
 {
-    return write_frame(oc, ost->enc, ost->st, get_video_frame(ost));
+    return write_frame(oc, ost->enc, ost->st, get_video_frame(ost, nullptr));
 
 }
 

@@ -65,6 +65,8 @@ add_library(opencv_java3 SHARED IMPORTED )
 set_target_properties(opencv_java3 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libopencv_java3.so)
 add_library(curl SHARED IMPORTED )
 set_target_properties(curl PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libcurl.so)
+add_library(libyuv SHARED IMPORTED )
+set_target_properties(libyuv PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libyuv.so)
 
 
 find_library(log-lib log )
@@ -80,7 +82,7 @@ set(third-party-libs
         swscale
         mp3
         x264
-        #        libyuv
+        libyuv
         ass
         crypto
         fdk-aac

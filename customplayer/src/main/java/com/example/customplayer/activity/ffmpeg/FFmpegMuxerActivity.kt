@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.activity_f_fmpeg_muxer.*
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class FFmpegMuxerActivity : AppCompatActivity(){
+class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private val mMuxer by lazy { CustomMediaController(2) }
     private val mCameraHelpr by lazy { CameraHelpr() }
 
@@ -25,20 +25,20 @@ class FFmpegMuxerActivity : AppCompatActivity(){
                 mMuxer.startTestEncode(2)
             })
         }
-        mMuxerSurface.init(mMuxer)
-//        mMuxerSurface.holder.addCallback(this)
+//        mMuxerSurface.init(mMuxer)
+        mMuxerSurface.holder.addCallback(this)
         mCameraHelpr.setPreviewCallback { data, camera ->
             log("打印设想数据:$data")
             mMuxer.native_onCameraFrameDataValible(data)
         }
-        mMuxer.setOnSurfaceCallListener(object : OnSurfaceCallListener{
-            override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-
-            }
-            override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-                mCameraHelpr.openCamera(this@FFmpegMuxerActivity,null)
-            }
-        })
+//        mMuxer.setOnSurfaceCallListener(object : OnSurfaceCallListener{
+//            override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
+//
+//            }
+//            override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+//
+//            }
+//        })
 
     }
 
@@ -46,4 +46,17 @@ class FFmpegMuxerActivity : AppCompatActivity(){
         mMuxer.native_OnDestroy()
         super.onDestroy()
     }
+
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {
+
+    }
+
+    override fun surfaceCreated(holder: SurfaceHolder?) {
+        mCameraHelpr.openCamera(this@FFmpegMuxerActivity,holder)
+    }
+
 }

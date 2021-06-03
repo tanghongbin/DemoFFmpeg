@@ -40,7 +40,6 @@ android {
             pickFirst '**/libswscale.so'
             pickFirst '**/libx264.so'
             pickFirst '**/libyuv.so'
-            pickFirst '**/libyuv-sample.so'
             pickFirst '**/libassimp.so'
             pickFirst '**/libopencv_java3.so'
             pickFirst '**/libcurl.so'

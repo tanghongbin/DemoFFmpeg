@@ -142,13 +142,18 @@ JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance,jint type) 
         char resultPath[128];
         sprintf(resultPath,"/storage/emulated/0/ffmpegtest/encodeVideos/%lld%s",GetSysCurrentTime(),"-aaaa.mp4");
         mediaMuxer->init(resultPath);
+    } else if (type == 3) {
+        mediaMuxer->test(type);
     }
 }
 
-JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject instance,jbyteArray byteArray) {
+JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject instance,jbyteArray data) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer == NULL) return;
-
+    int len = env->GetArrayLength (data);
+    unsigned char* buf = new unsigned char[len];
+    env->GetByteArrayRegion(data, 0, len, reinterpret_cast<jbyte*>(buf));
+    mediaMuxer->OnCameraFrameDataValible(buf);
 }
 
 

@@ -47,8 +47,6 @@ public class CameraHelpr {
                 release();
             }
             this.cameraId = cameraId;
-
-            new SurfaceTexture()
             mCamera = Camera.open(cameraId);
             displayOrientation = getCameraDisplayOrientation(activity, cameraId);
             mCamera.setDisplayOrientation(displayOrientation);

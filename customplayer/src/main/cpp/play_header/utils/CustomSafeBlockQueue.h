@@ -71,11 +71,17 @@ private:
     std::queue<T> mQueue;
     std::mutex tex;
     int inCount,outCount;
+    int maxSize;
 
 public:
-
+    
+    void setMax(int max){
+        maxSize = max;
+        LOGCATE("log max Size:%d %d",max,maxSize);
+    }
+    
     CustomSafeQueue<T>() {
-
+        maxSize = INT_MAX;
     }
 
     ~CustomSafeQueue<T>() {
@@ -83,11 +89,18 @@ public:
         inCount = outCount = 0;
     }
 
-    void pushLast(T node) {
+    T pushLast(T node) {
+        T last = nullptr;
         // 放入第一个
         std::unique_lock<std::mutex> lockGuard(tex);
         mQueue.push(node);
+        if (mQueue.size() >= maxSize){
+            last = mQueue.front();
+            mQueue.pop();
+        }
         inCount++;
+//        LOGCATE("totalSize:%d max:%d",mQueue.size(),maxSize);
+        return last;
     }
 
     T popFirst() {
@@ -108,6 +121,7 @@ public:
     }
 
     int size(){
+        std::unique_lock<std::mutex> lockGuard(tex);
         return mQueue.size();
     }
 };
