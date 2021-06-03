@@ -40,6 +40,10 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
     private var mOnCompleteListener: OnCompleteListener? = null
     private var mOnErrorListener: OnErrorListener? = null
     private var mOnDurationListener: OnDurationListener? = null
+    private var mOnSurfaceCallListener: OnSurfaceCallListener? = null
+    fun setOnSurfaceCallListener(listener:OnSurfaceCallListener){
+        mOnSurfaceCallListener = listener
+    }
     fun setOnDurationListener(listener:OnDurationListener){
         mOnDurationListener = listener
     }
@@ -88,10 +92,13 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         val orientation = DemoApplication.getInstance().resources.configuration.orientation
         log("查看屏幕方向:${orientation}")
+        mOnSurfaceCallListener?.onSurfaceChanged(gl,width,height)
         native_OnSurfaceChanged(orientation,width,height)
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+        log("onSurfaceCreated success")
+        mOnSurfaceCallListener?.onSurfaceCreated(gl,config)
         native_OnSurfaceCreated()
     }
 
@@ -124,5 +131,8 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
 
     external fun native_init_muxer()
 
-    external fun startTestEncode()
+    external fun native_onCameraFrameDataValible(byteArray: ByteArray)
+
+    // 1-开始录音
+    external fun startTestEncode(type:Int)
 }

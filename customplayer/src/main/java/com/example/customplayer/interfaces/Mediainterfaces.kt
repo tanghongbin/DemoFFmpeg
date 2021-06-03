@@ -1,5 +1,10 @@
 package com.example.customplayer.interfaces
 
+import android.opengl.GLSurfaceView
+import android.view.SurfaceHolder
+import android.view.SurfaceView
+import javax.microedition.khronos.opengles.GL10
+
 interface OnPreparedListener{
     fun onPrepared()
 }
@@ -17,5 +22,10 @@ interface OnCompleteListener{
 }
 interface OnErrorListener{
     fun onError(code:Int,str:String)
+}
+interface OnSurfaceCallListener : GLSurfaceView.Renderer {
+    override fun onDrawFrame(gl: GL10?) {
+
+    }
 }
 

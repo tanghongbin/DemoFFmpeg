@@ -11,6 +11,7 @@
 //using namespace std;
 #include <stdlib.h>
 #include <mutex>
+#include <utils/utils.h>
 
 #include <queue>
 
@@ -19,7 +20,7 @@
  */
 
 template<typename T>
-class CustomSafeQueue {
+class CustomSafeBlockQueue {
 private:
     std::queue<T> mQueue;
     std::mutex tex;
@@ -27,11 +28,11 @@ private:
 
 public:
 
-    CustomSafeQueue<T>() {
+    CustomSafeBlockQueue<T>() {
 
     }
 
-    ~CustomSafeQueue<T>() {
+    ~CustomSafeBlockQueue<T>() {
         // todo 自己清除
     }
 
@@ -49,6 +50,54 @@ public:
         }
         T bean = mQueue.front();
         mQueue.pop();
+        return bean;
+    }
+
+    T removeFirst() {
+        T bean = mQueue.front();
+        mQueue.pop();
+        return bean;
+    }
+
+    int size(){
+        std::unique_lock<std::mutex> uniqueLock(tex);
+        return mQueue.size();
+    }
+};
+
+template<typename T>
+class CustomSafeQueue {
+private:
+    std::queue<T> mQueue;
+    std::mutex tex;
+    int inCount,outCount;
+
+public:
+
+    CustomSafeQueue<T>() {
+
+    }
+
+    ~CustomSafeQueue<T>() {
+        LOGCATE("total enter count:%d  outcount:%d",inCount,outCount);
+        inCount = outCount = 0;
+    }
+
+    void pushLast(T node) {
+        // 放入第一个
+        std::unique_lock<std::mutex> lockGuard(tex);
+        mQueue.push(node);
+        inCount++;
+    }
+
+    T popFirst() {
+        std::unique_lock<std::mutex> uniqueLock(tex);
+        if (mQueue.size() == 0) {
+            return nullptr;
+        }
+        T bean = mQueue.front();
+        mQueue.pop();
+        outCount++;
         return bean;
     }
 

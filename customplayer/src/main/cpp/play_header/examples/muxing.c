@@ -1,25 +1,47 @@
-//
-// Created by Admin on 2021/5/31.
-//
+/*
+ * Copyright (c) 2003 Fabrice Bellard
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
+/**
+ * @file
+ * libavformat API example.
+ *
+ * Output a media file in any supported libavformat format. The default
+ * codecs are used.
+ * @example muxing.c
+ */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
 
-#include <encoder/FFmpegMediaMuxer.h>
-#include <utils/utils.h>
-#include <utils/AudioRecordPlayHelper.h>
-#include <encoder/FFmpegEncodeAudio.h>
-#include <utils/CustomGLUtils.h>
-#include <render/VideoRender.h>
-
-extern "C" {
-#include <libswscale/swscale.h>
 #include <libavutil/avassert.h>
-#include <libavformat/avformat.h>
+#include <libavutil/channel_layout.h>
 #include <libavutil/opt.h>
-#include <libswresample/swresample.h>
+#include <libavutil/mathematics.h>
 #include <libavutil/timestamp.h>
-#include <libavutil/time.h>
-}
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
 
 #define STREAM_DURATION   10.0
 #define STREAM_FRAME_RATE 25 /* 25 images/s */
@@ -27,22 +49,37 @@ extern "C" {
 
 #define SCALE_FLAGS SWS_BICUBIC
 
-FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
+// a wrapper around a single output AVStream
+typedef struct OutputStream {
+    AVStream *st;
+    AVCodecContext *enc;
 
+    /* pts of the next frame that will be generated */
+    int64_t next_pts;
+    int samples_count;
 
- void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt)
+    AVFrame *frame;
+    AVFrame *tmp_frame;
+
+    float t, tincr, tincr2;
+
+    struct SwsContext *sws_ctx;
+    struct SwrContext *swr_ctx;
+} OutputStream;
+
+static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt)
 {
     AVRational *time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
 
-     LOGCATE("pts:%s pts_time:%s dts:%s dts_time:%s duration:%s duration_time:%s stream_index:%d\n",
-            av_ts2str(pkt->pts), av_ts2timestr(pkt->pts, time_base),
-            av_ts2str(pkt->dts), av_ts2timestr(pkt->dts, time_base),
-            av_ts2str(pkt->duration), av_ts2timestr(pkt->duration, time_base),
-            pkt->stream_index);
+    printf("pts:%s pts_time:%s dts:%s dts_time:%s duration:%s duration_time:%s stream_index:%d\n",
+           av_ts2str(pkt->pts), av_ts2timestr(pkt->pts, time_base),
+           av_ts2str(pkt->dts), av_ts2timestr(pkt->dts, time_base),
+           av_ts2str(pkt->duration), av_ts2timestr(pkt->duration, time_base),
+           pkt->stream_index);
 }
 
- int write_frame(AVFormatContext *fmt_ctx, AVCodecContext *c,
-                 AVStream *st, AVFrame *frame)
+static int write_frame(AVFormatContext *fmt_ctx, AVCodecContext *c,
+                       AVStream *st, AVFrame *frame)
 {
     int ret;
 
@@ -79,13 +116,11 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
         }
     }
 
-    LOGCATE("has write result:%d  msg:%s currentIndex:%d currentCodeId:%d",ret,av_err2str(ret),st->index,c->codec_id);
-
     return ret == AVERROR_EOF ? 1 : 0;
 }
 
 /* Add an output stream. */
- void add_stream(OutputStream *ost, AVFormatContext *oc,
+static void add_stream(OutputStream *ost, AVFormatContext *oc,
                        AVCodec **codec,
                        enum AVCodecID codec_id)
 {
@@ -114,61 +149,61 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     ost->enc = c;
 
     switch ((*codec)->type) {
-        case AVMEDIA_TYPE_AUDIO:
-            c->sample_fmt  = (*codec)->sample_fmts ?
-                             (*codec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
-            c->bit_rate    = 64000;
-            c->sample_rate = 44100;
-            if ((*codec)->supported_samplerates) {
-                c->sample_rate = (*codec)->supported_samplerates[0];
-                for (i = 0; (*codec)->supported_samplerates[i]; i++) {
-                    if ((*codec)->supported_samplerates[i] == 44100)
-                        c->sample_rate = 44100;
-                }
+    case AVMEDIA_TYPE_AUDIO:
+        c->sample_fmt  = (*codec)->sample_fmts ?
+            (*codec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
+        c->bit_rate    = 64000;
+        c->sample_rate = 44100;
+        if ((*codec)->supported_samplerates) {
+            c->sample_rate = (*codec)->supported_samplerates[0];
+            for (i = 0; (*codec)->supported_samplerates[i]; i++) {
+                if ((*codec)->supported_samplerates[i] == 44100)
+                    c->sample_rate = 44100;
             }
-            c->channels        = av_get_channel_layout_nb_channels(c->channel_layout);
-            c->channel_layout = AV_CH_LAYOUT_STEREO;
-            if ((*codec)->channel_layouts) {
-                c->channel_layout = (*codec)->channel_layouts[0];
-                for (i = 0; (*codec)->channel_layouts[i]; i++) {
-                    if ((*codec)->channel_layouts[i] == AV_CH_LAYOUT_STEREO)
-                        c->channel_layout = AV_CH_LAYOUT_STEREO;
-                }
+        }
+        c->channels        = av_get_channel_layout_nb_channels(c->channel_layout);
+        c->channel_layout = AV_CH_LAYOUT_STEREO;
+        if ((*codec)->channel_layouts) {
+            c->channel_layout = (*codec)->channel_layouts[0];
+            for (i = 0; (*codec)->channel_layouts[i]; i++) {
+                if ((*codec)->channel_layouts[i] == AV_CH_LAYOUT_STEREO)
+                    c->channel_layout = AV_CH_LAYOUT_STEREO;
             }
-            c->channels        = av_get_channel_layout_nb_channels(c->channel_layout);
-            ost->st->time_base = (AVRational){ 1, c->sample_rate };
-            break;
+        }
+        c->channels        = av_get_channel_layout_nb_channels(c->channel_layout);
+        ost->st->time_base = (AVRational){ 1, c->sample_rate };
+        break;
 
-        case AVMEDIA_TYPE_VIDEO:
-            c->codec_id = codec_id;
+    case AVMEDIA_TYPE_VIDEO:
+        c->codec_id = codec_id;
 
-            c->bit_rate = 3500 * 1000;
-            /* Resolution must be a multiple of two. */
-            c->width    = 720;
-            c->height   = 1280;
-            /* timebase: This is the fundamental unit of time (in seconds) in terms
-             * of which frame timestamps are represented. For fixed-fps content,
-             * timebase should be 1/framerate and timestamp increments should be
-             * identical to 1. */
-            ost->st->time_base = (AVRational){ 1, STREAM_FRAME_RATE };
-            c->time_base       = ost->st->time_base;
+        c->bit_rate = 400000;
+        /* Resolution must be a multiple of two. */
+        c->width    = 352;
+        c->height   = 288;
+        /* timebase: This is the fundamental unit of time (in seconds) in terms
+         * of which frame timestamps are represented. For fixed-fps content,
+         * timebase should be 1/framerate and timestamp increments should be
+         * identical to 1. */
+        ost->st->time_base = (AVRational){ 1, STREAM_FRAME_RATE };
+        c->time_base       = ost->st->time_base;
 
-            c->gop_size      = 1; /* emit one intra frame every twelve frames at most */
-            c->pix_fmt       = STREAM_PIX_FMT;
-            if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO) {
-                /* just for testing, we also add B-frames */
-                c->max_b_frames = 2;
-            }
-            if (c->codec_id == AV_CODEC_ID_MPEG1VIDEO) {
-                /* Needed to avoid using macroblocks in which some coeffs overflow.
-                 * This does not happen with normal video, it just happens here as
-                 * the motion of the chroma plane does not match the luma plane. */
-                c->mb_decision = 2;
-            }
-            break;
+        c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
+        c->pix_fmt       = STREAM_PIX_FMT;
+        if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO) {
+            /* just for testing, we also add B-frames */
+            c->max_b_frames = 2;
+        }
+        if (c->codec_id == AV_CODEC_ID_MPEG1VIDEO) {
+            /* Needed to avoid using macroblocks in which some coeffs overflow.
+             * This does not happen with normal video, it just happens here as
+             * the motion of the chroma plane does not match the luma plane. */
+            c->mb_decision = 2;
+        }
+    break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     /* Some formats want stream headers to be separate. */
@@ -179,7 +214,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
 /**************************************************************/
 /* audio output */
 
- AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
+static AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
                                   uint64_t channel_layout,
                                   int sample_rate, int nb_samples)
 {
@@ -207,7 +242,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     return frame;
 }
 
- void open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, AVDictionary *opt_arg)
+static void open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, AVDictionary *opt_arg)
 {
     AVCodecContext *c;
     int nb_samples;
@@ -249,49 +284,44 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     }
 
     /* create resampler context */
-    ost->swr_ctx = swr_alloc();
-    if (!ost->swr_ctx) {
-        fprintf(stderr, "Could not allocate resampler context\n");
-        exit(1);
-    }
+        ost->swr_ctx = swr_alloc();
+        if (!ost->swr_ctx) {
+            fprintf(stderr, "Could not allocate resampler context\n");
+            exit(1);
+        }
 
-    /* set options */
-    av_opt_set_int       (ost->swr_ctx, "in_channel_count",   c->channels,       0);
-    av_opt_set_int       (ost->swr_ctx, "in_sample_rate",     c->sample_rate,    0);
-    av_opt_set_sample_fmt(ost->swr_ctx, "in_sample_fmt",      AV_SAMPLE_FMT_S16, 0);
-    av_opt_set_int       (ost->swr_ctx, "out_channel_count",  c->channels,       0);
-    av_opt_set_int       (ost->swr_ctx, "out_sample_rate",    c->sample_rate,    0);
-    av_opt_set_sample_fmt(ost->swr_ctx, "out_sample_fmt",     c->sample_fmt,     0);
+        /* set options */
+        av_opt_set_int       (ost->swr_ctx, "in_channel_count",   c->channels,       0);
+        av_opt_set_int       (ost->swr_ctx, "in_sample_rate",     c->sample_rate,    0);
+        av_opt_set_sample_fmt(ost->swr_ctx, "in_sample_fmt",      AV_SAMPLE_FMT_S16, 0);
+        av_opt_set_int       (ost->swr_ctx, "out_channel_count",  c->channels,       0);
+        av_opt_set_int       (ost->swr_ctx, "out_sample_rate",    c->sample_rate,    0);
+        av_opt_set_sample_fmt(ost->swr_ctx, "out_sample_fmt",     c->sample_fmt,     0);
 
-    /* initialize the resampling context */
-    if ((ret = swr_init(ost->swr_ctx)) < 0) {
-        fprintf(stderr, "Failed to initialize the resampling context\n");
-        exit(1);
-    }
+        /* initialize the resampling context */
+        if ((ret = swr_init(ost->swr_ctx)) < 0) {
+            fprintf(stderr, "Failed to initialize the resampling context\n");
+            exit(1);
+        }
 }
-
-#define IS_ENABLE_TEST false
 
 /* Prepare a 16 bit dummy audio frame of 'frame_size' samples and
  * 'nb_channels' channels. */
- AVFrame *get_audio_frame(OutputStream *ost)
+static AVFrame *get_audio_frame(OutputStream *ost)
 {
-#if IS_ENABLE_TEST
     AVFrame *frame = ost->tmp_frame;
     int j, i, v;
     int16_t *q = (int16_t*)frame->data[0];
-    int16_t *q2 = (int16_t*)frame->data[1];
 
     /* check if we want to generate more frames */
     if (av_compare_ts(ost->next_pts, ost->enc->time_base,
-                      STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
+                      STREAM_DURATION, (AVRational){ 1, 1 }) > 0)
         return NULL;
 
     for (j = 0; j <frame->nb_samples; j++) {
         v = (int)(sin(ost->t) * 10000);
-//        for (i = 0; i < ost->enc->channels; i++)
+        for (i = 0; i < ost->enc->channels; i++)
             *q++ = v;
-            *q2++ = v;
         ost->t     += ost->tincr;
         ost->tincr += ost->tincr2;
     }
@@ -300,57 +330,29 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     ost->next_pts  += frame->nb_samples;
 
     return frame;
-#else
-    AVFrame *frame = ost->tmp_frame;
-
-    /* check if we want to generate more frames */
-    if (av_compare_ts(ost->next_pts, ost->enc->time_base,
-                      STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
-        return NULL;
-
-    return frame;
-#endif
 }
 
 /*
  * encode one audio frame and send it to the muxer
  * return 1 when encoding is finished, 0 otherwise
  */
- int write_audio_frame(AVFormatContext *oc, OutputStream *ost)
+static int write_audio_frame(AVFormatContext *oc, OutputStream *ost)
 {
     AVCodecContext *c;
-    AVPacket pkt = { 0 }; // data and size must be 0;
     AVFrame *frame;
     int ret;
-    int got_packet;
     int dst_nb_samples;
 
-    AudioRecordItemInfo *audioInfo = FFmpegMediaMuxer::getInstace()->audioQueue.popFirst();
-    if (!audioInfo){
-//        LOGCATE("audio info is empty");
-        av_usleep(10 * 1000);
-        return 0;
-    }
-
-    av_init_packet(&pkt);
     c = ost->enc;
 
     frame = get_audio_frame(ost);
-    if (!frame) {
-//        LOGCATE("frame is null");
-        return 0;
-    }
-
-//    LOGCATE("log audioInfo:%p frame:%p data:%p samples:%d",audioInfo,frame,audioInfo->data,audioInfo->nb_samples);
-    frame->data[0] = audioInfo->data;
-    ost->next_pts = ost->next_pts + audioInfo->nb_samples;
 
     if (frame) {
         /* convert samples from native format to destination codec format, using the resampler */
-        /* compute destination number of samples */
-        dst_nb_samples = av_rescale_rnd(swr_get_delay(ost->swr_ctx, c->sample_rate) + frame->nb_samples,
-                                        c->sample_rate, c->sample_rate, AV_ROUND_UP);
-//        av_assert0(dst_nb_samples == frame->nb_samples);
+            /* compute destination number of samples */
+            dst_nb_samples = av_rescale_rnd(swr_get_delay(ost->swr_ctx, c->sample_rate) + frame->nb_samples,
+                                            c->sample_rate, c->sample_rate, AV_ROUND_UP);
+            av_assert0(dst_nb_samples == frame->nb_samples);
 
         /* when we pass a frame to the encoder, it may keep a reference to it
          * internally;
@@ -359,37 +361,28 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
         ret = av_frame_make_writable(ost->frame);
         if (ret < 0)
             exit(1);
-//        LOGCATE("log swr convert outSample:%d inSample:%d",frame->nb_samples,audioInfo->nb_samples);
+
         /* convert to destination format */
         ret = swr_convert(ost->swr_ctx,
-                          ost->frame->data, ost->frame->nb_samples,
-                          (const uint8_t **)frame->data, audioInfo->nb_samples/4);
+                          ost->frame->data, dst_nb_samples,
+                          (const uint8_t **)frame->data, frame->nb_samples);
         if (ret < 0) {
             fprintf(stderr, "Error while converting\n");
             exit(1);
         }
-
         frame = ost->frame;
 
         frame->pts = av_rescale_q(ost->samples_count, (AVRational){1, c->sample_rate}, c->time_base);
-//        LOGCATE("log current pts:%lld sampleCount:%d  sampleRate:%d c-timeBase:%d --%d" ,frame->pts,ost->samples_count,
-//                c->sample_rate,c->time_base.num,c->time_base.den);
-        ost->samples_count += frame->nb_samples;
+        ost->samples_count += dst_nb_samples;
     }
 
-    write_frame(oc, c, ost->st, frame);
-
-    if (audioInfo){
-        audioInfo->recycle();
-    }
-    audioInfo = nullptr;
-    return (frame || got_packet) ? 0 : 1;
+    return write_frame(oc, c, ost->st, frame);
 }
 
 /**************************************************************/
 /* video output */
 
- AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
+static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 {
     AVFrame *picture;
     int ret;
@@ -412,7 +405,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     return picture;
 }
 
- void open_video(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, AVDictionary *opt_arg)
+static void open_video(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, AVDictionary *opt_arg)
 {
     int ret;
     AVCodecContext *c = ost->enc;
@@ -455,8 +448,8 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     }
 }
 
-/* Prepare a signal 4 (SIGILL), code 1 (ILL_ILLOPC), fault addr 0xcd93288a image. */
- void fill_yuv_image(AVFrame *pict, int frame_index,
+/* Prepare a dummy image. */
+static void fill_yuv_image(AVFrame *pict, int frame_index,
                            int width, int height)
 {
     int x, y, i;
@@ -477,7 +470,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     }
 }
 
- AVFrame *get_video_frame(OutputStream *ost)
+static AVFrame *get_video_frame(OutputStream *ost)
 {
     AVCodecContext *c = ost->enc;
 
@@ -516,8 +509,6 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
 
     ost->frame->pts = ost->next_pts++;
 
-    LOGCATE("video frame has prepared");
-
     return ost->frame;
 }
 
@@ -525,10 +516,10 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
  * encode one video frame and send it to the muxer
  * return 1 when encoding is finished, 0 otherwise
  */
- int write_video_frame(AVFormatContext *oc, OutputStream *ost)
+static int write_video_frame(AVFormatContext *oc, OutputStream *ost)
 {
-     LOGCATE("start encode video");
     return write_frame(oc, ost->enc, ost->st, get_video_frame(ost));
+
 }
 
 static void close_stream(AVFormatContext *oc, OutputStream *ost)
@@ -543,12 +534,8 @@ static void close_stream(AVFormatContext *oc, OutputStream *ost)
 /**************************************************************/
 /* media file output */
 
-
-
-int FFmpegMediaMuxer::StartMuxer(const char * outFileName)
+int main(int argc, char **argv)
 {
-    av_usleep(1500 * 1000);
-    LOGCATE("start muxer");
     OutputStream video_st = { 0 }, audio_st = { 0 };
     const char *filename;
     AVOutputFormat *fmt;
@@ -560,7 +547,22 @@ int FFmpegMediaMuxer::StartMuxer(const char * outFileName)
     AVDictionary *opt = NULL;
     int i;
 
-    filename = outFileName;
+    if (argc < 2) {
+        printf("usage: %s output_file\n"
+               "API example program to output a media file with libavformat.\n"
+               "This program generates a synthetic audio and video stream, encodes and\n"
+               "muxes them into a file named output_file.\n"
+               "The output format is automatically guessed according to the file extension.\n"
+               "Raw images can also be output by using '%%d' in the filename.\n"
+               "\n", argv[0]);
+        return 1;
+    }
+
+    filename = argv[1];
+    for (i = 2; i+1 < argc; i+=2) {
+        if (!strcmp(argv[i], "-flags") || !strcmp(argv[i], "-fflags"))
+            av_dict_set(&opt, argv[i]+1, argv[i+1], 0);
+    }
 
     /* allocate the output media context */
     avformat_alloc_output_context2(&oc, NULL, NULL, filename);
@@ -614,7 +616,16 @@ int FFmpegMediaMuxer::StartMuxer(const char * outFileName)
         return 1;
     }
 
-    encodeMediaAV(oc, encode_video, encode_audio, video_st, audio_st);
+    while (encode_video || encode_audio) {
+        /* select the stream to encode */
+        if (encode_video &&
+            (!encode_audio || av_compare_ts(video_st.next_pts, video_st.enc->time_base,
+                                            audio_st.next_pts, audio_st.enc->time_base) <= 0)) {
+            encode_video = !write_video_frame(oc, &video_st);
+        } else {
+            encode_audio = !write_audio_frame(oc, &audio_st);
+        }
+    }
 
     /* Write the trailer, if any. The trailer must be written before you
      * close the CodecContexts open when you wrote the header; otherwise
@@ -622,7 +633,6 @@ int FFmpegMediaMuxer::StartMuxer(const char * outFileName)
      * av_codec_close(). */
     av_write_trailer(oc);
 
-    AudioRecordPlayHelper::getInstance()->stopCapture();
     /* Close each codec. */
     if (have_video)
         close_stream(oc, &video_st);
@@ -637,123 +647,4 @@ int FFmpegMediaMuxer::StartMuxer(const char * outFileName)
     avformat_free_context(oc);
 
     return 0;
-}
-
-void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int encode_video, int encode_audio,
-                                     OutputStream &video_st, OutputStream &audio_st) {
-    int size = av_samples_get_buffer_size(NULL, audio_st.frame->channels, audio_st.frame->nb_samples,
-                                          audio_st.enc->sample_fmt, 1);
-    LOGCATE("打印音频缓冲大小:%d",size);
-    int64_t start = GetSysCurrentTime();
-#define TESTMODE 3 // 1-音频，2-视频，3混合
-    while (encode_video || encode_audio) {
-        /* select the stream to encode */
-//        LOGCATE("differ :%lld",GetSysCurrentTime() - start);
-        if (GetSysCurrentTime() - start > 10 * 1000) break;
-#if TESTMODE == 1
-        encode_audio = !write_audio_frame(oc, &audio_st);
-#elif TESTMODE == 2
-        encode_video = !write_video_frame(oc, &video_st);
-#else
-        int compareResult = av_compare_ts(video_st.next_pts, video_st.enc->time_base,
-                                          audio_st.next_pts, audio_st.enc->time_base);
-//        LOGCATE("log encode video:%d encodeaudio:%d compareresult:%d  av next pts:%lld/%lld",encode_video,encode_audio,
-//                compareResult,audio_st.next_pts,video_st.next_pts);
-        if (encode_video &&
-            (!encode_audio || av_compare_ts(video_st.next_pts, video_st.enc->time_base,
-                                            audio_st.next_pts, audio_st.enc->time_base) <= 0)) {
-            encode_video = !write_video_frame(oc, &video_st);
-        } else {
-            encode_audio = !write_audio_frame(oc, &audio_st);
-        }
-#endif
-
-    }
-    LOGCATE("loop audio encode has end:%lld",GetSysCurrentTime() - start);
-}
-
-
-int FFmpegMediaMuxer::init(const char * fileName){
-    strcpy(mTargetFilePath,fileName);
-    LOGCATE("打印地址:%s",fileName);
-    audioRecordThread = new std::thread(startRecord,this);
-    thread = new std::thread(StartMuxer,mTargetFilePath);
-    return 0;
-}
-
-void FFmpegMediaMuxer::receiveAudioBuffer(uint8_t* data,int nb_samples){
-//    LOGCATE("打印receiveAudioBuffer data的大小：%d",BUFFER_SIZE);
-    auto* info = new AudioRecordItemInfo;
-    auto * newResult = static_cast<uint8_t *>(malloc(BUFFER_SIZE));
-    memcpy(newResult,data,BUFFER_SIZE);
-    info->nb_samples = nb_samples;
-    info->data = newResult;
-    getInstace() -> audioQueue.pushLast(info);
-//    LOGCATE("打印数据总数：%d ",getInstace()->audioQueue.size());
-}
-
-void FFmpegMediaMuxer::startRecord(void * pVoid){
-    AudioRecordPlayHelper::getInstance()->startCapture(FFmpegMediaMuxer::receiveAudioBuffer);
-}
-
-static int64_t currentDuration = 0;
-
-static void testAudio(uint8_t* data,int samples){
-    FFmpegEncodeAudio::getInstance()->encodeAudioFrame(data,samples);
-    if (GetSysCurrentTime() - currentDuration > 10 * 1000) {
-        AudioRecordPlayHelper::getInstance()->stopCapture();
-    }
-}
-
-void FFmpegMediaMuxer::test(int type){
-    currentDuration = GetSysCurrentTime();
-    FFmpegEncodeAudio* encodeAudio = FFmpegEncodeAudio::getInstance();
-    encodeAudio->init("test.aac");
-    AudioRecordPlayHelper::getInstance()->startCapture(testAudio);
-    encodeAudio->unInit();
-    encodeAudio->destroyInstance();
-}
-
-
-
-void FFmpegMediaMuxer::OnSurfaceCreate() {
-    videoRender = new VideoRender;
-    videoRender->Init();
-}
-void FFmpegMediaMuxer::OnSurfaceChanged(int width,int height) {
-
-}
-void FFmpegMediaMuxer::OnCameraFrameDataValible(uint8_t* data) {
-
-}
-
-void FFmpegMediaMuxer::OnDrawFrame(){
-    if (videoRender) videoRender->DrawFrame();
-}
-
-void FFmpegMediaMuxer::Destroy(){
-    // 清空所有缓存音频
-    LOGCATE("start destroy :%d",audioQueue.size());
-    AudioRecordPlayHelper::getInstance()->stopCapture();
-    if (thread) {
-        thread -> join();
-        delete thread;
-    }
-    if(videoRender){
-        videoRender->Destroy();
-    }
-    if (audioRecordThread){
-        audioRecordThread->join();
-        delete audioRecordThread;
-    }
-    if (audioQueue.size() != 0){
-        for (int i = 0; i < audioQueue.size(); ++i) {
-            AudioRecordItemInfo *itemInfo = audioQueue.popFirst();
-            itemInfo->recycle();
-        }
-    }
-    AudioRecordPlayHelper::getInstance()->destroyInstance();
-    delete instance;
-    instance = 0;
-    LOGCATE("has destroy over size:%d",audioQueue.size());
 }

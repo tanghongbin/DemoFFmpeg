@@ -10,10 +10,11 @@
 #include <utils/JavaVmManager.h>
 #include <utils/MsgLoopHelper.h>
 #include <encoder/FFmpegMediaMuxer.h>
+#include <utils/AudioRecordPlayHelper.h>
 
 #include "mediaprocess/AbsCustomMediaPlayer.h"
 #include "mediaprocess/FFmpegMediaPlayer.h"
-#include "play_header/utils/CustomSafeQueue.h"
+#include "play_header/utils/CustomSafeBlockQueue.h"
 
 
 #define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomMediaController"
@@ -40,17 +41,25 @@ JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer != NULL) mediaPlayer->OnSurfaceCreated();
+
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (mediaMuxer != NULL) mediaMuxer->OnSurfaceCreate();
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint oretenation,jint width,jint height) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer != NULL) mediaPlayer->OnSurfaceChanged(oretenation,width,height);
+
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (mediaMuxer != NULL) mediaMuxer->OnSurfaceChanged(width,height);
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL)
-    mediaPlayer->OnDrawFrame();
+    if (mediaPlayer != NULL) mediaPlayer->OnDrawFrame();
+
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (mediaMuxer != NULL) mediaMuxer->OnDrawFrame();
 }
 
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
@@ -61,6 +70,7 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         mediaPlayer = NULL;
     }
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    LOGCATE("log mediamuxer :%p",mediaMuxer);
     if (mediaMuxer){
         mediaMuxer->Destroy();
         delete mediaMuxer;
@@ -83,7 +93,7 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
 JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance) {
     JavaVmManager::setInstance(env,instance);
     MsgLoopHelper::initMsgLoop();
-    FFmpegMediaMuxer *mediaMuxer = new FFmpegMediaMuxer;
+    FFmpegMediaMuxer *mediaMuxer = FFmpegMediaMuxer::getInstace();
     setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
     LOGCATE("has enter env:%p instance:%p",env,instance);
 }
@@ -123,12 +133,22 @@ JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring u
  * ============================   编码视频，音频，合并部分  ==========================
  * *****/
 
-JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance) {
+JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance,jint type) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer == NULL) return;
-    char resultPath[128];
-    sprintf(resultPath,"/storage/emulated/0/ffmpegtest/encodeVideos/%lld%s",GetSysCurrentTime(),"-test.mp4");
-    mediaMuxer->init(resultPath);
+    if (type == 1) {
+        mediaMuxer->test(type);
+    } else if (type == 2) {
+        char resultPath[128];
+        sprintf(resultPath,"/storage/emulated/0/ffmpegtest/encodeVideos/%lld%s",GetSysCurrentTime(),"-aaaa.mp4");
+        mediaMuxer->init(resultPath);
+    }
+}
+
+JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject instance,jbyteArray byteArray) {
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (mediaMuxer == NULL) return;
+
 }
 
 
@@ -151,7 +171,9 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
         {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
 
-        {"startTestEncode",               "()V",            (void *) (startTestEncode)},
+        {"startTestEncode",               "(I)V",            (void *) (startTestEncode)},
+        {"native_onCameraFrameDataValible",               "([B)V",            (void *) (native_onCameraFrameDataValible)},
+
 };
 
 

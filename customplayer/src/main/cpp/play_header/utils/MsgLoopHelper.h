@@ -8,12 +8,12 @@
 #include "Message.h"
 #include <thread>
 #include <cstdint>
-#include <utils/CustomSafeQueue.h>
+#include <utils/CustomSafeBlockQueue.h>
 
 class MsgLoopHelper{
 private:
     bool isLoop = true;
-    CustomSafeQueue<Message*> * safeQueue;
+    CustomSafeBlockQueue<Message*> * safeQueue;
     std::thread * msgThread;
     static MsgLoopHelper* instance;
 

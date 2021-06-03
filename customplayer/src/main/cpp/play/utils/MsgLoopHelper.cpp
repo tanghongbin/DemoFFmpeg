@@ -10,7 +10,7 @@ MsgLoopHelper* MsgLoopHelper::instance = nullptr;
 
 void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
     LOGCATE("loop has enter %p",player);
-    player->getInstance()->safeQueue = new CustomSafeQueue<Message*>;
+    player->getInstance()->safeQueue = new CustomSafeBlockQueue<Message*>;
     for (;;) {
         if (!player->isLoop) break;
         Message*  message = player->safeQueue->popFirst();

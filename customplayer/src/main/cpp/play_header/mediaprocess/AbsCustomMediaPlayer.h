@@ -6,7 +6,7 @@
 #define DEMOFFMPEG_ABSCUSTOMMEDIAPLAYER_H
 
 #include <cstdint>
-#include <utils/CustomSafeQueue.h>
+#include <utils/CustomSafeBlockQueue.h>
 #include <utils/Message.h>
 #include <utils/JavaVmManager.h>
 #include <thread>
