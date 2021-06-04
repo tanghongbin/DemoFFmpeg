@@ -156,6 +156,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 }
 
 fun getAppContext():Context{
-    return DemoApplication.instance
+    return DemoApplication.getInstance()
 }
 

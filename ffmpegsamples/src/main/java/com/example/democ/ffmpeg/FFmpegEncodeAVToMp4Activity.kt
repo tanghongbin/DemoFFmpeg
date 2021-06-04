@@ -1,5 +1,6 @@
 package com.example.democ.ffmpeg
 
+import android.hardware.Camera
 import android.os.Bundle
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
@@ -9,9 +10,7 @@ import com.example.democ.R
 import com.example.democ.audio.log
 import com.example.democ.render.FFmpegRender
 import com.example.democ.utils.CameraAsyncDataHelper
-import com.example.democ.utils.JavaYuvConvertHelper
 import com.example.democ.utils.SpUtils
-import com.libyuv.LibyuvUtil
 import kotlinx.android.synthetic.main.activity_f_fmpeg_encode_a_v_to_mp4.*
 
 /**
@@ -34,6 +33,7 @@ class FFmpegEncodeAVToMp4Activity : AppCompatActivity(), SurfaceHolder.Callback,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_f_fmpeg_encode_a_v_to_mp4)
         mCameraSurfaceManager = CameraSurfaceManager(mAvSurface)
+//        mCameraSurfaceManager.mCameraUtil.currentCameraType = Camera.CameraInfo.CAMERA_FACING_FRONT
         mFFmpegRender = FFmpegRender()
         mAvSurface.setCameraYUVDataListener(this)
         mStartRecordMp4.setOnClickListener {
@@ -87,26 +87,27 @@ class FFmpegEncodeAVToMp4Activity : AppCompatActivity(), SurfaceHolder.Callback,
     private fun realEncode(nv21: ByteArray?) {
 //        log("java layer onCallback")
 
-        val windowWidth = mAvSurface.cameraUtil.cameraWidth
-        val windowHeight = mAvSurface.cameraUtil.cameraHeight
-        val scaleHeight = mAvSurface.cameraUtil.cameraWidth
-        val scaleWidth = mAvSurface.cameraUtil.cameraHeight
-        val mOrientation = mAvSurface.cameraUtil.orientation
-        val bytesSize = nv21?.size ?: 0
-
-        val start = System.currentTimeMillis()
-
-        val finalResult = JavaYuvConvertHelper.convert(
-            nv21,
-            windowWidth,
-            windowHeight,
-            mOrientation,
-            mOrientation == 270
-        )
-        val middle2 = System.currentTimeMillis()
+        if (nv21 == null) return
+//        val windowWidth = mAvSurface.cameraUtil.cameraWidth
+//        val windowHeight = mAvSurface.cameraUtil.cameraHeight
+//        val scaleHeight = mAvSurface.cameraUtil.cameraWidth
+//        val scaleWidth = mAvSurface.cameraUtil.cameraHeight
+//        val mOrientation = mAvSurface.cameraUtil.orientation
+//        val bytesSize = nv21?.size ?: 0
+//
+//        val start = System.currentTimeMillis()
+//
+//        val finalResult = JavaYuvConvertHelper.convert(
+//            nv21,
+//            windowWidth,
+//            windowHeight,
+//            mOrientation,
+//            mOrientation == 270
+//        )
+//        val middle2 = System.currentTimeMillis()
         //        log("nv21 转 i420 耗时:${middle - start}   旋转压缩耗时:${middle2 - middle}" +
         //                "      width:${windowWidth} height:${windowHeight} orientation:${mOrientation}  数组大小:${bytesSize}")
-        mFFmpegRender.native_encodeavmuxer_encodeFrame(finalResult)
+        mFFmpegRender.native_encodeavmuxer_encodeFrame(nv21)
     }
 
 

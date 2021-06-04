@@ -1,4 +1,4 @@
-package com.example.demoFFmpeg
+package com.example.democ
 
 import android.content.Context
 import android.content.Intent
@@ -6,11 +6,9 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.common_base.utils.requestCustomPermissions
-import com.example.democ.MainActivity
 import com.example.democ.activity.AudioTestActivity
 import com.example.democ.ffmpeg.FFmpegNavigationActivity
 import com.example.democ.opengles.OpenGLESNavigationActivity
-import com.example.ijkplayer_demo.FFmpegIjkPlayerActivity
 import kotlinx.android.synthetic.main.activity_splash.*
 
 class SplashActivity : AppCompatActivity() {
@@ -19,8 +17,8 @@ class SplashActivity : AppCompatActivity() {
         MainActivity::class.java,
         AudioTestActivity::class.java,
         FFmpegNavigationActivity::class.java,
-        OpenGLESNavigationActivity::class.java,
-        FFmpegIjkPlayerActivity::class.java
+        OpenGLESNavigationActivity::class.java
+//        FFmpegIjkPlayerActivity::class.java
 //        CustomPlayerListActivity::class.java
     )
     fun putIndex(position:Int){

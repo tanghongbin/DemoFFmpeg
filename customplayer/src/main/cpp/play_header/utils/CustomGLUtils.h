@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <mediaprocess/AbsCustomMediaPlayer.h>
 #include <encoder/AbsMediaMuxer.h>
+#include <libyuv/rotate.h>
 
 
 extern "C" {
@@ -74,6 +75,8 @@ const char *encdoeMp4FromOfficalDemo();
 const char *getCharStrFromJstring(JNIEnv *jniEnv, jstring str);
 
 const char *getRandomStr(const char *prefix, const char *suffix);
+
+void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width,int height, libyuv::RotationMode mode);
 
 //attribute_deprecated
 const char *getRandomStr(const char *prefix, const char *suffix, const char *subDir);

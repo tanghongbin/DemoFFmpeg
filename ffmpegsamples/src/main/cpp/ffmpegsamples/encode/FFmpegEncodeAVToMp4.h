@@ -8,9 +8,11 @@
 
 #include <cstdint>
 #include <thread>
+
 #include "AbsEncodeAV.h"
 
 extern "C"{
+#include <libyuv/rotate.h>
 #include <libswresample/swresample.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -96,6 +98,8 @@ public:
     int initEncodeAudio();
 
     void logPkt(AVFormatContext *pContext, AVPacket *pPacket);
+
+
 };
 
 

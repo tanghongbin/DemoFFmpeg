@@ -1,8 +1,4 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-}
-
+apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
@@ -14,6 +10,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
+        applicationId rootProject.ext.android.applicationId
         versionCode rootProject.ext.android.versionCode
         versionName rootProject.ext.android.versionName
 

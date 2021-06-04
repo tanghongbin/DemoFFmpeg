@@ -41,7 +41,6 @@ protected:
 public:
 
     GLBaseSample() {
-        uint32_t
     };
 
     virtual ~GLBaseSample() {

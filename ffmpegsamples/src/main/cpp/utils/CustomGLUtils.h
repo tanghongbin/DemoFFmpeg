@@ -16,7 +16,9 @@
 
 #include <stdlib.h>
 
+
 extern "C" {
+#include <libyuv/rotate.h>
 #include <libavutil/frame.h>
 #include <libavutil/pixfmt.h>
 }
@@ -42,10 +44,9 @@ typedef struct test_params_struct {
 } TestParams;
 
 
-void glCheckError(const char *pGLOperation) {
-    GLenum error = glGetError();
-    LOGCATE("GLUtils::glCheckError GL Operation %s() glError (0x%x)\n", pGLOperation, error);
-}
+void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width, int height, libyuv::RotationMode mode);
+
+void glCheckError(const char *pGLOperation);
 
 GLuint LoadShader(GLenum shaderType, const char *pSource);
 

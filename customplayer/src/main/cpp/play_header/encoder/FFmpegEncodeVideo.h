@@ -5,14 +5,15 @@
 #ifndef DEMOC_FFMPEGENCODEVIDEO_H
 #define DEMOC_FFMPEGENCODEVIDEO_H
 
-#include "../../include/libavcodec/avcodec.h"
-#include "../../include/libavutil/frame.h"
-#include "../../include/libavformat/avformat.h"
+
 #include <cstdio>
 #include <cstdint>
 
 extern "C" {
-
+#include "../../include/libavcodec/avcodec.h"
+#include "../../include/libavutil/frame.h"
+#include "../../include/libavformat/avformat.h"
+#include <libavutil/imgutils.h>
 }
 
 class FFmpegEncodeVideo {

@@ -159,19 +159,11 @@ set_target_properties(mp3 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}
 add_library(x264 SHARED IMPORTED )
 set_target_properties(x264 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libx264.so)
 
-#add_library(libyuv SHARED IMPORTED )
-#set_target_properties(libyuv PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libyuv.so)
+add_library(libyuv SHARED IMPORTED )
+set_target_properties(libyuv PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libyuv.so)
 
 add_library(fdk-aac SHARED IMPORTED )
 set_target_properties(fdk-aac PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libfdk-aac.so)
-
-#add_library(libyuv
-#        SHARED
-#        IMPORTED)
-#
-#set_target_properties(libyuv
-#        PROPERTIES IMPORTED_LOCATION
-#        ${LIBYUV_DIR}/libs/${ANDROID_ABI}/libyuv.so)
 
 # ass crypto expat fontconfig freetype fribidi ssl
 
@@ -218,7 +210,7 @@ set(third-party-libs
         swscale
         mp3
         x264
-#        libyuv
+        libyuv
         ass
         crypto
         fdk-aac

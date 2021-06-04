@@ -1,17 +1,15 @@
 package com.example.customplayer.activity.ffmpeg
 
-import androidx.appcompat.app.AppCompatActivity
+import android.hardware.Camera
 import android.os.Bundle
 import android.view.SurfaceHolder
+import androidx.appcompat.app.AppCompatActivity
 import com.example.common_base.utils.log
 import com.example.common_base.utils.runAsyncTask
 import com.example.customplayer.R
 import com.example.customplayer.camera.CameraHelpr
-import com.example.customplayer.interfaces.OnSurfaceCallListener
 import com.example.customplayer.player.CustomMediaController
 import kotlinx.android.synthetic.main.activity_f_fmpeg_muxer.*
-import javax.microedition.khronos.egl.EGLConfig
-import javax.microedition.khronos.opengles.GL10
 
 class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private val mMuxer by lazy { CustomMediaController(2) }
@@ -22,10 +20,11 @@ class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
         setContentView(R.layout.activity_f_fmpeg_muxer)
         muxerButton.setOnClickListener {
             runAsyncTask({
-                mMuxer.startTestEncode(2)
+                mMuxer.startTestEncode(3)
             })
         }
 //        mMuxerSurface.init(mMuxer)
+        mCameraHelpr.setCameraType(Camera.CameraInfo.CAMERA_FACING_BACK)
         mMuxerSurface.holder.addCallback(this)
         mCameraHelpr.setPreviewCallback { data, camera ->
             log("打印设想数据:$data")

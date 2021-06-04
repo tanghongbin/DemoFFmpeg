@@ -4,7 +4,7 @@ import android.content.Context.MODE_PRIVATE
 import com.example.common_base.DemoApplication
 
 object SpUtils {
-    private val sharedPreferences = DemoApplication.instance.getSharedPreferences("demoCApp",MODE_PRIVATE)
+    private val sharedPreferences = DemoApplication.getInstance().getSharedPreferences("demoCApp",MODE_PRIVATE)
 
     fun putString(name:String,value:String?){
         sharedPreferences.edit().putString(name,value).apply()

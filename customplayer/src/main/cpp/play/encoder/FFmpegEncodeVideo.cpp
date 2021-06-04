@@ -12,7 +12,7 @@
 #include <encoder/FFmpegEncodeVideo.h>
 #include <utils/utils.h>
 #include <utils/CustomGLUtils.h>
-#include <libavutil/imgutils.h>
+
 
 FFmpegEncodeVideo *FFmpegEncodeVideo::instance = nullptr;
 

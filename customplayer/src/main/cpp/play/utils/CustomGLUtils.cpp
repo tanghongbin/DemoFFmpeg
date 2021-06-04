@@ -15,6 +15,8 @@
 #include <iostream>
 #include <utils/utils.h>
 #include <utils/CustomGLUtils.h>
+#include <libyuv/rotate.h>
+#include <libyuv/convert.h>
 
 
 extern "C" {
@@ -238,6 +240,31 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
 void glCheckError(const char *pGLOperation){
     GLenum error = glGetError();
     LOGCATE("GLUtils::glCheckError GL Operation %s() glError (0x%x)\n", pGLOperation, error);
+}
+
+void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width,int height, libyuv::RotationMode mode) {
+    int64_t startTime= GetSysCurrentTime();
+    int frameSize = width * height * 3 / 2;
+    uint8_t * i420DstData = new uint8_t [frameSize];
+    memset(i420DstData,0x00,frameSize);
+    memset(i420RorateDst,0x00,frameSize);
+    uint8_t * nv21YData = nv21Data;
+    uint8_t * nv21UVData = nv21Data + width * height;
+    uint8_t * i420UData = i420DstData + width * height;
+    uint8_t * i420VData = i420DstData + width * height * 5 / 4;//        LOGCATE("srcData:%p dstData:%p",nv21Data,i420DstData);
+    libyuv::NV21ToI420((const uint8_t *)nv21YData,width,
+                       (const uint8_t *)nv21UVData,width,
+                       (uint8_t *) i420DstData,width,
+                       (uint8_t *) i420UData,width >> 1,
+                       (uint8_t *) i420VData,width >> 1,width,height);
+    libyuv::I420Rotate(i420DstData, width,
+                       i420UData, width >> 1,
+                       i420VData, width >> 1,
+                       i420RorateDst, height,
+                       i420RorateDst + width * height, height >> 1,
+                       i420RorateDst + width* height* 5/4, height >> 1,
+                       width, height, mode);
+    delete [] i420DstData;
 }
 
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,

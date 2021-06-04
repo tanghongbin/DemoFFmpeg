@@ -59,7 +59,7 @@ public class CameraSurfaceManager implements SensorEventListener, CameraYUVDataL
         mCameraSurfaceView = cameraSurfaceView;
         mCameraUtil = cameraSurfaceView.getCameraUtil();
         mCameraSurfaceView.setCameraYUVDataListener(this);
-        mSensorManager = (SensorManager) DemoApplication.instance.getSystemService(SENSOR_SERVICE);
+        mSensorManager = (SensorManager) DemoApplication.Companion.getInstance().getSystemService(SENSOR_SERVICE);
     }
 
     public void setCameraPictureListener(CameraPictureListener listener) {
@@ -206,11 +206,11 @@ public class CameraSurfaceManager implements SensorEventListener, CameraYUVDataL
         cropStartX = (int) SPUtil.get(Contacts.CROP_START_X, 0);
         cropStartY = (int) SPUtil.get(Contacts.CROP_START_Y, 0);
         if (cropStartX % 2 != 0 || cropStartY % 2 != 0) {
-            Toast.makeText(DemoApplication.instance, "裁剪的开始位置必须为偶数", Toast.LENGTH_SHORT).show();
+            Toast.makeText(DemoApplication.Companion.getInstance(), "裁剪的开始位置必须为偶数", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (cropStartX + cropWidth > scaleWidth || cropStartY + cropHeight > scaleHeight) {
-            Toast.makeText(DemoApplication.instance, "裁剪区域超出范围", Toast.LENGTH_SHORT).show();
+            Toast.makeText(DemoApplication.Companion.getInstance(), "裁剪区域超出范围", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

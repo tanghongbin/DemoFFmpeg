@@ -14,6 +14,7 @@
 #include <libyuv/scale.h>
 #include <libyuv/convert.h>
 #include <encoder/FFmpegEncodeVideo.h>
+#include <libyuv/rotate.h>
 
 extern "C" {
 #include <libswscale/swscale.h>
@@ -170,6 +171,8 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
             }
             int videoFrameSize = c->width * c->height * 3 / 2;
             FFmpegMediaMuxer::getInstace() -> videoFrameDst = static_cast<uint8_t *>(av_malloc(videoFrameSize));
+            FFmpegMediaMuxer::getInstace()->width = c->width;
+            FFmpegMediaMuxer::getInstace()->height = c->height;
             break;
     }
 
@@ -459,30 +462,19 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
 }
 
 /* Prepare a signal 4 (SIGILL), code 1 (ILL_ILLOPC), fault addr 0xcd93288a image. */
-void fill_yuv_image(AVFrame *avFrame, int frame_index, int width, int height, uint8_t *nv21Data)
+void fill_yuv_image(AVFrame *avFrame, int frame_index, int w, int h, uint8_t *nv21Data)
 {
     int64_t startTime = GetSysCurrentTime();
 
-    uint8_t * nv21YData = nv21Data;
-    uint8_t * nv21UVData = nv21Data + width * height;
-    uint8_t * i420DstData = FFmpegMediaMuxer::getInstace()->videoFrameDst;
-    memset(i420DstData,0x00,width*height*3/2);
-    uint8_t * i420UData = i420DstData + width * height;
-    uint8_t * i420VData = i420DstData + width * height * 5 / 4;
-    LOGCATE("srcData:%p dstData:%p",nv21Data,i420DstData);
-    libyuv::NV21ToI420((const uint8_t *)nv21YData,width,
-                       (const uint8_t *)nv21UVData,width,
-                       (uint8_t *) i420DstData,width,
-                       (uint8_t *) i420UData,width >> 1,
-                       (uint8_t *) i420VData,width >> 1,width,height);
-    avFrame->data[0] = i420DstData;
-//    avFrame->linesize[0] = width;
-    avFrame->data[1] = i420UData;
-//    avFrame->linesize[1] = width >> 1;
-    avFrame->data[2] = i420VData;
-//    avFrame->linesize[2] = width >> 1;
-    LOGCATE("打印convert 花费了多少时间:%lld width:%d height:%d lineSize:%d %d %d",GetSysCurrentTime() - startTime,
-            width,height,avFrame->linesize[0],avFrame->linesize[1],avFrame->linesize[2]);
+    uint8_t * i420RorateDst = FFmpegMediaMuxer::getInstace()->videoFrameDst;
+    int landScapeWidth = w;
+    int landScapeHeight = h;
+    yuvNv21To420p(nv21Data,i420RorateDst,landScapeWidth,landScapeHeight,libyuv::kRotate90);
+    avFrame->data[0] = i420RorateDst;
+    avFrame->data[1] = i420RorateDst + landScapeWidth * landScapeHeight;
+    avFrame->data[2] = i420RorateDst + landScapeWidth * landScapeHeight * 5 / 4;
+//    LOGCATE("打印convert 花费了多少时间:%lld width:%d height:%d lineSize:%d %d %d",GetSysCurrentTime() - startTime,
+//            landScapeWidth,landScapeHeight,avFrame->linesize[0],avFrame->linesize[1],avFrame->linesize[2]);
 
 }
 
@@ -558,6 +550,7 @@ else srcFormat = AV_PIX_FMT_YUV420P;
     if (!frameData) return 0;
     int ret = write_frame(oc, ost->enc, ost->st, frameData);
     delete [] data;
+    data = nullptr;
     return ret;
 }
 
@@ -749,7 +742,6 @@ void FFmpegMediaMuxer::test(int type){
         encodeVideo->mWindow_width = 1280;
         encodeVideo->mWindow_height = 720;
         encodeVideo->init();
-
     }
 
 }
@@ -763,11 +755,25 @@ void FFmpegMediaMuxer::OnSurfaceCreate() {
 void FFmpegMediaMuxer::OnSurfaceChanged(int width,int height) {
 
 }
-void FFmpegMediaMuxer::OnCameraFrameDataValible(uint8_t* data) {
-    if (isDestroyed) return;
-    uint8_t * lastData = videoQueue.pushLast(data);
-    if (lastData) delete [] lastData;
-//    LOGCATE("打印video total size:%d",videoQueue.size());
+void FFmpegMediaMuxer::OnCameraFrameDataValible(uint8_t* nv21Data) {
+//    if (isDestroyed || width == 0 || height == 0) return;
+//    int bufferSize = width * height * 3/2;
+//    uint8_t * saveData = new uint8_t [bufferSize];
+//    memset(saveData,0x00,bufferSize);
+//    memcpy(saveData,nv21Data,bufferSize);
+//    uint8_t * lastData = videoQueue.pushLast(saveData);
+//    if (lastData) delete [] lastData;
+
+// 测试
+if (FFmpegEncodeVideo::getInstance()->mWindow_height == 0 || FFmpegEncodeVideo::getInstance()->mWindow_width == 0) return;
+int bufferSize = FFmpegEncodeVideo::getInstance()->mWindow_height * FFmpegEncodeVideo::getInstance()->mWindow_width * 3/2;
+int width = FFmpegEncodeVideo::getInstance()->mWindow_height;
+int height = FFmpegEncodeVideo::getInstance()->mWindow_width;
+uint8_t * dstData = new uint8_t [bufferSize];
+LOGCATE("打印宽高：%d %d",width,height);
+yuvNv21To420p(nv21Data,dstData,width,height,libyuv::kRotate90);
+    FFmpegEncodeVideo::getInstance()->encodeVideoFrame(nv21Data);
+    delete [] dstData;
 }
 
 void FFmpegMediaMuxer::OnDrawFrame(){
@@ -777,6 +783,7 @@ void FFmpegMediaMuxer::OnDrawFrame(){
 void FFmpegMediaMuxer::Destroy(){
     // 清空所有缓存音频
     isDestroyed = true;
+    FFmpegEncodeVideo::getInstance()->unInit();
     LOGCATE("start destroy :%d",audioQueue.size());
     AudioRecordPlayHelper::getInstance()->stopCapture();
     if (thread) {

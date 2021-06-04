@@ -52,6 +52,7 @@ private:
     std::thread * audioRecordThread;
     char mTargetFilePath[128];
     BaseRender* videoRender;
+
     bool isDestroyed;
     static int StartMuxer(const char * fileName);
     static void startRecord(void * pVoid);
@@ -62,8 +63,10 @@ private:
         videoFrameDst = 0;
         videoQueue.setMax(3);
         isDestroyed = false;
+        width = height = 0;
     }
 public:
+    int width,height;
     CustomSafeQueue<AudioRecordItemInfo*> audioQueue;
     CustomSafeQueue<uint8_t *> videoQueue;
     uint8_t * videoFrameDst;

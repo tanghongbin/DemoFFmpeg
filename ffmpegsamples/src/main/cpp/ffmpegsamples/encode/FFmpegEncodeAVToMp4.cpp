@@ -15,6 +15,10 @@ extern "C"{
 #include <libavutil/time.h>
 #include <libavutil/opt.h>
 #include <libavutil/imgutils.h>
+#include <libyuv.h>
+#include <libyuv/scale.h>
+#include <libyuv/convert.h>
+#include <libyuv/rotate.h>
 }
 
 FFmpegEncodeAVToMp4* FFmpegEncodeAVToMp4::instance = nullptr;
@@ -129,7 +133,7 @@ void FFmpegEncodeAVToMp4::unInitAvEncoder(){
 }
 
 // 1-音频，2-视频
-void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int mediaType){
+void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* srcData, int length, int mediaType){
 
     if (!mHasInitSuccess)
         return;
@@ -141,7 +145,7 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
         out[0] = new uint8_t[length];
         out[1] = new uint8_t[length];
 
-        const uint8_t * convert_buffer = buffer;
+        const uint8_t * convert_buffer = srcData;
         ret = swr_convert(swr,out,length * 4,&convert_buffer,length/4);
         if (ret < 0){
             LOGCATE("convert error:%s",av_err2str(ret));
@@ -188,22 +192,38 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
         delete out[0];
         delete out[1];
     } else {
-
+        uint8_t * i420RorateDst = new uint8_t [codeCtxV->width * codeCtxV->height * 3 / 2];
         int ret;
+        AVRational time_base1;
+        int64_t calc_duration;
+        uint8_t * nv21Data;
+        int width  = codeCtxV->height;
+        int height = codeCtxV->width;
+        int frameSize = codeCtxV->width * codeCtxV->height * 3 / 2;
         int y_size = codeCtxV->width * codeCtxV->height;
         LOGCATE("encode width:%d height:%d", codeCtxV->width, codeCtxV->height);
+
+        // 转换
+        int64_t startTime;
+
+        yuvNv21To420p(srcData, i420RorateDst,width, height,libyuv::kRotate90);
+
+        //        ret = libyuv::ConvertToI420(nv21Data, width * height, i420DstData, height, i420UData, height / 2, i420VData,
+//                              height / 2, 0, 0, width, height, width, height, libyuv::kRotate90,
+//                              libyuv::FOURCC_NV21);
+        LOGCATE("查看第二次转换结果:%d 总共花费时间：%lld",ret,GetSysCurrentTime() - startTime);
         ret = av_frame_make_writable(frameV);
         if (ret < 0) {
             LOGCATE("av_frame_make_writable failed: code:%d  errorStr:%s", ret, av_err2str(ret));
-            return;
+            goto End;
         }
-        frameV->data[0] = buffer;              // Y
-        frameV->data[1] = buffer + y_size;      // U
-        frameV->data[2] = buffer + y_size * 5 / 4;  // V
+        frameV->data[0] = i420RorateDst;              // Y
+        frameV->data[1] = i420RorateDst + width * height;      // U
+        frameV->data[2] = i420RorateDst + width * height * 5 / 4;  // V
 
-        AVRational time_base1 = codeCtxV->time_base;
+        time_base1 = codeCtxV->time_base;
         //Duration between 2 frames (us)
-        int64_t calc_duration =
+        calc_duration =
                 (double) AV_TIME_BASE / av_q2d(codeCtxV->framerate);
         //Parameters
         frameV->pkt_duration = calc_duration;
@@ -213,7 +233,7 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
         ret = avcodec_send_frame(codeCtxV, frameV);
         if (ret < 0) {
             LOGCATE("avcodec_send_frame failed:%s", av_err2str(ret));
-            return;
+            goto End;
         }
 
         while (ret >= 0) {
@@ -238,8 +258,13 @@ void FFmpegEncodeAVToMp4::encode_frame_Av(uint8_t* buffer, int length, int media
             av_packet_unref(pktV);
         }
         pts_frame_indexV++;
+
+        End:
+        delete [] i420RorateDst;
     }
 }
+
+
 
 int FFmpegEncodeAVToMp4::initEncodeAudio(){
     ret = avformat_alloc_output_context2(&ofmtctx, NULL, NULL, out_file_name);

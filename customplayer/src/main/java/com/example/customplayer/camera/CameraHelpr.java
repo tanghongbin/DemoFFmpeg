@@ -5,6 +5,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.media.ImageReader;
 import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -29,6 +30,10 @@ public class CameraHelpr {
     private int cameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private boolean isFlashOpen;
 
+    public void setCameraType(int cameraId){
+        this.cameraId = cameraId;
+    }
+
     public boolean isFrontCamera(){
         return getCameraId() == Camera.CameraInfo.CAMERA_FACING_FRONT;
     }
@@ -38,7 +43,7 @@ public class CameraHelpr {
     }
 
     public void openCamera(Activity activity, SurfaceHolder surfaceHolder){
-        openCamera(activity, Camera.CameraInfo.CAMERA_FACING_FRONT,surfaceHolder);
+        openCamera(activity, cameraId,surfaceHolder);
     }
     public void openCamera(Activity activity, int cameraId, SurfaceHolder surfaceHolder){
 

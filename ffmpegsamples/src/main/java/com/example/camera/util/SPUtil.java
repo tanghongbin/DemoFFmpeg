@@ -26,7 +26,7 @@ public class SPUtil {
      * 保存数据的方法，我们需要拿到保存数据的具体类型，然后根据类型调用不同的保存方法
      */
     public static void put(String key, Object object) {
-        put(DemoApplication.instance, FILE_NAME, key, object);
+        put(DemoApplication.Companion.getInstance(), FILE_NAME, key, object);
     }
 
     private static void put(Context context, String spName, String key, Object object) {
@@ -55,7 +55,7 @@ public class SPUtil {
      * 得到保存数据的方法，我们根据默认值得到保存的数据的具体类型，然后调用相对于的方法获取值
      */
     public static Object get(String key, Object defaultObject) {
-        return get(DemoApplication.instance, FILE_NAME, key, defaultObject);
+        return get(DemoApplication.Companion.getInstance(), FILE_NAME, key, defaultObject);
     }
 
     private static Object get(Context context, String spName, String key, Object defaultObject) {
@@ -81,7 +81,7 @@ public class SPUtil {
      * 移除某个key值已经对应的值
      */
     public static void remove(String key) {
-        remove(DemoApplication.instance, FILE_NAME, key);
+        remove(DemoApplication.Companion.getInstance(), FILE_NAME, key);
     }
 
     private static void remove(Context context, String spName, String key) {
@@ -96,7 +96,7 @@ public class SPUtil {
      * 清除所有数据
      */
     public static void clear() {
-        clear(DemoApplication.instance, FILE_NAME);
+        clear(DemoApplication.Companion.getInstance(), FILE_NAME);
     }
 
     private static void clear(Context context, String spName) {
@@ -110,7 +110,7 @@ public class SPUtil {
      * 查询某个key是否已经存在
      */
     public static boolean contains(String key) {
-        return contains(DemoApplication.instance, FILE_NAME, key);
+        return contains(DemoApplication.Companion.getInstance(), FILE_NAME, key);
     }
 
     private static boolean contains(Context context, String spName, String key) {
@@ -122,7 +122,7 @@ public class SPUtil {
      * 返回所有的键值对
      */
     public static Map<String, ?> getAll() {
-        return getAll(DemoApplication.instance, FILE_NAME);
+        return getAll(DemoApplication.Companion.getInstance(), FILE_NAME);
     }
 
     private static Map<String, ?> getAll(Context context, String spName) {
