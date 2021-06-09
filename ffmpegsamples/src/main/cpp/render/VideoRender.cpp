@@ -43,7 +43,7 @@ void VideoRender::init(AVCodecContext *pContext, _jobject *instance, _jobject *p
     setupRenderDimension(windowWidth, windowHeight, m_VideoWidth, m_VideoHeight, &m_RenderWidth,
                          &m_RenderHeight);
 
-    LOGCATE("windowWidth:%d windowHeight:%d \nvideoWidth:%d videoHeight:%d \n renderWidth:%d renderHeight:%d",
+    LOGCATE("cameraWidth:%d windowHeight:%d \nvideoWidth:%d videoHeight:%d \n renderWidth:%d renderHeight:%d",
             windowWidth, windowHeight, m_VideoWidth, m_VideoHeight, m_RenderWidth, m_RenderHeight);
     //2. 获取转换的上下文
     m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight,

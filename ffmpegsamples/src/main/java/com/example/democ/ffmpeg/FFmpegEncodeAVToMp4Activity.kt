@@ -88,7 +88,7 @@ class FFmpegEncodeAVToMp4Activity : AppCompatActivity(), SurfaceHolder.Callback,
 //        log("java layer onCallback")
 
         if (nv21 == null) return
-//        val windowWidth = mAvSurface.cameraUtil.cameraWidth
+//        val cameraWidth = mAvSurface.cameraUtil.cameraWidth
 //        val windowHeight = mAvSurface.cameraUtil.cameraHeight
 //        val scaleHeight = mAvSurface.cameraUtil.cameraWidth
 //        val scaleWidth = mAvSurface.cameraUtil.cameraHeight
@@ -99,14 +99,14 @@ class FFmpegEncodeAVToMp4Activity : AppCompatActivity(), SurfaceHolder.Callback,
 //
 //        val finalResult = JavaYuvConvertHelper.convert(
 //            nv21,
-//            windowWidth,
+//            cameraWidth,
 //            windowHeight,
 //            mOrientation,
 //            mOrientation == 270
 //        )
 //        val middle2 = System.currentTimeMillis()
         //        log("nv21 转 i420 耗时:${middle - start}   旋转压缩耗时:${middle2 - middle}" +
-        //                "      width:${windowWidth} height:${windowHeight} orientation:${mOrientation}  数组大小:${bytesSize}")
+        //                "      width:${cameraWidth} height:${windowHeight} orientation:${mOrientation}  数组大小:${bytesSize}")
         mFFmpegRender.native_encodeavmuxer_encodeFrame(nv21)
     }
 

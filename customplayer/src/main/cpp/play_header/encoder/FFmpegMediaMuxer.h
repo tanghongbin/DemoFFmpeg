@@ -63,10 +63,10 @@ private:
         videoFrameDst = 0;
         videoQueue.setMax(3);
         isDestroyed = false;
-        width = height = 0;
+        cameraWidth = cameraHeight = 0;
     }
 public:
-    int width,height;
+    int cameraWidth,cameraHeight;
     CustomSafeQueue<AudioRecordItemInfo*> audioQueue;
     CustomSafeQueue<uint8_t *> videoQueue;
     uint8_t * videoFrameDst;

@@ -104,7 +104,7 @@ class FFmpegRtmpNativeActivity : AppCompatActivity(), SurfaceHolder.Callback,
         )
         val middle2 = System.currentTimeMillis()
 //                log("nv21 转 i420 耗时:${middle - start}   旋转压缩耗时:${middle2 - middle}" +
-        //                "      width:${windowWidth} height:${windowHeight} orientation:${mOrientation}  数组大小:${bytesSize}")
+        //                "      width:${cameraWidth} height:${windowHeight} orientation:${mOrientation}  数组大小:${bytesSize}")
 //        log("判断bytearray是否为空:${finalResult == null} 大小:${finalResult.size}")
         mFFmpegRender.native_live_encodeFrame(finalResult)
     }

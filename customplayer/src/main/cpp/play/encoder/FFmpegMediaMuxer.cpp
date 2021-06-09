@@ -63,9 +63,9 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
         AVPacket pkt = { 0 };
 
         ret = avcodec_receive_packet(c, &pkt);
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
             break;
-        else if (ret < 0) {
+        }else if (ret < 0) {
             fprintf(stderr, "Error encoding a frame: %s\n", av_err2str(ret));
             exit(1);
         }
@@ -84,7 +84,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
         }
     }
 
-    LOGCATE("has write result:%d  msg:%s currentIndex:%d currentCodeId:%d",ret,av_err2str(ret),st->index,c->codec_id);
+//    LOGCATE("has write result:%d  msg:%s currentIndex:%d currentCodeId:%d",ret,av_err2str(ret),st->index,c->codec_id);
 
     return ret == AVERROR_EOF ? 1 : 0;
 }
@@ -171,8 +171,8 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
             }
             int videoFrameSize = c->width * c->height * 3 / 2;
             FFmpegMediaMuxer::getInstace() -> videoFrameDst = static_cast<uint8_t *>(av_malloc(videoFrameSize));
-            FFmpegMediaMuxer::getInstace()->width = c->width;
-            FFmpegMediaMuxer::getInstace()->height = c->height;
+            FFmpegMediaMuxer::getInstace()->cameraWidth = c->height;
+            FFmpegMediaMuxer::getInstace()->cameraHeight = c->width;
             break;
     }
 
@@ -312,7 +312,8 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     if (av_compare_ts(ost->next_pts, ost->enc->time_base,
                       STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
         return NULL;
-
+    frame->pts = ost->next_pts;
+    ost->next_pts  += frame->nb_samples;
     return frame;
 #endif
 }
@@ -333,7 +334,6 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     AudioRecordItemInfo *audioInfo = FFmpegMediaMuxer::getInstace()->audioQueue.popFirst();
     if (!audioInfo){
 //        LOGCATE("audio info is empty");
-        av_usleep(10 * 1000);
         return 0;
     }
 
@@ -377,18 +377,18 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
         frame = ost->frame;
 
         frame->pts = av_rescale_q(ost->samples_count, (AVRational){1, c->sample_rate}, c->time_base);
-//        LOGCATE("log current pts:%lld sampleCount:%d  sampleRate:%d c-timeBase:%d --%d" ,frame->pts,ost->samples_count,
-//                c->sample_rate,c->time_base.num,c->time_base.den);
+        LOGCATE("log current pts:%lld sampleCount:%d  sampleRate:%d c-timeBase:%d --%d" ,frame->pts,ost->samples_count,
+                c->sample_rate,c->time_base.num,c->time_base.den);
         ost->samples_count += frame->nb_samples;
     }
 
-    write_frame(oc, c, ost->st, frame);
+    ret = write_frame(oc, c, ost->st, frame);
 
     if (audioInfo){
         audioInfo->recycle();
     }
     audioInfo = nullptr;
-    return (frame || got_packet) ? 0 : 1;
+    return ret == AVERROR_EOF ? 1 : 0;
 }
 
 /**************************************************************/
@@ -408,7 +408,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     picture->height = height;
 
     /* allocate the buffers for the frame data */
-    ret = av_frame_get_buffer(picture, 0);
+    ret = av_frame_get_buffer(picture, 1);
     if (ret < 0) {
         fprintf(stderr, "Could not allocate frame data.\n");
         exit(1);
@@ -462,13 +462,13 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
 }
 
 /* Prepare a signal 4 (SIGILL), code 1 (ILL_ILLOPC), fault addr 0xcd93288a image. */
-void fill_yuv_image(AVFrame *avFrame, int frame_index, int w, int h, uint8_t *nv21Data)
+void fill_yuv_image(AVFrame *avFrame, int frame_index, uint8_t *nv21Data)
 {
     int64_t startTime = GetSysCurrentTime();
 
     uint8_t * i420RorateDst = FFmpegMediaMuxer::getInstace()->videoFrameDst;
-    int landScapeWidth = w;
-    int landScapeHeight = h;
+    int landScapeWidth = FFmpegMediaMuxer::getInstace()->cameraWidth;
+    int landScapeHeight = FFmpegMediaMuxer::getInstace()->cameraHeight;
     yuvNv21To420p(nv21Data,i420RorateDst,landScapeWidth,landScapeHeight,libyuv::kRotate90);
     avFrame->data[0] = i420RorateDst;
     avFrame->data[1] = i420RorateDst + landScapeWidth * landScapeHeight;
@@ -500,7 +500,7 @@ if (isSwcConvert) srcFormat = AV_PIX_FMT_NV21;
 else srcFormat = AV_PIX_FMT_YUV420P;
 
 
-    LOGCATE("打印目标格式：%d",c->pix_fmt == AV_PIX_FMT_YUV420P);
+//    LOGCATE("打印目标格式：%d",c->pix_fmt == AV_PIX_FMT_YUV420P);
     if (srcFormat != AV_PIX_FMT_YUV420P) {
         /* as we only generate a YUV420P picture, we must convert it
          * to the codec pixel format if needed */
@@ -516,18 +516,18 @@ else srcFormat = AV_PIX_FMT_YUV420P;
                 exit(1);
             }
         }
-        fill_yuv_image(ost->tmp_frame, ost->next_pts, c->width, c->height, nv21Data);
+        fill_yuv_image(ost->tmp_frame, ost->next_pts,  nv21Data);
         sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
                   ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
                   ost->frame->linesize);
     } else {
-        LOGCATE("not convert");
-        fill_yuv_image(ost->frame, ost->next_pts, c->width, c->height, nv21Data);
+//        LOGCATE("not convert");
+        fill_yuv_image(ost->frame, ost->next_pts, nv21Data);
     }
 
     ost->frame->pts = ost->next_pts++;
 
-    LOGCATE("video frame has prepared");
+//    LOGCATE("video frame has prepared");
 
     return ost->frame;
 }
@@ -550,7 +550,6 @@ else srcFormat = AV_PIX_FMT_YUV420P;
     if (!frameData) return 0;
     int ret = write_frame(oc, ost->enc, ost->st, frameData);
     delete [] data;
-    data = nullptr;
     return ret;
 }
 
@@ -669,10 +668,10 @@ void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int encode_video, int 
     LOGCATE("打印音频缓冲大小:%d",size);
     int64_t start = GetSysCurrentTime();
 #define TESTMODE 3 // 1-音频，2-视频，3混合
-    while (encode_video || encode_audio) {
+    while (!FFmpegMediaMuxer::getInstace() -> isDestroyed && (encode_video || encode_audio)) {
         /* select the stream to encode */
 //        LOGCATE("differ :%lld",GetSysCurrentTime() - start);
-        if (GetSysCurrentTime() - start > 10 * 1000) break;
+//        if (GetSysCurrentTime() - start > 10 * 1000) break;
 #if TESTMODE == 1
         encode_audio = !write_audio_frame(oc, &audio_st);
 #elif TESTMODE == 2
@@ -680,15 +679,25 @@ void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int encode_video, int 
 #else
         int compareResult = av_compare_ts(video_st.next_pts, video_st.enc->time_base,
                                           audio_st.next_pts, audio_st.enc->time_base);
-//        LOGCATE("log encode video:%d encodeaudio:%d compareresult:%d  av next pts:%lld/%lld",encode_video,encode_audio,
-//                compareResult,audio_st.next_pts,video_st.next_pts);
+//        int64_t aTime = audio_st.next_pts * av_q2d(oc->streams[audio_st.st->index]->time_base);
+//        int64_t vTime = video_st.next_pts * av_q2d(oc->streams[video_st.st->index]->time_base);
+//        LOGCATE("log encode video:%d encodeaudio:%d compareresult:%d  av next pts:%lld/%lld   a/v time: %lld/%lld",
+//                encode_video,encode_audio,compareResult,audio_st.next_pts,video_st.next_pts,aTime,vTime);
         if (encode_video &&
-            (!encode_audio || av_compare_ts(video_st.next_pts, video_st.enc->time_base,
-                                            audio_st.next_pts, audio_st.enc->time_base) <= 0)) {
+            (!encode_audio || compareResult <= 0)) {
+//            LOGCATE("log start encode_video");
             encode_video = !write_video_frame(oc, &video_st);
         } else {
+//            LOGCATE("log start  encode_audio");
             encode_audio = !write_audio_frame(oc, &audio_st);
         }
+//if (encode_audio){
+//    encode_audio = !write_audio_frame(oc, &audio_st);
+//    LOGCATE("log start  encode_audio");
+//} else {
+//    write_video_frame(oc, &video_st);
+//    LOGCATE("log start encode_video");
+//}
 #endif
 
     }
@@ -756,24 +765,13 @@ void FFmpegMediaMuxer::OnSurfaceChanged(int width,int height) {
 
 }
 void FFmpegMediaMuxer::OnCameraFrameDataValible(uint8_t* nv21Data) {
-//    if (isDestroyed || width == 0 || height == 0) return;
-//    int bufferSize = width * height * 3/2;
-//    uint8_t * saveData = new uint8_t [bufferSize];
-//    memset(saveData,0x00,bufferSize);
-//    memcpy(saveData,nv21Data,bufferSize);
-//    uint8_t * lastData = videoQueue.pushLast(saveData);
-//    if (lastData) delete [] lastData;
-
-// 测试
-if (FFmpegEncodeVideo::getInstance()->mWindow_height == 0 || FFmpegEncodeVideo::getInstance()->mWindow_width == 0) return;
-int bufferSize = FFmpegEncodeVideo::getInstance()->mWindow_height * FFmpegEncodeVideo::getInstance()->mWindow_width * 3/2;
-int width = FFmpegEncodeVideo::getInstance()->mWindow_height;
-int height = FFmpegEncodeVideo::getInstance()->mWindow_width;
-uint8_t * dstData = new uint8_t [bufferSize];
-LOGCATE("打印宽高：%d %d",width,height);
-yuvNv21To420p(nv21Data,dstData,width,height,libyuv::kRotate90);
-    FFmpegEncodeVideo::getInstance()->encodeVideoFrame(nv21Data);
-    delete [] dstData;
+    if (isDestroyed || cameraWidth == 0 || cameraHeight == 0) return;
+    int bufferSize = cameraWidth * cameraHeight * 3 / 2;
+    uint8_t * saveData = new uint8_t [bufferSize];
+    memset(saveData,0x00,bufferSize);
+    memcpy(saveData,nv21Data,bufferSize);
+    uint8_t * lastData = videoQueue.pushLast(saveData);
+    if (lastData) delete [] lastData;
 }
 
 void FFmpegMediaMuxer::OnDrawFrame(){

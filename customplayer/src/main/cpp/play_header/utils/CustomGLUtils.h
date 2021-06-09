@@ -125,6 +125,7 @@ static AbsCustomMediaPlayer* getJniPlayerFromJava(){
     bool isAttach;
     JNIEnv* env = JavaVmManager::GetEnv(&isAttach);
     jobject instance = JavaVmManager::getObjInstance();
+    if (!instance) return NULL;
     jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativePlayer","J");
     jlong point = env->GetLongField(instance,jfieldId);
 //    if (isAttach){
@@ -137,6 +138,7 @@ static AbsMediaMuxer* getJniMuxerFromJava(){
     bool isAttach;
     JNIEnv* env = JavaVmManager::GetEnv(&isAttach);
     jobject instance = JavaVmManager::getObjInstance();
+    if (!instance) return NULL;
     jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativeMuxer","J");
     jlong point = env->GetLongField(instance,jfieldId);
 //    if (isAttach){

@@ -135,9 +135,9 @@ public class CameraSurfaceManager implements SensorEventListener, CameraYUVDataL
 
                     // custom test
 
-//                    final byte[] dstData = new byte[windowWidth * windowHeight * 3 / 2];
+//                    final byte[] dstData = new byte[cameraWidth * windowHeight * 3 / 2];
 ////                    YuvUtil.yuvCompress(srcData, mCameraUtil.getCameraWidth(), mCameraUtil.getCameraHeight(), dstData, scaleHeight, scaleWidth, 3, morientation, morientation == 270);
-//                    YuvUtil.yuvNV21ToI420AndRotate(srcData, windowHeight, windowWidth, dstData, morientation);
+//                    YuvUtil.yuvNV21ToI420AndRotate(srcData, windowHeight, cameraWidth, dstData, morientation);
 //                    //进行yuv数据裁剪的操作
 //                    final byte[] cropData = new byte[cropWidth * cropHeight * 3 / 2];
 //                    YuvUtil.yuvCropI420(dstData, scaleWidth, scaleHeight, cropData, cropWidth, cropHeight, cropStartX, cropStartY);

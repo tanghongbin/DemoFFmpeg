@@ -67,7 +67,7 @@ private lateinit var mCameraHelper:CameraSurfaceManager
     }
 
     override fun onCallback(srcData: ByteArray?) {
-//        val windowWidth = mSurface.cameraUtil.cameraWidth
+//        val cameraWidth = mSurface.cameraUtil.cameraWidth
 //        val windowHeight = mSurface.cameraUtil.cameraHeight
 //        val scaleHeight = mSurface.cameraUtil.cameraWidth
 //        val scaleWidth = mSurface.cameraUtil.cameraHeight
@@ -76,11 +76,11 @@ private lateinit var mCameraHelper:CameraSurfaceManager
         if (!isSet) {
 //            isSet = true
 
-//            val bytes = ByteArray(windowHeight * windowWidth * 3 / 2)
+//            val bytes = ByteArray(windowHeight * cameraWidth * 3 / 2)
 
 //            YuvUtil.yuvCompress(
 //                srcData,
-//                windowWidth,
+//                cameraWidth,
 //                windowHeight,
 //                bytes,
 //                scaleHeight,
@@ -90,7 +90,7 @@ private lateinit var mCameraHelper:CameraSurfaceManager
 //                mOrientation == 270
 //            )
 //
-//            val dstData = ByteArray(windowHeight * windowWidth * 3 / 2)
+//            val dstData = ByteArray(windowHeight * cameraWidth * 3 / 2)
 //            log("prepare yuv420 to nv21")
 //            YuvUtil.yuvI420ToNV21(
 //                bytes,

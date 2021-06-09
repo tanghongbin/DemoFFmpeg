@@ -68,6 +68,7 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         mediaPlayer->Destroy();
         delete mediaPlayer;
         mediaPlayer = NULL;
+        setJniPointToJava(env,"mNativePlayer","J", nullptr);
     }
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     LOGCATE("log mediamuxer :%p",mediaMuxer);
@@ -75,6 +76,7 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         mediaMuxer->Destroy();
         delete mediaMuxer;
         mediaMuxer = NULL;
+        setJniPointToJava(env,"mNativeMuxer","J", nullptr);
     }
     JavaVmManager::destroyInstance();
     MsgLoopHelper::destroyInstance();
@@ -140,7 +142,7 @@ JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance,jint type) 
         mediaMuxer->test(type);
     } else if (type == 2) {
         char resultPath[128];
-        sprintf(resultPath,"/storage/emulated/0/ffmpegtest/encodeVideos/%lld%s",GetSysCurrentTime(),"-aaaa.mp4");
+        sprintf(resultPath,"/storage/emulated/0/ffmpegtest/encodeVideos/%lld%s",GetSysCurrentTime(),"-randow.mp4");
         mediaMuxer->init(resultPath);
     } else if (type == 3) {
         mediaMuxer->test(type);

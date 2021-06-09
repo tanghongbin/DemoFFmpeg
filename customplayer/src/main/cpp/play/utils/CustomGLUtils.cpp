@@ -243,7 +243,6 @@ void glCheckError(const char *pGLOperation){
 }
 
 void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width,int height, libyuv::RotationMode mode) {
-    int64_t startTime= GetSysCurrentTime();
     int frameSize = width * height * 3 / 2;
     uint8_t * i420DstData = new uint8_t [frameSize];
     memset(i420DstData,0x00,frameSize);

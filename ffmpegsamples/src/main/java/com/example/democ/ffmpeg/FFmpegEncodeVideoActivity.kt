@@ -89,7 +89,7 @@ class FFmpegEncodeVideoActivity : AppCompatActivity(),
         val start = System.currentTimeMillis()
 //        YuvUtil.yuvCompress(
 //            srcData,
-//            windowWidth,
+//            cameraWidth,
 //            windowHeight,
 //            bytes,
 //            scaleHeight,
