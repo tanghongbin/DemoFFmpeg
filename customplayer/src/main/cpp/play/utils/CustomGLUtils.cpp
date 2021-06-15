@@ -17,6 +17,7 @@
 #include <utils/CustomGLUtils.h>
 #include <libyuv/rotate.h>
 #include <libyuv/convert.h>
+#include <libyuv/scale.h>
 
 
 extern "C" {
@@ -264,6 +265,53 @@ void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width,int heig
                        i420RorateDst + width* height* 5/4, height >> 1,
                        width, height, mode);
     delete [] i420DstData;
+}
+
+
+void yuvI420Rotate(uint8_t *i420Src, uint8_t * i420RorateDst, int width, int height, libyuv::RotationMode mode){
+    uint8_t * uData = i420Src + width * height;
+    uint8_t * vData = i420Src + width * height * 5 / 4;
+    libyuv::I420Rotate(i420Src, width,
+                       uData, width >> 1,
+                       vData, width >> 1,
+                       i420RorateDst, height,
+                       i420RorateDst + width * height, height >> 1,
+                       i420RorateDst + width* height* 5/4, height >> 1,
+                       width, height, mode);
+}
+
+void yuvI420RotateVertical(uint8_t *i420Src, uint8_t * i420RorateDst, int width, int height){
+    uint8_t * uData = i420Src + width * height;
+    uint8_t * vData = i420Src + width * height * 5 / 4;
+    libyuv::I420Rotate(i420Src, width,
+                       uData, width >> 1,
+                       vData, width >> 1,
+                       i420RorateDst, height,
+                       i420RorateDst + width * height, width >> 1,
+                       i420RorateDst + width* height* 5/4, width >> 1,
+                       width, height, libyuv::kRotate180);
+}
+
+void yuvRgbaToI420(uint8_t *rgbaData, uint8_t * i420Dst, int width, int height){
+    uint8_t * i420U = i420Dst + width * height;
+    uint8_t * i420V = i420Dst + width * height * 5 / 4;
+    libyuv::RGBAToI420(rgbaData,width * 4,i420Dst,width,
+                       i420U,width >> 1,
+                       i420V,width >> 1,width,height);
+}
+
+void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeight,int dstWidth,int dstHeight){
+    uint8_t *srcUData = i420Src + srcWidth * srcHeight;
+    uint8_t *srcVData = i420Src + srcWidth * srcHeight * 5/4;
+    uint8_t *dstUData = i420Dst + dstWidth * dstHeight;
+    uint8_t *dstVData = i420Dst + dstWidth * dstHeight * 5/4;
+    libyuv::I420Scale(i420Src,srcWidth,
+            srcUData,srcWidth >> 1,
+            srcVData,srcWidth >> 1,
+            srcWidth,srcHeight,
+            i420Dst,dstWidth,
+            dstUData,dstWidth >> 1,
+            dstVData,dstWidth >> 1,dstWidth,dstHeight,libyuv::kFilterNone);
 }
 
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,

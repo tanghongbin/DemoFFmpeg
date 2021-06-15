@@ -80,7 +80,7 @@ void VideoRender::DrawFrame() {
         return;
     }
     uniqueLock.unlock();
-    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);
+//    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);
     // draw
     shader->use();
     glBindVertexArray(vaoIds[0]);

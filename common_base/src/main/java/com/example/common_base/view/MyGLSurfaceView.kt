@@ -14,7 +14,7 @@ import com.example.common_base.utils.log
 class MyGLSurfaceView @JvmOverloads constructor(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs){
 
 
-    fun init(render:Renderer) {
+    fun init(render:Renderer,isContinue:Boolean = true) {
         val activityManager: ActivityManager =
             DemoApplication.getInstance().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val configurationInfo: ConfigurationInfo = activityManager.deviceConfigurationInfo
@@ -36,7 +36,7 @@ class MyGLSurfaceView @JvmOverloads constructor(context: Context?, attrs: Attrib
 //            8
 //        )
         setRenderer(render)
-        renderMode = RENDERMODE_CONTINUOUSLY
+        renderMode = if (isContinue )RENDERMODE_CONTINUOUSLY else RENDERMODE_WHEN_DIRTY
        log("java layer config set success")
     }
 

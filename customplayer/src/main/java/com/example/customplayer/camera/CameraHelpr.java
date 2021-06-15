@@ -10,6 +10,7 @@ import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,16 +47,33 @@ public class CameraHelpr {
         openCamera(activity, cameraId,surfaceHolder);
     }
     public void openCamera(Activity activity, int cameraId, SurfaceHolder surfaceHolder){
+        try {
+            setupCameraParams(activity,cameraId);
+            mCamera.setPreviewDisplay(surfaceHolder);
+            mCamera.startPreview();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public Camera getCamera(){
+        return mCamera;
+    }
+
+    /**
+     * 设置camera参数
+     * @param activity
+     * @param cameraId
+     */
+    public void setupCameraParams(Activity activity, int cameraId){
         try {
             if(mCamera != null){
                 release();
             }
             this.cameraId = cameraId;
-            mCamera = Camera.open(cameraId);
-            displayOrientation = getCameraDisplayOrientation(activity, cameraId);
+            mCamera = Camera.open(this.cameraId);
+            displayOrientation = getCameraDisplayOrientation(activity, this.cameraId);
             mCamera.setDisplayOrientation(displayOrientation);
-            mCamera.setPreviewDisplay(surfaceHolder);
             mCamera.setPreviewCallback(previewCallback);
             Camera.Parameters parameters = mCamera.getParameters();
             previewSize = getPreviewSize();
@@ -63,9 +81,7 @@ public class CameraHelpr {
             parameters.setFocusMode(getAutoFocus());
             parameters.setPictureFormat(ImageFormat.JPEG);
             parameters.setPreviewFormat(ImageFormat.NV21);
-
             mCamera.setParameters(parameters);
-            mCamera.startPreview();
         } catch (Exception e) {
             e.printStackTrace();
         }

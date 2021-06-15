@@ -51,12 +51,13 @@ private:
     std::thread * thread;
     std::thread * audioRecordThread;
     char mTargetFilePath[128];
-    BaseRender* videoRender;
+    BaseVideoRender* videoRender;
 
     bool isDestroyed;
     static int StartMuxer(const char * fileName);
     static void startRecord(void * pVoid);
     static void receiveAudioBuffer(uint8_t* data,int nb_samples);
+    static void receivePixelData(void *pVoid);
     FFmpegMediaMuxer(){
         thread = audioRecordThread = 0;
         videoRender = 0;
@@ -86,7 +87,7 @@ public:
 
     void OnSurfaceCreate();
     void OnSurfaceChanged(int width,int height);
-    void OnCameraFrameDataValible(uint8_t* data);
+    void OnCameraFrameDataValible(int type,uint8_t* data);
     void OnDrawFrame();
 };
 

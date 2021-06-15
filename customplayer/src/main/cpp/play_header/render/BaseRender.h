@@ -24,4 +24,11 @@ public:
     virtual void Destroy() = 0;
 };
 
+class BaseVideoRender : public BaseRender{
+public:
+    ReceiveOqData readPixelCall;
+    virtual void copyImage(NativeOpenGLImage *openGlImage) = 0;
+    virtual void OnSurfaceChanged(int width,int height) { };
+};
+
 #endif //DEMOFFMPEG_BASERENDER_H

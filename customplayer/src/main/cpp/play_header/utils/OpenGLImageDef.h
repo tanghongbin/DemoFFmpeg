@@ -101,7 +101,7 @@ typedef struct _tag_NativeImage_plus
 {
 	int width;
 	int height;
-	int format;
+	int format; // IMAGE_FORMAT_I420 。。。。
 	uint8_t *ppPlane[3];
 	int pLineSize[3];
 	_tag_NativeImage_plus()

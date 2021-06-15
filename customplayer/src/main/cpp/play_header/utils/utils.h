@@ -12,8 +12,8 @@
 /**
  * 是否启用ffmpeg日志
  */
-#define ENABLE_FFMPEG_LOG true
-//#define ENABLE_FFMPEG_LOG false
+//#define ENABLE_FFMPEG_LOG true
+#define ENABLE_FFMPEG_LOG false
 
 #define ROOT_DIR "/storage/emulated/0/ffmpegtest/"
 #define FILTER_IMAGE_DIR "/storage/emulated/0/ffmpegtest/filterImg/"
@@ -43,6 +43,7 @@
 
 typedef void (*PrepareCall) (long);
 typedef void (*ConvertResult) (void * decoder,void * data);
+typedef void (*ReceiveOqData) (void * data);
 
 static std::string getModel3DPath(const char * fileName){
     std::string result = std::string (MODEL3D_ROOT_DIR) + std::string (fileName);

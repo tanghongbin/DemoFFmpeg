@@ -11,6 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activity.ffmpeg.FFmpegMuxerActivity"></activity>
+        <activity android:name=".activity.ffmpeg.FFmpegGLESMuxerActivity"></activity>
         <activity
             android:name=".activity.hw.PlayerMediaActivity"
             android:configChanges="screenSize|orientation"

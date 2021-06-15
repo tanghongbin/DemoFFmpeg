@@ -15,6 +15,7 @@
 #include <libyuv/convert.h>
 #include <encoder/FFmpegEncodeVideo.h>
 #include <libyuv/rotate.h>
+#include <render/VideoFboRender.h>
 
 extern "C" {
 #include <libswscale/swscale.h>
@@ -86,7 +87,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
 
 //    LOGCATE("has write result:%d  msg:%s currentIndex:%d currentCodeId:%d",ret,av_err2str(ret),st->index,c->codec_id);
 
-    return ret == AVERROR_EOF ? 1 : 0;
+    return 1;
 }
 
 /* Add an output stream. */
@@ -309,9 +310,9 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     AVFrame *frame = ost->tmp_frame;
 
     /* check if we want to generate more frames */
-    if (av_compare_ts(ost->next_pts, ost->enc->time_base,
-                      STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
-        return NULL;
+//    if (av_compare_ts(ost->next_pts, ost->enc->time_base,
+//                      STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
+//        return NULL;
     frame->pts = ost->next_pts;
     ost->next_pts  += frame->nb_samples;
     return frame;
@@ -332,9 +333,12 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     int dst_nb_samples;
 
     AudioRecordItemInfo *audioInfo = FFmpegMediaMuxer::getInstace()->audioQueue.popFirst();
+    while (!audioInfo){
+        av_usleep(10 * 1000);
+    }
     if (!audioInfo){
 //        LOGCATE("audio info is empty");
-        return 0;
+        return 1;
     }
 
     av_init_packet(&pkt);
@@ -343,12 +347,15 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     frame = get_audio_frame(ost);
     if (!frame) {
 //        LOGCATE("frame is null");
-        return 0;
+        return 1;
     }
 
 //    LOGCATE("log audioInfo:%p frame:%p data:%p samples:%d",audioInfo,frame,audioInfo->data,audioInfo->nb_samples);
     frame->data[0] = audioInfo->data;
-    ost->next_pts = ost->next_pts + audioInfo->nb_samples;
+    frame->pts = ost->next_pts;
+    ost->next_pts +=  frame->nb_samples;
+
+    LOGCATE("log frame nb_samples:%d audioInfosamples:%d",frame->nb_samples,audioInfo->nb_samples);
 
     if (frame) {
         /* convert samples from native format to destination codec format, using the resampler */
@@ -388,7 +395,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
         audioInfo->recycle();
     }
     audioInfo = nullptr;
-    return ret == AVERROR_EOF ? 1 : 0;
+    return 1;
 }
 
 /**************************************************************/
@@ -444,13 +451,11 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     /* If the output format is not YUV420P, then a temporary YUV420P
      * picture is needed too. It is then converted to the required
      * output format. */
-    ost->tmp_frame = NULL;
-    if (c->pix_fmt != AV_PIX_FMT_YUV420P) {
-        ost->tmp_frame = alloc_picture(AV_PIX_FMT_YUV420P, c->width, c->height);
-        if (!ost->tmp_frame) {
-            fprintf(stderr, "Could not allocate temporary picture\n");
-            exit(1);
-        }
+    int tmpWidth = 1080,tmpHeight = 1991;
+    ost->tmp_frame = alloc_picture(AV_PIX_FMT_RGBA, tmpWidth, tmpHeight);
+    if (!ost->tmp_frame) {
+        fprintf(stderr, "Could not allocate temporary picture\n");
+        exit(1);
     }
 
     /* copy the stream parameters to the muxer */
@@ -462,31 +467,23 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
 }
 
 /* Prepare a signal 4 (SIGILL), code 1 (ILL_ILLOPC), fault addr 0xcd93288a image. */
-void fill_yuv_image(AVFrame *avFrame, int frame_index, uint8_t *nv21Data)
+void fill_yuv_image(AVFrame *avFrame, int frame_index, uint8_t *rgbaData)
 {
-    int64_t startTime = GetSysCurrentTime();
-
-    uint8_t * i420RorateDst = FFmpegMediaMuxer::getInstace()->videoFrameDst;
-    int landScapeWidth = FFmpegMediaMuxer::getInstace()->cameraWidth;
-    int landScapeHeight = FFmpegMediaMuxer::getInstace()->cameraHeight;
-    yuvNv21To420p(nv21Data,i420RorateDst,landScapeWidth,landScapeHeight,libyuv::kRotate90);
-    avFrame->data[0] = i420RorateDst;
-    avFrame->data[1] = i420RorateDst + landScapeWidth * landScapeHeight;
-    avFrame->data[2] = i420RorateDst + landScapeWidth * landScapeHeight * 5 / 4;
+    avFrame->data[0] = rgbaData;
 //    LOGCATE("打印convert 花费了多少时间:%lld width:%d height:%d lineSize:%d %d %d",GetSysCurrentTime() - startTime,
 //            landScapeWidth,landScapeHeight,avFrame->linesize[0],avFrame->linesize[1],avFrame->linesize[2]);
-
 }
 
 
 
-AVFrame *get_video_frame(OutputStream *ost, uint8_t *nv21Data) {
+AVFrame *get_video_frame(OutputStream *ost, uint8_t *rgbaData) {
     AVCodecContext *c = ost->enc;
+    int ret;
 
     /* check if we want to generate more frames */
-    if (av_compare_ts(ost->next_pts, c->time_base,
-                      STREAM_DURATION, (AVRational){ 1, 1 }) > 0)
-        return NULL;
+//    if (av_compare_ts(ost->next_pts, c->time_base,
+//                      STREAM_DURATION, (AVRational){ 1, 1 }) > 0)
+//        return NULL;
 
     /* when we pass a frame to the encoder, it may keep a reference to it
      * internally; make sure we do not overwrite it here */
@@ -497,7 +494,7 @@ bool isSwcConvert = false;
     AVPixelFormat srcFormat;
 if (isSwcConvert) srcFormat = AV_PIX_FMT_NV21;
 
-else srcFormat = AV_PIX_FMT_YUV420P;
+else srcFormat = AV_PIX_FMT_RGBA;
 
 
 //    LOGCATE("打印目标格式：%d",c->pix_fmt == AV_PIX_FMT_YUV420P);
@@ -505,7 +502,9 @@ else srcFormat = AV_PIX_FMT_YUV420P;
         /* as we only generate a YUV420P picture, we must convert it
          * to the codec pixel format if needed */
         if (!ost->sws_ctx) {
-            ost->sws_ctx = sws_getContext(c->width, c->height,
+            int srcW = 1080;
+            int srcH = 1991;
+            ost->sws_ctx = sws_getContext(srcW, srcH,
                                           srcFormat,
                                           c->width, c->height,
                                           c->pix_fmt,
@@ -516,13 +515,14 @@ else srcFormat = AV_PIX_FMT_YUV420P;
                 exit(1);
             }
         }
-        fill_yuv_image(ost->tmp_frame, ost->next_pts,  nv21Data);
-        sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
+        fill_yuv_image(ost->tmp_frame, ost->next_pts,  rgbaData);
+        ret = sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
                   ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
                   ost->frame->linesize);
+//        LOGCATE("log convert result:%d",ret);
     } else {
 //        LOGCATE("not convert");
-        fill_yuv_image(ost->frame, ost->next_pts, nv21Data);
+        fill_yuv_image(ost->frame, ost->next_pts, rgbaData);
     }
 
     ost->frame->pts = ost->next_pts++;
@@ -544,10 +544,10 @@ else srcFormat = AV_PIX_FMT_YUV420P;
 //     LOGCATE("start encode video");
     uint8_t *data = FFmpegMediaMuxer::getInstace()->videoQueue.popFirst();
     if (!data){
-        return 0;
+        return 1;
     }
     AVFrame *frameData = get_video_frame(ost, data);
-    if (!frameData) return 0;
+    if (!frameData) return 1;
     int ret = write_frame(oc, ost->enc, ost->st, frameData);
     delete [] data;
     return ret;
@@ -661,14 +661,14 @@ int FFmpegMediaMuxer::StartMuxer(const char * outFileName)
     return 0;
 }
 
-void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int encode_video, int encode_audio,
+void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int video_editable, int audio_editable,
                                      OutputStream &video_st, OutputStream &audio_st) {
     int size = av_samples_get_buffer_size(NULL, audio_st.frame->channels, audio_st.frame->nb_samples,
                                           audio_st.enc->sample_fmt, 1);
     LOGCATE("打印音频缓冲大小:%d",size);
     int64_t start = GetSysCurrentTime();
 #define TESTMODE 3 // 1-音频，2-视频，3混合
-    while (!FFmpegMediaMuxer::getInstace() -> isDestroyed && (encode_video || encode_audio)) {
+    while (!FFmpegMediaMuxer::getInstace() -> isDestroyed && (video_editable || audio_editable)) {
         /* select the stream to encode */
 //        LOGCATE("differ :%lld",GetSysCurrentTime() - start);
 //        if (GetSysCurrentTime() - start > 10 * 1000) break;
@@ -679,17 +679,17 @@ void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int encode_video, int 
 #else
         int compareResult = av_compare_ts(video_st.next_pts, video_st.enc->time_base,
                                           audio_st.next_pts, audio_st.enc->time_base);
-//        int64_t aTime = audio_st.next_pts * av_q2d(oc->streams[audio_st.st->index]->time_base);
-//        int64_t vTime = video_st.next_pts * av_q2d(oc->streams[video_st.st->index]->time_base);
-//        LOGCATE("log encode video:%d encodeaudio:%d compareresult:%d  av next pts:%lld/%lld   a/v time: %lld/%lld",
-//                encode_video,encode_audio,compareResult,audio_st.next_pts,video_st.next_pts,aTime,vTime);
-        if (encode_video &&
-            (!encode_audio || compareResult <= 0)) {
+        int64_t aTime = audio_st.next_pts * av_q2d(oc->streams[audio_st.st->index]->time_base);
+        int64_t vTime = video_st.next_pts * av_q2d(oc->streams[video_st.st->index]->time_base);
+        LOGCATE("log encode video:%d encodeaudio:%d compareresult:%d  av next pts:%lld/%lld   a/v time: %lld/%lld",
+                video_editable,audio_editable,compareResult,audio_st.next_pts,video_st.next_pts,aTime,vTime);
+        if (video_editable &&
+            (!audio_editable || compareResult <= 0)) {
 //            LOGCATE("log start encode_video");
-            encode_video = !write_video_frame(oc, &video_st);
+            video_editable = write_video_frame(oc, &video_st);
         } else {
 //            LOGCATE("log start  encode_audio");
-            encode_audio = !write_audio_frame(oc, &audio_st);
+            audio_editable = write_audio_frame(oc, &audio_st);
         }
 //if (encode_audio){
 //    encode_audio = !write_audio_frame(oc, &audio_st);
@@ -711,6 +711,11 @@ int FFmpegMediaMuxer::init(const char * fileName){
     audioRecordThread = new std::thread(startRecord,this);
     thread = new std::thread(StartMuxer,mTargetFilePath);
     return 0;
+}
+
+
+void FFmpegMediaMuxer::receivePixelData(void *pVoid){
+    FFmpegMediaMuxer::getInstace()->OnCameraFrameDataValible(3, static_cast<uint8_t *>(pVoid));
 }
 
 void FFmpegMediaMuxer::receiveAudioBuffer(uint8_t* data,int nb_samples){
@@ -758,20 +763,48 @@ void FFmpegMediaMuxer::test(int type){
 
 
 void FFmpegMediaMuxer::OnSurfaceCreate() {
-    videoRender = new VideoRender;
+    videoRender = new VideoFboRender;
+    videoRender->readPixelCall = FFmpegMediaMuxer::receivePixelData;
     videoRender->Init();
 }
 void FFmpegMediaMuxer::OnSurfaceChanged(int width,int height) {
-
+    videoRender->OnSurfaceChanged(width,height);
 }
-void FFmpegMediaMuxer::OnCameraFrameDataValible(uint8_t* nv21Data) {
-    if (isDestroyed || cameraWidth == 0 || cameraHeight == 0) return;
-    int bufferSize = cameraWidth * cameraHeight * 3 / 2;
-    uint8_t * saveData = new uint8_t [bufferSize];
-    memset(saveData,0x00,bufferSize);
-    memcpy(saveData,nv21Data,bufferSize);
-    uint8_t * lastData = videoQueue.pushLast(saveData);
-    if (lastData) delete [] lastData;
+void FFmpegMediaMuxer::OnCameraFrameDataValible(int type,uint8_t* srcData) {
+    // 1-java camera nv21 转换成i420直接编码成mp4，2-opengles用来渲染的I420,3-i420放进队列,待会儿编码
+    if (type == 1) {
+        if (isDestroyed || cameraWidth == 0 || cameraHeight == 0) return;
+        int bufferSize = cameraWidth * cameraHeight * 3 / 2;
+        uint8_t * i420Dst = new uint8_t [bufferSize];
+        memset(i420Dst,0x00,bufferSize);
+        yuvNv21To420p(srcData,i420Dst,cameraWidth,cameraHeight,libyuv::kRotate90);
+        uint8_t * lastData = videoQueue.pushLast(i420Dst);
+        if (lastData) delete [] lastData;
+    } else if (type == 3) {
+        uint8_t * lastData = videoQueue.pushLast(srcData);
+        if (lastData) delete [] lastData;
+    } else {
+        int localWidth = 1280;
+        int localHeight = 720;
+        uint8_t * i420srcData = srcData;
+        uint8_t * i420dstData = new uint8_t [localWidth * localHeight * 3/2];
+        yuvI420Rotate(i420srcData, i420dstData, localWidth, localHeight, libyuv::kRotate90);
+        NativeOpenGLImage openGlImage;
+        openGlImage.width = localHeight;
+        openGlImage.height = localWidth;
+        openGlImage.format = IMAGE_FORMAT_I420;
+        openGlImage.ppPlane[0] = i420dstData;
+        openGlImage.ppPlane[1] = i420dstData + localWidth * localHeight;
+        openGlImage.ppPlane[2] = i420dstData + localWidth * localHeight * 5 / 4;
+        openGlImage.pLineSize[0] = localHeight;
+        openGlImage.pLineSize[1] = localHeight >> 1;
+        openGlImage.pLineSize[2] = localHeight >> 1;
+        videoRender->copyImage(&openGlImage);
+        delete [] i420dstData;
+//        LOGCATE("log width:%d height:%d imagewidth:%d imageheight:%d",localWidth,localHeight,openGlImage.width,openGlImage.height);
+    }
+
+
 }
 
 void FFmpegMediaMuxer::OnDrawFrame(){

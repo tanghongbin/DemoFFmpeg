@@ -149,13 +149,13 @@ JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance,jint type) 
     }
 }
 
-JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject instance,jbyteArray imageData) {
+JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject instance,jint type,jbyteArray imageData) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer == NULL) return;
 
     jbyte *data = env->GetByteArrayElements(imageData, 0);
 
-    mediaMuxer->OnCameraFrameDataValible(reinterpret_cast<uint8_t *>(data));
+    mediaMuxer->OnCameraFrameDataValible(type,reinterpret_cast<uint8_t *>(data));
 
     env->ReleaseByteArrayElements(imageData, data, 0);
 }
@@ -181,7 +181,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
 
         {"startTestEncode",               "(I)V",            (void *) (startTestEncode)},
-        {"native_onCameraFrameDataValible",               "([B)V",            (void *) (native_onCameraFrameDataValible)},
+        {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
 
 };
 

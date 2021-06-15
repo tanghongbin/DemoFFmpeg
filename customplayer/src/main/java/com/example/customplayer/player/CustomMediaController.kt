@@ -131,7 +131,7 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
 
     external fun native_init_muxer()
 
-    external fun native_onCameraFrameDataValible(byteArray: ByteArray)
+    external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 
     // 1-开始录音
     external fun startTestEncode(type:Int)

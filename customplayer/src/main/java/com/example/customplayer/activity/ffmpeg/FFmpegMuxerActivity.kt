@@ -28,7 +28,7 @@ class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
         mMuxerSurface.holder.addCallback(this)
         mCameraHelpr.setPreviewCallback { data, camera ->
 //            log("打印设想数据:$data")
-            mMuxer.native_onCameraFrameDataValible(data)
+            mMuxer.native_onCameraFrameDataValible(1,data)
         }
 //        mMuxer.setOnSurfaceCallListener(object : OnSurfaceCallListener{
 //            override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {

@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.common_base.utils.requestCustomPermissions
 import com.example.customplayer.R
+import com.example.customplayer.activity.ffmpeg.FFmpegGLESMuxerActivity
 import com.example.customplayer.activity.ffmpeg.FFmpegMuxerActivity
 import com.example.customplayer.activity.ffmpeg.PlayerDecodeFFmpegActivity
 import com.example.customplayer.adapter.PlayerListAdapter
@@ -38,7 +39,7 @@ class CustomPlayerListActivity : AppCompatActivity() {
             adapter.addList(it)
         }
         startMuxer.setOnClickListener {
-            startActivity(Intent(this,FFmpegMuxerActivity::class.java))
+            startActivity(Intent(this,FFmpegGLESMuxerActivity::class.java))
         }
     }
 }
