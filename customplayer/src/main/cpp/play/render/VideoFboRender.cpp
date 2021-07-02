@@ -89,23 +89,25 @@ void VideoFboRender::createPbo() {
 void VideoFboRender::createFbo() {
     if (fboId != 0) return;
     glGenTextures(1, &fboTextureId);
-    glBindTexture(GL_TEXTURE_2D, fboId);
+    glBindTexture(GL_TEXTURE_2D, fboTextureId);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderWidth, renderHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glBindTexture(GL_TEXTURE_2D,0);
+
     glGenFramebuffers(1,&fboId);
     glBindFramebuffer(GL_FRAMEBUFFER, fboId);
     glBindTexture(GL_TEXTURE_2D, fboTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderWidth, renderHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureId, 0);
     LOGCATE("log width:%d height:%d",renderWidth,renderHeight);
     GLenum  result;
     if ((result = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE){
         LOGCATE("log frame buffer is not complete %.2x",result);
         glCheckError("glCheckFramebufferStatus");
+    } else {
+        LOGCATE("create buffer complete");
     }
     glBindTexture(GL_TEXTURE_2D,0);
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -144,14 +146,16 @@ void VideoFboRender::DrawFrame() {
     }
     uniqueLock.unlock();
 
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    shader->use();
     glBindFramebuffer(GL_FRAMEBUFFER,fboId);
-    int64_t startsss = GetSysCurrentTime();
-    drawNormalImage(true);
+//    int64_t startsss = GetSysCurrentTime();
+    drawFboTexture();
     readImagePixel();
-//    readImagePixelHardBuffer();
+////    readImagePixelHardBuffer();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 
-    drawNormalImage(false);
+    drawNormalImage();
 //    LOGCATE("total fbo time:%lld",GetSysCurrentTime() - startsss);
 
 }
@@ -162,15 +166,14 @@ void VideoFboRender::readImagePixel() {
     readPixelCall(rgbaData);
 }
 
-void VideoFboRender::drawNormalImage(bool isFboRender) {
+void VideoFboRender::drawNormalImage() {
+    GLuint currentFboId = vaoIds[0];
     glViewport(0, 0, renderWidth, renderHeight);
-    glClearColor(0.0,0.0,0.0,1.0);
+    glClearColor(1.0,1.0,1.0,1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    // upload texture
-//    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);
-// draw
-    shader->use();
-    GLuint currentFboId = isFboRender ? vaoIds[1] : vaoIds[0];
+
+    // 画camera 数据
+
     glBindVertexArray(currentFboId);
     shader->setMat4("model", glm::mat4(1.0));
     shader->setInt("samplerType", 2);
@@ -182,23 +185,33 @@ void VideoFboRender::drawNormalImage(bool isFboRender) {
         shader->setInt(samplerName, i);
     }
     glDrawArrays(GL_TRIANGLES,0,6);
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D,0);
 
-    glBindVertexArray(currentFboId);
-    glm::mat4 currentModel = glm::mat4(1.0);
-    currentModel = glm::scale(currentModel,glm::vec3 (0.1f));
-    if (isFboRender){
-        currentModel = glm::translate(currentModel,glm::vec3(8.5f,-8.6f,0.0f));
-    } else {
-        currentModel = glm::translate(currentModel,glm::vec3(8.5f,8.6f,0.0f));
+}
+
+
+void VideoFboRender::drawFboTexture() {
+    glViewport(0, 0, renderWidth, renderHeight);
+    glClearColor(1.0,1.0,1.0,1.0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    // upload texture
+//    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);
+// draw
+    GLuint currentVaoId = vaoIds[1];
+    glBindVertexArray(currentVaoId);
+    shader->setMat4("model", glm::mat4(1.0));
+    shader->setInt("samplerType", 2);
+    for (int i = 0; i < TEXTURE_FBO_NUM; ++i) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, textures[i]);
+        char samplerName[64] = {0};
+        sprintf(samplerName, "s_TextureMap%d", i);
+        shader->setInt(samplerName, i);
     }
-    shader->setMat4("model", currentModel);
-    shader->setInt("samplerType", 1);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textures[3]);
-    char samplerName[64] = {0};
-    sprintf(samplerName, "s_TextureMap%d", 0);
-    shader->setInt(samplerName, 0);
     glDrawArrays(GL_TRIANGLES,0,6);
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D,0);
 }
 
 void VideoFboRender::Destroy() {
@@ -243,72 +256,7 @@ void VideoFboRender::OnSurfaceChanged(int windowW,int windowH){
     createPbo();
 }
 
-void VideoFboRender::readImagePixelHardBuffer() {
-    // OUR parameters that we will set and give it to AHardwareBuffer
-//    AHardwareBuffer_Desc usage;
-//
-//// filling in the usage for HardwareBuffer
-//    usage.format = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
-//    usage.height = renderHeight;
-//    usage.width = renderWidth;
-//    usage.layers = 1;
-//    usage.rfu0 = 0;
-//    usage.rfu1 = 0;
-//    usage.stride = 10;
-//    usage.usage = AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN | AHARDWAREBUFFER_USAGE_CPU_WRITE_NEVER
-//                  | AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT;
-//    // create GraphicBuffer
-//    AHardwareBuffer* graphicBuf;
-//    AHardwareBuffer_allocate(&usage, &graphicBuf); // it's worth to check the return code
-//
-//// ACTUAL parameters of the AHardwareBuffer which it reports
-//    AHardwareBuffer_Desc usage1;
-//
-//// for stride, see below
-//    AHardwareBuffer_describe(graphicBuf, &usage1);
-//
-//// get the native buffer
-//    EGLClientBuffer clientBuf = eglGetNativeClientBufferANDROID(graphicBuf);
-//
-//// obtaining the EGL display
-//    EGLDisplay disp = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-//
-//// specifying the image attributes
-//    EGLint eglImageAttributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
-//
-//    EGLImageKHR imageEGL = eglCreateImageKHR(disp, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuf, eglImageAttributes);
-//
-//    // attaching an EGLImage to OUTPUT texture
-//    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, imageEGL);
-//
-//    // pointer for reading and writing texture data
-//    void *readPtr, *writePtr;
-//
-//// locking the buffer
-//    graphicBuf->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &readPtr);
-//
-//// setting the write pointer
-//    writePtr = <set to a valid memory area, like malloc(_YOUR_SIZE_)>
-//
-//                                                 // obtaining the stride (for me it was always = width)
-//                                                 int stride = graphicBuf->getStride();
-//
-//// loop over texture rows
-//    for (int row = 0; row < height; row++) {
-//        // copying, 4 = 4 channels RGBA because of the format above
-//        memcpy(writePtr, readPtr, width * 4);
-//
-//        // adding stride * 4 to read pointer
-//        readPtr = (void *)(int(readPtr) + stride * 4);
-//
-//        // adding width * 4 to write pointer
-//        writePtr = (void *)(int(writePtr) + width * 4);
-//    }
-//
-//// NOW data is in writePtr memory
-//
-//// unlocking the buffer
-//    graphicBuf->unlock();
-}
+
+
 
 

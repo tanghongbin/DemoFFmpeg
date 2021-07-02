@@ -81,7 +81,7 @@ class NativeRender(val mType:Int = 1)
     private fun setImageByType(type:Int) {
         when(type){
             1 -> {
-                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.test_box)
+                val bitmap = BitmapFactory.decodeResource(getAppContext().resources, R.drawable.lye)
                 val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
                 bitmap.copyPixelsToBuffer(byteBuffer)
                 native_SetImageData(IMAGE_FORMAT_RGBA, bitmap.width, bitmap.height, byteBuffer.array())

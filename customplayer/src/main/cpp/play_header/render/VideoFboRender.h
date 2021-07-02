@@ -36,7 +36,7 @@ public:
         fboId = fboTextureId = 0;
     }
 
-    void drawNormalImage(bool isFboRender);
+    void drawNormalImage();
 
     void readImagePixel();
 
@@ -45,7 +45,7 @@ public:
 
     void createPbo();
 
-    void readImagePixelHardBuffer();
+    void drawFboTexture();
 };
 
 #endif //DEMOFFMPEG_FBORENDER_H

@@ -167,10 +167,12 @@ void GLFBOSample::draw(){
 // 离屏渲染
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glViewport(0, 0, m_RenderImage.width, m_RenderImage.height);
+    glClearColor(0.0,0.0,0.0,1.0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // Do FBO off screen rendering
     glBindFramebuffer(GL_FRAMEBUFFER, m_FboId);
-//    glUseProgram(m_FboProgramObj);
+    glUseProgram(m_ProgramObj);
     glBindVertexArray(m_VaoIds[1]);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_ImageTextureId);
@@ -178,19 +180,23 @@ void GLFBOSample::draw(){
 //    GO_CHECK_GL_ERROR();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *)0);
 //    GO_CHECK_GL_ERROR();
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+//    glBindVertexArray(0);
+//    glBindTexture(GL_TEXTURE_2D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // 普通渲染
     // Do normal rendering
     glViewport(0, 0, MyGLRenderContext::GetInstance()->width, MyGLRenderContext::GetInstance()->height);
+    glClearColor(0.0,0.0,0.0,1.0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    return;
     glUseProgram(m_ProgramObj);
 //    GO_CHECK_GL_ERROR();
     glBindVertexArray(m_VaoIds[0]);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_FboTextureId);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glUniform1i(m_SamplerLoc, 0);
 //    GO_CHECK_GL_ERROR();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *)0);

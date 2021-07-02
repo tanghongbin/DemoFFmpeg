@@ -14,7 +14,7 @@ object GlslDataCenter {
             put("Texture",2)
             put("TextureMapSample",3)
             put("TextureCubeSample",9)
-            put("GLFBOSample",10)
+            put("TestFBOSample",10)
             put("LightSample",11)
 
             put("Model3DSample",12)

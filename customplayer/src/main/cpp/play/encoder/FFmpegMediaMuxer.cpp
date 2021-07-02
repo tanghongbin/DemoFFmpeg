@@ -784,6 +784,7 @@ void FFmpegMediaMuxer::OnCameraFrameDataValible(int type,uint8_t* srcData) {
         uint8_t * lastData = videoQueue.pushLast(srcData);
         if (lastData) delete [] lastData;
     } else {
+        // FFmpegGLESMuxerActivity
         int localWidth = 1280;
         int localHeight = 720;
         uint8_t * i420srcData = srcData;
