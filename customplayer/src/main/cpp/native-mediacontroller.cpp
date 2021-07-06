@@ -142,7 +142,9 @@ JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance,jint type) 
         mediaMuxer->test(type);
     } else if (type == 2) {
         char resultPath[128];
-        sprintf(resultPath,"/storage/emulated/0/ffmpegtest/encodeVideos/%lld%s",GetSysCurrentTime(),"-randow.mp4");
+        const char * folder = "/storage/emulated/0/ffmpegtest/encodeVideos";
+        sprintf(resultPath,"%s/%lld%s",folder,GetSysCurrentTime(),"-randow.mp4");
+        createFolderIfNotExist(folder);
         mediaMuxer->init(resultPath);
     } else if (type == 3) {
         mediaMuxer->test(type);
@@ -155,7 +157,19 @@ JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject inst
 
     jbyte *data = env->GetByteArrayElements(imageData, 0);
 
-    mediaMuxer->OnCameraFrameDataValible(type,reinterpret_cast<uint8_t *>(data));
+    NativeOpenGLImage openGlImage;
+    if (type == 2) {
+        openGlImage.width = 1280;
+        openGlImage.height = 720;
+        openGlImage.format = IMAGE_FORMAT_I420;
+        openGlImage.ppPlane[0] = reinterpret_cast<uint8_t *>(data);
+        openGlImage.ppPlane[1] = reinterpret_cast<uint8_t *>(data) + openGlImage.width * openGlImage.height;
+        openGlImage.ppPlane[2] = reinterpret_cast<uint8_t *>(data) + openGlImage.width * openGlImage.height * 5 / 4;
+        openGlImage.pLineSize[0] = openGlImage.width;
+        openGlImage.pLineSize[1] = openGlImage.width/2;
+        openGlImage.pLineSize[2] = openGlImage.width/2;
+    }
+    mediaMuxer->OnCameraFrameDataValible(type,&openGlImage);
 
     env->ReleaseByteArrayElements(imageData, data, 0);
 }

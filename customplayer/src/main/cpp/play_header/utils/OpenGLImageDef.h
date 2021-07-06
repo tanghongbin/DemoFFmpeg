@@ -43,11 +43,9 @@ private:
 public:
 
 	~_tag_LoadImageInfo_(){
-		LOGCATE("imageData before freed:%p",imageData);
 		if (imageData){
 			stbi_image_free(imageData);
 			imageData = nullptr;
-			LOGCATE("imageData has been freed:%p",imageData);
 		}
 	}
 	GLint getFormat(){
@@ -62,14 +60,12 @@ public:
 	 */
 	void uploadImageTex2D(){
 		glTexImage2D(GL_TEXTURE_2D, 0, getFormat(), width,height, 0, getFormat(), GL_UNSIGNED_BYTE, imageData);
-		LOGCATE("load and upload totally cost:%lld",(getTime() - startTime));
 	}
 	/***
 	 * 上传3D纹理
 	 */
 	void uploadCubeTex(GLenum face){
 		glTexImage2D(face, 0, getFormat(), width,height, 0, getFormat(), GL_UNSIGNED_BYTE, imageData);
-		LOGCATE("load and upload totally cost:%lld",(getTime() - startTime));
 	}
 	void loadImage(const char * filePath){
 		startTime = getTime();
@@ -182,7 +178,6 @@ public:
 		   pSrcImg->width != pDstImg->width ||
 		   pSrcImg->height != pDstImg->height)
 		{
-			LOGCATE("NativeImageUtil::CopyNativeImage invalid params.");
 			return;
 		}
 
@@ -266,7 +261,6 @@ public:
 				break;
 			default:
 			{
-				LOGCATE("NativeImageUtil::CopyNativeImage do not support the format. Format = %d", pSrcImg->format);
 			}
 				break;
 		}
@@ -307,8 +301,6 @@ public:
 
 		FILE *fp = fopen(imgPath, "wb");
 
-		LOGCATE("DumpNativeImage fp=%p, file=%s", fp, imgPath);
-
 		if(fp)
 		{
 			switch (pSrcImg->format)
@@ -340,7 +332,6 @@ public:
 				}
 				default:
 				{
-					LOGCATE("DumpNativeImage default");
 					break;
 				}
 			}

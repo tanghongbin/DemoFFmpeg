@@ -15,7 +15,7 @@ public:
     virtual void OnDrawFrame() = 0;
     virtual void OnSurfaceCreate() = 0;
     virtual void OnSurfaceChanged(int width,int height) = 0;
-    virtual void OnCameraFrameDataValible(int type,uint8_t* data) = 0;
+    virtual void OnCameraFrameDataValible(int type,NativeOpenGLImage * data) = 0;
 };
 
 #endif //DEMOFFMPEG_ABSMEDIAMUXER_H

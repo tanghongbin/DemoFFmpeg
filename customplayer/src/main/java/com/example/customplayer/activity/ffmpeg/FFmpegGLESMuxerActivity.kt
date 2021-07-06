@@ -1,9 +1,6 @@
 package com.example.customplayer.activity.ffmpeg
 
-import android.hardware.Camera
-import android.media.ImageReader
 import android.os.Bundle
-import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
 import com.example.common_base.utils.log
 import com.example.common_base.utils.runAsyncTask
@@ -31,6 +28,7 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
             })
         }
         mGLESMuxerSurface.init(mMuxer,true)
+        mGLESMuxerSurface.holder
 //        ImageReader
         mCamera2Wrapper.startCamera()
     }

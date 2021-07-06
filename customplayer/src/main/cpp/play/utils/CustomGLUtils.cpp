@@ -295,7 +295,8 @@ void yuvI420RotateVertical(uint8_t *i420Src, uint8_t * i420RorateDst, int width,
 void yuvRgbaToI420(uint8_t *rgbaData, uint8_t * i420Dst, int width, int height){
     uint8_t * i420U = i420Dst + width * height;
     uint8_t * i420V = i420Dst + width * height * 5 / 4;
-    libyuv::RGBAToI420(rgbaData,width * 4,i420Dst,width,
+    libyuv::RGBAToI420(rgbaData,width * 4,
+                       i420Dst,width,
                        i420U,width >> 1,
                        i420V,width >> 1,width,height);
 }
@@ -312,6 +313,13 @@ void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeig
             i420Dst,dstWidth,
             dstUData,dstWidth >> 1,
             dstVData,dstWidth >> 1,dstWidth,dstHeight,libyuv::kFilterNone);
+}
+
+void createFolderIfNotExist(const char * folder){
+    if (access(folder,0) == -1){
+        mkdir(folder,0700);
+    }
+    LOGCATE("log create folder:%s",folder);
 }
 
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,

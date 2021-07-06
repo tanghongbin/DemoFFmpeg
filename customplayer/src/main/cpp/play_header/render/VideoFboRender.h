@@ -7,15 +7,17 @@
 
 #include "BaseRender.h"
 #define TEXTURE_FBO_NUM 4
+#define SRC_W 720
+#define SRC_H 1280
 
 class VideoFboRender : public BaseVideoRender{
 private:
-    GLuint textures[TEXTURE_FBO_NUM],fboTextureId;
+    GLuint textures[TEXTURE_FBO_NUM],fboTextureId,testRgbaTextureId;
     GLuint vboIds[4],fboId;
     GLuint vaoIds[2];
     GLuint pboIds[2];
-    int currentPboIndex = 0;
-    int nextPboIndex = 0;
+    int currentPboId= 0;
+    int nextPboId= 0;
     std::mutex renderMutex;
     std::condition_variable renderCondition;
     int count = 0;
@@ -42,10 +44,13 @@ public:
 
     void createFbo();
 
-
     void createPbo();
 
     void drawFboTexture();
+
+    void readImagePixelByPbo();
+
+    void drawLogo(GLuint currentVaoId);
 };
 
 #endif //DEMOFFMPEG_FBORENDER_H

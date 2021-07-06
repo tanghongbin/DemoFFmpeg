@@ -27,9 +27,10 @@ extern "C" {
 #include <libavutil/time.h>
 }
 
-#define STREAM_DURATION   10.0
+//#define STREAM_DURATION   10.0
 #define STREAM_FRAME_RATE 25 /* 25 images/s */
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
+
 
 #define SCALE_FLAGS SWS_BICUBIC
 
@@ -451,7 +452,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     /* If the output format is not YUV420P, then a temporary YUV420P
      * picture is needed too. It is then converted to the required
      * output format. */
-    int tmpWidth = 1080,tmpHeight = 1991;
+    int tmpWidth = c->width,tmpHeight = c->height;
     ost->tmp_frame = alloc_picture(AV_PIX_FMT_RGBA, tmpWidth, tmpHeight);
     if (!ost->tmp_frame) {
         fprintf(stderr, "Could not allocate temporary picture\n");
@@ -466,17 +467,8 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     }
 }
 
-/* Prepare a signal 4 (SIGILL), code 1 (ILL_ILLOPC), fault addr 0xcd93288a image. */
-void fill_yuv_image(AVFrame *avFrame, int frame_index, uint8_t *rgbaData)
-{
-    avFrame->data[0] = rgbaData;
-//    LOGCATE("打印convert 花费了多少时间:%lld width:%d height:%d lineSize:%d %d %d",GetSysCurrentTime() - startTime,
-//            landScapeWidth,landScapeHeight,avFrame->linesize[0],avFrame->linesize[1],avFrame->linesize[2]);
-}
 
-
-
-AVFrame *get_video_frame(OutputStream *ost, uint8_t *rgbaData) {
+AVFrame *get_video_frame(OutputStream *ost, NativeOpenGLImage *openGlImage) {
     AVCodecContext *c = ost->enc;
     int ret;
 
@@ -502,9 +494,7 @@ else srcFormat = AV_PIX_FMT_RGBA;
         /* as we only generate a YUV420P picture, we must convert it
          * to the codec pixel format if needed */
         if (!ost->sws_ctx) {
-            int srcW = 1080;
-            int srcH = 1991;
-            ost->sws_ctx = sws_getContext(srcW, srcH,
+            ost->sws_ctx = sws_getContext(c->width, c->height,
                                           srcFormat,
                                           c->width, c->height,
                                           c->pix_fmt,
@@ -515,14 +505,23 @@ else srcFormat = AV_PIX_FMT_RGBA;
                 exit(1);
             }
         }
-        fill_yuv_image(ost->tmp_frame, ost->next_pts,  rgbaData);
+        ost->tmp_frame->data[0] = openGlImage->ppPlane[0];
         ret = sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
                   ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
                   ost->frame->linesize);
-//        LOGCATE("log convert result:%d",ret);
+        LOGCATE("log convert result:%d lineSize:%d dstLineSize:%d",ret,ost->tmp_frame->linesize[0],
+                ost->frame->linesize[0]);
+
+        // 感觉这里转换有问题,用libyuv 试一下
     } else {
-//        LOGCATE("not convert");
-        fill_yuv_image(ost->frame, ost->next_pts, rgbaData);
+        // 这里转换一下
+        uint8_t * dstData = new uint8_t [ost->frame->width * ost->frame->height * 3/2];
+        yuvRgbaToI420(openGlImage->ppPlane[0],dstData,ost->frame->width,ost->frame->height);
+        ost->frame->data[0] = dstData;
+        ost->frame->data[1] = dstData + ost->frame->width * ost->frame->height;
+        ost->frame->data[2] = dstData + ost->frame->width * ost->frame->height * 5/4;
+        LOGCATE("打印转换 w:%d h:%d",ost->frame->width,ost->frame->height);
+//        fill_yuv_image(, ost->next_pts, rgbaData);
     }
 
     ost->frame->pts = ost->next_pts++;
@@ -542,14 +541,15 @@ else srcFormat = AV_PIX_FMT_RGBA;
  int write_video_frame(AVFormatContext *oc, OutputStream *ost)
 {
 //     LOGCATE("start encode video");
-    uint8_t *data = FFmpegMediaMuxer::getInstace()->videoQueue.popFirst();
-    if (!data){
+    NativeOpenGLImage *nativeOpenGlImage = FFmpegMediaMuxer::getInstace()->videoQueue.popFirst();
+    if (!nativeOpenGlImage){
         return 1;
     }
-    AVFrame *frameData = get_video_frame(ost, data);
+    AVFrame *frameData = get_video_frame(ost, nativeOpenGlImage);
     if (!frameData) return 1;
     int ret = write_frame(oc, ost->enc, ost->st, frameData);
-    delete [] data;
+    NativeOpenGLImageUtil::FreeNativeImage(nativeOpenGlImage);
+    delete nativeOpenGlImage;
     return ret;
 }
 
@@ -708,14 +708,15 @@ void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int video_editable, in
 int FFmpegMediaMuxer::init(const char * fileName){
     strcpy(mTargetFilePath,fileName);
     LOGCATE("打印地址:%s",fileName);
+    access(fileName,0);
     audioRecordThread = new std::thread(startRecord,this);
     thread = new std::thread(StartMuxer,mTargetFilePath);
     return 0;
 }
 
 
-void FFmpegMediaMuxer::receivePixelData(void *pVoid){
-    FFmpegMediaMuxer::getInstace()->OnCameraFrameDataValible(3, static_cast<uint8_t *>(pVoid));
+void FFmpegMediaMuxer::receivePixelData(int type,NativeOpenGLImage *pVoid){
+    FFmpegMediaMuxer::getInstace()->OnCameraFrameDataValible(type, pVoid);
 }
 
 void FFmpegMediaMuxer::receiveAudioBuffer(uint8_t* data,int nb_samples){
@@ -770,39 +771,52 @@ void FFmpegMediaMuxer::OnSurfaceCreate() {
 void FFmpegMediaMuxer::OnSurfaceChanged(int width,int height) {
     videoRender->OnSurfaceChanged(width,height);
 }
-void FFmpegMediaMuxer::OnCameraFrameDataValible(int type,uint8_t* srcData) {
-    // 1-java camera nv21 转换成i420直接编码成mp4，2-opengles用来渲染的I420,3-i420放进队列,待会儿编码
+void FFmpegMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData) {
+    // 4-glreadPixel 读出来的数据已经转换成720分辨率的420p的数据了,可以直接编码
     if (type == 1) {
+        // 1-java camera nv21 转换成i420直接编码成mp4  - 适用于surfaceview
         if (isDestroyed || cameraWidth == 0 || cameraHeight == 0) return;
-        int bufferSize = cameraWidth * cameraHeight * 3 / 2;
-        uint8_t * i420Dst = new uint8_t [bufferSize];
-        memset(i420Dst,0x00,bufferSize);
-        yuvNv21To420p(srcData,i420Dst,cameraWidth,cameraHeight,libyuv::kRotate90);
-        uint8_t * lastData = videoQueue.pushLast(i420Dst);
-        if (lastData) delete [] lastData;
-    } else if (type == 3) {
-        uint8_t * lastData = videoQueue.pushLast(srcData);
-        if (lastData) delete [] lastData;
-    } else {
-        // FFmpegGLESMuxerActivity
+//        int bufferSize = cameraWidth * cameraHeight * 3 / 2;
+//        uint8_t * i420Dst = new uint8_t [bufferSize];
+//        memset(i420Dst,0x00,bufferSize);
+//        yuvNv21To420p(srcData,i420Dst,cameraWidth,cameraHeight,libyuv::kRotate90);
+//        uint8_t * lastData = videoQueue.pushLast(i420Dst);
+//        if (lastData) delete [] lastData;
+    } else if (type == 2) {
+        // camera-yuv420p 数据，直接渲染成Opengles
         int localWidth = 1280;
         int localHeight = 720;
-        uint8_t * i420srcData = srcData;
+        uint8_t * i420srcData = srcData->ppPlane[0];
         uint8_t * i420dstData = new uint8_t [localWidth * localHeight * 3/2];
-        yuvI420Rotate(i420srcData, i420dstData, localWidth, localHeight, libyuv::kRotate90);
-        NativeOpenGLImage openGlImage;
-        openGlImage.width = localHeight;
-        openGlImage.height = localWidth;
-        openGlImage.format = IMAGE_FORMAT_I420;
-        openGlImage.ppPlane[0] = i420dstData;
-        openGlImage.ppPlane[1] = i420dstData + localWidth * localHeight;
-        openGlImage.ppPlane[2] = i420dstData + localWidth * localHeight * 5 / 4;
-        openGlImage.pLineSize[0] = localHeight;
-        openGlImage.pLineSize[1] = localHeight >> 1;
-        openGlImage.pLineSize[2] = localHeight >> 1;
-        videoRender->copyImage(&openGlImage);
+        yuvI420Rotate(i420srcData, i420dstData, localWidth, localHeight, libyuv::kRotate270);
+        srcData -> width = localHeight;
+        srcData -> height = localWidth;
+        srcData -> format = IMAGE_FORMAT_I420;
+        srcData -> ppPlane[0] = i420dstData;
+        srcData -> ppPlane[1] = i420dstData + localWidth * localHeight;
+        srcData -> ppPlane[2] = i420dstData + localWidth * localHeight * 5 / 4;
+        srcData -> pLineSize[0] = localHeight;
+        srcData -> pLineSize[1] = localHeight >> 1;
+        srcData -> pLineSize[2] = localHeight >> 1;
+        videoRender->copyImage(srcData);
         delete [] i420dstData;
 //        LOGCATE("log width:%d height:%d imagewidth:%d imageheight:%d",localWidth,localHeight,openGlImage.width,openGlImage.height);
+    } else if (type == 3) {
+        // 3-rgba放进队列
+        NativeOpenGLImage * lastData = videoQueue.pushLast(srcData);
+        if (lastData) {
+            NativeOpenGLImageUtil::FreeNativeImage(lastData);
+            delete lastData;
+        }
+    } else if (type == 4) {
+        // glreadypixel 后转换成720分辨率的420p的画面,可以直接使用
+        NativeOpenGLImage * lastData = videoQueue.pushLast(srcData);
+        if (lastData) {
+            NativeOpenGLImageUtil::FreeNativeImage(lastData);
+            delete lastData;
+        }
+    } else {
+        LOGCATE("OnCameraFrameDataValible not support type:%d",type);
     }
 
 
@@ -837,8 +851,9 @@ void FFmpegMediaMuxer::Destroy(){
     }
     if (videoQueue.size() != 0){
         for (int i = 0; i < videoQueue.size(); ++i) {
-            uint8_t * data= videoQueue.popFirst();
-            delete[] data;
+            NativeOpenGLImage * data= videoQueue.popFirst();
+            NativeOpenGLImageUtil::FreeNativeImage(data);
+            delete data;
         }
     }
     if (videoFrameDst){

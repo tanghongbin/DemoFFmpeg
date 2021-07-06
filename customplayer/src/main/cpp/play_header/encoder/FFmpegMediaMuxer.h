@@ -18,7 +18,7 @@ typedef struct _audio_info{
     uint8_t* data;
     int nb_samples;
     void recycle(){
-        nb_samples;
+        nb_samples = 0;
         data = nullptr;
         delete this;
     }
@@ -57,7 +57,7 @@ private:
     static int StartMuxer(const char * fileName);
     static void startRecord(void * pVoid);
     static void receiveAudioBuffer(uint8_t* data,int nb_samples);
-    static void receivePixelData(void *pVoid);
+    static void receivePixelData(int type,NativeOpenGLImage *pVoid);
     FFmpegMediaMuxer(){
         thread = audioRecordThread = 0;
         videoRender = 0;
@@ -69,7 +69,7 @@ private:
 public:
     int cameraWidth,cameraHeight;
     CustomSafeQueue<AudioRecordItemInfo*> audioQueue;
-    CustomSafeQueue<uint8_t *> videoQueue;
+    CustomSafeQueue<NativeOpenGLImage *> videoQueue;
     uint8_t * videoFrameDst;
     int init(const char * outFileName);
     void Destroy();
@@ -87,7 +87,7 @@ public:
 
     void OnSurfaceCreate();
     void OnSurfaceChanged(int width,int height);
-    void OnCameraFrameDataValible(int type,uint8_t* data);
+    void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
     void OnDrawFrame();
 };
 

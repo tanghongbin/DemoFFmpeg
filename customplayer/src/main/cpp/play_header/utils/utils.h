@@ -8,6 +8,7 @@
 
 #include <android/log.h>
 #include <string>
+#include "OpenGLImageDef.h"
 
 /**
  * 是否启用ffmpeg日志
@@ -44,6 +45,7 @@
 typedef void (*PrepareCall) (long);
 typedef void (*ConvertResult) (void * decoder,void * data);
 typedef void (*ReceiveOqData) (void * data);
+typedef void (*ReceiveOqTypeData) (int type,NativeOpenGLImage * data);
 
 static std::string getModel3DPath(const char * fileName){
     std::string result = std::string (MODEL3D_ROOT_DIR) + std::string (fileName);
