@@ -160,8 +160,8 @@ void VideoFboRender::DrawFrame() {
     shader->use();
     glBindFramebuffer(GL_FRAMEBUFFER,fboId);
 //    int64_t startsss = GetSysCurrentTime();
-    drawFboTexture();
-//    readImagePixelByPbo();
+//    drawFboTexture();
+    readImagePixelByPbo();
 //    readImagePixel();
 ////    readImagePixelHardBuffer();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -304,8 +304,6 @@ void VideoFboRender::readImagePixelByPbo() {
         nextPboId = pboIds[0];
     }
     int64_t startTime = GetSysCurrentTime();
-    int targetW = VIDEO_W,targetH = VIDEO_H;
-    auto * yuv420p720 = new uint8_t[targetW * targetH * 3/2];
     int rgb720Length = VIDEO_W * VIDEO_H * 4;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,currentPboId);
     glReadPixels(0,0,VIDEO_W,VIDEO_H,GL_RGBA,GL_UNSIGNED_BYTE, (void *)0);
@@ -317,22 +315,33 @@ void VideoFboRender::readImagePixelByPbo() {
     auto * mapCopy720Data = new uint8_t [rgb720Length];
     memset(mapCopy720Data,0x00,rgb720Length);
     memcpy(mapCopy720Data,mapBuffer,rgb720Length);
+
+    auto * openGlImage = new NativeOpenGLImage;
+    openGlImage->width = VIDEO_W;
+    openGlImage->height = VIDEO_H;
+    openGlImage->format = IMAGE_FORMAT_RGBA;
+    openGlImage->pLineSize[0] = VIDEO_W * 4;
+    openGlImage->ppPlane[0] = mapCopy720Data;
+    readPixelCall(3,openGlImage);
+
     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
     glBindBuffer(GL_PIXEL_PACK_BUFFER,0);
-
+    int64_t mapTime = GetSysCurrentTime() - startTime;
+    LOGCATE("log currentPbo:%d nextPbo:%d asyncReadTime:%lld mapCopyTime:%lld rgbTo420pTime:%lld scaleTime:%lld"
+    ,currentPboId,nextPboId,readTime,mapTime,0LL,0LL);
+    return;
     // 这里假定测试下，加载
 //    LoadImageInfo loadImageInfo;
 //    loadImageInfo.loadImage("");
     // 1080rgb -> 1080 yuv420p
-    int64_t mapTime = GetSysCurrentTime() - startTime;
+
     startTime = GetSysCurrentTime();
-    yuvRgbaToI420(mapCopy720Data,yuv420p720,VIDEO_W,VIDEO_H);
+//    yuvRgbaToI420(mapCopy720Data,yuv420p720,VIDEO_W,VIDEO_H);
     int64_t timeRgbTo420p = GetSysCurrentTime() - startTime;
     startTime = GetSysCurrentTime();
     // 1080 yuv420p -> 720 yuv420p
     int64_t timeScale = GetSysCurrentTime() - startTime;
-    LOGCATE("log currentPbo:%d nextPbo:%d asyncReadTime:%lld mapCopyTime:%lld rgbTo420pTime:%lld scaleTime:%lld"
-            ,currentPboId,nextPboId,readTime,mapTime,timeRgbTo420p,timeScale);
+
 //    readPixelCall(4,yuv420p720);
 //    delete [] yuv420p1080;
 //    delete [] yuv420p720;

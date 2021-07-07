@@ -22,6 +22,7 @@ void main()
     highp vec3 rgb = mat3(1.0,       1.0,     1.0,
     0.0, -0.344, 1.770,
     1.403,  -0.714,     0.0) * yuv;
+    float value = (rgb.r + rgb.g + rgb.b) / 3.0 + 0.1;
     outColor = vec4(rgb, 1.0);
   }
 }
