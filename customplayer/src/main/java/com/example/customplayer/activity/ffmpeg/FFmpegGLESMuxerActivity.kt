@@ -16,7 +16,6 @@ import kotlinx.android.synthetic.main.activity_gles_ffmpeg_muxer.*
  */
 class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
     private val mMuxer by lazy { CustomMediaController(2) }
-    private val mCameraHelpr by lazy { CameraHelpr() }
     private val mCamera2Wrapper by lazy { Camera2Wrapper(this,this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +23,7 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
         setContentView(R.layout.activity_gles_ffmpeg_muxer)
         muxerButton.setOnClickListener {
             runAsyncTask({
-                mMuxer.startTestEncode(2)
+                mMuxer.native_startEncode()
             })
         }
         mGLESMuxerSurface.init(mMuxer,true)
@@ -34,8 +33,13 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
     }
 
     override fun onDestroy() {
+        mCamera2Wrapper.stopCamera()
         mMuxer.native_OnDestroy()
         super.onDestroy()
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
     override fun onCaptureFrame(data: ByteArray?, width: Int, height: Int) {

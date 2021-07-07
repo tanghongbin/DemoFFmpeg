@@ -10,10 +10,9 @@ MsgLoopHelper* MsgLoopHelper::instance = nullptr;
 
 void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
     LOGCATE("loop has enter %p",player);
-    player->getInstance()->safeQueue = new CustomSafeBlockQueue<Message*>;
     for (;;) {
         if (!player->isLoop) break;
-        Message*  message = player->safeQueue->popFirst();
+        Message*  message = player->safeQueue.popFirst();
         if (message == nullptr) continue;
         bool isAttach;
         JNIEnv *env = JavaVmManager::GetEnv(&isAttach);
@@ -31,24 +30,24 @@ void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
         }
         message->recycle();
     }
-    delete player->getInstance()->safeQueue;
-    player->getInstance()->safeQueue = nullptr;
     LOGCATE("loop msg has end");
 }
 void MsgLoopHelper::initMsgLoop(){
-    getInstance()->msgThread = new std::thread(prepareMsgLoop,getInstance());
+    if (getInstance()->msgThread == nullptr) getInstance()->msgThread = new std::thread(prepareMsgLoop,getInstance());
 }
 
 void MsgLoopHelper::sendMsg(Message *msg){
-    getInstance()->safeQueue->pushLast(msg);
+    getInstance()->safeQueue.pushLast(msg);
 }
 
 void MsgLoopHelper::destroyMsgLoop(){
     isLoop = false;
-    safeQueue->pushLast(nullptr);
-    msgThread->join();
-    delete msgThread;
+    safeQueue.pushLast(nullptr);
+    if (msgThread) {
+        msgThread->join();
+        delete msgThread;
+    }
     msgThread = nullptr;
-    delete instance;
+    if (instance) delete instance;
     instance = nullptr;
 }

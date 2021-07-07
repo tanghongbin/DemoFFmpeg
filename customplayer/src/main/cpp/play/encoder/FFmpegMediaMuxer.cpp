@@ -7,13 +7,11 @@
 #include <encoder/FFmpegMediaMuxer.h>
 #include <utils/utils.h>
 #include <utils/AudioRecordPlayHelper.h>
-#include <encoder/FFmpegEncodeAudio.h>
 #include <utils/CustomGLUtils.h>
 #include <render/VideoRender.h>
 #include <libyuv.h>
 #include <libyuv/scale.h>
 #include <libyuv/convert.h>
-#include <encoder/FFmpegEncodeVideo.h>
 #include <libyuv/rotate.h>
 #include <render/VideoFboRender.h>
 
@@ -670,10 +668,18 @@ void FFmpegMediaMuxer::encodeMediaAV(AVFormatContext *oc, int video_editable, in
     LOGCATE("打印音频缓冲大小:%d",size);
     int64_t start = GetSysCurrentTime();
 #define TESTMODE 3 // 1-音频，2-视频，3混合
-    while (!FFmpegMediaMuxer::getInstace() -> isDestroyed && (video_editable || audio_editable)) {
+    while (video_editable || audio_editable) {
         /* select the stream to encode */
 //        LOGCATE("differ :%lld",GetSysCurrentTime() - start);
 //        if (GetSysCurrentTime() - start > 10 * 1000) break;
+        std::unique_lock<std::mutex> uniqueLock(FFmpegMediaMuxer::getInstace() -> runningMutex,std::defer_lock);
+        uniqueLock.lock();
+        if (FFmpegMediaMuxer::getInstace() -> isDestroyed){
+            uniqueLock.unlock();
+            break;
+        }
+        uniqueLock.unlock();
+
 #if TESTMODE == 1
         encode_audio = !write_audio_frame(oc, &audio_st);
 #elif TESTMODE == 2
@@ -736,34 +742,6 @@ void FFmpegMediaMuxer::startRecord(void * pVoid){
     AudioRecordPlayHelper::getInstance()->startCapture(FFmpegMediaMuxer::receiveAudioBuffer);
 }
 
-static int64_t currentDuration = 0;
-
-static void testAudio(uint8_t* data,int samples){
-    FFmpegEncodeAudio::getInstance()->encodeAudioFrame(data,samples);
-    if (GetSysCurrentTime() - currentDuration > 10 * 1000) {
-        AudioRecordPlayHelper::getInstance()->stopCapture();
-    }
-}
-
-void FFmpegMediaMuxer::test(int type){
-    if (type == 1) {
-        currentDuration = GetSysCurrentTime();
-        FFmpegEncodeAudio* encodeAudio = FFmpegEncodeAudio::getInstance();
-        encodeAudio->init("test.aac");
-        AudioRecordPlayHelper::getInstance()->startCapture(testAudio);
-        encodeAudio->unInit();
-        encodeAudio->destroyInstance();
-    } else if(type == 3) {
-        currentDuration = GetSysCurrentTime();
-        FFmpegEncodeVideo* encodeVideo = FFmpegEncodeVideo::getInstance();
-        encodeVideo->mWindow_width = 1280;
-        encodeVideo->mWindow_height = 720;
-        encodeVideo->init();
-    }
-
-}
-
-
 
 void FFmpegMediaMuxer::OnSurfaceCreate() {
     videoRender = new VideoFboRender;
@@ -775,7 +753,14 @@ void FFmpegMediaMuxer::OnSurfaceChanged(int width,int height) {
 }
 void FFmpegMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData) {
     // 4-glreadPixel 读出来的数据已经转换成720分辨率的420p的数据了,可以直接编码
-    if (isDestroyed) return;
+    std::unique_lock<std::mutex> uniqueLock(FFmpegMediaMuxer::getInstace() -> runningMutex,std::defer_lock);
+    uniqueLock.lock();
+    if (isDestroyed){
+        uniqueLock.unlock();
+        return;
+    }
+    uniqueLock.unlock();
+
     if (type == 1) {
         // 1-java camera nv21 转换成i420直接编码成mp4  - 适用于surfaceview
         if (isDestroyed || cameraWidth == 0 || cameraHeight == 0) return;
@@ -831,9 +816,11 @@ void FFmpegMediaMuxer::OnDrawFrame(){
 
 void FFmpegMediaMuxer::Destroy(){
     // 清空所有缓存音频
+    std::unique_lock<std::mutex> uniqueLock(runningMutex,std::defer_lock);
+    uniqueLock.lock();
     isDestroyed = true;
-    av_usleep(300 * 1000);
-    FFmpegEncodeVideo::getInstance()->unInit();
+    uniqueLock.unlock();
+//    av_usleep(300 * 1000);
     LOGCATE("start destroy :%d",audioQueue.size());
     AudioRecordPlayHelper::getInstance()->stopCapture();
     if (thread) {
@@ -842,6 +829,8 @@ void FFmpegMediaMuxer::Destroy(){
     }
     if(videoRender){
         videoRender->Destroy();
+        delete videoRender;
+        videoRender = 0;
     }
     if (audioRecordThread){
         audioRecordThread->join();

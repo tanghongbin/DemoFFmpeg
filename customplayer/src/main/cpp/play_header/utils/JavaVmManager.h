@@ -26,15 +26,10 @@ public:
     static jobject getObjInstance(){
         return instance;
     }
-    static void destroyInstance(){
+    static void destroyInstance(JNIEnv *env) {
         if (instance == nullptr) return;
-        bool isAttach;
-        JNIEnv *env = GetEnv(&isAttach);
         env->DeleteGlobalRef(instance);
         instance = nullptr;
-        if (isAttach){
-            detachCurrentThread();
-        }
     }
     
 };

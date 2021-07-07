@@ -134,5 +134,5 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
     external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 
     // 1-开始录音
-    external fun startTestEncode(type:Int)
+    external fun native_startEncode()
 }

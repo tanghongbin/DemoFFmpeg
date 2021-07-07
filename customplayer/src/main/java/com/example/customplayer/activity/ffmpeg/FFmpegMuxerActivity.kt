@@ -20,14 +20,14 @@ class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
         setContentView(R.layout.activity_f_fmpeg_muxer)
         muxerButton.setOnClickListener {
             runAsyncTask({
-                mMuxer.startTestEncode(2)
+                mMuxer.native_startEncode()
             })
         }
 //        mMuxerSurface.init(mMuxer)
         mCameraHelpr.setCameraType(Camera.CameraInfo.CAMERA_FACING_BACK)
         mMuxerSurface.holder.addCallback(this)
         mCameraHelpr.setPreviewCallback { data, camera ->
-//            log("打印设想数据:$data")
+            log("打印设想数据:$data")
             mMuxer.native_onCameraFrameDataValible(1,data)
         }
 //        mMuxer.setOnSurfaceCallListener(object : OnSurfaceCallListener{
@@ -42,6 +42,7 @@ class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
     }
 
     override fun onDestroy() {
+        mCameraHelpr.release()
         mMuxer.native_OnDestroy()
         super.onDestroy()
     }

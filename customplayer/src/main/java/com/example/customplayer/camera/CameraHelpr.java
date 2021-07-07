@@ -179,6 +179,9 @@ public class CameraHelpr {
         return "";
     }
 
+    /***
+     * activity onDestroy中调用
+     */
     public void release(){
         if(mCamera != null){
             try {

@@ -53,6 +53,7 @@ private:
     char mTargetFilePath[128];
     BaseVideoRender* videoRender;
 
+
     bool isDestroyed;
     static int StartMuxer(const char * fileName);
     static void startRecord(void * pVoid);
@@ -66,6 +67,7 @@ private:
         cameraWidth = cameraHeight = 0;
     }
 public:
+    std::mutex runningMutex;
     int cameraWidth,cameraHeight;
     CustomSafeQueue<AudioRecordItemInfo*> audioQueue;
     CustomSafeQueue<NativeOpenGLImage *> videoQueue;
@@ -77,7 +79,6 @@ public:
         }
         return instance;
     }
-    void test(int type);
 
     static void encodeMediaAV( AVFormatContext *oc, int encode_video, int encode_audio,
                   OutputStream &video_st,

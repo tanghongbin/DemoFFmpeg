@@ -43,15 +43,15 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
     if (mediaPlayer != NULL) mediaPlayer->OnSurfaceCreated();
 
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer != NULL) mediaMuxer->OnSurfaceCreate();
+    if (mediaMuxer) mediaMuxer->OnSurfaceCreate();
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint oretenation,jint width,jint height) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL) mediaPlayer->OnSurfaceChanged(oretenation,width,height);
+    if (mediaPlayer) mediaPlayer->OnSurfaceChanged(oretenation,width,height);
 
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer != NULL) mediaMuxer->OnSurfaceChanged(width,height);
+    if (mediaMuxer) mediaMuxer->OnSurfaceChanged(width,height);
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
@@ -76,7 +76,7 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         mediaMuxer->Destroy();
         delete mediaMuxer;
     }
-    JavaVmManager::destroyInstance();
+    JavaVmManager::destroyInstance(env);
     MsgLoopHelper::destroyInstance();
     LOGCATE("destroy all over");
 }
@@ -134,28 +134,26 @@ JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring u
  * ============================   编码视频，音频，合并部分  ==========================
  * *****/
 
-JNIEXPORT void JNICALL startTestEncode(JNIEnv *env, jobject instance,jint type) {
+JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer == NULL) return;
-    if (type == 1) {
-        mediaMuxer->test(type);
-    } else if (type == 2) {
-        char resultPath[128];
-        const char * folder = "/storage/emulated/0/ffmpegtest/encodeVideos";
-        sprintf(resultPath,"%s/%lld%s",folder,GetSysCurrentTime(),"-randow.mp4");
-        createFolderIfNotExist(folder);
-        mediaMuxer->init(resultPath);
-    } else if (type == 3) {
-        mediaMuxer->test(type);
-    }
+
+    char resultPath[128];
+    const char * folder = "/storage/emulated/0/ffmpegtest/encodeVideos";
+    sprintf(resultPath,"%s/%lld%s",folder,GetSysCurrentTime(),"-randow.mp4");
+    createFolderIfNotExist(folder);
+    mediaMuxer->init(resultPath);
 }
 
 JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject instance,jint type,jbyteArray imageData) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer == NULL) return;
+    if (!mediaMuxer)
+        return;
+
+    LOGCATE("log native_onCameraFrameDataValible:%p",mediaMuxer);
 
     jbyte *data = env->GetByteArrayElements(imageData, 0);
-    if (data == nullptr) return;
+    if (!data) return;
 
     NativeOpenGLImage openGlImage;
     if (type == 2) {
@@ -194,7 +192,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
         {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
 
-        {"startTestEncode",               "(I)V",            (void *) (startTestEncode)},
+        {"native_startEncode",               "()V",            (void *) (native_startEncode)},
         {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
 
 };

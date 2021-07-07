@@ -148,12 +148,10 @@ static AbsMediaMuxer* getJniMuxerFromJava(){
     bool isAttach;
     JNIEnv* env = JavaVmManager::GetEnv(&isAttach);
     jobject instance = JavaVmManager::getObjInstance();
-    if (!instance) return NULL;
+    if (!instance) return nullptr;
     jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativeMuxer","J");
     jlong point = env->GetLongField(instance,jfieldId);
-//    if (isAttach){
-//        JavaVmManager::detachCurrentThread();
-//    }
+    if (point == 0L) return nullptr;
     return reinterpret_cast<AbsMediaMuxer *>(point);
 }
 
