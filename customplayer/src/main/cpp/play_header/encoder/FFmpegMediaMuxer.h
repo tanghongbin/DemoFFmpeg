@@ -61,7 +61,6 @@ private:
     FFmpegMediaMuxer(){
         thread = audioRecordThread = 0;
         videoRender = 0;
-        videoFrameDst = 0;
         videoQueue.setMax(3);
         isDestroyed = false;
         cameraWidth = cameraHeight = 0;
@@ -70,7 +69,6 @@ public:
     int cameraWidth,cameraHeight;
     CustomSafeQueue<AudioRecordItemInfo*> audioQueue;
     CustomSafeQueue<NativeOpenGLImage *> videoQueue;
-    uint8_t * videoFrameDst;
     int init(const char * outFileName);
     void Destroy();
      static FFmpegMediaMuxer* getInstace(){

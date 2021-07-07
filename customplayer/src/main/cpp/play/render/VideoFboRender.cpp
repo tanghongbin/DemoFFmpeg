@@ -161,7 +161,7 @@ void VideoFboRender::DrawFrame() {
     glBindFramebuffer(GL_FRAMEBUFFER,fboId);
 //    int64_t startsss = GetSysCurrentTime();
     drawFboTexture();
-    readImagePixelByPbo();
+//    readImagePixelByPbo();
 //    readImagePixel();
 ////    readImagePixelHardBuffer();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -173,13 +173,15 @@ void VideoFboRender::DrawFrame() {
 
 void VideoFboRender::readImagePixel() {
     auto * rgbaData = new uint8_t [VIDEO_W * VIDEO_H * 4];
+    int64_t startTime =GetSysCurrentTime();
     glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
+    LOGCATE("打印读取时间：%lld",GetSysCurrentTime() - startTime);
 //    glBindTexture(GL_TEXTURE_2D,testRgbaTextureId);
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIDEO_W, VIDEO_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
 //    glBindTexture(GL_TEXTURE_2D,0);
 //    delete [] rgbaData;
     // 测试读取显示
-    NativeOpenGLImage * openGlImage = new NativeOpenGLImage;
+    auto * openGlImage = new NativeOpenGLImage;
     openGlImage->width = VIDEO_W;
     openGlImage->height = VIDEO_H;
     openGlImage->format = IMAGE_FORMAT_RGBA;
@@ -302,20 +304,19 @@ void VideoFboRender::readImagePixelByPbo() {
         nextPboId = pboIds[0];
     }
     int64_t startTime = GetSysCurrentTime();
-    int targetW = 720,targetH = 1280;
-    uint8_t * yuv420p1080 = new uint8_t[VIDEO_W * VIDEO_H * 3/2];
-    uint8_t * yuv420p720 = new uint8_t[targetW * targetH * 3/2];
-    int rgb1080Length = VIDEO_W * VIDEO_H * 4;
+    int targetW = VIDEO_W,targetH = VIDEO_H;
+    auto * yuv420p720 = new uint8_t[targetW * targetH * 3/2];
+    int rgb720Length = VIDEO_W * VIDEO_H * 4;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,currentPboId);
     glReadPixels(0,0,VIDEO_W,VIDEO_H,GL_RGBA,GL_UNSIGNED_BYTE, (void *)0);
     int64_t readTime = GetSysCurrentTime() - startTime;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,nextPboId);
     startTime = GetSysCurrentTime();
-    void * mapBuffer = glMapBufferRange(GL_PIXEL_PACK_BUFFER,0,rgb1080Length,GL_MAP_READ_BIT);
+    void * mapBuffer = glMapBufferRange(GL_PIXEL_PACK_BUFFER,0,rgb720Length,GL_MAP_READ_BIT);
     if (mapBuffer == nullptr) return;
-    uint8_t * mapCopy1080Data = new uint8_t [rgb1080Length];
-    memset(mapCopy1080Data,0x00,rgb1080Length);
-    memcpy(mapCopy1080Data,mapBuffer,rgb1080Length);
+    auto * mapCopy720Data = new uint8_t [rgb720Length];
+    memset(mapCopy720Data,0x00,rgb720Length);
+    memcpy(mapCopy720Data,mapBuffer,rgb720Length);
     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
     glBindBuffer(GL_PIXEL_PACK_BUFFER,0);
 
@@ -325,16 +326,15 @@ void VideoFboRender::readImagePixelByPbo() {
     // 1080rgb -> 1080 yuv420p
     int64_t mapTime = GetSysCurrentTime() - startTime;
     startTime = GetSysCurrentTime();
-    yuvRgbaToI420(mapCopy1080Data,yuv420p1080,VIDEO_W,VIDEO_H);
+    yuvRgbaToI420(mapCopy720Data,yuv420p720,VIDEO_W,VIDEO_H);
     int64_t timeRgbTo420p = GetSysCurrentTime() - startTime;
     startTime = GetSysCurrentTime();
     // 1080 yuv420p -> 720 yuv420p
-    yuvI420Scale(yuv420p1080,yuv420p720,VIDEO_W,VIDEO_H,targetW,targetH);
     int64_t timeScale = GetSysCurrentTime() - startTime;
     LOGCATE("log currentPbo:%d nextPbo:%d asyncReadTime:%lld mapCopyTime:%lld rgbTo420pTime:%lld scaleTime:%lld"
             ,currentPboId,nextPboId,readTime,mapTime,timeRgbTo420p,timeScale);
 //    readPixelCall(4,yuv420p720);
-    delete [] yuv420p1080;
+//    delete [] yuv420p1080;
 //    delete [] yuv420p720;
 
 }

@@ -65,21 +65,20 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer) {
+        setJniPointToJava(env,"mNativePlayer","J", nullptr);
         mediaPlayer->Destroy();
         delete mediaPlayer;
-        mediaPlayer = NULL;
-        setJniPointToJava(env,"mNativePlayer","J", nullptr);
     }
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     LOGCATE("log mediamuxer :%p",mediaMuxer);
     if (mediaMuxer){
+        setJniPointToJava(env,"mNativeMuxer","J", nullptr);
         mediaMuxer->Destroy();
         delete mediaMuxer;
-        mediaMuxer = NULL;
-        setJniPointToJava(env,"mNativeMuxer","J", nullptr);
     }
     JavaVmManager::destroyInstance();
     MsgLoopHelper::destroyInstance();
+    LOGCATE("destroy all over");
 }
 
 JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
@@ -156,6 +155,7 @@ JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject inst
     if (mediaMuxer == NULL) return;
 
     jbyte *data = env->GetByteArrayElements(imageData, 0);
+    if (data == nullptr) return;
 
     NativeOpenGLImage openGlImage;
     if (type == 2) {

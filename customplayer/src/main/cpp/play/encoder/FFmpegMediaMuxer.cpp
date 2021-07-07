@@ -172,7 +172,6 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
                 c->mb_decision = 2;
             }
             int videoFrameSize = c->width * c->height * 3 / 2;
-            FFmpegMediaMuxer::getInstace() -> videoFrameDst = static_cast<uint8_t *>(av_malloc(videoFrameSize));
             FFmpegMediaMuxer::getInstace()->cameraWidth = c->height;
             FFmpegMediaMuxer::getInstace()->cameraHeight = c->width;
             break;
@@ -505,12 +504,16 @@ else srcFormat = AV_PIX_FMT_RGBA;
                 exit(1);
             }
         }
+        int64_t startTime = GetSysCurrentTime();
+//        ost->tmp_frame->width = openGlImage->width;
+//        ost->tmp_frame->height = openGlImage->height;
         ost->tmp_frame->data[0] = openGlImage->ppPlane[0];
         ret = sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
                   ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
                   ost->frame->linesize);
         LOGCATE("log convert result:%d lineSize:%d dstLineSize:%d",ret,ost->tmp_frame->linesize[0],
                 ost->frame->linesize[0]);
+        LOGCATE("打印转换时间：%lld",GetSysCurrentTime() - startTime);
         // 感觉这里转换有问题,用libyuv 试一下
     } else {
         // 这里转换一下
@@ -772,6 +775,7 @@ void FFmpegMediaMuxer::OnSurfaceChanged(int width,int height) {
 }
 void FFmpegMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData) {
     // 4-glreadPixel 读出来的数据已经转换成720分辨率的420p的数据了,可以直接编码
+    if (isDestroyed) return;
     if (type == 1) {
         // 1-java camera nv21 转换成i420直接编码成mp4  - 适用于surfaceview
         if (isDestroyed || cameraWidth == 0 || cameraHeight == 0) return;
@@ -828,6 +832,7 @@ void FFmpegMediaMuxer::OnDrawFrame(){
 void FFmpegMediaMuxer::Destroy(){
     // 清空所有缓存音频
     isDestroyed = true;
+    av_usleep(300 * 1000);
     FFmpegEncodeVideo::getInstance()->unInit();
     LOGCATE("start destroy :%d",audioQueue.size());
     AudioRecordPlayHelper::getInstance()->stopCapture();
@@ -854,9 +859,6 @@ void FFmpegMediaMuxer::Destroy(){
             NativeOpenGLImageUtil::FreeNativeImage(data);
             delete data;
         }
-    }
-    if (videoFrameDst){
-        av_free(videoFrameDst);
     }
     AudioRecordPlayHelper::getInstance()->destroyInstance();
     delete instance;
