@@ -161,8 +161,8 @@ void VideoFboRender::DrawFrame() {
     glBindFramebuffer(GL_FRAMEBUFFER,fboId);
 //    int64_t startsss = GetSysCurrentTime();
     drawFboTexture();
-//    readImagePixelByPbo();
-    readImagePixel();
+    readImagePixelByPbo();
+//    readImagePixel();
 ////    readImagePixelHardBuffer();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 
