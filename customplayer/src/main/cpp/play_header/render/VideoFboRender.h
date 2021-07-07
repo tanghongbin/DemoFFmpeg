@@ -7,8 +7,8 @@
 
 #include "BaseRender.h"
 #define TEXTURE_FBO_NUM 4
-#define SRC_W 720
-#define SRC_H 1280
+#define VIDEO_W 720
+#define VIDEO_H 1280
 
 class VideoFboRender : public BaseVideoRender{
 private:

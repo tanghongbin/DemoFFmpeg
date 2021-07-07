@@ -505,13 +505,19 @@ else srcFormat = AV_PIX_FMT_RGBA;
                 exit(1);
             }
         }
+        ost->tmp_frame->width = openGlImage->width;
+        ost->tmp_frame->height = openGlImage->height;
         ost->tmp_frame->data[0] = openGlImage->ppPlane[0];
+        ost->tmp_frame->data[1] = openGlImage->ppPlane[1];
+        ost->tmp_frame->data[2] = openGlImage->ppPlane[2];
+        ost->tmp_frame->linesize[0] = openGlImage->pLineSize[0];
+        ost->tmp_frame->linesize[1] = openGlImage->pLineSize[1];
+        ost->tmp_frame->linesize[2] = openGlImage->pLineSize[2];
         ret = sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
                   ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
                   ost->frame->linesize);
         LOGCATE("log convert result:%d lineSize:%d dstLineSize:%d",ret,ost->tmp_frame->linesize[0],
                 ost->frame->linesize[0]);
-
         // 感觉这里转换有问题,用libyuv 试一下
     } else {
         // 这里转换一下

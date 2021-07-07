@@ -78,7 +78,7 @@ void VideoFboRender::Init(){
 
 void VideoFboRender::createPbo() {
     glGenBuffers(2,pboIds);
-    int size = renderWidth * renderHeight * 4;
+    int size = VIDEO_W * VIDEO_H * 4;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,pboIds[0]);
     glBufferData(GL_PIXEL_PACK_BUFFER,size, nullptr,GL_STATIC_READ);
     glBindBuffer(GL_PIXEL_PACK_BUFFER,pboIds[1]);
@@ -94,7 +94,7 @@ void VideoFboRender::createFbo() {
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderWidth, renderHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIDEO_W, VIDEO_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glBindTexture(GL_TEXTURE_2D,0);
 
     glGenTextures(1, &testRgbaTextureId);
@@ -111,7 +111,7 @@ void VideoFboRender::createFbo() {
     glBindFramebuffer(GL_FRAMEBUFFER, fboId);
     glBindTexture(GL_TEXTURE_2D, fboTextureId);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureId, 0);
-    LOGCATE("log width:%d height:%d",renderWidth,renderHeight);
+    LOGCATE("log width:%d height:%d",VIDEO_W,VIDEO_H);
     GLenum  result;
     if ((result = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE){
         LOGCATE("log frame buffer is not complete %.2x",result);
@@ -172,18 +172,18 @@ void VideoFboRender::DrawFrame() {
 }
 
 void VideoFboRender::readImagePixel() {
-    auto * rgbaData = new uint8_t [renderWidth * renderHeight * 4];
-    glReadPixels(0, 0, renderWidth, renderHeight, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
+    auto * rgbaData = new uint8_t [VIDEO_W * VIDEO_H * 4];
+    glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
 //    glBindTexture(GL_TEXTURE_2D,testRgbaTextureId);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderWidth, renderHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIDEO_W, VIDEO_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
 //    glBindTexture(GL_TEXTURE_2D,0);
 //    delete [] rgbaData;
     // 测试读取显示
     NativeOpenGLImage * openGlImage = new NativeOpenGLImage;
-    openGlImage->width = renderWidth;
-    openGlImage->height = renderHeight;
+    openGlImage->width = VIDEO_W;
+    openGlImage->height = VIDEO_H;
     openGlImage->format = IMAGE_FORMAT_RGBA;
-    openGlImage->pLineSize[0] = renderWidth * 4;
+    openGlImage->pLineSize[0] = VIDEO_W * 4;
     openGlImage->ppPlane[0] = rgbaData;
     readPixelCall(3,openGlImage);
 }
@@ -210,7 +210,7 @@ void VideoFboRender::drawNormalImage() {
 
 
 void VideoFboRender::drawFboTexture() {
-    glViewport(0, 0, renderWidth, renderHeight);
+    glViewport(0, 0, VIDEO_W, VIDEO_H);
     glClearColor(1.0,1.0,1.0,1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     // upload texture
@@ -303,11 +303,11 @@ void VideoFboRender::readImagePixelByPbo() {
     }
     int64_t startTime = GetSysCurrentTime();
     int targetW = 720,targetH = 1280;
-    uint8_t * yuv420p1080 = new uint8_t[renderWidth * renderHeight * 3/2];
+    uint8_t * yuv420p1080 = new uint8_t[VIDEO_W * VIDEO_H * 3/2];
     uint8_t * yuv420p720 = new uint8_t[targetW * targetH * 3/2];
-    int rgb1080Length = renderWidth * renderHeight * 4;
+    int rgb1080Length = VIDEO_W * VIDEO_H * 4;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,currentPboId);
-    glReadPixels(0,0,renderWidth,renderHeight,GL_RGBA,GL_UNSIGNED_BYTE, (void *)0);
+    glReadPixels(0,0,VIDEO_W,VIDEO_H,GL_RGBA,GL_UNSIGNED_BYTE, (void *)0);
     int64_t readTime = GetSysCurrentTime() - startTime;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,nextPboId);
     startTime = GetSysCurrentTime();
@@ -325,11 +325,11 @@ void VideoFboRender::readImagePixelByPbo() {
     // 1080rgb -> 1080 yuv420p
     int64_t mapTime = GetSysCurrentTime() - startTime;
     startTime = GetSysCurrentTime();
-    yuvRgbaToI420(mapCopy1080Data,yuv420p1080,renderWidth,renderHeight);
+    yuvRgbaToI420(mapCopy1080Data,yuv420p1080,VIDEO_W,VIDEO_H);
     int64_t timeRgbTo420p = GetSysCurrentTime() - startTime;
     startTime = GetSysCurrentTime();
     // 1080 yuv420p -> 720 yuv420p
-    yuvI420Scale(yuv420p1080,yuv420p720,renderWidth,renderHeight,targetW,targetH);
+    yuvI420Scale(yuv420p1080,yuv420p720,VIDEO_W,VIDEO_H,targetW,targetH);
     int64_t timeScale = GetSysCurrentTime() - startTime;
     LOGCATE("log currentPbo:%d nextPbo:%d asyncReadTime:%lld mapCopyTime:%lld rgbTo420pTime:%lld scaleTime:%lld"
             ,currentPboId,nextPboId,readTime,mapTime,timeRgbTo420p,timeScale);
