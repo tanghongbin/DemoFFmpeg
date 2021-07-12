@@ -16,6 +16,8 @@ public:
     virtual void OnSurfaceCreate() = 0;
     virtual void OnSurfaceChanged(int width,int height) = 0;
     virtual void OnCameraFrameDataValible(int type,NativeOpenGLImage * data) = 0;
+
+    virtual void OnAudioData(uint8_t *audioData, jint length) = 0;
 };
 
 #endif //DEMOFFMPEG_ABSMEDIAMUXER_H

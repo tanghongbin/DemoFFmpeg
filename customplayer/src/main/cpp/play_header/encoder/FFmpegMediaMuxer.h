@@ -49,7 +49,6 @@ private:
 
     static FFmpegMediaMuxer* instance;
     std::thread * thread;
-    std::thread * audioRecordThread;
     char mTargetFilePath[128];
     BaseVideoRender* videoRender;
 
@@ -60,7 +59,7 @@ private:
     static void receiveAudioBuffer(uint8_t* data,int nb_samples);
     static void receivePixelData(int type,NativeOpenGLImage *pVoid);
     FFmpegMediaMuxer(){
-        thread = audioRecordThread = 0;
+        thread = 0;
         videoRender = 0;
         videoQueue.setMax(3);
         isDestroyed = false;
@@ -88,6 +87,7 @@ public:
     void OnSurfaceChanged(int width,int height);
     void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
     void OnDrawFrame();
+    void OnAudioData(uint8_t *audioData, jint length);
 };
 
 #endif //DEMOFFMPEG_FFMPEGMEDIAMUXER_H

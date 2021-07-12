@@ -1,11 +1,9 @@
-package com.example.democ.utils;
+package com.example.avutils.audio.recoder;
 
 import android.annotation.TargetApi;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-
-import com.example.democ.hwencoder.AudioConfiguration;
 
 /**
  * @Title: AudioUtils

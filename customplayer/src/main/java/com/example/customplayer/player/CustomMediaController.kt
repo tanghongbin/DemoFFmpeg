@@ -135,4 +135,6 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
 
     // 1-开始录音
     external fun native_startEncode()
+
+    external fun native_audioData(byteArray: ByteArray,length:Int)
 }

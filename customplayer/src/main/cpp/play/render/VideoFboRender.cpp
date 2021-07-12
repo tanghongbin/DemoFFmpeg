@@ -161,8 +161,8 @@ void VideoFboRender::DrawFrame() {
     glBindFramebuffer(GL_FRAMEBUFFER,fboId);
 //    int64_t startsss = GetSysCurrentTime();
     drawFboTexture();
-    readImagePixelByPbo();
-//    readImagePixel();
+//    readImagePixelByPbo();
+    readImagePixel();
 ////    readImagePixelHardBuffer();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 
@@ -175,7 +175,7 @@ void VideoFboRender::readImagePixel() {
     auto * rgbaData = new uint8_t [VIDEO_W * VIDEO_H * 4];
     int64_t startTime =GetSysCurrentTime();
     glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
-    LOGCATE("打印读取时间：%lld",GetSysCurrentTime() - startTime);
+//    LOGCATE("打印读取时间：%lld",GetSysCurrentTime() - startTime);
 //    glBindTexture(GL_TEXTURE_2D,testRgbaTextureId);
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIDEO_W, VIDEO_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
 //    glBindTexture(GL_TEXTURE_2D,0);

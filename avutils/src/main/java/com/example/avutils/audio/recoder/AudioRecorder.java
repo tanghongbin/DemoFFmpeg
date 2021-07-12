@@ -1,4 +1,4 @@
-package com.example.democ.audio;/*
+package com.example.avutils.audio.recoder;/*
  *  COPYRIGHT NOTICE  
  *  Copyright (C) 2016, Jhuster <lujun.hust@gmail.com>
  *  https://github.com/Jhuster/Android
@@ -11,12 +11,9 @@ package com.example.democ.audio;/*
  *  @author  Jhuster
  *  @date    2016/03/10    
  */
-
 import android.media.AudioRecord;
 import android.util.Log;
 
-import com.example.democ.hwencoder.AudioConfiguration;
-import com.example.democ.utils.AudioUtils;
 
 public class AudioRecorder {
 

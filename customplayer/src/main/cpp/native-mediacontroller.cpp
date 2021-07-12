@@ -150,7 +150,7 @@ JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject inst
     if (!mediaMuxer)
         return;
 
-    LOGCATE("log native_onCameraFrameDataValible:%p",mediaMuxer);
+//    LOGCATE("log native_onCameraFrameDataValible:%p",mediaMuxer);
 
     jbyte *data = env->GetByteArrayElements(imageData, 0);
     if (!data) return;
@@ -171,6 +171,19 @@ JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject inst
 
     env->ReleaseByteArrayElements(imageData, data, 0);
 }
+
+
+JNIEXPORT void JNICALL native_audioData(JNIEnv *env, jobject instance,jbyteArray audioData,jint length) {
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (!mediaMuxer)
+        return;
+    jbyte *data = env->GetByteArrayElements(audioData, 0);
+    if (!data) return;
+    mediaMuxer ->OnAudioData(reinterpret_cast<uint8_t *>(data), length);
+    env->ReleaseByteArrayElements(audioData, data, 0);
+}
+
+
 
 
 /***
@@ -194,7 +207,7 @@ static JNINativeMethod g_RenderMethods[] = {
 
         {"native_startEncode",               "()V",            (void *) (native_startEncode)},
         {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
-
+        {"native_audioData",               "([BI)V",            (void *) (native_audioData)},
 };
 
 

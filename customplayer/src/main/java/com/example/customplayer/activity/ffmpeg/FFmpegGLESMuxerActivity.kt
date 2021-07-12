@@ -2,6 +2,7 @@ package com.example.customplayer.activity.ffmpeg
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.avutils.audio.recoder.AudioRecorder
 import com.example.common_base.utils.log
 import com.example.common_base.utils.runAsyncTask
 import com.example.customplayer.R
@@ -17,14 +18,19 @@ import kotlinx.android.synthetic.main.activity_gles_ffmpeg_muxer.*
 class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
     private val mMuxer by lazy { CustomMediaController(2) }
     private val mCamera2Wrapper by lazy { Camera2Wrapper(this,this) }
+    private val mAudioRecorder by lazy { AudioRecorder() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gles_ffmpeg_muxer)
         muxerButton.setOnClickListener {
             runAsyncTask({
+                mAudioRecorder.startCapture()
                 mMuxer.native_startEncode()
             })
+        }
+        mAudioRecorder.setOnAudioFrameCapturedListener { audioData, ret ->
+            mMuxer.native_audioData(audioData,ret)
         }
         mGLESMuxerSurface.init(mMuxer,true)
         mGLESMuxerSurface.holder
@@ -33,6 +39,7 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
     }
 
     override fun onDestroy() {
+        mAudioRecorder.stopCapture()
         mCamera2Wrapper.stopCamera()
         mMuxer.native_OnDestroy()
         super.onDestroy()

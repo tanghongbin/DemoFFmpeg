@@ -1,4 +1,4 @@
-package com.example.democ.hwencoder;
+package com.example.avutils.audio.recoder;
 
 import android.media.AudioFormat;
 import android.media.MediaCodecInfo;
