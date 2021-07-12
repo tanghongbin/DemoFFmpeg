@@ -295,10 +295,10 @@ void yuvI420RotateVertical(uint8_t *i420Src, uint8_t * i420RorateDst, int width,
 void yuvRgbaToI420(uint8_t *rgbaData, uint8_t * i420Dst, int width, int height){
     uint8_t * i420U = i420Dst + width * height;
     uint8_t * i420V = i420Dst + width * height * 5 / 4;
-    libyuv::RGBAToI420(rgbaData,width * 4,
+    libyuv::ABGRToI420(rgbaData,width * 4,
                        i420Dst,width,
-                       i420U,width >> 1,
-                       i420V,width >> 1,width,height);
+                       i420U,width / 2,
+                       i420V,width / 2,width,height);
 }
 
 void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeight,int dstWidth,int dstHeight){

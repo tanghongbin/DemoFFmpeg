@@ -80,9 +80,9 @@ void VideoFboRender::createPbo() {
     glGenBuffers(2,pboIds);
     int size = VIDEO_W * VIDEO_H * 4;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,pboIds[0]);
-    glBufferData(GL_PIXEL_PACK_BUFFER,size, nullptr,GL_STATIC_READ);
+    glBufferData(GL_PIXEL_PACK_BUFFER,size, nullptr,GL_STATIC_DRAW);
     glBindBuffer(GL_PIXEL_PACK_BUFFER,pboIds[1]);
-    glBufferData(GL_PIXEL_PACK_BUFFER,size, nullptr,GL_STATIC_READ);
+    glBufferData(GL_PIXEL_PACK_BUFFER,size, nullptr,GL_STATIC_DRAW);
     glBindBuffer(GL_PIXEL_PACK_BUFFER,0);
 }
 
@@ -160,7 +160,7 @@ void VideoFboRender::DrawFrame() {
     shader->use();
     glBindFramebuffer(GL_FRAMEBUFFER,fboId);
 //    int64_t startsss = GetSysCurrentTime();
-//    drawFboTexture();
+    drawFboTexture();
     readImagePixelByPbo();
 //    readImagePixel();
 ////    readImagePixelHardBuffer();
@@ -303,14 +303,14 @@ void VideoFboRender::readImagePixelByPbo() {
         currentPboId = pboIds[1];
         nextPboId = pboIds[0];
     }
-    int64_t startTime = GetSysCurrentTime();
     int rgb720Length = VIDEO_W * VIDEO_H * 4;
     glBindBuffer(GL_PIXEL_PACK_BUFFER,currentPboId);
     glReadPixels(0,0,VIDEO_W,VIDEO_H,GL_RGBA,GL_UNSIGNED_BYTE, (void *)0);
-    int64_t readTime = GetSysCurrentTime() - startTime;
+    int64_t startTime = GetSysCurrentTime();
     glBindBuffer(GL_PIXEL_PACK_BUFFER,nextPboId);
-    startTime = GetSysCurrentTime();
     void * mapBuffer = glMapBufferRange(GL_PIXEL_PACK_BUFFER,0,rgb720Length,GL_MAP_READ_BIT);
+    int64_t readTime = GetSysCurrentTime() - startTime;
+    startTime = GetSysCurrentTime();
     if (mapBuffer == nullptr) return;
     auto * mapCopy720Data = new uint8_t [rgb720Length];
     memset(mapCopy720Data,0x00,rgb720Length);

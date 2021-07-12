@@ -515,12 +515,16 @@ else srcFormat = AV_PIX_FMT_RGBA;
         // 感觉这里转换有问题,用libyuv 试一下
     } else {
         // 这里转换一下
-        uint8_t * dstData = new uint8_t [ost->frame->width * ost->frame->height * 3/2];
-        yuvRgbaToI420(openGlImage->ppPlane[0],dstData,ost->frame->width,ost->frame->height);
+        int64_t startTime = GetSysCurrentTime();
+        auto * dstData = new uint8_t [VIDEO_W * VIDEO_H * 3/2];
+        yuvRgbaToI420(openGlImage->ppPlane[0],dstData,VIDEO_W,VIDEO_H);
         ost->frame->data[0] = dstData;
         ost->frame->data[1] = dstData + ost->frame->width * ost->frame->height;
         ost->frame->data[2] = dstData + ost->frame->width * ost->frame->height * 5/4;
-        LOGCATE("打印转换 w:%d h:%d",ost->frame->width,ost->frame->height);
+        LOGCATE("打印转换 w:%d h:%d 转换时长:%lld",ost->frame->width,ost->frame->height,GetSysCurrentTime() - startTime);
+        ost->frame->linesize[0] = VIDEO_W;
+        ost->frame->linesize[1] = VIDEO_W/2;
+        ost->frame->linesize[2] = VIDEO_W/2;
 //        fill_yuv_image(, ost->next_pts, rgbaData);
     }
 
