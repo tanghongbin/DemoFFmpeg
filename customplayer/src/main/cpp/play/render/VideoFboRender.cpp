@@ -69,7 +69,7 @@ void VideoFboRender::Init(){
         glBindTexture(GL_TEXTURE_2D,0);
     }
     LoadImageInfo imageInfo;
-    imageInfo.loadImage("/storage/emulated/0/ffmpegtest/filterImg/slight.jpg");
+    imageInfo.loadImage("/storage/emulated/0/ffmpegtest/filterImg/lye.jpg");
     glBindTexture(GL_TEXTURE_2D,textures[3]);
     imageInfo.setupNormalSetting();
     imageInfo.uploadImageTex2D();
@@ -240,7 +240,8 @@ void VideoFboRender::drawFboTexture() {
 void VideoFboRender::drawLogo(GLuint currentVaoId) {
     glBindVertexArray(currentVaoId);
         glm::mat4 currentModel = glm::mat4(1.0);
-    currentModel = glm::scale(currentModel,glm::vec3 (0.1f));
+    currentModel = glm::scale(currentModel,glm::vec3 (0.2f));
+    currentModel = glm::translate(currentModel,glm::vec3 (8.0f,-8.0f,0.0f));
     shader->setMat4("model", currentModel);
     shader->setInt("samplerType", 1);
     glActiveTexture(GL_TEXTURE0);
