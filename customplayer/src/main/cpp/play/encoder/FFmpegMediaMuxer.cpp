@@ -324,7 +324,7 @@ FFmpegMediaMuxer* FFmpegMediaMuxer::instance = nullptr;
     int dst_nb_samples;
 
     AudioRecordItemInfo *audioInfo = FFmpegMediaMuxer::getInstace()->audioQueue.popFirst();
-    while (!audioInfo){
+    while (!audioInfo && !FFmpegMediaMuxer::getInstace()->isDestroyed){
         av_usleep(10 * 1000);
         audioInfo = FFmpegMediaMuxer::getInstace()->audioQueue.popFirst();
     }
@@ -869,5 +869,4 @@ void FFmpegMediaMuxer::Destroy(){
     }
     delete instance;
     instance = 0;
-    LOGCATE("start destroy 4:%d",audioQueue.size());
 }

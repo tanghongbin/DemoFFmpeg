@@ -51,9 +51,6 @@ private:
     std::thread * thread;
     char mTargetFilePath[128];
     BaseVideoRender* videoRender;
-
-
-    bool isDestroyed;
     static int StartMuxer(const char * fileName);
     static void startRecord(void * pVoid);
     static void receiveAudioBuffer(uint8_t* data,int nb_samples);
@@ -66,6 +63,7 @@ private:
         cameraWidth = cameraHeight = 0;
     }
 public:
+    bool isDestroyed;
     std::mutex runningMutex;
     int cameraWidth,cameraHeight;
     CustomSafeQueue<AudioRecordItemInfo*> audioQueue;
