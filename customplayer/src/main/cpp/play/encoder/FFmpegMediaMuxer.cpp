@@ -13,6 +13,7 @@
 #include <libyuv/convert.h>
 #include <libyuv/rotate.h>
 #include <render/VideoFboRender.h>
+#include <media/NdkMediaMuxer.h>
 
 extern "C" {
 #include <libswscale/swscale.h>
@@ -779,7 +780,7 @@ void FFmpegMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * src
         int localHeight = 720;
         uint8_t * i420srcData = srcData->ppPlane[0];
         uint8_t * i420dstData = new uint8_t [localWidth * localHeight * 3/2];
-        yuvI420Rotate(i420srcData, i420dstData, localWidth, localHeight, libyuv::kRotate270);
+        yuvI420Rotate(i420srcData, i420dstData, localWidth, localHeight, libyuv::kRotate270, true);
         srcData -> width = localHeight;
         srcData -> height = localWidth;
         srcData -> format = IMAGE_FORMAT_I420;

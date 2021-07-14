@@ -78,7 +78,7 @@ const char *getRandomStr(const char *prefix, const char *suffix);
 
 void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width,int height, libyuv::RotationMode mode);
 
-void yuvI420Rotate(uint8_t *nv21Data, uint8_t * i420RorateDst, int width, int height, libyuv::RotationMode mode);
+void yuvI420Rotate(uint8_t *nv21Data, uint8_t * i420RorateDst, int width, int height, libyuv::RotationMode mode,bool isMirror);
 
 void yuvI420RotateVertical(uint8_t *i420Src, uint8_t * i420RorateDst, int width, int height);
 

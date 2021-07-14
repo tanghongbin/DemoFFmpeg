@@ -268,17 +268,34 @@ void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width,int heig
 }
 
 
-void yuvI420Rotate(uint8_t *i420Src, uint8_t * i420RorateDst, int width, int height, libyuv::RotationMode mode){
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "ArgumentSelectionDefects"
+void yuvI420Rotate(uint8_t *i420Src, uint8_t * i420RorateDst, int width, int height, libyuv::RotationMode mode,bool isMirror){
     uint8_t * uData = i420Src + width * height;
     uint8_t * vData = i420Src + width * height * 5 / 4;
+    uint8_t * tmpDst = i420RorateDst;
+    if (isMirror) tmpDst = new uint8_t [width * height *3/2];
     libyuv::I420Rotate(i420Src, width,
                        uData, width >> 1,
                        vData, width >> 1,
-                       i420RorateDst, height,
-                       i420RorateDst + width * height, height >> 1,
-                       i420RorateDst + width* height* 5/4, height >> 1,
+                       tmpDst, height,
+                       tmpDst + width * height, height >> 1,
+                       tmpDst + width* height* 5/4, height >> 1,
                        width, height, mode);
+    if (isMirror){
+        int localW = height;
+        int localH = width;
+        libyuv::I420Mirror(tmpDst, height,
+                           tmpDst + width * height, height >> 1,
+                           tmpDst + width * height * 5 / 4, height >> 1,
+                           i420RorateDst, height,
+                           i420RorateDst + width * height, height >> 1,
+                           i420RorateDst + width* height* 5/4, height >> 1,
+                           localW, localH);
+        delete [] tmpDst;
+    }
 }
+#pragma clang diagnostic pop
 
 void yuvI420RotateVertical(uint8_t *i420Src, uint8_t * i420RorateDst, int width, int height){
     uint8_t * uData = i420Src + width * height;

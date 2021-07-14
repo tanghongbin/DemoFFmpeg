@@ -241,7 +241,7 @@ void VideoFboRender::drawLogo(GLuint currentVaoId) {
     glBindVertexArray(currentVaoId);
         glm::mat4 currentModel = glm::mat4(1.0);
     currentModel = glm::scale(currentModel,glm::vec3 (0.2f));
-    currentModel = glm::translate(currentModel,glm::vec3 (8.0f,-8.0f,0.0f));
+    currentModel = glm::translate(currentModel,glm::vec3 (4.0f,-4.0f,0.0f));
     shader->setMat4("model", currentModel);
     shader->setInt("samplerType", 1);
     glActiveTexture(GL_TEXTURE0);

@@ -12,6 +12,7 @@ package com.example.avutils.audio.recoder;/*
  *  @date    2016/03/10    
  */
 import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.util.Log;
 
 
@@ -20,8 +21,9 @@ public class AudioRecorder {
     private static final String TAG = "AudioRecorder";
 
     private AudioRecord mAudioRecord;
+
     private int mMinBufferSize = 0;
-	
+
     private Thread mCaptureThread; 	
     private boolean mIsCaptureStarted = false;
     private volatile boolean mIsLoopExit = false;
