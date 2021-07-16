@@ -11,6 +11,7 @@
 #include <utils/MsgLoopHelper.h>
 #include <encoder/FFmpegMediaMuxer.h>
 #include <utils/AudioRecordPlayHelper.h>
+#include <encoder/HwMediaMuxer.h>
 
 #include "mediaprocess/AbsCustomMediaPlayer.h"
 #include "mediaprocess/FFmpegMediaPlayer.h"
@@ -91,10 +92,21 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
 }
 
 
-JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance) {
+/***
+ *
+ * @param env
+ * @param instance
+ * @param type  1-ffmpeg 编码，2- 硬编码
+ */
+JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type) {
     JavaVmManager::setInstance(env,instance);
     MsgLoopHelper::initMsgLoop();
-    FFmpegMediaMuxer *mediaMuxer = FFmpegMediaMuxer::getInstace();
+    AbsMediaMuxer *mediaMuxer;
+    if (type == 1) {
+        mediaMuxer = FFmpegMediaMuxer::getInstace();
+    } else {
+        mediaMuxer = HwMediaMuxer::getInstace();
+    }
     setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
     LOGCATE("has enter env:%p instance:%p",env,instance);
 }
@@ -198,7 +210,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnDestroy",               "()V",            (void *) (native_OnDestroy)},
 
         {"native_init_player",               "()V",            (void *) (native_init_player)},
-        {"native_init_muxer",               "()V",            (void *) (native_init_muxer)},
+        {"native_init_muxer",               "(I)V",            (void *) (native_init_muxer)},
         {"native_prepare",               "()V",            (void *) (native_prepare)},
         {"native_start",               "()V",            (void *) (native_start)},
         {"native_stop",               "()V",            (void *) (native_stop)},

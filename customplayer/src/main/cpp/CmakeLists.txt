@@ -7,7 +7,8 @@ set(libName native-mediacontroller)
 
 include_directories(
         include
-        play_header)
+        play_header
+        rtmp)
 
 #指定 rtmp 静态库文件目录
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${RTMP}/libs/${CMAKE_ANDROID_ARCH_ABI}")
@@ -19,7 +20,9 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/play/utils/*.cpp
         ${CMAKE_SOURCE_DIR}/play/decoder/*.cpp
         ${CMAKE_SOURCE_DIR}/play/encoder/*.cpp
-        ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp)
+        ${CMAKE_SOURCE_DIR}/play/encoder/hw/*.cpp
+        ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp
+        ${CMAKE_SOURCE_DIR}/rtmp/*.cpp)
 
 
 #添加静态库
@@ -68,11 +71,6 @@ set_target_properties(curl PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI
 add_library(libyuv SHARED IMPORTED )
 set_target_properties(libyuv PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libyuv.so)
 
-
-find_library(log-lib log )
-
-find_library(OpenSLES-lib OpenSLES)
-
 set(third-party-libs
         avcodec
         avfilter
@@ -96,6 +94,12 @@ set(third-party-libs
         opencv_java3
         curl)
 
+find_library(log-lib log )
+
+find_library(OpenSLES-lib OpenSLES)
+
+find_library(media mediandk)
+
 add_library( # Sets the name of the library.
         ${libName}
 
@@ -109,6 +113,8 @@ target_link_libraries(${libName}
         ${OpenSLES-lib}
         ${log-lib}
         ${third-party-libs}
+        ${media}
+        OpenMAXAL
         EGL
         android
         GLESv3)

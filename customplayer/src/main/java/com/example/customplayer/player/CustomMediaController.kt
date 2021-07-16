@@ -29,7 +29,7 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
     init {
         when(type){
             1 -> native_init_player()
-            2 -> native_init_muxer()
+            2 -> native_init_muxer(2)
         }
     }
     private var mNativePlayer:Long = 0L
@@ -129,7 +129,10 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
 
     /**====================  编码器  encoder 方法 **********************/
 
-    external fun native_init_muxer()
+    /**
+     * 1-ffmpeg 编码，2-硬编码
+     */
+    external fun native_init_muxer(type:Int)
 
     external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 

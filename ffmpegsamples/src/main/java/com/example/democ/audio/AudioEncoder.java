@@ -28,6 +28,7 @@ import com.example.democ.hwencoder.HwEncoderHelper;
 import com.example.democ.interfaces.CaptureDataListener;
 import com.example.democ.interfaces.OutputEncodedDataListener;
 import com.example.democ.interfaces.SingleInterface;
+import com.example.democ.utils.LogUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,7 +49,7 @@ public class AudioEncoder extends Thread {
     private boolean mIsOpened = false;
     private long audioStartTime = 0L;
     private CaptureDataListener captureDataListener;
-//    private ArrayBlockingQueue<byte[]> mAudioBufferList = new ArrayBlockingQueue<byte[]>(2000);
+    private ArrayBlockingQueue<byte[]> mAudioBufferList = new ArrayBlockingQueue<byte[]>(50000);
 
     private HwEncoderHelper.CaptureMode mCaptureMode = HwEncoderHelper.CaptureMode.RECORD;
 
@@ -75,6 +76,28 @@ public class AudioEncoder extends Thread {
     public void run() {
         super.run();
         while (mIsOpened){
+            byte[] input = mAudioBufferList.poll();
+            if (input == null) {
+                try {
+                    sleep(20 );
+                    LogUtils.INSTANCE.log("打印 睡眠后继续 input：" + ( input == null));
+                    continue;
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+            LogUtils.INSTANCE.log("打印 input：" + ( input == null));
+            int inputBufferIndex = mMediaCodec.dequeueInputBuffer(1000);
+            if (inputBufferIndex >= 0) {
+                ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(inputBufferIndex);
+                inputBuffer.clear();
+                LogUtils.INSTANCE.log("打印 里面 input：" + input);
+                inputBuffer.put(input);
+                long timeStamp = mCaptureMode == HwEncoderHelper.CaptureMode.RECORD ?
+                        ((System.nanoTime() - audioStartTime) / 1000) : 0;
+                mMediaCodec.queueInputBuffer(inputBufferIndex, 0, input.length,
+                        timeStamp , 0);
+            }
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 1000);
             if (outputBufferIndex >= 0) {
@@ -150,16 +173,7 @@ public class AudioEncoder extends Thread {
         }
         try {
             log("TAG","i'm encoding audio");
-            int inputBufferIndex = mMediaCodec.dequeueInputBuffer(1000);
-            if (inputBufferIndex >= 0) {
-                ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(inputBufferIndex);
-                inputBuffer.clear();
-                inputBuffer.put(input);
-                long timeStamp = mCaptureMode == HwEncoderHelper.CaptureMode.RECORD ?
-                        ((System.nanoTime() - audioStartTime) / 1000) : 0;
-                mMediaCodec.queueInputBuffer(inputBufferIndex, 0, input.length,
-                        timeStamp , 0);
-            }
+            mAudioBufferList.put(input);
         }catch (Exception e){
             e.printStackTrace();
         }

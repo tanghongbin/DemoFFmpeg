@@ -66,6 +66,8 @@ void testLocalThread();
 
 long long GetSysCurrentTime();
 
+long long GetSysNanoTime();
+
 const char *encodeYuvToImageUtils(const char *filePath);
 
 const char *encodeYuvToImageUtils2(const char *filePath);
@@ -83,6 +85,8 @@ void yuvI420Rotate(uint8_t *nv21Data, uint8_t * i420RorateDst, int width, int he
 void yuvI420RotateVertical(uint8_t *i420Src, uint8_t * i420RorateDst, int width, int height);
 
 void yuvRgbaToI420(uint8_t *rgba, uint8_t * i420Dst, int width, int height);
+
+void yuvRgbaToNv21(uint8_t *rgba, uint8_t * nv21Dst, int width, int height);
 
 void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeight,int dstWidth,int dstHeight);
 

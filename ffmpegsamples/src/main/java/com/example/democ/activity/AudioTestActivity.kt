@@ -30,9 +30,9 @@ class AudioTestActivity : AppCompatActivity() ,View.OnClickListener{
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.mStart -> {
-                mAudioCapture.setOnAudioFrameCapturedListener {
-                    log("capture success data:${it}")
-                    mAudioEncoder.encode(it)
+                mAudioCapture.setOnAudioFrameCapturedListener { data,ret ->
+                    log("capture success data:${data}")
+                    mAudioEncoder.encode(data)
                 }
                 mAudioEncoder.setAudioEncodedListener { encoded, presentationTimeUs ->
                     log("encode success data:${encoded}")

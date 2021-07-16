@@ -5,6 +5,10 @@
 #ifndef DEMOFFMPEG_ABSMEDIAMUXER_H
 #define DEMOFFMPEG_ABSMEDIAMUXER_H
 
+#include <utils/OpenGLImageDef.h>
+
+
+
 class AbsMediaMuxer{
 public:
     virtual int init(const char * outFileName) = 0;
@@ -17,7 +21,7 @@ public:
     virtual void OnSurfaceChanged(int width,int height) = 0;
     virtual void OnCameraFrameDataValible(int type,NativeOpenGLImage * data) = 0;
 
-    virtual void OnAudioData(uint8_t *audioData, jint length) = 0;
+    virtual void OnAudioData(uint8_t *audioData, int length) = 0;
 };
 
 #endif //DEMOFFMPEG_ABSMEDIAMUXER_H

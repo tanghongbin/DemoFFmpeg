@@ -72,8 +72,8 @@ class HwEncoderHelper(private val cameraSurfaceView: CameraSurfaceView) : Camera
             throw NullPointerException("audioOutputListener or initListener can't be null")
         if (mTestStart) return
         initListener?.init()
-        mAudioRecorder.setOnAudioFrameCapturedListener {
-            mAudioEncoder.encode(it)
+        mAudioRecorder.setOnAudioFrameCapturedListener { data ,ret ->
+            mAudioEncoder.encode(data)
         }
         mAudioRecorder.startCapture()
         mAudioEncoder.setOutputListener(audioOutputListener)

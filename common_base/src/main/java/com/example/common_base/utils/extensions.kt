@@ -29,8 +29,10 @@ fun log(str:String,tag:String = "DemoC"){
 }
 
 fun getRandomStr(subdir:String,suffixName:String):String{
-    val path = "/storage/emulated/0/ffmpegtest/${subdir}${System.currentTimeMillis()}${suffixName}"
+    val folder = "/storage/emulated/0/ffmpegtest/${subdir}"
+    val path = "${folder}/${System.currentTimeMillis()}${suffixName}"
     log("path:${path}")
+    FileUtils.makeDirs(folder)
     val file = File(path)
     if (!file.exists()){
         val result = file.createNewFile()

@@ -18,6 +18,7 @@
 #include <libyuv/rotate.h>
 #include <libyuv/convert.h>
 #include <libyuv/scale.h>
+#include <chrono>
 
 
 extern "C" {
@@ -112,6 +113,12 @@ long long GetSysCurrentTime() {
     gettimeofday(&time, NULL);
     long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
     return curTime;
+}
+
+long long GetSysNanoTime() {
+    timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return now.tv_sec * 1000000000LL + now.tv_nsec;
 }
 
 /**
@@ -317,6 +324,25 @@ void yuvRgbaToI420(uint8_t *rgbaData, uint8_t * i420Dst, int width, int height){
                        i420U,width / 2,
                        i420V,width / 2,width,height);
 }
+
+void yuvRgbaToNv21(uint8_t *rgbaData, uint8_t * nv21Dst, int width, int height){
+    uint8_t* i420Tmp = new uint8_t [width * height * 3/2];
+    uint8_t * i420U = i420Tmp + width * height;
+    uint8_t * i420V = i420Tmp + width * height * 5 / 4;
+    libyuv::RGBAToI420(rgbaData,width * 4,
+                       i420Tmp,width,
+                       i420U,width / 2,
+                       i420V,width / 2,width,height);
+    libyuv::I420ToNV21(i420Tmp,width,
+            i420Tmp + width * height,width / 2,
+            i420Tmp + width * height * 5/4,width / 2,
+            nv21Dst,width,
+            nv21Dst + width * height,width,
+            width,height);
+    delete [] i420Tmp;
+}
+
+
 
 void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeight,int dstWidth,int dstHeight){
     uint8_t *srcUData = i420Src + srcWidth * srcHeight;

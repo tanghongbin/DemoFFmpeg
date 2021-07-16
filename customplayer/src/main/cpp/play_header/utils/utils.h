@@ -42,6 +42,17 @@
 #define JNI_COMMUNICATE_TYPE_DURATION 6
 
 
+typedef struct _audio_info{
+    uint8_t* data;
+    int nb_samples;
+    void recycle(){
+        nb_samples = 0;
+        data = nullptr;
+        delete this;
+    }
+} AudioRecordItemInfo;
+
+
 typedef void (*PrepareCall) (long);
 typedef void (*ConvertResult) (void * decoder,void * data);
 typedef void (*ReceiveOqData) (void * data);

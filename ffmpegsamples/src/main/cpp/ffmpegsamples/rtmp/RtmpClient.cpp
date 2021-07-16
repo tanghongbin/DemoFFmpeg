@@ -9,6 +9,7 @@
 
 extern "C" {
 #include <rtmp.h>
+#include <libavutil/time.h>
 }
 
 RtmpClient *RtmpClient::instance = 0;
@@ -34,7 +35,8 @@ void RtmpClient::loop(RtmpClient *client) {
         RTMPPacket *packet = client->mDataQueue.popFirst();
         if (packet == 0) {
             LOGCATE("pkt is null,this is impossible");
-            break;
+            av_usleep(10 * 1000);
+            continue;
         }
         packet->m_nInfoField2 = client->rtmp->m_stream_id;
 //        LOGCATE("send pkt info body size:%d  type:%d",packet->m_nBodySize,packet->m_packetType);

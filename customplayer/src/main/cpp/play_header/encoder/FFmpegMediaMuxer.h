@@ -14,15 +14,6 @@ extern "C" {
 #include <libavformat/avformat.h>
 };
 
-typedef struct _audio_info{
-    uint8_t* data;
-    int nb_samples;
-    void recycle(){
-        nb_samples = 0;
-        data = nullptr;
-        delete this;
-    }
-} AudioRecordItemInfo;
 
 // a wrapper around a single output AVStream
 typedef struct OutputStream {
@@ -85,7 +76,7 @@ public:
     void OnSurfaceChanged(int width,int height);
     void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
     void OnDrawFrame();
-    void OnAudioData(uint8_t *audioData, jint length);
+    void OnAudioData(uint8_t *audioData, int length);
 };
 
 #endif //DEMOFFMPEG_FFMPEGMEDIAMUXER_H

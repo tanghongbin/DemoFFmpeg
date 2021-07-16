@@ -1,1 +1,1 @@
-ffmpeg 系列
+ffmpeg 系列,软硬编码，rtmp推流都可以了
