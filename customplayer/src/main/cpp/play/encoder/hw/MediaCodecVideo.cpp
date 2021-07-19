@@ -31,21 +31,21 @@ void MediaCodecVideo::startEncode(){
 
 AMediaCodec * MediaCodecVideo::createVideoMediaCodec(){
     AMediaFormat *format = AMediaFormat_new();
-    const char * mine = DEFAULT_VIDEO_MIME;
-    const char * videoMine = DEFAULT_VIDEO_MIME;
-    int width = DEFAULT_WIDTH;
-    int height = DEFAULT_HEIGHT;
-    int maxBitRate =  1024 * DEFAULT_MAX_BPS ;
-    int fps = DEFAULT_FPS;
-    int ivf = DEFAULT_VIDEO_IFI;
+    const char * mine = DEFAULT_VIDEO_MIME
+    const char * videoMine = DEFAULT_VIDEO_MIME
+    int width = DEFAULT_VIDEO_WIDTH
+    int height = DEFAULT_VIDEO_HEIGHT
+    int maxBitRate =  1024 * DEFAULT_VIDEO_MAX_BPS
+    int fps = DEFAULT_VIDEO_FPS
+    int ivf = DEFAULT_VIDEO_IFI
     AMediaFormat_setString(format,AMEDIAFORMAT_KEY_MIME,videoMine);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_WIDTH,width);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_HEIGHT,height);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_BIT_RATE, maxBitRate);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_FRAME_RATE,fps);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_I_FRAME_INTERVAL,ivf);
-    // yuv 420sp nv21
-    AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,21);
+    // yuv 420sp nv21 // 19 - i420
+    AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,19);
     AMediaCodec *mediaCodec = AMediaCodec_createEncoderByType(mine);
     mMediaFormat = format;
     int ret = AMediaCodec_configure(mediaCodec,format, nullptr, nullptr,AMEDIACODEC_CONFIGURE_FLAG_ENCODE);
@@ -93,20 +93,21 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
         }
         int widthV = image->width;
         int heightV = image->height;
-        int nv21Size = widthV * heightV * 3/2;
+        int i420Size = widthV * heightV * 3/2;
 //        LOGCATE("打印loopEncode width:%d    height:%d",widthV,heightV);
-        auto* nv21Data = new uint8_t [nv21Size];
-        yuvRgbaToNv21(image->ppPlane[0],nv21Data,widthV,heightV);
+        auto* i420Data = new uint8_t [i420Size];
+        yuvRgbaToI420(image->ppPlane[0],i420Data,widthV,heightV);
         int inputIndex = AMediaCodec_dequeueInputBuffer(codecVideo->mMediaCodec,1000);
         if (inputIndex >= 0) {
             size_t inputBufferSize;
             uint8_t *inputData = AMediaCodec_getInputBuffer(codecVideo->mMediaCodec, inputIndex,&inputBufferSize);
-            memcpy(inputData,nv21Data,nv21Size);
+            memcpy(inputData,i420Data,i420Size);
             int64_t timeStamp = (GetSysNanoTime() - startNano) / 1000;
-            AMediaCodec_queueInputBuffer(codecVideo->mMediaCodec,inputIndex,0,nv21Size,timeStamp,0);
+            AMediaCodec_queueInputBuffer(codecVideo->mMediaCodec,inputIndex,0,i420Size,timeStamp,0);
         }
         AMediaCodecBufferInfo bufferInfo;
-        int outIndex = AMediaCodec_dequeueOutputBuffer(codecVideo->mMediaCodec,&bufferInfo,12000);
+        int outIndex = AMediaCodec_dequeueOutputBuffer(codecVideo->mMediaCodec,&bufferInfo,1000);
+        LOGCATE("log current output index:%d  time:%lld",outIndex,bufferInfo.presentationTimeUs);
         if (outIndex >= 0) {
             size_t outputBufferSize;
             auto outputData = AMediaCodec_getOutputBuffer(codecVideo->mMediaCodec,outIndex,&outputBufferSize);
@@ -115,7 +116,7 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
         } else if (outIndex == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
             codecVideo -> outputFmtChangedListener(2,AMediaCodec_getOutputFormat(codecVideo->mMediaCodec));
         }
-        delete [] nv21Data;
+        delete [] i420Data;
         NativeOpenGLImageUtil::FreeNativeImage(image);
         delete image;
     }

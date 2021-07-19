@@ -41,10 +41,6 @@ void HwMediaMuxer::receivePixelData(int type,NativeOpenGLImage *pVoid){
 }
 
 void HwMediaMuxer::receiveMediaCodecData(int type,AMediaCodecBufferInfo * bufferInfo, uint8_t* data){
-    if (!getInstace()->mMuxerHelper->isReady()) {
-        LOGCATE("muxer is not ready");
-        return;
-    }
     if( type == 1) {
         // 音频
         getInstace()->mMuxerHelper->writeSampleData(getInstace() -> audioTrackIndex,data,bufferInfo);

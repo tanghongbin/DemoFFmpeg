@@ -42,8 +42,3 @@ void NdkMediaMuxerHelper::destroy(){
     std::lock_guard<std::mutex> lockGuard(mMutex);
     if (mMuxer) AMediaMuxer_delete(mMuxer);
 }
-bool NdkMediaMuxerHelper::isReady(){
-    std::lock_guard<std::mutex> lockGuard(mMutex);
-//    LOGCATE("打印当前count数量:%d",count);
-    return count == 2;
-}

@@ -39,7 +39,6 @@ public:
     void start();
     void stop();
     void destroy();
-    bool isReady();
 };
 
 #endif //DEMOFFMPEG_NDKMEDIAMUXERHELPER_H

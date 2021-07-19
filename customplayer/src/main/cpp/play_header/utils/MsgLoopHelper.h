@@ -12,7 +12,7 @@
 
 class MsgLoopHelper{
 private:
-    bool isLoop = true;
+    bool isLoop;
     CustomSafeBlockQueue<Message*> safeQueue;
     std::thread * msgThread;
     static MsgLoopHelper* instance;
@@ -24,6 +24,12 @@ private:
     static MsgLoopHelper* getInstance(){
         if (instance == nullptr) instance = new MsgLoopHelper;
         return instance;
+    }
+
+    MsgLoopHelper(){
+        instance = 0;
+        msgThread = 0;
+        isLoop = true;
     }
 
 

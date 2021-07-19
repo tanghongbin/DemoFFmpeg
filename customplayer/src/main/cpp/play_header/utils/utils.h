@@ -45,8 +45,13 @@
 typedef struct _audio_info{
     uint8_t* data;
     int nb_samples;
+    _audio_info(){
+        data = 0;
+        nb_samples = 0;
+    }
     void recycle(){
         nb_samples = 0;
+        if (data) delete [] data;
         data = nullptr;
         delete this;
     }

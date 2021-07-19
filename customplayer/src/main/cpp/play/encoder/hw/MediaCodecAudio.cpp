@@ -31,11 +31,11 @@ void MediaCodecAudio::startEncode(){
 AMediaCodec * MediaCodecAudio::createAudioMediaCodec(){
     AMediaFormat *format = AMediaFormat_new();
     const char * mine = DEFAULT_AUDIO_MIME;
-    int frameSize = 4096 * DEFAULT_CHANNEL_COUNT;
+    int frameSize = 4096 * DEFAULT_AUDIO_CHANNEL_COUNT;
     const char * audioMine = DEFAULT_AUDIO_MIME;
-    int sampleRate = DEFAULT_FREQUENCY;
-    int channelCount = DEFAULT_CHANNEL_COUNT;
-    int maxBitRate = 1024 * DEFAULT_MAX_BPS;
+    int sampleRate = DEFAULT_AUDIO_FREQUENCY;
+    int channelCount = DEFAULT_AUDIO_CHANNEL_COUNT;
+    int maxBitRate = 1024 * DEFAULT_AUDIO_MAX_BPS;
     AMediaFormat_setString(format,AMEDIAFORMAT_KEY_MIME,audioMine);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_SAMPLE_RATE,sampleRate);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_CHANNEL_COUNT,channelCount);
