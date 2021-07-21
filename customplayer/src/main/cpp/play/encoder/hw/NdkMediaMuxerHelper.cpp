@@ -10,8 +10,8 @@ NdkMediaMuxerHelper* NdkMediaMuxerHelper::instance = nullptr;
 
 void  NdkMediaMuxerHelper::init(const char * path){
     LOGCATE("打印合成地址:%s",path);
-    FILE* file = fopen(path,"wb+");
-    mMuxer =  AMediaMuxer_new(fileno(file),AMEDIAMUXER_OUTPUT_FORMAT_MPEG_4);
+    mFile = fopen(path,"wb+");
+    mMuxer =  AMediaMuxer_new(fileno(mFile),AMEDIAMUXER_OUTPUT_FORMAT_MPEG_4);
 }
 
 void NdkMediaMuxerHelper::writeSampleData(int trackIndex,uint8_t* data,AMediaCodecBufferInfo* info){
@@ -33,6 +33,7 @@ void NdkMediaMuxerHelper::start(){
     isStart = true;
     LOGCATE("硬编码已经开始录制了");
 }
+
 void NdkMediaMuxerHelper::stop(){
     std::lock_guard<std::mutex> lockGuard(mMutex);
     isStart = false;
@@ -41,4 +42,5 @@ void NdkMediaMuxerHelper::stop(){
 void NdkMediaMuxerHelper::destroy(){
     std::lock_guard<std::mutex> lockGuard(mMutex);
     if (mMuxer) AMediaMuxer_delete(mMuxer);
+    if (mFile) fclose(mFile);
 }

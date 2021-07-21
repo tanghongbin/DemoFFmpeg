@@ -21,8 +21,10 @@ private:
     int count;
     bool isStart;
     std::mutex mMutex;
+    FILE * mFile;
 public:
     NdkMediaMuxerHelper(){
+        mFile = 0;
         mMuxer = 0;
         count = 0;
         isStart = false;

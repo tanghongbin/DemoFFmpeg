@@ -107,7 +107,7 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
         }
         AMediaCodecBufferInfo bufferInfo;
         int outIndex = AMediaCodec_dequeueOutputBuffer(codecVideo->mMediaCodec,&bufferInfo,1000);
-        LOGCATE("log current output index:%d  time:%lld",outIndex,bufferInfo.presentationTimeUs);
+//        LOGCATE("log current output index:%d  time:%lld",outIndex,bufferInfo.presentationTimeUs);
         if (outIndex >= 0) {
             size_t outputBufferSize;
             auto outputData = AMediaCodec_getOutputBuffer(codecVideo->mMediaCodec,outIndex,&outputBufferSize);
