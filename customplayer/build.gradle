@@ -85,5 +85,7 @@ dependencies {
     implementation project(path: ':avutils')
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'io.socket:socket.io-client:1.0.0'
+    implementation 'org.webrtc:google-webrtc:1.0.+'
 
 }

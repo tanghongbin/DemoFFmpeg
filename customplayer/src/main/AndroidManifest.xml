@@ -21,6 +21,11 @@
             android:configChanges="screenSize|orientation"
             android:theme="@style/AppThemeNoActionBar"></activity>
         <activity
+            android:name=".activity.ffmpeg.WebrtcActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar"></activity>
+
+        <activity
             android:name=".activity.hw.PlayerDecodeHwActivity"
             android:configChanges="screenSize|orientation"
             android:theme="@style/AppThemeNoActionBar"></activity>
