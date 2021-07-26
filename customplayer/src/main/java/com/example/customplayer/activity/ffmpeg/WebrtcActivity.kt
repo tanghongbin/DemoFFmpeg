@@ -16,13 +16,14 @@ import java.util.*
  */
 class WebrtcActivity : AppCompatActivity(), RtcConnectHelper.RtcConnectListener {
 
+    private val USER_ID = "thb001${Build.DEVICE}"
     private val mConnectHelper by  lazy { RtcConnectHelper() }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webrtc)
         mConnectHelper.setConnectListener(this)
-        mConnectHelper.joinRoom(getString(R.string.server2),UUID.randomUUID().toString(),"thb007")
+        mConnectHelper.joinRoom(getString(R.string.server2),USER_ID,"thb007")
     }
 
 

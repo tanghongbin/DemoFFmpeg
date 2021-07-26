@@ -56,7 +56,7 @@ class RtcConnectHelper {
             log("error:${it}")
         }
         mSocket!!.on(Socket.EVENT_CONNECT) {
-            sendMessage(JOIN_ROOM,JSONObject().append("userId",mUserId).append("roomName",mRoomName))
+            sendMessage(JOIN_ROOM,JSONObject().appendValue("userId",mUserId).appendValue("roomName",mRoomName))
             mListener?.onConnected()
         }
         mSocket!!.on(Socket.EVENT_CONNECTING) {
@@ -87,7 +87,7 @@ class RtcConnectHelper {
 
     fun sendMessage(eventName:String,jsonObject: JSONObject){
         if (mSocket == null) return
-        mSocket!!.emit(eventName,jsonObject)
+        mSocket!!.emit(eventName,jsonObject.toString())
     }
 
     /**
@@ -95,7 +95,7 @@ class RtcConnectHelper {
      */
     fun leftRoom(){
         if (mSocket == null) return
-        mSocket!!.emit(LEAVE_ROOM,JSONObject().append("userId",mUserId).append("roomName",mRoomName))
+        sendMessage(LEAVE_ROOM,JSONObject().appendValue("userId",mUserId).appendValue("roomName",mRoomName))
         mSocket!!.close()
         mSocket = null
     }
@@ -104,7 +104,7 @@ class RtcConnectHelper {
 
 }
 
-fun JSONObject.append(key:String,value:Any):JSONObject{
+fun JSONObject.appendValue(key:String,value:String):JSONObject{
     put(key,value)
     return this
 }
