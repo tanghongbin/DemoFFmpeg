@@ -1,3 +1,5 @@
 <resources>
 
+    <string name="server2">http://182.61.44.214:8080/socket.io/</string>
+
 </resources>

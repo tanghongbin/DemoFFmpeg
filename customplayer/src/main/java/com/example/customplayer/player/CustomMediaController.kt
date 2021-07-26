@@ -141,12 +141,4 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
 
     external fun native_audioData(byteArray: ByteArray,length:Int)
 
-    /****
-     *  ===================  webrtc  即使通信部分  =========================
-     */
-    external fun native_joinRoom(url:String,userId:String,roomName:String)
-
-    external fun native_leaveRoom()
-
-    external fun sendMsg()
 }
