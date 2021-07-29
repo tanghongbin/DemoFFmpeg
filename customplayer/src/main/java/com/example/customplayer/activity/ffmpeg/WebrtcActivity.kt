@@ -28,6 +28,7 @@ PeerConnection.Observer{
     private lateinit var mPeerConnectionFactory: PeerConnectionFactory
     private lateinit var mRootEglBase: EglBase
     private val USER_ID = "thb001${Build.DEVICE}"
+    private val mConnectionMap = HashMap<String,PeerConnection>()
     private var mPeerConnection: PeerConnection? = null
 
     private val mConnectHelper by  lazy { RtcConnectHelper() }
