@@ -19,6 +19,13 @@
         android:layout_gravity="right"
         android:layout_height="260dp"/>
 
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/mRemoteSurfaceView2"
+        android:layout_width="147dp"
+        android:layout_margin="20dp"
+        android:layout_gravity="start"
+        android:layout_height="260dp"/>
+
 
     <ImageView
         android:layout_marginBottom="30dp"

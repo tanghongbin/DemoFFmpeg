@@ -16,7 +16,7 @@
 #include "mediaprocess/AbsCustomMediaPlayer.h"
 #include "mediaprocess/FFmpegMediaPlayer.h"
 #include "play_header/utils/CustomSafeBlockQueue.h"
-
+#include <MathFunctions.h>
 
 #define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomMediaController"
 
@@ -88,7 +88,8 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
     FFmpegMediaPlayer *mediaPlayer = new FFmpegMediaPlayer;
     setJniPointToJava(env,"mNativePlayer","J", mediaPlayer);
     mediaPlayer->Init();
-    LOGCATE("has enter env:%p instance:%p",env,instance);
+    LOGCATE("has enter env:%p instance:%p  测试数字:%lf   文字:%s  nubmer:%d"
+            ,env,instance,mysqrt(592.32),getInfo(),computeFour(100));
 }
 
 

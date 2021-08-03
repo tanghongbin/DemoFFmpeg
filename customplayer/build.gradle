@@ -43,10 +43,17 @@ android {
             pickFirst '**/libassimp.so'
             pickFirst '**/libopencv_java3.so'
             pickFirst '**/libcurl.so'
+            pickFirst '**/libMathFunctions.so'
         }
 
         ndk {
             abiFilters "armeabi-v7a"
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared"
+            }
         }
     }
 

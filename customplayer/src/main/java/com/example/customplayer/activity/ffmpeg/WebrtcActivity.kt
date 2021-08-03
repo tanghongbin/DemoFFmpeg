@@ -28,8 +28,8 @@ PeerConnection.Observer{
     private lateinit var mPeerConnectionFactory: PeerConnectionFactory
     private lateinit var mRootEglBase: EglBase
     private val USER_ID = "thb001${Build.DEVICE}"
-    private val mConnectionMap = HashMap<String,PeerConnection>()
-    private var mPeerConnection: PeerConnection? = null
+    private val mConnectionMap = HashMap<String?,PeerConnection?>()
+    private var mRemoteCount = 0
 
     private val mConnectHelper by  lazy { RtcConnectHelper() }
 
@@ -52,24 +52,28 @@ PeerConnection.Observer{
     }
 
     private fun startCall() {
-        if (mPeerConnection == null){
-            mPeerConnection = createConnection()
-        }
-        val constraints = MediaConstraints()
-        constraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio","true"))
-        constraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo","true"))
-        constraints.mandatory.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement","true"))
-        mPeerConnection?.createOffer(object : SimpleSdpObserver() {
-            override fun onCreateSuccess(sessionDescription: SessionDescription) {
-                log("createOffer onCreateSuccess")
-                mPeerConnection?.setLocalDescription(SimpleSdpObserver(),sessionDescription)
-                val json = JSONObject().appendValue("userId",mConnectHelper.getUserId())
-                        .appendValue("msgType",RtcConnectHelper.MESSAGE_TYPE_OFFER)
-                        .appendValue("sdp",sessionDescription.description)
-                mConnectHelper.sendBrocastMessage(json)
+        forEachAllUser {userId ->
+            var mPeerConnection = mConnectionMap[userId]
+            if (mPeerConnection == null){
+                mPeerConnection = createConnection()
             }
-        },constraints)
-        log("startCall")
+            val constraints = MediaConstraints()
+            constraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio","true"))
+            constraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo","true"))
+            constraints.mandatory.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement","true"))
+            mPeerConnection?.createOffer(object : SimpleSdpObserver() {
+                override fun onCreateSuccess(sessionDescription: SessionDescription) {
+                    log("createOffer onCreateSuccess")
+                    mPeerConnection.setLocalDescription(SimpleSdpObserver(),sessionDescription)
+                    val json = JSONObject().appendValue("userId",mConnectHelper.getUserId())
+                            .appendValue("msgType",RtcConnectHelper.MESSAGE_TYPE_OFFER)
+                            .appendValue("sdp",sessionDescription.description)
+                    mConnectHelper.sendBrocastMessage(json)
+                }
+            },constraints)
+            mConnectionMap[userId] = mPeerConnection
+            log("startCall")
+        }
     }
 
     private fun createConnection(): PeerConnection? {
@@ -103,6 +107,7 @@ PeerConnection.Observer{
         doEndCall()
         mLocalSurfaceView.release()
         mRemoteSurfaceView.release()
+        mRemoteSurfaceView2.release()
         mVideoCapturer!!.dispose()
         mSurfaceTextureHelper.dispose()
         PeerConnectionFactory.stopInternalTracingCapture()
@@ -125,12 +130,21 @@ PeerConnection.Observer{
     }
 
     private fun hanup() {
-        if (mPeerConnection == null) {
-            return
+        forEachAllUser {
+            val mPeerConnection = mConnectionMap[it]
+            if (mPeerConnection != null) {
+                mPeerConnection.close()
+                mConnectionMap.remove(it)
+            }
         }
-        mPeerConnection?.close()
-        mPeerConnection = null
+
 //        updateCallState(true)
+    }
+
+    fun forEachAllUser(block:(String?) -> Unit){
+        mConnectionMap.keys.forEach {
+            block(it)
+        }
     }
 
 
@@ -146,6 +160,12 @@ PeerConnection.Observer{
         mRemoteSurfaceView.setMirror(true)
         mRemoteSurfaceView.setEnableHardwareScaler(true /* enabled */)
         mRemoteSurfaceView.setZOrderMediaOverlay(true)
+
+        mRemoteSurfaceView2.init(mRootEglBase.eglBaseContext, null)
+        mRemoteSurfaceView2.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL)
+        mRemoteSurfaceView2.setMirror(true)
+        mRemoteSurfaceView2.setEnableHardwareScaler(true /* enabled */)
+        mRemoteSurfaceView2.setZOrderMediaOverlay(true)
 
         val videoSink = ProxyVideoSink()
         videoSink.setTarget(mLocalSurfaceView)
@@ -244,10 +264,18 @@ PeerConnection.Observer{
 
     override fun onRemoteUserJoin(userId: String) {
         log("hi , there is a new guy here :${userId}")
+        if (!mConnectionMap.containsKey(userId)){
+            mConnectionMap[userId] = null
+        }
     }
 
     override fun onRemoteUserLeft(userId: String) {
         log("shit,the guy gone:${userId}")
+        if (mConnectionMap.containsKey(userId) && mConnectionMap[userId] != null){
+            val connnection = mConnectionMap[userId]
+            connnection?.close()
+            mConnectionMap.remove(userId)
+        }
     }
 
     override fun onMessage(json: JSONObject) {
@@ -273,7 +301,7 @@ PeerConnection.Observer{
         runCatchException {
             val remoteCandidate = IceCandidate(json.getString("id"),json.getInt("label"),
                     json.getString("candidate"))
-            mPeerConnection?.addIceCandidate(remoteCandidate)
+            mConnectionMap[userId]?.addIceCandidate(remoteCandidate)
         }
     }
 
@@ -281,7 +309,7 @@ PeerConnection.Observer{
         log("onRemoteAnswerReceived userId:${userId}")
         runCatchException {
             val desc = json.getString("sdp")
-            mPeerConnection?.setRemoteDescription(SimpleSdpObserver(),SessionDescription(SessionDescription.Type.ANSWER,desc))
+            mConnectionMap[userId]?.setRemoteDescription(SimpleSdpObserver(),SessionDescription(SessionDescription.Type.ANSWER,desc))
         }
     }
 
@@ -291,23 +319,26 @@ PeerConnection.Observer{
     private fun onRemoteOfferReceived(userId: String?, json: JSONObject) {
         log("onRemoteAnswerReceived userId:${userId}")
         runCatchException {
+            var mPeerConnection = mConnectionMap[userId]
             if (mPeerConnection == null){
                 mPeerConnection = createConnection()
+                mConnectionMap[userId] = mPeerConnection
             }
             val desc = json.getString("sdp")
             mPeerConnection?.setRemoteDescription(SimpleSdpObserver(),SessionDescription(SessionDescription.Type.OFFER,desc))
-            doAnswerCall()
+            doAnswerCall(userId)
         }
     }
 
     /***
      * 答复
      */
-    private fun doAnswerCall() {
+    private fun doAnswerCall(userId: String?) {
         val constraints = MediaConstraints()
+        val mPeerConnection = mConnectionMap[userId]
         mPeerConnection?.createAnswer(object : SimpleSdpObserver(){
             override fun onCreateSuccess(sessionDescription: SessionDescription) {
-                mPeerConnection?.setLocalDescription(SimpleSdpObserver(),sessionDescription)
+                mPeerConnection.setLocalDescription(SimpleSdpObserver(),sessionDescription)
                 val json = JSONObject().appendValue("userId",mConnectHelper.getUserId())
                         .appendValue("msgType",RtcConnectHelper.MESSAGE_TYPE_ANSWER)
                         .appendValue("sdp",sessionDescription.description)
@@ -328,7 +359,9 @@ PeerConnection.Observer{
 
 
     override fun onIceCandidatesRemoved(iceCandidates: Array<out IceCandidate>?) {
-        mPeerConnection?.removeIceCandidates(iceCandidates)
+        mConnectionMap.values.forEach {connection ->
+            connection?.removeIceCandidates(iceCandidates)
+        }
     }
 
 
@@ -370,7 +403,12 @@ PeerConnection.Observer{
         if (track is VideoTrack){
             track.setEnabled(true)
             val sink = ProxyVideoSink()
-            sink.setTarget(mRemoteSurfaceView)
+            if (mRemoteCount == 0) {
+                sink.setTarget(mRemoteSurfaceView)
+            } else if (mRemoteCount == 1) {
+                sink.setTarget(mRemoteSurfaceView2)
+            }
+            mRemoteCount++
             track.addSink(sink)
         }
     }
