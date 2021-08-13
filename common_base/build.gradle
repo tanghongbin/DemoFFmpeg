@@ -1,4 +1,4 @@
-apply from: "$rootDir/module.gradle"
+apply from: "$rootDir/android-library.gradle"
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

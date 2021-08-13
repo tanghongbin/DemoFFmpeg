@@ -1,3 +1,4 @@
+include ':linphonedemo'
 include ':avutils'
 include ':customplayer'
 include ':ffmpegsamples'
