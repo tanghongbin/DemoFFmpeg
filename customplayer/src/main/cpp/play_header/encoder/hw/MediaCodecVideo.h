@@ -36,6 +36,7 @@ public:
         mMediaCodec = 0;
         mMediaFormat = 0;
         encodeThread = 0;
+        videoQueue.setMax(3);
     }
     void setOutputDataListener(OutputFmtChangedListener changedListener,OutputDataListener dataListener);
     void startEncode();
