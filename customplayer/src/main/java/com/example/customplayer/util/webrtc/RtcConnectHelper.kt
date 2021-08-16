@@ -12,6 +12,7 @@ class RtcConnectHelper {
     private var mRoomName = ""
     private var mListener:RtcConnectListener? = null
 
+
     companion object{
         const val REMOTE_USERJOIN = "user-joined"
         const val REMOTE_USERLEFT = "user-left"
