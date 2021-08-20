@@ -29,7 +29,7 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
     init {
         when(type){
             1 -> native_init_player()
-            2 -> native_init_muxer(2)
+            2 -> native_init_muxer(1)
         }
     }
     private var mNativePlayer:Long = 0L

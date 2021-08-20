@@ -12,7 +12,7 @@
 
 class VideoFboRender : public BaseVideoRender{
 private:
-    GLuint textures[TEXTURE_FBO_NUM],fboTextureId,testRgbaTextureId;
+    GLuint textures[TEXTURE_FBO_NUM],fboTextureId,testRgbaTextureId,lutTextureId;
     GLuint vboIds[4],fboId;
     GLuint vaoIds[2];
     GLuint pboIds[2];
@@ -22,7 +22,7 @@ private:
     std::condition_variable renderCondition;
     int count = 0;
     bool renderIsFinish = false;
-    int renderWidth,renderHeight;
+    int renderWidth,renderHeight,u_offset;
 
 
 public:
@@ -35,7 +35,8 @@ public:
      ~VideoFboRender();
 
     VideoFboRender(){
-        fboId = fboTextureId = 0;
+        fboId = fboTextureId = lutTextureId = 0;
+        u_offset = 0;
     }
 
     void drawNormalImage();
