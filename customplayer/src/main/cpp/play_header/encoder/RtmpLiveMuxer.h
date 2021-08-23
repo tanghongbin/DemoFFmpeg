@@ -9,6 +9,7 @@
 #include "../render/BaseRender.h"
 #include "AbsMediaMuxer.h"
 #include "../utils/OpenGLImageDef.h"
+#include "EncoderAACAndx264.h"
 #include <thread>
 
 /***
@@ -22,6 +23,7 @@ private:
     char mTargetFilePath[128];
     BaseVideoRender* videoRender;
     int audioTrackIndex,videoTrackIndex;
+    EncoderAACAndx264* mAvEncoder;
     static void receivePixelData(int type,NativeOpenGLImage *pVoid);
     RtmpLiveMuxer(){
         audioTrackIndex = videoTrackIndex = 0;
@@ -29,6 +31,7 @@ private:
         videoRender = 0;
         isDestroyed = false;
         cameraWidth = cameraHeight = 0;
+        mAvEncoder = 0;
     }
 public:
     bool isDestroyed;

@@ -24,6 +24,8 @@ int RtmpLiveMuxer::init(const char * fileName){
     strcpy(mTargetFilePath,fileName);
     LOGCATE("打印地址:%s",fileName);
     access(fileName,0);
+    mAvEncoder = new EncoderAACAndx264;
+    mAvEncoder->init();
     return 0;
 }
 
@@ -83,15 +85,17 @@ void RtmpLiveMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcDat
 //        LOGCATE("log width:%d height:%d imagewidth:%d imageheight:%d",localWidth,localHeight,openGlImage.width,openGlImage.height);
     } else if (type == 3) {
         // 3-rgba放进队列
-        LOGCATE("log has received data:%d",type);
+//        LOGCATE("log has received data:%d",type);
+        NativeOpenGLImageUtil::FreeNativeImage(srcData);
+        delete srcData;
     } else if (type == 4) {
         // glreadypixel 后转换成720分辨率的420p的画面,可以直接使用
-        LOGCATE("log has received data:%d",type);
+//        LOGCATE("log has received data:%d",type);
+        NativeOpenGLImageUtil::FreeNativeImage(srcData);
+        delete srcData;
     } else {
         LOGCATE("OnCameraFrameDataValible not support type:%d",type);
     }
-
-
 }
 
 void RtmpLiveMuxer::OnAudioData(uint8_t *audioData, jint length) {
@@ -127,6 +131,10 @@ void RtmpLiveMuxer::Destroy(){
         videoRender->Destroy();
         delete videoRender;
         videoRender = 0;
+    }
+    if (mAvEncoder){
+        mAvEncoder->destroy();
+        delete mAvEncoder;
     }
     delete instance;
     instance = 0;

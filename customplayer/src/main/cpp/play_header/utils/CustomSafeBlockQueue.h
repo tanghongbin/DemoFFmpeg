@@ -25,8 +25,15 @@ private:
     std::queue<T> mQueue;
     std::mutex tex;
     std::condition_variable conditionVariable;
+    int maxSize;
 
 public:
+
+    void setMax(int max){
+        maxSize = max;
+        LOGCATE("log max Size:%d %d",max,maxSize);
+    }
+
 
     CustomSafeBlockQueue<T>() {
 
@@ -36,11 +43,17 @@ public:
         // todo 自己清除
     }
 
-    void pushLast(T node) {
+    T pushLast(T node) {
         // 放入第一个
+        T last;
         std::unique_lock<std::mutex> lockGuard(tex);
         mQueue.push(node);
+        if (mQueue.size() > maxSize){
+            last = mQueue.front();
+            mQueue.pop();
+        }
         conditionVariable.notify_one();
+        return last;
     }
 
     T popFirst() {

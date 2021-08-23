@@ -66,11 +66,15 @@ void MediaCodecVideo::destroy() {
         AMediaCodec_stop(mMediaCodec);
         AMediaCodec_delete(mMediaCodec);
     }
-    for (int i = 0; i < videoQueue.size(); ++i) {
-        auto bean = videoQueue.popFirst();
-        NativeOpenGLImageUtil::FreeNativeImage(bean);
-        delete bean;
-    }
+
+    do {
+        NativeOpenGLImage *videoItem = videoQueue.popFirst();
+        if (videoItem) {
+            NativeOpenGLImageUtil::FreeNativeImage(videoItem);
+            delete videoItem;
+        }
+    } while (videoQueue.size() > 0);
+
     delete encodeThread;
 }
 

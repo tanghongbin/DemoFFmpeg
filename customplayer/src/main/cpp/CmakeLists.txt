@@ -5,11 +5,11 @@ project(testFFmpeg VERSION 1.0)
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libName native-mediacontroller)
+set(RTMP ${CMAKE_SOURCE_DIR}/librtmp)
 
 include_directories(
         include
-        play_header
-        rtmp)
+        play_header)
 
 #指定 rtmp 静态库文件目录
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${RTMP}/libs/${CMAKE_ANDROID_ARCH_ABI}")
@@ -22,8 +22,7 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/play/decoder/*.cpp
         ${CMAKE_SOURCE_DIR}/play/encoder/*.cpp
         ${CMAKE_SOURCE_DIR}/play/encoder/hw/*.cpp
-        ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp
-        ${CMAKE_SOURCE_DIR}/rtmp/*.cpp)
+        ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp)
 
 
 #添加静态库
@@ -95,7 +94,7 @@ set(third-party-libs
         freetype
         fribidi
         ssl
-#        rtmp
+        rtmp
         assimp
         opencv_java3
         curl

@@ -6,10 +6,7 @@ import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.common_base.utils.requestCustomPermissions
 import com.example.customplayer.R
-import com.example.customplayer.activity.ffmpeg.FFmpegGLESMuxerActivity
-import com.example.customplayer.activity.ffmpeg.FFmpegMuxerActivity
-import com.example.customplayer.activity.ffmpeg.PlayerDecodeFFmpegActivity
-import com.example.customplayer.activity.ffmpeg.WebrtcActivity
+import com.example.customplayer.activity.ffmpeg.*
 import com.example.customplayer.adapter.PlayerListAdapter
 import com.example.customplayer.module.PlayerModule
 import kotlinx.android.synthetic.main.activity_custom_player_list.*
@@ -44,6 +41,9 @@ class CustomPlayerListActivity : AppCompatActivity() {
         }
         startWebrtc.setOnClickListener {
             startActivity(Intent(this,WebrtcActivity::class.java))
+        }
+        startLive.setOnClickListener {
+            startActivity(Intent(this,RtmpGLESActivity::class.java))
         }
     }
 }

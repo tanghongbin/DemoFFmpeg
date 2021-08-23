@@ -64,10 +64,11 @@ void MediaCodecAudio::destroy() {
         AMediaCodec_stop(mMediaCodec);
         AMediaCodec_delete(mMediaCodec);
     }
-    for (int i = 0; i < audioQueue.size(); ++i) {
-        auto bean = audioQueue.popFirst();
-        bean->recycle();
-    }
+    do {
+        AudioRecordItemInfo *audioItem = audioQueue.popFirst();
+        if (audioItem) audioItem->recycle();
+    } while (audioQueue.size() > 0);
+
     delete encodeThread;
 }
 
