@@ -17,6 +17,7 @@
 #include "mediaprocess/FFmpegMediaPlayer.h"
 #include "play_header/utils/CustomSafeBlockQueue.h"
 #include <MathFunctions.h>
+#include <encoder/RtmpLiveMuxer.h>
 
 #define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomMediaController"
 
@@ -97,7 +98,7 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
  *
  * @param env
  * @param instance
- * @param type  1-ffmpeg 编码，2- 硬编码
+ * @param type  1-ffmpeg 编码，2- 硬编码 , 3 - 直播推流
  */
 JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type) {
     JavaVmManager::setInstance(env,instance);
@@ -105,8 +106,10 @@ JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type
     AbsMediaMuxer *mediaMuxer;
     if (type == 1) {
         mediaMuxer = FFmpegMediaMuxer::getInstace();
-    } else {
+    } else if (type == 2) {
         mediaMuxer = HwMediaMuxer::getInstace();
+    } else {
+        mediaMuxer = RtmpLiveMuxer::getInstance();
     }
     setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
     LOGCATE("has enter env:%p instance:%p",env,instance);
@@ -147,14 +150,10 @@ JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring u
  * ============================   编码视频，音频，合并部分  ==========================
  * *****/
 
-JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
+JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance,jstring path) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer == NULL) return;
-
-    char resultPath[128];
-    const char * folder = "/storage/emulated/0/ffmpegtest/encodeVideos";
-    sprintf(resultPath,"%s/%lld%s",folder,GetSysCurrentTime(),"-randow.mp4");
-    createFolderIfNotExist(folder);
+    const char* resultPath = getCharStrFromJstring(env,path);
     mediaMuxer->init(resultPath);
 }
 
@@ -218,7 +217,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
         {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
 
-        {"native_startEncode",               "()V",            (void *) (native_startEncode)},
+        {"native_startEncode",               "(Ljava/lang/String;)V",            (void *) (native_startEncode)},
         {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
         {"native_audioData",               "([BI)V",            (void *) (native_audioData)},
 };

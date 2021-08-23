@@ -7,12 +7,13 @@ import android.os.Message
 import com.example.common_base.DemoApplication
 import com.example.common_base.utils.log
 import com.example.customplayer.interfaces.*
+import com.example.customplayer.util.AV_PREFIX
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 @Suppress("KotlinJniMissingFunction", "FunctionName")
 // 1-播放器，2-muxer合成器
-class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
+class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView.Renderer {
     companion object{
         // communicate code
         private const val MSG_PREPARED = 1
@@ -27,9 +28,10 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
         }
     }
     init {
-        when(type){
+        when(rootType){
             1 -> native_init_player()
-            2 -> native_init_muxer(1)
+            // 1-ffmpeg 编码,2-硬编码,3-直播推流
+            2 -> native_init_muxer(muxerType)
         }
     }
     private var mNativePlayer:Long = 0L
@@ -137,7 +139,7 @@ class CustomMediaController(type: Int = 1) : GLSurfaceView.Renderer {
     external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 
     // 1-开始录音
-    external fun native_startEncode()
+    external fun native_startEncode(path:String = "${AV_PREFIX}${System.currentTimeMillis()}-randow.mp4")
 
     external fun native_audioData(byteArray: ByteArray,length:Int)
 

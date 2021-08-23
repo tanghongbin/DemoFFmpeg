@@ -15,8 +15,8 @@ void  NdkMediaMuxerHelper::init(const char * path){
 }
 
 void NdkMediaMuxerHelper::writeSampleData(int trackIndex,uint8_t* data,AMediaCodecBufferInfo* info){
+    LOGCATE("开始写入sample数据:%d",trackIndex);
     std::lock_guard<std::mutex> lockGuard(mMutex);
-    if (!isStart) return;
     AMediaMuxer_writeSampleData(mMuxer,trackIndex,data,info);
 }
 
@@ -27,11 +27,12 @@ int NdkMediaMuxerHelper::addTrack(AMediaFormat* mediaFormat){
 }
 
 void NdkMediaMuxerHelper::start(){
+    LOGCATE("硬编码准备开始录制了");
     std::lock_guard<std::mutex> lockGuard(mMutex);
     if (isStart || count < 2) return;
     AMediaMuxer_start(mMuxer);
     isStart = true;
-    LOGCATE("硬编码已经开始录制了");
+
 }
 
 void NdkMediaMuxerHelper::stop(){

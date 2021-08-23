@@ -4,7 +4,6 @@
 
 
 
-#include <encoder/HwMediaMuxer.h>
 #include <utils/utils.h>
 #include <utils/CustomGLUtils.h>
 #include <render/VideoRender.h>
@@ -13,65 +12,40 @@
 #include <libyuv/convert.h>
 #include <libyuv/rotate.h>
 #include <render/VideoFboRender.h>
+#include "../../play_header/encoder/RtmpLiveMuxer.h"
 
 
-HwMediaMuxer* HwMediaMuxer::instance = nullptr;
+RtmpLiveMuxer* RtmpLiveMuxer::instance = nullptr;
 
 /**************************************************************/
 /* media file output */
 
-int HwMediaMuxer::init(const char * fileName){
+int RtmpLiveMuxer::init(const char * fileName){
     strcpy(mTargetFilePath,fileName);
     LOGCATE("打印地址:%s",fileName);
     access(fileName,0);
-    mMuxerHelper = new NdkMediaMuxerHelper;
-    mMuxerHelper->init(mTargetFilePath);
-    mediaCodecA = new MediaCodecAudio;
-    mediaCodecA->startEncode();
-    mediaCodecA->setOutputDataListener(HwMediaMuxer::receiveCodecFmtChanged,HwMediaMuxer::receiveMediaCodecData);
-    mediaCodecV = new MediaCodecVideo;
-    mediaCodecV->startEncode();
-    mediaCodecV->setOutputDataListener(HwMediaMuxer::receiveCodecFmtChanged,HwMediaMuxer::receiveMediaCodecData);
     return 0;
 }
 
 
-void HwMediaMuxer::receivePixelData(int type,NativeOpenGLImage *pVoid){
-    HwMediaMuxer::getInstace()->OnCameraFrameDataValible(type, pVoid);
+void RtmpLiveMuxer::receivePixelData(int type,NativeOpenGLImage *pVoid){
+    RtmpLiveMuxer::getInstance()->OnCameraFrameDataValible(type, pVoid);
 }
 
-void HwMediaMuxer::receiveMediaCodecData(int type,AMediaCodecBufferInfo * bufferInfo, uint8_t* data){
-    if( type == 1) {
-        // 音频
-        getInstace()->mMuxerHelper->writeSampleData(getInstace() -> audioTrackIndex,data,bufferInfo);
-    } else {
-        // 视频
-        getInstace()->mMuxerHelper->writeSampleData(getInstace() -> videoTrackIndex,data,bufferInfo);
-    }
-}
 
-void HwMediaMuxer::receiveCodecFmtChanged(int type,AMediaFormat* mediaFormat){
-    if( type == 1) {
-        // 音频
-        getInstace() -> audioTrackIndex = getInstace()->mMuxerHelper->addTrack(mediaFormat);
-    } else {
-        // 视频
-        getInstace() -> videoTrackIndex = getInstace()->mMuxerHelper->addTrack(mediaFormat);
-    }
-    getInstace()->mMuxerHelper->start();
-}
-
-void HwMediaMuxer::OnSurfaceCreate() {
+void RtmpLiveMuxer::OnSurfaceCreate() {
     videoRender = new VideoFboRender;
-    videoRender->readPixelCall = HwMediaMuxer::receivePixelData;
+    videoRender->readPixelCall = RtmpLiveMuxer::receivePixelData;
     videoRender->Init();
 }
-void HwMediaMuxer::OnSurfaceChanged(int width,int height) {
+
+void RtmpLiveMuxer::OnSurfaceChanged(int width,int height) {
     videoRender->OnSurfaceChanged(width,height);
 }
-void HwMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData) {
+
+void RtmpLiveMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData) {
     // 4-glreadPixel 读出来的数据已经转换成720分辨率的420p的数据了,可以直接编码
-    std::unique_lock<std::mutex> uniqueLock(HwMediaMuxer::getInstace() -> runningMutex,std::defer_lock);
+    std::unique_lock<std::mutex> uniqueLock(RtmpLiveMuxer::getInstance() -> runningMutex,std::defer_lock);
     uniqueLock.lock();
     if (isDestroyed){
         uniqueLock.unlock();
@@ -109,20 +83,10 @@ void HwMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData
 //        LOGCATE("log width:%d height:%d imagewidth:%d imageheight:%d",localWidth,localHeight,openGlImage.width,openGlImage.height);
     } else if (type == 3) {
         // 3-rgba放进队列
-        if (mediaCodecV) {
-            mediaCodecV->putData(srcData);
-        } else {
-            NativeOpenGLImageUtil::FreeNativeImage(srcData);
-            delete srcData;
-        }
+        LOGCATE("log has received data:%d",type);
     } else if (type == 4) {
         // glreadypixel 后转换成720分辨率的420p的画面,可以直接使用
-        if (mediaCodecV) {
-            mediaCodecV->putData(srcData);
-        } else {
-            NativeOpenGLImageUtil::FreeNativeImage(srcData);
-            delete srcData;
-        }
+        LOGCATE("log has received data:%d",type);
     } else {
         LOGCATE("OnCameraFrameDataValible not support type:%d",type);
     }
@@ -130,8 +94,8 @@ void HwMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData
 
 }
 
-void HwMediaMuxer::OnAudioData(uint8_t *audioData, jint length) {
-    std::unique_lock<std::mutex> uniqueLock(HwMediaMuxer::getInstace() -> runningMutex,std::defer_lock);
+void RtmpLiveMuxer::OnAudioData(uint8_t *audioData, jint length) {
+    std::unique_lock<std::mutex> uniqueLock(RtmpLiveMuxer::getInstance() -> runningMutex,std::defer_lock);
     uniqueLock.lock();
     if (isDestroyed){
         uniqueLock.unlock();
@@ -141,16 +105,15 @@ void HwMediaMuxer::OnAudioData(uint8_t *audioData, jint length) {
 
     auto * data = new uint8_t [length];
     memcpy(data,audioData,length);
-    if (getInstace()->mediaCodecA){
-        getInstace()->mediaCodecA->putData(data,length);
-    }
+
+    // 处理数据
 }
 
-void HwMediaMuxer::OnDrawFrame(){
+void RtmpLiveMuxer::OnDrawFrame(){
     if (videoRender) videoRender->DrawFrame();
 }
 
-void HwMediaMuxer::Destroy(){
+void RtmpLiveMuxer::Destroy(){
     // 清空所有缓存音频
     std::unique_lock<std::mutex> uniqueLock(runningMutex,std::defer_lock);
     uniqueLock.lock();
@@ -165,13 +128,6 @@ void HwMediaMuxer::Destroy(){
         delete videoRender;
         videoRender = 0;
     }
-    mediaCodecA->destroy();
-    delete mediaCodecA;
-    mediaCodecV->destroy();
-    delete mediaCodecV;
-    mMuxerHelper->stop();
-    mMuxerHelper->destroy();
-    delete mMuxerHelper;
     delete instance;
     instance = 0;
 }

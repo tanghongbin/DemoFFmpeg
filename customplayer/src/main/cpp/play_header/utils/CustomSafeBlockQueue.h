@@ -94,7 +94,7 @@ public:
         // 放入第一个
         std::unique_lock<std::mutex> lockGuard(tex);
         mQueue.push(node);
-        if (mQueue.size() >= maxSize){
+        if (mQueue.size() > maxSize){
             last = mQueue.front();
             mQueue.pop();
         }

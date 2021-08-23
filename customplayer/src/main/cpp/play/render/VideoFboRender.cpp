@@ -182,21 +182,19 @@ void VideoFboRender::DrawFrame() {
 }
 
 void VideoFboRender::readImagePixel() {
-    auto * rgbaData = new uint8_t [VIDEO_W * VIDEO_H * 4];
+    auto * openGlImage = new NativeOpenGLImage;
+    openGlImage->width = VIDEO_W;
+    openGlImage->height = VIDEO_H;
+    openGlImage->format = IMAGE_FORMAT_RGBA;
+    NativeOpenGLImageUtil::AllocNativeImage(openGlImage);
     int64_t startTime =GetSysCurrentTime();
-    glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
+    glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, openGlImage->ppPlane[0]);
 //    LOGCATE("打印读取时间：%lld",GetSysCurrentTime() - startTime);
 //    glBindTexture(GL_TEXTURE_2D,testRgbaTextureId);
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIDEO_W, VIDEO_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
 //    glBindTexture(GL_TEXTURE_2D,0);
 //    delete [] rgbaData;
     // 测试读取显示
-    auto * openGlImage = new NativeOpenGLImage;
-    openGlImage->width = VIDEO_W;
-    openGlImage->height = VIDEO_H;
-    openGlImage->format = IMAGE_FORMAT_RGBA;
-    openGlImage->pLineSize[0] = VIDEO_W * 4;
-    openGlImage->ppPlane[0] = rgbaData;
     readPixelCall(3,openGlImage);
 }
 
