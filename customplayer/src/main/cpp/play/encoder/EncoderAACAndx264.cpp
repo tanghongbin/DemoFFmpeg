@@ -59,6 +59,7 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
         int nNal = -1;
         x264_nal_t * nal = nullptr;
 
+
         if (!x264_encoder_encode(encodeVHandle,&nal,&nNal,pic_in,pic_out)){
             NativeOpenGLImageUtil::FreeNativeImage(videoItem);
             delete videoItem;
