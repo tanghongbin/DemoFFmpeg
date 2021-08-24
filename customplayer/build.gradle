@@ -38,7 +38,7 @@ android {
             pickFirst '**/libswresample.so'
 
             pickFirst '**/libswscale.so'
-            pickFirst '**/libx264.so'
+            pickFirst '**/libx264.a'
             pickFirst '**/libyuv.so'
             pickFirst '**/libassimp.so'
             pickFirst '**/libopencv_java3.so'

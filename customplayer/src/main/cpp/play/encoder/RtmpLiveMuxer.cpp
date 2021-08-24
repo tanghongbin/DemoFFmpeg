@@ -84,8 +84,17 @@ void RtmpLiveMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcDat
         delete [] i420dstData;
 //        LOGCATE("log width:%d height:%d imagewidth:%d imageheight:%d",localWidth,localHeight,openGlImage.width,openGlImage.height);
     } else if (type == 3) {
-        // 3-rgba放进队列
+        // 3-rgba放进队列 , 这里是x264 编码，要转换成i420数据
 //        LOGCATE("log has received data:%d",type);
+        auto* encodeVideoData = new NativeOpenGLImage;
+        encodeVideoData->format = IMAGE_FORMAT_I420;
+        encodeVideoData->width = VIDEO_W;
+        encodeVideoData->height = VIDEO_H;
+        NativeOpenGLImageUtil::AllocNativeImage(encodeVideoData);
+        int32_t computeTime = GetSysCurrentTime();
+        yuvRgbaToI420(srcData->ppPlane[0],encodeVideoData->ppPlane[0],VIDEO_W,VIDEO_H);
+        LOGCATE("rgb2yuv42p cost time:%lld",GetSysCurrentTime() - computeTime);
+        mAvEncoder->putVideoData(encodeVideoData);
         NativeOpenGLImageUtil::FreeNativeImage(srcData);
         delete srcData;
     } else if (type == 4) {

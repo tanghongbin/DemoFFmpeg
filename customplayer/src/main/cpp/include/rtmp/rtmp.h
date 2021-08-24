@@ -29,9 +29,9 @@
 #define CRYPTO
 #endif
 
-#include <errno.h>
-#include <stdint.h>
-#include <stddef.h>
+#include "errno.h"
+#include "stdint.h"
+#include "stddef.h"
 
 #include "amf.h"
 

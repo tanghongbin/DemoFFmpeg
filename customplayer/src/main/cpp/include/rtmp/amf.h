@@ -25,7 +25,8 @@
  *  http://www.gnu.org/copyleft/lgpl.html
  */
 
-#include <stdint.h>
+#include "stdint.h"
+#include "cstdint"
 
 #ifndef TRUE
 #define TRUE	1

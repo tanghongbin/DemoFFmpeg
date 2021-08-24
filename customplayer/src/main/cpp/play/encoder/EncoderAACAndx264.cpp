@@ -2,12 +2,16 @@
 // Created by Admin on 2021/8/23.
 //
 
-#include <librtmp/include/rtmp.h>
+#include <rtmp/rtmp.h>
 #include "../../play_header/encoder/EncoderAACAndx264.h"
-#include "x264.h"
-#include "x264_config.h"
+
+#include "x264/x264_config.h"
+#include "x264/x264.h"
+
 
 void EncoderAACAndx264::init(){
+    rtmpPushHelper = new RtmpPushHelper;
+    rtmpPushHelper->initPush();
     mEncodeThreadV = new thread(EncoderAACAndx264::loopEncodeVideo, this);
 }
 
@@ -51,6 +55,10 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
     
     while (instance -> isRunning) {
         NativeOpenGLImage *videoItem = instance->mVideoQueue.popFirst();
+        if (videoItem == nullptr) {
+            usleep(1000 * 10);
+            continue;
+        }
         // 假设这里的数据是yuv420p
         std::unique_lock<mutex> videoMutex(instance -> mAvMutex,std::defer_lock);
         memcpy(pic_in->img.plane[0],videoItem->ppPlane[0],params.i_width * params.i_height);
@@ -59,10 +67,9 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
         int nNal = -1;
         x264_nal_t * nal = nullptr;
 
-
+        NativeOpenGLImageUtil::FreeNativeImage(videoItem);
+        delete videoItem;
         if (!x264_encoder_encode(encodeVHandle,&nal,&nNal,pic_in,pic_out)){
-            NativeOpenGLImageUtil::FreeNativeImage(videoItem);
-            delete videoItem;
             goto Encodex264End;
         }
         pic_in->i_pts++;
@@ -81,8 +88,10 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
                 memcpy(pps,nal[i].p_payload + 4,ppsLen);
                 // 推送sps,pps信息
                 instance -> addH264Header(sps,pps,spsLen,ppsLen);
+                free(sps);
+                free(pps);
             } else {
-                instance -> addH264Body(nal[i].p_payload,nal[i].i_payload);
+                instance -> addH264Body(nal[i].i_type,nal[i].p_payload,nal[i].i_payload);
             }
         }
     }
@@ -90,12 +99,14 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
     Encodex264End:
     if (pic_in) x264_picture_clean(pic_in);
     if (pic_out) x264_picture_clean(pic_out);
-    x264_param_cleanup(&params);
     if (encodeVHandle) x264_encoder_close(encodeVHandle);
     
 }
 
 void EncoderAACAndx264::destroy(){
+    isRunning = false;
+    mVideoQueue.pushLast(nullptr);
+    mAudioQueue.pushLast(nullptr);
     if (mEncodeThreadV){
         mEncodeThreadV->join();
         delete mEncodeThreadV;
@@ -113,16 +124,25 @@ void EncoderAACAndx264::destroy(){
             delete videoItem;
         }
     } while (mVideoQueue.size() > 0);
-}
-
-void EncoderAACAndx264::encodeData(int type,uint8_t* data){
-
-}
-
-void EncoderAACAndx264::addH264Header(uint8_t *string, uint8_t *string1, int i, int i1) {
+    if (rtmpPushHelper){
+        rtmpPushHelper->destroy();
+        delete rtmpPushHelper;
+    }
 
 }
 
-void EncoderAACAndx264::addH264Body(uint8_t *string, int i) {
+void EncoderAACAndx264::putAudioData(){
 
+}
+
+void EncoderAACAndx264::putVideoData(NativeOpenGLImage* data){
+    mVideoQueue.pushLast(data);
+}
+
+void EncoderAACAndx264::addH264Header(uint8_t *sps, uint8_t *pps, int spsLen, int ppsLen) {
+    rtmpPushHelper->putVideoSpsPps(sps,pps,spsLen,ppsLen);
+}
+
+void EncoderAACAndx264::addH264Body(int type,uint8_t *payload, int i_payload) {
+    rtmpPushHelper->putVideoBody(type,payload,i_payload);
 }
