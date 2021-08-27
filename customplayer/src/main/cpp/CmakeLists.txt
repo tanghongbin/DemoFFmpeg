@@ -68,12 +68,13 @@ add_library(libyuv SHARED IMPORTED )
 set_target_properties(libyuv PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libyuv.so)
 add_library(testMath SHARED IMPORTED )
 set_target_properties(testMath PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libMathFunctions.so)
+add_library(x264 SHARED IMPORTED )
+set_target_properties(x264 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libx264.so)
 
 #静态库
 add_library(rtmp STATIC IMPORTED )
 set_target_properties(rtmp PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/librtmp.a)
-add_library(x264 STATIC IMPORTED )
-set_target_properties(x264 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libx264.a)
+
 
 #socket io
 
@@ -103,13 +104,6 @@ set(third-party-libs
         opencv_java3
         curl
         testMath)
-
-
-
-set(third-party-libs-simple
-        x264
-        libyuv
-        rtmp)
 
 find_library(log-lib log )
 
