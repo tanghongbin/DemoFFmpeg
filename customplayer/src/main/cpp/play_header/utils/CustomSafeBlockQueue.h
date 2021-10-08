@@ -26,6 +26,8 @@ private:
     std::mutex tex;
     std::condition_variable conditionVariable;
     int maxSize;
+    int inCount,outCount;
+
 
 public:
 
@@ -36,11 +38,13 @@ public:
 
 
     CustomSafeBlockQueue<T>() {
-
+        inCount = outCount = 0;
+        maxSize = INT_MAX;
     }
 
     ~CustomSafeBlockQueue<T>() {
         // todo 自己清除
+        LOGCATE("total enter count:%d  outcount:%d",inCount,outCount);
     }
 
     T pushLast(T node) {
@@ -52,7 +56,8 @@ public:
             last = mQueue.front();
             mQueue.pop();
         }
-        conditionVariable.notify_one();
+        inCount++;
+        conditionVariable.notify_all();
         return last;
     }
 
@@ -61,6 +66,7 @@ public:
         if (mQueue.size() == 0) {
             conditionVariable.wait(uniqueLock);
         }
+        outCount++;
         T bean = mQueue.front();
         mQueue.pop();
         return bean;

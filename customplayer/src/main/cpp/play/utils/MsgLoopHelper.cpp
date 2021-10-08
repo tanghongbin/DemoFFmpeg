@@ -11,6 +11,7 @@ MsgLoopHelper* MsgLoopHelper::instance = nullptr;
 void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
     LOGCATE("loop has enter %p",player);
     for (;;) {
+
         if (!player->isLoop) break;
         Message*  message = player->safeQueue.popFirst();
         if (message == nullptr) continue;

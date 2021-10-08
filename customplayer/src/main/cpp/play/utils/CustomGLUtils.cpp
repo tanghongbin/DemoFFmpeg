@@ -230,6 +230,12 @@ void NvToYUV420p(const uint8_t *image_src, uint8_t *image_dst, int image_width, 
     }
 }
 
+void checkNegativeError(int ret,const char* error){
+    if (ret < 0) {
+        LOGCATE("retCode:%d errorStr:%s",ret,error);
+    }
+}
+
 bool checkNegativeReturn(int ret, const char *string) {
     if (ret < 0) {
         LOGCATE("------------:retCode:%d  msg:%s  ffmpegErrorStr:%s", ret, string, av_err2str(ret));

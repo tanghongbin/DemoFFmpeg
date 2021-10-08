@@ -23,20 +23,30 @@ private:
     thread* rtmpThread;
     static void loopRtmpPush(RtmpPushHelper* pushHelper);
     CustomSafeBlockQueue<RTMPPacket*> packetQueue;
+    int64_t startTime;
+    RTMP * mRtmp;
+
 
 public:
+
     RtmpPushHelper(){
+        startTime = 0L;
         rtmpThread = 0;
         isPushing = true;
+        mRtmp = 0;
     }
-    ~RtmpPushHelper(){
 
+    ~RtmpPushHelper(){
     }
     void initPush();
     void putAudioData();
     void putVideoSpsPps(uint8_t* sps,uint8_t* pps,int spslen,int ppslen);
     void putVideoBody(int type,uint8_t* payload,int i_payload);
     void destroy();
+
+    void initTime();
+
+    static void log_rtmp_infos(int level, const char *fmt, va_list args);
 };
 
 

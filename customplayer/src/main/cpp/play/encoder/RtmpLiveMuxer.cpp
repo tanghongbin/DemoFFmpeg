@@ -20,12 +20,24 @@ RtmpLiveMuxer* RtmpLiveMuxer::instance = nullptr;
 /**************************************************************/
 /* media file output */
 
-int RtmpLiveMuxer::init(const char * fileName){
+RtmpLiveMuxer::RtmpLiveMuxer(){
+    audioTrackIndex = videoTrackIndex = 0;
+    thread = 0;
+    videoRender = 0;
+    isDestroyed = false;
+    cameraWidth = cameraHeight = 0;
+    mAvEncoder = 0;
+    isStartEncode = false;
+    const char * fileName = "rtmp://182.61.44.214:1935/live/windowsPush";
     strcpy(mTargetFilePath,fileName);
     LOGCATE("打印地址:%s",fileName);
     access(fileName,0);
     mAvEncoder = new EncoderAACAndx264;
     mAvEncoder->init();
+}
+
+int RtmpLiveMuxer::init(const char * fileName){
+    isStartEncode = true;
     return 0;
 }
 
@@ -86,15 +98,7 @@ void RtmpLiveMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcDat
     } else if (type == 3) {
         // 3-rgba放进队列 , 这里是x264 编码，要转换成i420数据
 //        LOGCATE("log has received data:%d",type);
-        auto* encodeVideoData = new NativeOpenGLImage;
-        encodeVideoData->format = IMAGE_FORMAT_I420;
-        encodeVideoData->width = VIDEO_W;
-        encodeVideoData->height = VIDEO_H;
-        NativeOpenGLImageUtil::AllocNativeImage(encodeVideoData);
-        int32_t computeTime = GetSysCurrentTime();
-        yuvRgbaToI420(srcData->ppPlane[0],encodeVideoData->ppPlane[0],VIDEO_W,VIDEO_H);
-        LOGCATE("rgb2yuv42p cost time:%lld",GetSysCurrentTime() - computeTime);
-        mAvEncoder->putVideoData(encodeVideoData);
+        formatConvert(srcData);
         NativeOpenGLImageUtil::FreeNativeImage(srcData);
         delete srcData;
     } else if (type == 4) {
@@ -105,6 +109,19 @@ void RtmpLiveMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcDat
     } else {
         LOGCATE("OnCameraFrameDataValible not support type:%d",type);
     }
+}
+
+void RtmpLiveMuxer::formatConvert(const NativeOpenGLImage *srcData) {
+    if (!isStartEncode) return;
+    auto* encodeVideoData = new NativeOpenGLImage;
+    encodeVideoData->format = IMAGE_FORMAT_I420;
+    encodeVideoData->width = VIDEO_W;
+    encodeVideoData->height = VIDEO_H;
+    NativeOpenGLImageUtil::AllocNativeImage(encodeVideoData);
+    int64_t computeTime = GetSysCurrentTime();
+    yuvRgbaToI420(srcData->ppPlane[0],encodeVideoData->ppPlane[0],VIDEO_W,VIDEO_H);
+//    LOGCATE("rgb2yuv42p cost time:%lld", (GetSysCurrentTime() - computeTime));
+    mAvEncoder->putVideoData(encodeVideoData);
 }
 
 void RtmpLiveMuxer::OnAudioData(uint8_t *audioData, jint length) {
@@ -118,7 +135,7 @@ void RtmpLiveMuxer::OnAudioData(uint8_t *audioData, jint length) {
 
     auto * data = new uint8_t [length];
     memcpy(data,audioData,length);
-
+    mAvEncoder->putAudioData(data, length);
     // 处理数据
 }
 

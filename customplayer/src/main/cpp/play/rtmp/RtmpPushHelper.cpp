@@ -6,15 +6,19 @@
 #include <rtmp/rtmp.h>
 #include <rtmp/http.h>
 #include <rtmp/amf.h>
+#include <rtmp/log.h>
 #include <utils/CustomGLUtils.h>
 #include <x264/x264.h>
 
-#define RTMPURL "rtmp://182.61.44.214:1935/live/windowsPush"
+#define RTMPURL "rtmp://1.14.99.52:1935/live/androidPush"
+
 
 void RtmpPushHelper::initPush(){
     rtmpThread = new thread(RtmpPushHelper::loopRtmpPush, this);
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 void RtmpPushHelper::putVideoSpsPps(uint8_t* sps,uint8_t* pps,int spslen,int ppslen) {
     int bodySize = 13 + spslen + 3 + ppslen;
     auto * packet = new RTMPPacket ;
@@ -48,18 +52,27 @@ void RtmpPushHelper::putVideoSpsPps(uint8_t* sps,uint8_t* pps,int spslen,int pps
     packet->m_body[i++] = (ppslen >> 8) & 0xff;
     packet->m_body[i++] = ppslen & 0xff;
     memcpy(&packet->m_body[i],pps,ppslen);
+    LOGCATE("打印spsLen:%d  ppsLen:%d",spslen,ppslen);
 
     // video
-    packet->m_packetType == RTMP_PACKET_TYPE_VIDEO;
+    packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = bodySize;
-    packet->m_nChannel = 10;
+    packet->m_nChannel = 0x10;
     // sps and pps no timestamp
     packet->m_nTimeStamp = 0;
     packet->m_hasAbsTimestamp = 0;
+    packet->m_nInfoField2 = mRtmp->m_stream_id;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+    initTime();
+    packet->m_nTimeStamp = RTMP_GetTime() - startTime;
+    LOGCATE("log putVideoSpsPps pkt is ready:%d",RTMPPacket_IsReady(packet));
     packetQueue.pushLast(packet);
-
+    RTMPPacket_Dump(packet);
+    LOGCATE("has put sps pps info");
 }
+#pragma clang diagnostic pop
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 void RtmpPushHelper::putVideoBody(int type,uint8_t* payload,int i_payload) {
     if (payload[2] == 0x00){
         i_payload -= 4;
@@ -87,16 +100,25 @@ void RtmpPushHelper::putVideoBody(int type,uint8_t* payload,int i_payload) {
     packet->m_body[8] = (i_payload) & 0xff;
 
     memcpy(&packet->m_body[9],payload,(size_t)i_payload);
+    LOGCATE("打印 body_size:%d",i_payload);
+
+    packet->m_nInfoField2 = mRtmp->m_stream_id;
     packet->m_hasAbsTimestamp = 0;
+    packet->m_nBodySize = bodySize;
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nChannel = 0x10;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+    initTime();
+    packet->m_nTimeStamp = RTMP_GetTime() - startTime;
+    LOGCATE("log putVideoBody pkt is ready:%d",RTMPPacket_IsReady(packet));
     packetQueue.pushLast(packet);
-
+    RTMPPacket_Dump(packet);
+//    LOGCATE("has put video body info");
 }
-
+#pragma clang diagnostic pop
 void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
-    RTMP * rtmp = RTMP_Alloc();
+    instance->mRtmp = RTMP_Alloc();
+    RTMP * rtmp = instance->mRtmp;
     const char * errorMsg = nullptr;
     uint32_t startTime;
     int ret;
@@ -105,6 +127,8 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
         goto RtmpPushEnd;
     }
     RTMP_Init(rtmp);
+    RTMP_LogSetLevel(RTMP_LOGERROR);
+    RTMP_LogSetCallback(log_rtmp_infos);
     ret = RTMP_SetupURL(rtmp,RTMPURL);
     rtmp->Link.timeout = 5;// 秒为单位
     RTMP_EnableWrite(rtmp);
@@ -121,11 +145,20 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
     startTime = RTMP_GetTime();
     while (instance -> isPushing){
         RTMPPacket *packet = instance->packetQueue.popFirst();
-        if (packet == nullptr) continue;
+        if (packet == nullptr) {
+            usleep(1000 * 5);
+            continue;
+        }
         packet->m_nInfoField2 = rtmp->m_stream_id;
+        if (!RTMP_IsConnected(rtmp)){
+            errorMsg = "RTMP_SendPacket failed, has disconnected";
+            break;
+        }
         ret = RTMP_SendPacket(rtmp,packet,1);
+        RTMPPacket_Reset(packet);
         RTMPPacket_Free(packet);
         delete packet;
+        // 先不判断，可能有延迟，推送不成功什么的
         if (!ret){
             errorMsg = "RTMP_SendPacket is failed";
             break;
@@ -143,10 +176,12 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
 }
 void RtmpPushHelper::destroy(){
     isPushing = false;
+    packetQueue.pushLast(nullptr);
     if (rtmpThread) {
         rtmpThread->join();
         delete rtmpThread; 
     }
+    packetQueue.pushLast(nullptr);
     do {
         RTMPPacket *item = packetQueue.popFirst();
         if (item){
@@ -154,4 +189,17 @@ void RtmpPushHelper::destroy(){
             delete item;
         }
     } while (packetQueue.size() > 0);
+    LOGCATE("rtmpPushHelper all destroy");
+}
+
+void RtmpPushHelper::initTime() {
+    if (startTime == 0L) {
+        startTime = RTMP_GetTime();
+    }
+}
+
+void RtmpPushHelper::log_rtmp_infos(int level, const char *msg, va_list args) {
+    char log[2048];
+    vsprintf(log, msg, args);
+    LOGCATE("log rtmp info ------ %d %s",level,log);
 }

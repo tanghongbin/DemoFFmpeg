@@ -97,6 +97,8 @@ const char *getRandomStr(const char *prefix, const char *suffix, const char *sub
 
 jstring getJstringFromCharStr(JNIEnv *jniEnv, const char *str);
 
+void checkNegativeError(int ret,const char* error);
+
 bool checkNegativeReturn(int ret, const char *string);
 
 void NvToYUV420p(const uint8_t *image_src, uint8_t *image_dst, int image_width, int image_height);

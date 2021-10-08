@@ -1,7 +1,7 @@
 include ':linphonedemo'
 include ':avutils'
 include ':customplayer'
-include ':ffmpegsamples'
+//include ':ffmpegsamples'
 include ':common_base'
 include ':ijkplayer-demo'
 rootProject.name='DemoFFmpeg'

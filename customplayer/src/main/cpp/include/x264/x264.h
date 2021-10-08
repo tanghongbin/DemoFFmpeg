@@ -1,7 +1,7 @@
 /*****************************************************************************
  * x264.h: x264 public header
  *****************************************************************************
- * Copyright (C) 2003-2021 x264 project
+ * Copyright (C) 2003-2020 x264 project
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Loren Merritt <lorenm@u.washington.edu>
@@ -45,7 +45,7 @@ extern "C" {
 
 #include "x264_config.h"
 
-#define X264_BUILD 164
+#define X264_BUILD 160
 
 #ifdef _WIN32
 #   define X264_DLL_IMPORT __declspec(dllimport)
@@ -485,31 +485,6 @@ typedef struct x264_param_t
     /* frame packing arrangement flag */
     int i_frame_packing;
 
-    /* mastering display SEI: Primary and white point chromaticity coordinates
-       in 0.00002 increments. Brightness units are 0.0001 cd/m^2. */
-    struct
-    {
-        int b_mastering_display;    /* enable writing this SEI */
-        int i_green_x;
-        int i_green_y;
-        int i_blue_x;
-        int i_blue_y;
-        int i_red_x;
-        int i_red_y;
-        int i_white_x;
-        int i_white_y;
-        int64_t i_display_max;
-        int64_t i_display_min;
-    } mastering_display;
-
-    /* content light level SEI */
-    struct
-    {
-        int b_cll;                  /* enable writing this SEI */
-        int i_max_cll;
-        int i_max_fall;
-    } content_light_level;
-
     /* alternative transfer SEI */
     int i_alternative_transfer;
 
@@ -608,9 +583,6 @@ typedef struct x264_param_t
      * e.g. if doing multiple encodes in one process.
      */
     void (*nalu_process)( x264_t *h, x264_nal_t *nal, void *opaque );
-
-    /* For internal use only */
-    void *opaque;
 } x264_param_t;
 
 X264_API void x264_nal_encode( x264_t *h, uint8_t *dst, x264_nal_t *nal );
@@ -653,19 +625,10 @@ X264_API void x264_param_default( x264_param_t * );
  *  note: BAD_VALUE occurs only if it can't even parse the value,
  *  numerical range is not checked until x264_encoder_open() or
  *  x264_encoder_reconfig().
- *  value=NULL means "true" for boolean options, but is a BAD_VALUE for non-booleans.
- *  can allocate memory which should be freed by call of x264_param_cleanup. */
+ *  value=NULL means "true" for boolean options, but is a BAD_VALUE for non-booleans. */
 #define X264_PARAM_BAD_NAME  (-1)
 #define X264_PARAM_BAD_VALUE (-2)
-#define X264_PARAM_ALLOC_FAILED (-3)
 X264_API int x264_param_parse( x264_param_t *, const char *name, const char *value );
-
-/* x264_param_cleanup:
- * Cleans up and frees allocated members of x264_param_t.
- * This *does not* free the x264_param_t itself, as it may exist on the
- * stack. It only frees any members of the struct that were allocated by
- * x264 itself, in e.g. x264_param_parse(). */
-X264_API void x264_param_cleanup( x264_param_t *param );
 
 /****************************************************************************
  * Advanced parameter handling functions

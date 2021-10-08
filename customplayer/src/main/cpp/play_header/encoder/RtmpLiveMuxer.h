@@ -24,15 +24,9 @@ private:
     BaseVideoRender* videoRender;
     int audioTrackIndex,videoTrackIndex;
     EncoderAACAndx264* mAvEncoder;
+    bool isStartEncode;
     static void receivePixelData(int type,NativeOpenGLImage *pVoid);
-    RtmpLiveMuxer(){
-        audioTrackIndex = videoTrackIndex = 0;
-        thread = 0;
-        videoRender = 0;
-        isDestroyed = false;
-        cameraWidth = cameraHeight = 0;
-        mAvEncoder = 0;
-    }
+    RtmpLiveMuxer();
 public:
     bool isDestroyed;
     std::mutex runningMutex;
@@ -45,12 +39,17 @@ public:
         }
         return instance;
     }
-
     void OnSurfaceCreate();
     void OnSurfaceChanged(int width,int height);
     void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
     void OnDrawFrame();
     void OnAudioData(uint8_t *audioData, int length);
+
+    /**
+     * 转换格式  转换成 i420
+     * @param srcData
+     */
+    void formatConvert(const NativeOpenGLImage *srcData);
 };
 
 #endif //DEMOFFMPEG_RTMPLIVEMUXER_H

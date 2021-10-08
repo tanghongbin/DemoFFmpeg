@@ -43,7 +43,7 @@ public:
     void destroy();
 
     // 1-音频，2-视频
-    void putAudioData();
+    void putAudioData(unsigned char *  data, jint length);
     void putVideoData(NativeOpenGLImage* data);
 
 
