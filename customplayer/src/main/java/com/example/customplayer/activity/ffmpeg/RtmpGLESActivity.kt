@@ -2,6 +2,7 @@ package com.example.customplayer.activity.ffmpeg
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.avutils.audio.recoder.AudioConfiguration
 import com.example.avutils.audio.recoder.AudioRecorder
 import com.example.common_base.utils.log
 import com.example.common_base.utils.runAsyncTask
@@ -28,6 +29,7 @@ class RtmpGLESActivity : AppCompatActivity(), Camera2FrameCallback {
             runAsyncTask({
                 val liveRtmpUrl = "rtmp://182.61.44.214:1935/live/windowsPush"
                 mAudioRecorder.startCapture()
+                mMuxer.native_configAudioParams(AudioConfiguration.DEFAULT_FREQUENCY,AudioConfiguration.DEFAULT_CHANNEL_COUNT)
                 mMuxer.native_startEncode(liveRtmpUrl)
             })
         }

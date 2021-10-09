@@ -5,10 +5,13 @@ project(testFFmpeg VERSION 1.0)
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libName native-mediacontroller)
+#语音编码器
+set(faac ${CMAKE_SOURCE_DIR}/faac)
 
 include_directories(
         include
-        play_header)
+        play_header
+        ${faac}/include)
 
 
 file(GLOB src-files
@@ -23,7 +26,12 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp)
 
 
-#添加静态库
+
+#指定 faac 静态库文件目录
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${faac}/libs/${CMAKE_ANDROID_ARCH_ABI}")
+
+
+#添加动态库
 add_library(avcodec SHARED IMPORTED )
 set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libavcodec.so)
 add_library(avfilter SHARED IMPORTED )
@@ -102,7 +110,9 @@ set(third-party-libs
         assimp
         opencv_java3
         curl
-        testMath)
+        testMath
+        #语音编码
+        faac)
 
 find_library(log-lib log )
 

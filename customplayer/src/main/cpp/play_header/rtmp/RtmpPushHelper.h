@@ -39,10 +39,11 @@ public:
     ~RtmpPushHelper(){
     }
     void initPush();
-    void putAudioData();
     void putVideoSpsPps(uint8_t* sps,uint8_t* pps,int spslen,int ppslen);
     void putVideoBody(int type,uint8_t* payload,int i_payload);
     void destroy();
+    void putAacPacket(const uint8_t *outputAudioBuffer, int byteLen);
+    void putAudioTagFirst(void *audioEncodec);
 
     void initTime();
 

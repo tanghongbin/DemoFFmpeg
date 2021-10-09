@@ -143,4 +143,9 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
 
     external fun native_audioData(byteArray: ByteArray,length:Int)
 
+    /***
+     * 配置录音参数
+     */
+    external fun native_configAudioParams(sampleHz:Int,channels:Int)
+
 }

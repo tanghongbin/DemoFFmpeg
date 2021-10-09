@@ -6,13 +6,66 @@
 #include <x264/x264.h>
 #include "../../play_header/encoder/EncoderAACAndx264.h"
 #include <utils/CustomGLUtils.h>
+#include <faac.h>
+#include <faaccfg.h>
+
+
+#define FAAC_DEFAUTE_SAMPLE_RATE 44100
+#define FAAC_DEFAUTE_SAMPLE_CHANNEL 2
 
 
 void EncoderAACAndx264::init(){
     rtmpPushHelper = new RtmpPushHelper();
     rtmpPushHelper->initPush();
     mEncodeThreadV = new thread(EncoderAACAndx264::loopEncodeVideo, this);
+    mEncodeThreadA = new thread(EncoderAACAndx264::loopEncodeAudio,this);
 }
+
+void EncoderAACAndx264::loopEncodeAudio(EncoderAACAndx264* instance){
+
+    u_long mInputSamples;
+    u_long maxOutputBytes;
+    faacEncHandle faacHandle = faacEncOpen(FAAC_DEFAUTE_SAMPLE_RATE, FAAC_DEFAUTE_SAMPLE_CHANNEL,
+                                           &mInputSamples, &maxOutputBytes);
+    if (!faacHandle){
+        LOGCATE("faac open failed");
+        return;
+    }
+    // 设置编码参数
+    faacEncConfigurationPtr configration = faacEncGetCurrentConfiguration(faacHandle);
+    configration->mpegVersion = MPEG4;
+    configration->aacObjectType = LOW;
+    //16位
+    configration->inputFormat = FAAC_INPUT_16BIT;
+    // 编码出原始数据 既不是adts也不是adif
+    configration->outputFormat = 0;
+    faacEncSetConfiguration(faacHandle, configration);
+    auto* outputAudioBuffer = new uint8_t [maxOutputBytes];
+
+    instance -> rtmpPushHelper -> putAudioTagFirst(faacHandle);
+
+    while (instance->isRunning){
+        AudioRecordItemInfo *audioItem = instance->mAudioQueue.popFirst();
+        if (audioItem == nullptr){
+            usleep(5 * 1000);
+            continue;
+        }
+        LOGCATE("start encode");
+        int byteLen = faacEncEncode(faacHandle, reinterpret_cast<int32_t *>(audioItem->data), mInputSamples, outputAudioBuffer, maxOutputBytes);
+        LOGCATE("look encode audio success size:%d  inputSamples:%ld  maxOutputBytes:%ld",byteLen,mInputSamples,maxOutputBytes);
+        if (byteLen > 0) {
+            instance -> rtmpPushHelper -> putAacPacket(outputAudioBuffer, byteLen);
+        }
+        audioItem->recycle();
+    }
+
+    LoopAudioEnd:
+    faacEncClose(faacHandle);
+    delete [] outputAudioBuffer;
+
+    LOGCATE("loop is over");
+}
+
 
 void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
 
@@ -98,9 +151,9 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
                 ppsLen = nal[i].i_payload - 4;
                 memcpy(pps,nal[i].p_payload + 4,ppsLen);
                 // 推送sps,pps信息
-                instance -> addH264Header(sps,pps,spsLen,ppsLen);
+                instance -> rtmpPushHelper ->putVideoSpsPps(sps,pps,spsLen,ppsLen);
             } else {
-                instance -> addH264Body(nal[i].i_type,nal[i].p_payload,nal[i].i_payload);
+                instance -> rtmpPushHelper ->putVideoBody(nal[i].i_type,nal[i].p_payload,nal[i].i_payload);
             }
         }
     }
@@ -117,6 +170,10 @@ void EncoderAACAndx264::destroy(){
     isRunning = false;
     mVideoQueue.pushLast(nullptr);
     mAudioQueue.pushLast(nullptr);
+    if (mEncodeThreadA){
+        mEncodeThreadA->join();
+        delete mEncodeThreadA;
+    }
     if (mEncodeThreadV){
         mEncodeThreadV->join();
         delete mEncodeThreadV;
@@ -145,19 +202,17 @@ void EncoderAACAndx264::destroy(){
     LOGCATE("encode aac and h264 all over");
 }
 
-void EncoderAACAndx264::putAudioData(unsigned char * data, int length) {
-
-}
-
 void EncoderAACAndx264::putVideoData(NativeOpenGLImage* data){
     if (!isRunning) return;
     mVideoQueue.pushLast(data);
 }
 
-void EncoderAACAndx264::addH264Header(uint8_t *sps, uint8_t *pps, int spsLen, int ppsLen) {
-    rtmpPushHelper->putVideoSpsPps(sps,pps,spsLen,ppsLen);
+void EncoderAACAndx264::putAudioData(uint8_t *data, jint len) {
+    if (!isRunning) return;
+    auto* item = new AudioRecordItemInfo;
+    item->data = data;
+    item->nb_samples = len;
+    mAudioQueue.pushLast(item);
+    LOGCATE("audio item has putted into packet");
 }
 
-void EncoderAACAndx264::addH264Body(int type,uint8_t *payload, int i_payload) {
-    rtmpPushHelper->putVideoBody(type,payload,i_payload);
-}

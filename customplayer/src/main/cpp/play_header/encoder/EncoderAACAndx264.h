@@ -20,18 +20,22 @@ using std::mutex;
 class EncoderAACAndx264 {
 
 private:
+    int sampleHz,channels;
     RtmpPushHelper* rtmpPushHelper;
     thread* mEncodeThreadV;
+    thread* mEncodeThreadA;
     bool isRunning;
     mutex mAvMutex;
     static void loopEncodeVideo(EncoderAACAndx264* instance);
+    static void loopEncodeAudio(EncoderAACAndx264* instance);
     CustomSafeBlockQueue<NativeOpenGLImage*>mVideoQueue;
     CustomSafeBlockQueue<AudioRecordItemInfo *>mAudioQueue;
 
 public:
     EncoderAACAndx264() {
+        sampleHz = channels = 0;
         isRunning = true;
-        mEncodeThreadV = 0;
+        mEncodeThreadV = mEncodeThreadA =  0;
         rtmpPushHelper = 0;
         mVideoQueue.setMax(3);
     }
@@ -43,13 +47,9 @@ public:
     void destroy();
 
     // 1-音频，2-视频
-    void putAudioData(unsigned char *  data, jint length);
     void putVideoData(NativeOpenGLImage* data);
 
-
-    void addH264Header(uint8_t *string, uint8_t *string1, int i, int i1);
-
-    void addH264Body(int type,uint8_t *string, int i);
+    void putAudioData(uint8_t *string, jint i);
 };
 
 

@@ -195,7 +195,12 @@ JNIEXPORT void JNICALL native_audioData(JNIEnv *env, jobject instance,jbyteArray
     env->ReleaseByteArrayElements(audioData, data, 0);
 }
 
-
+JNIEXPORT void JNICALL native_configAudioParams(JNIEnv *env, jobject instance,jint sampleHz,jint channels) {
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (!mediaMuxer)
+        return;
+    mediaMuxer->configAudioPrams(sampleHz,channels);
+}
 
 
 /***
@@ -220,6 +225,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_startEncode",               "(Ljava/lang/String;)V",            (void *) (native_startEncode)},
         {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
         {"native_audioData",               "([BI)V",            (void *) (native_audioData)},
+        {"native_configAudioParams",               "(II)V",            (void *) (native_configAudioParams)},
 };
 
 

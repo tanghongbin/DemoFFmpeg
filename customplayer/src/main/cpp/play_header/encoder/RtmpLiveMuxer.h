@@ -20,7 +20,6 @@ private:
 
     static RtmpLiveMuxer* instance;
     std::thread * thread;
-    char mTargetFilePath[128];
     BaseVideoRender* videoRender;
     int audioTrackIndex,videoTrackIndex;
     EncoderAACAndx264* mAvEncoder;
@@ -44,6 +43,7 @@ public:
     void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
     void OnDrawFrame();
     void OnAudioData(uint8_t *audioData, int length);
+    void configAudioPrams(int samHz,int chnns);
 
     /**
      * 转换格式  转换成 i420

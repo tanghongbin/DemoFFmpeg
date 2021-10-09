@@ -28,10 +28,6 @@ RtmpLiveMuxer::RtmpLiveMuxer(){
     cameraWidth = cameraHeight = 0;
     mAvEncoder = 0;
     isStartEncode = false;
-    const char * fileName = "rtmp://182.61.44.214:1935/live/windowsPush";
-    strcpy(mTargetFilePath,fileName);
-    LOGCATE("打印地址:%s",fileName);
-    access(fileName,0);
     mAvEncoder = new EncoderAACAndx264;
     mAvEncoder->init();
 }
@@ -124,7 +120,12 @@ void RtmpLiveMuxer::formatConvert(const NativeOpenGLImage *srcData) {
     mAvEncoder->putVideoData(encodeVideoData);
 }
 
+void RtmpLiveMuxer::configAudioPrams(int samHz,int chnns){
+
+}
+
 void RtmpLiveMuxer::OnAudioData(uint8_t *audioData, jint length) {
+    if (!isStartEncode) return;
     std::unique_lock<std::mutex> uniqueLock(RtmpLiveMuxer::getInstance() -> runningMutex,std::defer_lock);
     uniqueLock.lock();
     if (isDestroyed){

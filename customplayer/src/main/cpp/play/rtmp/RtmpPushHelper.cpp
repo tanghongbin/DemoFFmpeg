@@ -9,13 +9,38 @@
 #include <rtmp/log.h>
 #include <utils/CustomGLUtils.h>
 #include <x264/x264.h>
-
+#include <faac.h>
+#include <faaccfg.h>
 #define RTMPURL "rtmp://1.14.99.52:1935/live/androidPush"
 
 
 void RtmpPushHelper::initPush(){
     rtmpThread = new thread(RtmpPushHelper::loopRtmpPush, this);
 }
+
+void RtmpPushHelper::putAacPacket(const uint8_t *outputAudioBuffer, int byteLen) {
+    int bodySize = byteLen + 2;
+    auto * packet = new RTMPPacket ;
+    RTMPPacket_Alloc(packet,bodySize);
+    //双声道
+    packet->m_body[0] = 0xAF;
+//            if (mChannels == 1) {
+//                packet->m_body[0] = 0xAE;
+//            }
+//编码出的声音 都是 0x01
+    packet->m_body[1] = 0x01;
+    // 音频数据
+    memcpy(&packet->m_body[2],outputAudioBuffer,byteLen);
+    packet->m_hasAbsTimestamp = FALSE;
+    packet->m_nBodySize = bodySize;
+    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+    packet->m_nChannel = 0x11;
+    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+    initTime();
+    packet->m_nTimeStamp = RTMP_GetTime() - startTime;
+    packetQueue.pushLast(packet);
+}
+
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
@@ -52,7 +77,7 @@ void RtmpPushHelper::putVideoSpsPps(uint8_t* sps,uint8_t* pps,int spslen,int pps
     packet->m_body[i++] = (ppslen >> 8) & 0xff;
     packet->m_body[i++] = ppslen & 0xff;
     memcpy(&packet->m_body[i],pps,ppslen);
-    LOGCATE("打印spsLen:%d  ppsLen:%d",spslen,ppslen);
+//    LOGCATE("打印spsLen:%d  ppsLen:%d",spslen,ppslen);
 
     // video
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
@@ -65,10 +90,10 @@ void RtmpPushHelper::putVideoSpsPps(uint8_t* sps,uint8_t* pps,int spslen,int pps
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
     initTime();
     packet->m_nTimeStamp = RTMP_GetTime() - startTime;
-    LOGCATE("log putVideoSpsPps pkt is ready:%d",RTMPPacket_IsReady(packet));
+//    LOGCATE("log putVideoSpsPps pkt is ready:%d",RTMPPacket_IsReady(packet));
     packetQueue.pushLast(packet);
     RTMPPacket_Dump(packet);
-    LOGCATE("has put sps pps info");
+//    LOGCATE("has put sps pps info");
 }
 #pragma clang diagnostic pop
 #pragma clang diagnostic push
@@ -100,7 +125,7 @@ void RtmpPushHelper::putVideoBody(int type,uint8_t* payload,int i_payload) {
     packet->m_body[8] = (i_payload) & 0xff;
 
     memcpy(&packet->m_body[9],payload,(size_t)i_payload);
-    LOGCATE("打印 body_size:%d",i_payload);
+//    LOGCATE("打印 body_size:%d",i_payload);
 
     packet->m_nInfoField2 = mRtmp->m_stream_id;
     packet->m_hasAbsTimestamp = 0;
@@ -110,7 +135,7 @@ void RtmpPushHelper::putVideoBody(int type,uint8_t* payload,int i_payload) {
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
     initTime();
     packet->m_nTimeStamp = RTMP_GetTime() - startTime;
-    LOGCATE("log putVideoBody pkt is ready:%d",RTMPPacket_IsReady(packet));
+//    LOGCATE("log putVideoBody pkt is ready:%d",RTMPPacket_IsReady(packet));
     packetQueue.pushLast(packet);
     RTMPPacket_Dump(packet);
 //    LOGCATE("has put video body info");
@@ -201,5 +226,30 @@ void RtmpPushHelper::initTime() {
 void RtmpPushHelper::log_rtmp_infos(int level, const char *msg, va_list args) {
     char log[2048];
     vsprintf(log, msg, args);
-    LOGCATE("log rtmp info ------ %d %s",level,log);
+//    LOGCATE("log rtmp info ------ %d %s",level,log);
+}
+
+
+void RtmpPushHelper::putAudioTagFirst(void *audioEncodec) {
+    uint8_t * buf;
+    u_long len;
+    faacEncGetDecoderSpecificInfo(audioEncodec,&buf,&len);
+    int bodySize = 2 + len;
+    auto *packet = new RTMPPacket;
+    RTMPPacket_Alloc(packet, bodySize);
+    //双声道
+    packet->m_body[0] = 0xAF;
+//    if (mChannels == 1) {
+//        packet->m_body[0] = 0xAE;
+//    }
+    packet->m_body[1] = 0x00;
+    //图片数据
+    memcpy(&packet->m_body[2], buf, len);
+
+    packet->m_hasAbsTimestamp = FALSE;
+    packet->m_nBodySize = bodySize;
+    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+    packet->m_nChannel = 0x11;
+    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+    packetQueue.pushLast(packet);
 }

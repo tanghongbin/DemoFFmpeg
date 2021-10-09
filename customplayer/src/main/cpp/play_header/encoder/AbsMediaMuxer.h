@@ -10,6 +10,9 @@
 
 
 class AbsMediaMuxer{
+private:
+    int sampleHz;
+    int channels;
 public:
     virtual int init(const char * outFileName) = 0;
     virtual void Destroy() = 0;
@@ -22,6 +25,10 @@ public:
     virtual void OnCameraFrameDataValible(int type,NativeOpenGLImage * data) = 0;
 
     virtual void OnAudioData(uint8_t *audioData, int length) = 0;
+    virtual void configAudioPrams(int samHz,int chnns){
+        this->sampleHz = samHz;
+        this->channels = chnns;
+    }
 };
 
 #endif //DEMOFFMPEG_ABSMEDIAMUXER_H
