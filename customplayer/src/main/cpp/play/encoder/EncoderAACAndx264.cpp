@@ -50,9 +50,8 @@ void EncoderAACAndx264::loopEncodeAudio(EncoderAACAndx264* instance){
             usleep(5 * 1000);
             continue;
         }
-        LOGCATE("start encode");
         int byteLen = faacEncEncode(faacHandle, reinterpret_cast<int32_t *>(audioItem->data), mInputSamples, outputAudioBuffer, maxOutputBytes);
-        LOGCATE("look encode audio success size:%d  inputSamples:%ld  maxOutputBytes:%ld",byteLen,mInputSamples,maxOutputBytes);
+//        LOGCATE("look encode audio success size:%d  inputSamples:%ld  maxOutputBytes:%ld",byteLen,mInputSamples,maxOutputBytes);
         if (byteLen > 0) {
             instance -> rtmpPushHelper -> putAacPacket(outputAudioBuffer, byteLen);
         }
@@ -213,6 +212,6 @@ void EncoderAACAndx264::putAudioData(uint8_t *data, jint len) {
     item->data = data;
     item->nb_samples = len;
     mAudioQueue.pushLast(item);
-    LOGCATE("audio item has putted into packet");
+//    LOGCATE("audio item has putted into packet");
 }
 

@@ -23,12 +23,13 @@ private:
     int count = 0;
     bool renderIsFinish = false;
     int renderWidth,renderHeight,u_offset;
+    float x_test_offset;
 
 
 public:
     NativeOpenGLImage nativeOpenGlImage;
      void Init();
-     void DrawFrame() ;
+     void DrawFrame();
      void Destroy();
      void OnSurfaceChanged(int windowWidth,int windowHeight);
      void copyImage(NativeOpenGLImage *openGlImage);
@@ -37,6 +38,7 @@ public:
     VideoFboRender(){
         fboId = fboTextureId = lutTextureId = 0;
         u_offset = 0;
+        x_test_offset = 0;
     }
 
     void drawNormalImage();

@@ -260,10 +260,13 @@ void VideoFboRender::drawFboTexture() {
 }
 
 void VideoFboRender::drawLogo(GLuint currentVaoId) {
+    if (x_test_offset > 4.0) {
+        x_test_offset = -4.0;
+    }
     glBindVertexArray(currentVaoId);
         glm::mat4 currentModel = glm::mat4(1.0);
     currentModel = glm::scale(currentModel,glm::vec3 (0.2f));
-    currentModel = glm::translate(currentModel,glm::vec3 (4.0f,-4.0f,0.0f));
+    currentModel = glm::translate(currentModel,glm::vec3 (x_test_offset,x_test_offset,0.0f));
     shader->setMat4("model", currentModel);
     shader->setInt("samplerType", 1);
     glActiveTexture(GL_TEXTURE0);
@@ -274,6 +277,7 @@ void VideoFboRender::drawLogo(GLuint currentVaoId) {
     glDrawArrays(GL_TRIANGLES,0,6);
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D,0);
+    x_test_offset += 0.02;
 }
 
 void VideoFboRender::Destroy() {

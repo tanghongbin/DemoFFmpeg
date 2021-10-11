@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.avutils.audio.recoder.AudioConfiguration
 import com.example.avutils.audio.recoder.AudioRecorder
+import com.example.common_base.utils.keepScreenOn
 import com.example.common_base.utils.log
 import com.example.common_base.utils.runAsyncTask
 import com.example.customplayer.R
@@ -25,6 +26,7 @@ class RtmpGLESActivity : AppCompatActivity(), Camera2FrameCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gles_ffmpeg_muxer)
+        keepScreenOn()
         muxerButton.setOnClickListener {
             runAsyncTask({
                 val liveRtmpUrl = "rtmp://182.61.44.214:1935/live/windowsPush"

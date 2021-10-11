@@ -194,6 +194,7 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
     RtmpPushEnd:
     if (errorMsg) LOGCATE("打印rtmppush 的错误:%s",errorMsg);
     if (rtmp) {
+        RTMP_DeleteStream(rtmp);
         RTMP_Close(rtmp);
         RTMP_Free(rtmp);
     }
