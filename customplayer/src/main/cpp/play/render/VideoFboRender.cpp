@@ -22,26 +22,29 @@ void VideoFboRender::Init(){
             readGLSLStrFromFile("fboplay/fragment.glsl").c_str());
 
     GLfloat vetex[] = {
-            -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
-            1.0f, -1.0f, 0.0f,  1.0f, 1.0f,
-            1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,  0.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f,  0.0f, 1.0f, // 0
+            1.0f, -1.0f, 0.0f,  1.0f, 1.0f, // 1
+            1.0f,  1.0f, 0.0f,  1.0f, 0.0f, // 2
+            -1.0f, -1.0f, 0.0f,  0.0f, 1.0f, // 0
+            1.0f,  1.0f, 0.0f,  1.0f, 0.0f, // 2
+            -1.0f,  1.0f, 0.0f,  0.0f, 0.0f, // 3
+
     };
 
     GLfloat vetexReverse[] = {
-            -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
-            1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, // 0
+            1.0f, -1.0f, 0.0f,  1.0f, 0.0f, // 1
+            1.0f,  1.0f, 0.0f,  1.0f, 1.0f, // 2
+            -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, // 0
+            1.0f,  1.0f, 0.0f,  1.0f, 1.0f, // 2
+            -1.0f,  1.0f, 0.0f,  0.0f, 1.0f, // 3
     };
     glGenBuffers(4,vboIds);
     glGenVertexArrays(2,vaoIds);
     glGenTextures(4,textures);
-
+    glGenTextures(4,filterTextures);
+    glGenTextures(1,&lutTextureId);
+    glGenTextures(1,&logoTextureId);
 
     glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
     glBufferData(GL_ARRAY_BUFFER,sizeof(vetex),vetex,GL_STATIC_DRAW);
@@ -70,12 +73,6 @@ void VideoFboRender::Init(){
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D,0);
     }
-    LoadImageInfo imageInfo;
-    imageInfo.loadImage("/storage/emulated/0/ffmpegtest/filterImg/lye.jpg");
-    glBindTexture(GL_TEXTURE_2D,textures[3]);
-    imageInfo.setupNormalSetting();
-    imageInfo.uploadImageTex2D();
-    glBindTexture(GL_TEXTURE_2D,0);
 
     glBindTexture(GL_TEXTURE_2D,lutTextureId);
     LoadImageInfo lutImageInfo;
@@ -85,6 +82,32 @@ void VideoFboRender::Init(){
     lutImageInfo.setupNormalSetting();
     lutImageInfo.uploadImageTex2D();
     glBindTexture(GL_TEXTURE_2D,0);
+
+    // bind logo texture
+    glBindTexture(GL_TEXTURE_2D,logoTextureId);
+    LoadImageInfo logoImgInfo;
+    logoImgInfo.loadImage("/storage/emulated/0/ffmpegtest/filterImg/java.jpg");
+    logoImgInfo.setupNormalSetting();
+    logoImgInfo.uploadImageTex2D();
+
+
+//    inputTextureHandles[0] = OpenGLUtils.loadTexture(context, "filter/brannan_blowout.png")
+//    inputTextureHandles[1] = OpenGLUtils.loadTexture(context, "filter/overlaymap.png")
+//    inputTextureHandles[2] = OpenGLUtils.loadTexture(context, "filter/amaromap.png")
+    // load gpuimagefilter 尝试gpuimagefilter 滤镜
+    const char* filterPaths [TEXTURE_FBO_NUM - 1]  = {
+            getAssetsFileAbsolutePath("filter/brannan_blowout.png").c_str(),
+            getAssetsFileAbsolutePath("filter/overlaymap.png").c_str(),
+            getAssetsFileAbsolutePath("filter/amaromap.png").c_str(),
+    };
+    for (int i = 0; i < TEXTURE_FBO_NUM - 1; ++i) {
+        glBindTexture(GL_TEXTURE_2D,filterTextures[i]);
+        LoadImageInfo loadImageInfo;
+        loadImageInfo.setupNormalSetting();
+        loadImageInfo.loadImage(filterPaths[i]);
+        loadImageInfo.uploadImageTex2D();
+        glBindTexture(GL_TEXTURE_2D,0);
+    }
 }
 
 void VideoFboRender::createPbo() {
@@ -187,7 +210,7 @@ void VideoFboRender::readImagePixel() {
     openGlImage->height = VIDEO_H;
     openGlImage->format = IMAGE_FORMAT_RGBA;
     NativeOpenGLImageUtil::AllocNativeImage(openGlImage);
-    int64_t startTime =GetSysCurrentTime();
+    int64_t startTime = GetSysCurrentTime();
     glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, openGlImage->ppPlane[0]);
 //    LOGCATE("打印读取时间：%lld",GetSysCurrentTime() - startTime);
 //    glBindTexture(GL_TEXTURE_2D,testRgbaTextureId);
@@ -217,6 +240,8 @@ void VideoFboRender::drawNormalImage() {
     glDrawArrays(GL_TRIANGLES,0,6);
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D,0);
+
+//    drawLogo(currentvaoId);
 }
 
 
@@ -236,10 +261,10 @@ void VideoFboRender::drawFboTexture() {
     shader->setMat4("model", glm::mat4(1.0));
     shader->setInt("samplerType", 2);
     shader->setInt("u_offset",u_offset);
-    shader->setVec2("texSize",glm::vec2(VIDEO_W,VIDEO_H));
-    shader->setInt("fliterType",3);
-    shader->setVec2("blurCenter",glm::vec2(0.9));
+    shader->setInt("fliterType",6);
     shader->setFloat("blurSize",5.0f);
+    shader->setVec2("texSize",glm::vec2(VIDEO_W,VIDEO_H));
+    shader->setVec2("blurCenter",glm::vec2(0.9));
     for (int i = 0; i < TEXTURE_FBO_NUM; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, textures[i]);
@@ -250,12 +275,20 @@ void VideoFboRender::drawFboTexture() {
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D,lutTextureId);
     shader->setInt("s_LutTexture",4);
+    // 把多个普通滤镜的图片传过去
+    for (int i = 0; i < TEXTURE_FBO_NUM - 1; ++i) {
+        glActiveTexture(GL_TEXTURE5 + i);
+        glBindTexture(GL_TEXTURE_2D, filterTextures[i]);
+        char filterName[64] = {0};
+        sprintf(filterName, "s_Filter%d", i);
+        shader->setInt(filterName, i + 5);
+    }
     glDrawArrays(GL_TRIANGLES,0,6);
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D,0);
 
     // 画logo
-    drawLogo(currentVaoId);
+//    drawLogo(currentVaoId);
     u_offset++;
 }
 
@@ -264,9 +297,9 @@ void VideoFboRender::drawLogo(GLuint currentVaoId) {
         x_test_offset = -4.0;
     }
     glBindVertexArray(currentVaoId);
-        glm::mat4 currentModel = glm::mat4(1.0);
-    currentModel = glm::scale(currentModel,glm::vec3 (0.2f));
-    currentModel = glm::translate(currentModel,glm::vec3 (x_test_offset,x_test_offset,0.0f));
+    glm::mat4 currentModel = glm::mat4(1.0);
+    currentModel = glm::scale(currentModel,glm::vec3 (0.5f));
+//    currentModel = glm::translate(currentModel,glm::vec3 (x_test_offset,x_test_offset,0.0f));
     shader->setMat4("model", currentModel);
     shader->setInt("samplerType", 1);
     glActiveTexture(GL_TEXTURE0);
@@ -277,19 +310,23 @@ void VideoFboRender::drawLogo(GLuint currentVaoId) {
     glDrawArrays(GL_TRIANGLES,0,6);
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D,0);
-    x_test_offset += 0.02;
+//    x_test_offset += 0.02;
 }
 
 void VideoFboRender::Destroy() {
     std::lock_guard<std::mutex> lockGuard(renderMutex);
     renderIsFinish = true;
     shader->Destroy();
+
+    glDeleteTextures(4,textures);
+    glDeleteTextures(4,filterTextures);
     glDeleteTextures(1,&fboTextureId);
+    glDeleteTextures(1,&lutTextureId);
+    glDeleteTextures(1,&logoTextureId);
+
     glDeleteBuffers(4,vboIds);
     glDeleteFramebuffers(1,&fboId);
     glDeleteVertexArrays(2,vaoIds);
-    glDeleteTextures(4,textures);
-    glDeleteBuffers(1,&lutTextureId);
     glDeleteBuffers(2,pboIds);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
     LOGCATE("delete video render is success");

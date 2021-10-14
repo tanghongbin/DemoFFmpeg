@@ -72,6 +72,7 @@ public:
 	}
 	void loadImage(const char * filePath){
 		startTime = getTime();
+
 		imageData = stbi_load(filePath, &width, &height, &channels, 0);
 	}
 

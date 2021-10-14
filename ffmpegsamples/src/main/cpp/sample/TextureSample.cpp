@@ -28,14 +28,10 @@ void TextureSample::init(const char * vShaderStr,const char * fShaderStr) {
     int localHeight;
     int nrChannels;
     // test1,2,3 ...
-    const char * filePath = "/storage/emulated/0/ffmpegtest/filterImg/test3.jpg";
-    const char * filePath2 = "/storage/emulated/0/ffmpegtest/filterImg/test2.png";
-    bool isPng = false;
-    GLint format = GL_RGBA;
-    if (!isPng){
-        format = GL_RGB;
-    }
-//    imageData = stbi_load(filePath, &localWidth, &localHeight, &nrChannels, 0);
+//    const char * filePath = "/storage/emulated/0/ffmpegtest/filterImg/test3.jpg";
+    const char * filePath2 = "/storage/emulated/0/ffmpegtest/filterImg/leg.jpg";
+
+
 //    LOGCATE("image width:%d height:%d channel:%d data:%p costTime:%lld",localWidth,localHeight,nrChannels,imageData,
 //            (GetSysCurrentTime() - startTime));
     startTime = GetSysCurrentTime();
@@ -46,51 +42,28 @@ void TextureSample::init(const char * vShaderStr,const char * fShaderStr) {
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    LoadImageInfo loadImageInfo;
+    loadImageInfo.loadImage(filePath2);
+    loadImageInfo.uploadImageTex2D();
+
 //    glTexImage2D(GL_TEXTURE_2D, 0, format, localWidth,localHeight, 0, format, GL_UNSIGNED_BYTE, imageData);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,m_RenderImage.ppPlane[0]);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_RenderImage.width, m_RenderImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,m_RenderImage.ppPlane[0]);
     glBindTexture(GL_TEXTURE_2D, GL_NONE);
     float verticesBig[] = {
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            -1.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
+            1.0f,  -1.0f, 0.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f, 0.0f,  0.0f, 0.0f,
+            1.0f,  -1.0f, 0.0f,  1.0f, 1.0f,
+            1.0f, 1.0f, 0.0f,  1.0f, 0.0f,
 
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+//            -1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+//            1.0f, 1.0f,  0.0f,  1.0f, 1.0f,
+//            1.0f,  -1.0f,  0.0f,  1.0f, 0.0f,
+//            -1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
+//            1.0f,  -1.0f,  0.0f,  1.0f, 0.0f,
+//            -1.0f, -1.0f,  0.0f,  0.0f, 0.0f,
     };
     glGenBuffers(1,&vboIds[0]);
     glBindBuffer(GL_ARRAY_BUFFER,vboIds[0]);
@@ -135,7 +108,7 @@ void TextureSample::draw() {
     // Set the RGBA map sampler to texture unit to 0
     glUniform1i(m_SamplerLoc, 0);
 
-    createMvp();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 
@@ -143,12 +116,7 @@ void TextureSample::Destroy()
 {
     if (m_ProgramObj)
     {
-        LOGCATE("before over %p",imageData);
-        if (imageData){
-            stbi_image_free(imageData);
-            LOGCATE("after over %p",imageData);
-            imageData = nullptr;
-        }
+
         glDeleteProgram(m_ProgramObj);
         glDeleteTextures(1, &m_TextureId);
         glDeleteBuffers(1,&vboIds[0]);
@@ -157,58 +125,7 @@ void TextureSample::Destroy()
 }
 
 void TextureSample::createMvp() {
-    model = glm::mat4(1.0f);
-    view = glm::mat4(1.0f);
-    projection = glm::mat4(1.0f);
-    float second = 1.0f;
-    if (startTime == 0L){
-        startTime = GetSysCurrentTime();
-    } else {
-        second = (float)(GetSysCurrentTime() - startTime) / 1000;
-    }
 
-    glm::vec3 cubePositions[] = {
-            glm::vec3( 0.0f,  0.0f,  0.0f),
-            glm::vec3( 2.0f,  5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3( 2.4f, -0.4f, -3.5f),
-
-            glm::vec3(-1.7f,  3.0f, -7.5f),
-            glm::vec3( 1.3f, -2.0f, -2.5f),
-            glm::vec3( 1.5f,  2.0f, -2.5f),
-            glm::vec3( 1.5f,  0.2f, -1.5f),
-            glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-
-    for(unsigned int i = 0; i < 10; i++)
-    {
-        model = glm::translate(model, cubePositions[i]);
-        float angle = 5.0f * i;
-//        if (angle == 0) angle = 20.0f;
-//        angle = glm::radians(angle);
-//        if ( i == 0 || i % 3 == 0){
-//            angle = angle * second;
-//        }
-//        LOGCATE("angle will be rotate %f",angle);
-        model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-
-
-        // create view matrix
-        float radius = 10.0f;
-        float camX = sin(second) * radius;
-        float camZ = cos(second) * radius;
-//        view = glm::translate(view,glm::vec3(0.0f,0.0f,-3.0f));
-        view = glm::lookAt(glm::vec3(camX,0.0,camZ),glm::vec3(0.0,0.0,0.0),
-                glm::vec3(0.0,1.0,0.0));
-//    LOGCATE("log width:%d height:%d",screenWidth,screenHeight);
-        float ration = (float)screenWidth / (float )screenHeight;
-        projection = glm::perspective(glm::radians(45.0f),1.33f,0.1f,100.0f);
-        setMat4(m_ProgramObj, "model", model);
-        setMat4(m_ProgramObj, "view", view);
-        setMat4(m_ProgramObj, "projection", projection);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
 
 
 

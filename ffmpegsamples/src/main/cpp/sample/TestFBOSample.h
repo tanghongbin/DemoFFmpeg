@@ -16,8 +16,6 @@ private:
     GLuint vboIds[3];
     GLuint vaoIds[2];
     glm::mat4 m_MVPMatrix;
-    uint8_t* imageData = nullptr;
-
 public:
     TestFBOSample();
 

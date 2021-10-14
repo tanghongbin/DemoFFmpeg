@@ -7,6 +7,9 @@ uniform sampler2D s_TextureMap0;
 uniform sampler2D s_TextureMap1;
 uniform sampler2D s_TextureMap2;
 uniform sampler2D s_LutTexture;
+uniform sampler2D s_Filter0;
+uniform sampler2D s_Filter1;
+uniform sampler2D s_Filter2;
 uniform vec2 texSize;
 uniform float u_offset;
 uniform int fliterType;// 滤镜类型
@@ -37,7 +40,7 @@ vec4 yuv2Rgb(vec2 texCoords,bool isAvarage){
 
 /// =================================== 滤镜类型 =======================
 
-// 多方行滤镜
+// 网格滤镜
 vec4 filterSquare(){
   vec2 imgTexCoord = out_texCoords * texSize;//将纹理坐标系转换为图片坐标系
   float sideLength = 30.0;//网格的边长
@@ -139,6 +142,33 @@ vec4 zoomBlurFilter(){
   return fragmentColor;
 }
 
+// 普通滤镜
+vec4 normalFilter(vec2 texCoords){
+  return yuv2Rgb(out_texCoords,false);
+}
+
+
+// gpuimagefilter 的滤镜例子，拿一个来玩玩
+vec4 accoFilter(vec2 texCoords){
+  vec4 originColor = yuv2Rgb(texCoords,false);
+  vec4 texel = yuv2Rgb(texCoords,false);
+  vec3 bbTexel = texture(s_Filter0, texCoords).rgb;
+
+  texel.r = texture(s_Filter1, vec2(bbTexel.r, texel.r)).r;
+  texel.g = texture(s_Filter1, vec2(bbTexel.g, texel.g)).g;
+  texel.b = texture(s_Filter1, vec2(bbTexel.b, texel.b)).b;
+
+  vec4 mapped;
+  mapped.r = texture(s_Filter2, vec2(texel.r, .16666)).r;
+  mapped.g = texture(s_Filter2, vec2(texel.g, .5)).g;
+  mapped.b = texture(s_Filter2, vec2(texel.b, .83333)).b;
+  mapped.a = 1.0;
+  float strength = 0.5f;
+  mapped.rgb = mix(originColor.rgb, mapped.rgb, strength);
+
+  return mapped;
+}
+
 void main()
 {
   // 1-rgba
@@ -161,9 +191,13 @@ void main()
 //        outColor = texture(s_LutTexture,out_texCoords);
       }
     } else if (fliterType == 4) {
+      // 4- 高斯模糊
       outColor = zoomBlurFilter();
+    } else if (fliterType == 5) {
+      // 5- 纯滤镜
+      outColor = normalFilter(out_texCoords);
+    } else if (fliterType == 6){
+      outColor = accoFilter(out_texCoords);
     }
-
-
   }
 }

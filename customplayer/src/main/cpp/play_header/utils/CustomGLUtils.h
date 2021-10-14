@@ -131,6 +131,11 @@ static const std::string  readGLSLStrFromFile(const char *filename) {
     return value;
 }
 
+static const std::string getAssetsFileAbsolutePath(const char* filename){
+    std::string absolutePath = std::string(GLSL_ROOT_DIR) + std::string(filename);
+    return absolutePath;
+}
+
 static void setJniPointToJava(JNIEnv* env, const char * fieldName,const char * signature,void* p){
     jobject instance = JavaVmManager::getObjInstance();
     jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),fieldName,signature);

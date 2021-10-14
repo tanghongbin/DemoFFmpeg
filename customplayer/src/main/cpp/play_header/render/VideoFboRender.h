@@ -12,7 +12,8 @@
 
 class VideoFboRender : public BaseVideoRender{
 private:
-    GLuint textures[TEXTURE_FBO_NUM],fboTextureId,testRgbaTextureId,lutTextureId;
+    GLuint textures[TEXTURE_FBO_NUM],fboTextureId,testRgbaTextureId,lutTextureId,logoTextureId;
+    GLuint filterTextures[TEXTURE_FBO_NUM];
     GLuint vboIds[4],fboId;
     GLuint vaoIds[2];
     GLuint pboIds[2];
@@ -36,7 +37,7 @@ public:
      ~VideoFboRender();
 
     VideoFboRender(){
-        fboId = fboTextureId = lutTextureId = 0;
+        fboId = fboTextureId = lutTextureId = logoTextureId  = 0;
         u_offset = 0;
         x_test_offset = 0;
     }

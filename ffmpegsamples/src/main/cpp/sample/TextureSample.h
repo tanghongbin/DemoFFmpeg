@@ -23,10 +23,6 @@ public:
     void Destroy();
 
 private:
-    stbi_uc * imageData = nullptr;
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 projection;
     GLuint vboIds[2];
 
 
