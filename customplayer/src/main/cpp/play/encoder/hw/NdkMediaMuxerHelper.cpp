@@ -15,7 +15,7 @@ void  NdkMediaMuxerHelper::init(const char * path){
 }
 
 void NdkMediaMuxerHelper::writeSampleData(int trackIndex,uint8_t* data,AMediaCodecBufferInfo* info){
-    LOGCATE("开始写入sample数据:%d",trackIndex);
+//    LOGCATE("开始写入sample数据:%d",trackIndex);
     std::lock_guard<std::mutex> lockGuard(mMutex);
     AMediaMuxer_writeSampleData(mMuxer,trackIndex,data,info);
 }

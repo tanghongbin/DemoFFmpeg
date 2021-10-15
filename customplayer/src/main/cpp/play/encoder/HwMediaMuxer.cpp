@@ -13,6 +13,7 @@
 #include <libyuv/convert.h>
 #include <libyuv/rotate.h>
 #include <render/VideoFboRender.h>
+#include <utils/SoundTouchUtils.h>
 
 
 HwMediaMuxer* HwMediaMuxer::instance = nullptr;
@@ -23,7 +24,7 @@ HwMediaMuxer* HwMediaMuxer::instance = nullptr;
 int HwMediaMuxer::init(const char * fileName){
     strcpy(mTargetFilePath,fileName);
     LOGCATE("打印地址:%s",fileName);
-    access(fileName,0);
+    createFolderIfNotExist(mTargetFilePath);
     mMuxerHelper = new NdkMediaMuxerHelper;
     mMuxerHelper->init(mTargetFilePath);
     mediaCodecA = new MediaCodecAudio;
@@ -130,6 +131,11 @@ void HwMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData
 
 }
 
+/***
+ * 原生数据，要经过soundtouch的处理
+ * @param audioData
+ * @param length
+ */
 void HwMediaMuxer::OnAudioData(uint8_t *audioData, jint length) {
     std::unique_lock<std::mutex> uniqueLock(HwMediaMuxer::getInstace() -> runningMutex,std::defer_lock);
     uniqueLock.lock();

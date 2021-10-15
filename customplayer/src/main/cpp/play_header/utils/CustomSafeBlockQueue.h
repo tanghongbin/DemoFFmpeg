@@ -109,7 +109,7 @@ public:
     }
 
     T pushLast(T node) {
-        T last = nullptr;
+        T last = 0;
         // 放入第一个
         std::unique_lock<std::mutex> lockGuard(tex);
         mQueue.push(node);
@@ -125,7 +125,7 @@ public:
     T popFirst() {
         std::unique_lock<std::mutex> uniqueLock(tex);
         if (mQueue.size() == 0) {
-            return nullptr;
+            return 0;
         }
         T bean = mQueue.front();
         mQueue.pop();
@@ -133,9 +133,13 @@ public:
         return bean;
     }
 
-    T removeFirst() {
-        T bean = mQueue.front();
-        mQueue.pop();
+    T getLast() {
+        std::unique_lock<std::mutex> uniqueLock(tex);
+        if (mQueue.size() == 0) {
+            return 0;
+        }
+        T bean = mQueue.back();
+        outCount++;
         return bean;
     }
 

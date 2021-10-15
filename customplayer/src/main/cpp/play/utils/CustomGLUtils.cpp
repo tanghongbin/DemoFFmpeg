@@ -364,11 +364,32 @@ void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeig
             dstVData,dstWidth >> 1,dstWidth,dstHeight,libyuv::kFilterNone);
 }
 
-void createFolderIfNotExist(const char * folder){
-    if (access(folder,0) == -1){
-        mkdir(folder,0700);
+void createFolderIfNotExist(char * _f){
+    bool isFolder = true;
+    if (strstr(_f,".")){
+        isFolder = false;
     }
-    LOGCATE("log create folder:%s",folder);
+    CustomSafeQueue<char *> safeQueue;
+    std::string lastStr;
+    char filePath [128];
+    strcpy(filePath,_f);
+    char * splitResult = strtok(filePath,"/");
+    while (splitResult != NULL){
+        safeQueue.pushLast(splitResult);
+        splitResult = strtok(NULL,"/");
+    }
+    lastStr = safeQueue.getLast();
+    std::string resultPath = "";
+    while (safeQueue.size() > 0) {
+        std::string item = safeQueue.popFirst();
+        if (!isFolder && lastStr == item) continue;
+        resultPath = resultPath + "/" + item;
+        if (access(resultPath.c_str(),0) < 0){
+            mkdir(resultPath.c_str(),0777);
+            LOGCATE("文件不存在:%s",resultPath.c_str());
+        }
+    }
+    LOGCATE("创建成功，最终地址为:%s",resultPath.c_str());
 }
 
 GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSource,

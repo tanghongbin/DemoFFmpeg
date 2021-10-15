@@ -17,6 +17,7 @@
 #include <mediaprocess/AbsCustomMediaPlayer.h>
 #include <encoder/AbsMediaMuxer.h>
 #include <libyuv/rotate.h>
+#include <stdio.h>
 
 
 extern "C" {
@@ -90,7 +91,13 @@ void yuvRgbaToNv21(uint8_t *rgba, uint8_t * nv21Dst, int width, int height);
 
 void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeight,int dstWidth,int dstHeight);
 
-void createFolderIfNotExist(const char * folder);
+/***
+ * 创建目录，如果不存在
+ * @param filePath
+ */
+void createFolderIfNotExist(char * filePath);
+
+
 
 //attribute_deprecated
 const char *getRandomStr(const char *prefix, const char *suffix, const char *subDir);
@@ -130,6 +137,8 @@ static const std::string  readGLSLStrFromFile(const char *filename) {
 //    LOGCATE("log fileStr:%s",value.c_str());
     return value;
 }
+
+
 
 static const std::string getAssetsFileAbsolutePath(const char* filename){
     std::string absolutePath = std::string(GLSL_ROOT_DIR) + std::string(filename);

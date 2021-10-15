@@ -8,6 +8,7 @@ import com.example.common_base.DemoApplication
 import com.example.common_base.utils.log
 import com.example.customplayer.interfaces.*
 import com.example.customplayer.util.AV_PREFIX
+import com.example.customplayer.util.getRamdowVideoPath
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -139,7 +140,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
     external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 
     // 1-开始录音
-    external fun native_startEncode(path:String = "${AV_PREFIX}${System.currentTimeMillis()}-randow.mp4")
+    external fun native_startEncode(path:String = getRamdowVideoPath())
 
     external fun native_audioData(byteArray: ByteArray,length:Int)
 
