@@ -20,6 +20,7 @@
 
 class MediaCodecVideo {
 private:
+    double speed;
     std::thread* encodeThread;
     bool isRunning;
     AMediaCodec *mMediaCodec;
@@ -27,17 +28,21 @@ private:
     CustomSafeQueue<NativeOpenGLImage*> videoQueue;
     OutputFmtChangedListener outputFmtChangedListener;
     OutputDataListener outputDataListener;
+    int64_t startNanoTime;
 
     AMediaCodec * createVideoMediaCodec();
 
 public:
     MediaCodecVideo(){
         isRunning = false;
+        startNanoTime = 0LL;
         mMediaCodec = 0;
         mMediaFormat = 0;
         encodeThread = 0;
         videoQueue.setMax(3);
+        speed = 1.0;
     }
+    void setSpeed(double speed);
     void setOutputDataListener(OutputFmtChangedListener changedListener,OutputDataListener dataListener);
     void startEncode();
     void destroy();

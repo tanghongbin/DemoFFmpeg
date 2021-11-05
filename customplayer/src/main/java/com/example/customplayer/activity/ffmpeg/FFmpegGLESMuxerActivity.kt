@@ -1,6 +1,8 @@
 package com.example.customplayer.activity.ffmpeg
 
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.appcompat.app.AppCompatActivity
 import com.example.avutils.audio.recoder.AudioRecorder
 import com.example.common_base.utils.log
@@ -26,6 +28,7 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
         muxerButton.setOnClickListener {
             runAsyncTask({
                 mAudioRecorder.startCapture()
+                mMuxer.native_setSpeed(1.0)
                 mMuxer.native_startEncode()
             })
         }
@@ -59,4 +62,8 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
         mMuxer.native_onCameraFrameDataValible(2,data)
     }
 
+}
+
+interface A1{
+    fun test1();
 }

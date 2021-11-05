@@ -31,7 +31,7 @@ void MediaCodecAudio::startEncode(){
 AMediaCodec * MediaCodecAudio::createAudioMediaCodec(){
     AMediaFormat *format = AMediaFormat_new();
     const char * mine = DEFAULT_AUDIO_MIME;
-    int frameSize = 4096 * DEFAULT_AUDIO_CHANNEL_COUNT;
+    int frameSize = DEFAULT_AUDIO_FRAME_SIZE_SINGLE * DEFAULT_AUDIO_CHANNEL_COUNT;
     const char * audioMine = DEFAULT_AUDIO_MIME;
     int sampleRate = DEFAULT_AUDIO_FREQUENCY;
     int channelCount = DEFAULT_AUDIO_CHANNEL_COUNT;
@@ -73,8 +73,10 @@ void MediaCodecAudio::destroy() {
 }
 
 void MediaCodecAudio::putData(uint8_t* data,int length) {
-    auto item = new AudioRecordItemInfo ;
-    item->data = data;
+    auto item = new AudioRecordItemInfo;
+    auto itemData = new uint8_t [length];
+    memcpy(itemData,data,length);
+    item->data = itemData;
     item->nb_samples = length;
     audioQueue.pushLast(item);
 }
@@ -91,8 +93,14 @@ void MediaCodecAudio::loopEncode(MediaCodecAudio* codecAudio) {
             size_t inputBufferSize;
             uint8_t *inputData = AMediaCodec_getInputBuffer(codecAudio->mMediaCodec, inputIndex,&inputBufferSize);
             memcpy(inputData,audioBean->data,audioBean->nb_samples);
-            int64_t timeStamp = (GetSysNanoTime() - startNano) / 1000;
-            AMediaCodec_queueInputBuffer(codecAudio->mMediaCodec,inputIndex,0,audioBean->nb_samples,timeStamp,0);
+//            int64_t timeStamp = (GetSysNanoTime() - startNano) / 1000;
+//            LOGCATE("打印音频pts:%lld frameIndex:%d  samples:%d   计算前部分:%lld"
+            if (codecAudio->mStartTime == -1LL) {
+                codecAudio -> mStartTime = GetSysNanoTime();
+            }
+            int64_t resultPts = (GetSysNanoTime() - codecAudio->mStartTime) / 1000;
+            LOGCATE("打印每次音频:%lld",resultPts);
+            AMediaCodec_queueInputBuffer(codecAudio->mMediaCodec,inputIndex,0,audioBean->nb_samples,resultPts,0);
         }
         AMediaCodecBufferInfo bufferInfo;
         int outIndex = AMediaCodec_dequeueOutputBuffer(codecAudio->mMediaCodec,&bufferInfo,1000);

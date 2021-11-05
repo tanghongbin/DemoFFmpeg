@@ -26,6 +26,7 @@ private:
     CustomSafeQueue<AudioRecordItemInfo*> audioQueue;
     OutputFmtChangedListener outputFmtChangedListener;
     OutputDataListener outputDataListener;
+    int64_t mStartTime;
     AMediaCodec * createAudioMediaCodec();
     static void loopEncode(MediaCodecAudio* codecAudio);
 
@@ -35,6 +36,7 @@ public:
         mMediaCodec = 0;
         mMediaFormat = 0;
         encodeThread = 0;
+        mStartTime = -1LL;
     }
     void setOutputDataListener(OutputFmtChangedListener changedListener,OutputDataListener dataListener);
     void startEncode();

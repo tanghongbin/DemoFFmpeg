@@ -202,6 +202,13 @@ JNIEXPORT void JNICALL native_configAudioParams(JNIEnv *env, jobject instance,ji
     mediaMuxer->configAudioPrams(sampleHz,channels);
 }
 
+JNIEXPORT void JNICALL native_setSpeed(JNIEnv *env, jobject instance,jdouble speed) {
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (!mediaMuxer)
+        return;
+    mediaMuxer->SetPeed(speed);
+}
+
 
 /***
  *  ===================================   注释方法部分   ==================================
@@ -226,6 +233,8 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
         {"native_audioData",               "([BI)V",            (void *) (native_audioData)},
         {"native_configAudioParams",               "(II)V",            (void *) (native_configAudioParams)},
+        {"native_setSpeed",               "(D)V",            (void *) (native_setSpeed)},
+
 };
 
 

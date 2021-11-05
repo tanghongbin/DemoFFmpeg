@@ -30,15 +30,37 @@ int HwMediaMuxer::init(const char * fileName){
     mediaCodecA = new MediaCodecAudio;
     mediaCodecA->startEncode();
     mediaCodecA->setOutputDataListener(HwMediaMuxer::receiveCodecFmtChanged,HwMediaMuxer::receiveMediaCodecData);
+    soundTouchHelper = new SoundTouchHelper;
+    soundTouchHelper->setSpeed(speed);
+    soundTouchHelper->init();
+    soundTouchHelper->setAudioCallback(reinterpret_cast<ReceiveAudioData>(HwMediaMuxer::receiveSoundTouchData));
     mediaCodecV = new MediaCodecVideo;
+    mediaCodecV->setSpeed(speed);
     mediaCodecV->startEncode();
     mediaCodecV->setOutputDataListener(HwMediaMuxer::receiveCodecFmtChanged,HwMediaMuxer::receiveMediaCodecData);
+    isStarted = true;
     return 0;
 }
 
 
 void HwMediaMuxer::receivePixelData(int type,NativeOpenGLImage *pVoid){
     HwMediaMuxer::getInstace()->OnCameraFrameDataValible(type, pVoid);
+}
+
+void HwMediaMuxer::receiveSoundTouchData(short * srcData,int size){
+    std::unique_lock<std::mutex> uniqueLock(HwMediaMuxer::getInstace() -> runningMutex,std::defer_lock);
+    uniqueLock.lock();
+    if (HwMediaMuxer::getInstace()->isDestroyed || !HwMediaMuxer::getInstace()->isStarted){
+        uniqueLock.unlock();
+        return;
+    }
+    uniqueLock.unlock();
+
+    uint8_t resultData[size];
+    memcpy(resultData,srcData,size);
+    if (getInstace()->mediaCodecA){
+        getInstace()->mediaCodecA->putData(resultData,size);
+    }
 }
 
 void HwMediaMuxer::receiveMediaCodecData(int type,AMediaCodecBufferInfo * bufferInfo, uint8_t* data){
@@ -139,16 +161,18 @@ void HwMediaMuxer::OnCameraFrameDataValible(int type,NativeOpenGLImage * srcData
 void HwMediaMuxer::OnAudioData(uint8_t *audioData, jint length) {
     std::unique_lock<std::mutex> uniqueLock(HwMediaMuxer::getInstace() -> runningMutex,std::defer_lock);
     uniqueLock.lock();
-    if (isDestroyed){
+    if (isDestroyed  || !isStarted){
         uniqueLock.unlock();
         return;
     }
     uniqueLock.unlock();
 
-    auto * data = new uint8_t [length];
-    memcpy(data,audioData,length);
-    if (getInstace()->mediaCodecA){
-        getInstace()->mediaCodecA->putData(data,length);
+    if (speed != 1.0) {
+        soundTouchHelper->adjustAudioData(audioData,length);
+    } else {
+        if (getInstace()->mediaCodecA){
+            getInstace()->mediaCodecA->putData(audioData,length);
+        }
     }
 }
 
@@ -174,6 +198,8 @@ void HwMediaMuxer::Destroy(){
     mediaCodecA->destroy();
     delete mediaCodecA;
     mediaCodecV->destroy();
+    soundTouchHelper->destroy();
+    delete soundTouchHelper;
     delete mediaCodecV;
     mMuxerHelper->stop();
     mMuxerHelper->destroy();

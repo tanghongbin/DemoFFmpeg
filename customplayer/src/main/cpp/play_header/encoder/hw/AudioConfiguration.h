@@ -20,6 +20,7 @@ typedef void (*OutputDataListener) (int,AMediaCodecBufferInfo*,uint8_t*) ;
 //int DEFAULT_AUDIO_ENCODING AudioFormat.ENCODING_PCM_16BIT;
 //int DEFAULT_AAC_PROFILE MediaCodecInfo.CodecProfileLevel.AACObjectLC;
 #define DEFAULT_AUDIO_CHANNEL_COUNT 2;
+#define DEFAULT_AUDIO_FRAME_SIZE_SINGLE 4096
 #define  DEFAULT_AEC false;
 
 

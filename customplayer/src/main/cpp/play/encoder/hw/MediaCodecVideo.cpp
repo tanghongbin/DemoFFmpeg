@@ -29,6 +29,10 @@ void MediaCodecVideo::startEncode(){
     isRunning = true;
 }
 
+void MediaCodecVideo::setSpeed(double sp){
+    this->speed = sp;
+}
+
 AMediaCodec * MediaCodecVideo::createVideoMediaCodec(){
     AMediaFormat *format = AMediaFormat_new();
     const char * mine = DEFAULT_VIDEO_MIME
@@ -37,6 +41,7 @@ AMediaCodec * MediaCodecVideo::createVideoMediaCodec(){
     int height = DEFAULT_VIDEO_HEIGHT
     int maxBitRate =  1024 * DEFAULT_VIDEO_MAX_BPS
     int fps = DEFAULT_VIDEO_FPS
+    fps = (int)(fps * speed);
     int ivf = DEFAULT_VIDEO_IFI
     AMediaFormat_setString(format,AMEDIAFORMAT_KEY_MIME,videoMine);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_WIDTH,width);
@@ -44,7 +49,7 @@ AMediaCodec * MediaCodecVideo::createVideoMediaCodec(){
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_BIT_RATE, maxBitRate);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_FRAME_RATE,fps);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_I_FRAME_INTERVAL,ivf);
-    // yuv 420sp nv21 // 19 - i420
+    // yuv 420sp nv21 // 19 - i4205
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,19);
     AMediaCodec *mediaCodec = AMediaCodec_createEncoderByType(mine);
     mMediaFormat = format;
@@ -66,7 +71,6 @@ void MediaCodecVideo::destroy() {
         AMediaCodec_stop(mMediaCodec);
         AMediaCodec_delete(mMediaCodec);
     }
-
     do {
         NativeOpenGLImage *videoItem = videoQueue.popFirst();
         if (videoItem) {
@@ -87,7 +91,6 @@ void MediaCodecVideo::putData(NativeOpenGLImage* image) {
 }
 
 void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
-    auto startNano = GetSysNanoTime();
     while (codecVideo->isRunning){
         // 这里暂时不用rgba来填充数据
         NativeOpenGLImage * image = codecVideo->videoQueue.popFirst();
@@ -106,8 +109,13 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
             size_t inputBufferSize;
             uint8_t *inputData = AMediaCodec_getInputBuffer(codecVideo->mMediaCodec, inputIndex,&inputBufferSize);
             memcpy(inputData,i420Data,i420Size);
-            int64_t timeStamp = (GetSysNanoTime() - startNano) / 1000;
-            AMediaCodec_queueInputBuffer(codecVideo->mMediaCodec,inputIndex,0,i420Size,timeStamp,0);
+            if (codecVideo -> startNanoTime == 00L) {
+                codecVideo->startNanoTime = GetSysNanoTime();
+            }
+            int64_t timeStamp = (GetSysNanoTime() - codecVideo -> startNanoTime) / 1000;
+            int64_t nowTimeStamp = (double)timeStamp / codecVideo -> speed;
+            LOGCATE("打印结果视频 当前速度:%lf 打印时间戳微妙：%lld   时间s:%lf",codecVideo->speed,nowTimeStamp,nowTimeStamp/1000.0/1000.0);
+            AMediaCodec_queueInputBuffer(codecVideo->mMediaCodec,inputIndex,0,i420Size,nowTimeStamp,0);
         }
         AMediaCodecBufferInfo bufferInfo;
         int outIndex = AMediaCodec_dequeueOutputBuffer(codecVideo->mMediaCodec,&bufferInfo,1000);
@@ -115,14 +123,15 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
         if (outIndex >= 0) {
             size_t outputBufferSize;
             auto outputData = AMediaCodec_getOutputBuffer(codecVideo->mMediaCodec,outIndex,&outputBufferSize);
+//            LOGCATE("打印结果视频当前速度：%lf    pts:%lld   时间:%lf",codecVideo->speed,bufferInfo.presentationTimeUs,bufferInfo.presentationTimeUs / 1000.0 / 1000.0);
             codecVideo -> outputDataListener(2,&bufferInfo,outputData);
             AMediaCodec_releaseOutputBuffer(codecVideo->mMediaCodec,outIndex, false);
         } else if (outIndex == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
             codecVideo -> outputFmtChangedListener(2,AMediaCodec_getOutputFormat(codecVideo->mMediaCodec));
         }
-        delete [] i420Data;
         NativeOpenGLImageUtil::FreeNativeImage(image);
         delete image;
+        delete [] i420Data;
     }
     LOGCATE("all video mediacode has over");
 }

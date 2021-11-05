@@ -149,4 +149,9 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
      */
     external fun native_configAudioParams(sampleHz:Int,channels:Int)
 
+    /***
+     * 录制速率
+     */
+    external fun native_setSpeed(speed:Double)
+
 }

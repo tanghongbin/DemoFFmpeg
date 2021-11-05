@@ -61,6 +61,7 @@ typedef struct _audio_info{
 typedef void (*PrepareCall) (long);
 typedef void (*ConvertResult) (void * decoder,void * data);
 typedef void (*ReceiveOqData) (void * data);
+typedef void (*ReceiveAudioData) (void * data,int size);
 typedef void (*ReceiveOqTypeData) (int type,NativeOpenGLImage * data);
 
 static std::string getModel3DPath(const char * fileName){
