@@ -38,32 +38,35 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback {
         mGLESMuxerSurface.holder
 //        ImageReader
         mCamera2Wrapper.startCamera()
+        FFmpegCommand.setDebug(true)
         mMuxer.setOnAvMergeListener(object : OnAvMergeListener {
             override fun onMerge(duration: Long, audioPath: String?, videoPath: String?) {
                 val resultTime = duration/1000/1000
                 log("打印时长:${resultTime}   音频地址：${audioPath}   视频地址：${videoPath}")
-                FFmpegCommand.runCmd(getOutStr(resultTime, audioPath, videoPath),object : IFFmpegCallBack{
-                    override fun onCancel() {
+                runAsyncTask({
+                    FFmpegCommand.runCmd(getOutStr(resultTime, audioPath, videoPath),object : IFFmpegCallBack{
+                        override fun onCancel() {
 
-                    }
+                        }
 
-                    override fun onComplete() {
-                        log("合并结束")
-                        log("合并成功")
-                    }
+                        override fun onComplete() {
+                            log("合并结束")
+                            log("合并成功")
+                        }
 
-                    override fun onError(errorCode: Int, errorMsg: String?) {
-                        log("合并失败 code:${errorCode}  msg:${errorMsg}")
-                    }
+                        override fun onError(errorCode: Int, errorMsg: String?) {
+                            log("合并失败 code:${errorCode}  msg:${errorMsg}")
+                        }
 
-                    override fun onProgress(progress: Int, pts: Long) {
+                        override fun onProgress(progress: Int, pts: Long) {
+                            log("合并中:${progress}   pts:${pts}")
+                        }
 
-                    }
+                        override fun onStart() {
+                            log("合并视频开始")
+                        }
 
-                    override fun onStart() {
-
-                    }
-
+                    })
                 })
             }
         })
@@ -72,7 +75,7 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback {
                 runAsyncTask({
                     mMuxer.initByType(2, 4)
                     mAudioRecorder.startCapture()
-                    mMuxer.native_setSpeed(0.5)
+                    mMuxer.native_setSpeed(3.0)
                     mMuxer.native_startEncode()
                 })
             }
@@ -93,17 +96,17 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback {
         // ffmpeg
         // 其中，audioFile 为我们的 aac 文件的路径，videoFile 为 mp4 文件的路径，
         // output 为最终生成的 mp4 文件的路径，duration 为音频文件的长度，使用MediaExtractor 获取即可。
-//        val commandStr:String = "-y -i $audioPath -ss 0 -t $duration -i $videoPath -acodec copy -vcodec copy ${}"
 //        val arrays = commandStr.split(" ")
         val outputMixPath = getRamdowVideoPath("merged")
         if (!FileUtils.isFileExist(outputMixPath)){
             val file = File(outputMixPath)
             file.createNewFile()
         }
+        val commandStr:String = "ffmpeg -y -i $audioPath -ss 0 -t $duration -i $videoPath -acodec copy -vcodec copy ${outputMixPath}"
 
-        val mixAudioCmd = FFmpegUtils.mixAudioVideo(videoPath, audioPath, duration.toInt(), outputMixPath)
-        log("打印输出命令;${mixAudioCmd}")
-        return mixAudioCmd
+//        val mixAudioCmd = FFmpegUtils.mixAudioVideo(videoPath, audioPath, duration.toInt(), outputMixPath)
+        log("打印输出命令;${commandStr}")
+        return listToArrays(commandStr.split(" "))
     }
 
     private fun listToArrays(list: List<String>):Array<String?>{

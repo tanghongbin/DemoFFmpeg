@@ -65,7 +65,7 @@ class PlayerModule {
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     private fun internalLoadVideoList():List<VideoInfo>{
         val videoList = ArrayList<VideoInfo>()
-        val cursor: Cursor = DemoApplication.getInstance().contentResolver.query(
+        val cursor: Cursor? = DemoApplication.getInstance().contentResolver.query(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI, sLocalVideoColumns,
             null, null, null
         )

@@ -84,18 +84,18 @@ class PlayerMediaActivity : AppCompatActivity(), SurfaceHolder.Callback,
         super.onDestroy()
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
 
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder?) {
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
 //        AudioDecodeManager.getInstance().stopDecode()
 //        AudioDecodeManager.destroyInstance()
 //        VideoDecodeManager.getInstance().stopDecode()
 //        VideoDecodeManager.destroyInstance()
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder?) {
+    override fun surfaceCreated(holder: SurfaceHolder) {
 //        VideoDecodeManager.getInstance().init(holder!!.surface,mUrl)
 //        VideoDecodeManager.getInstance().setOutputFormatChanged(this)
 //        AudioDecodeManager.getInstance().init(mUrl)

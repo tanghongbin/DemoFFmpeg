@@ -19,7 +19,7 @@ import kotlin.random.Random
  */
 class PlayerDecodeFFmpegActivity : AppCompatActivity(){
     private val mUrl by lazy {
-        intent.getStringExtra("url")
+        intent.getStringExtra("url") ?: ""
 //        Constants.MP4_PLAY_PATH
     }
     private var isPlaying = true

@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
  */
 class PlayerDecodeHwActivity : AppCompatActivity(), SurfaceHolder.Callback,
     OutputFormatChangeListener {
-    private val mUrl by lazy { intent.getStringExtra("url") }
+    private val mUrl by lazy { intent.getStringExtra("url") ?: ""}
     private val mPlayer by lazy { CustomMediaController() }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,18 +62,18 @@ class PlayerDecodeHwActivity : AppCompatActivity(), SurfaceHolder.Callback,
         super.onDestroy()
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
 
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder?) {
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
         AudioDecodeManager.getInstance().stopDecode()
         AudioDecodeManager.destroyInstance()
         VideoDecodeManager.getInstance().stopDecode()
         VideoDecodeManager.destroyInstance()
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder?) {
+    override fun surfaceCreated(holder: SurfaceHolder) {
         VideoDecodeManager.getInstance().init(holder!!.surface,mUrl)
         VideoDecodeManager.getInstance().setOutputFormatChanged(this)
         AudioDecodeManager.getInstance().init(mUrl)

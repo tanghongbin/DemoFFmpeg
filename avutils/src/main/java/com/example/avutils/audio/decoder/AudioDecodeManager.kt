@@ -54,7 +54,7 @@ class AudioDecodeManager {
         mediaExtractor?.setDataSource(audioPath)
         for (index in 0 until mediaExtractor!!.trackCount) {
             val trackFormat = mediaExtractor?.getTrackFormat(index)
-            val mime: String = trackFormat!!.getString(MediaFormat.KEY_MIME)
+            val mime: String = trackFormat!!.getString(MediaFormat.KEY_MIME) ?: ""
             if (mime.startsWith("audio")) {
                 log("has looked up mediaformat")
                 mediaFormat = trackFormat

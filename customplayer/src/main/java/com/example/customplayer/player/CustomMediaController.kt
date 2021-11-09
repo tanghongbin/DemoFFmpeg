@@ -81,8 +81,8 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
 
 
     private val mHandler = object : Handler(Looper.getMainLooper()){
-        override fun handleMessage(msg: Message?) {
-            when(msg?.what){
+        override fun handleMessage(msg: Message) {
+            when(msg.what){
                 MSG_PREPARED -> mOnPreparedListener?.onPrepared()
                 MSG_VIDEO_SIZE_CHANGED -> mOnVideoSizeChangeListener?.onVideoSize(msg.arg1,msg.arg2)
                 MSG_SEEK_PROGRESS_CHANGED -> mOnSeekProgressChangeListener?.onProgress(msg.arg1)

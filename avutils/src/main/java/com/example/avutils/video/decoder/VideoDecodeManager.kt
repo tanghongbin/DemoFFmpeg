@@ -57,7 +57,7 @@ class VideoDecodeManager {
         mediaExtractor?.setDataSource(videoPath)
         for (index in 0 until mediaExtractor!!.trackCount) {
             val trackFormat = mediaExtractor?.getTrackFormat(index)
-            val mime: String = trackFormat!!.getString(MediaFormat.KEY_MIME)
+            val mime: String = trackFormat!!.getString(MediaFormat.KEY_MIME) ?: ""
             if (mime.startsWith("video")) {
                 mediaFormat = trackFormat
                 mediaExtractor!!.selectTrack(index)
