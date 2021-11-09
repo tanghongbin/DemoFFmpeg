@@ -23,18 +23,27 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
         private const val MSG_COMPLETE = 4
         private const val MSG_ERROR = 5
         private const val MSG_DURATION = 6
+        private const val MSG_MERGE_AV = 7
 
         init {
             System.loadLibrary("native-mediacontroller")
         }
     }
+    private var isInit = false
     init {
-        when(rootType){
+        initByType(rootType, muxerType)
+    }
+
+    fun initByType(rootType: Int, muxerType: Int) {
+        if (isInit) return
+        when (rootType) {
             1 -> native_init_player()
-            // 1-ffmpeg 编码,2-硬编码,3-直播推流
+            // 1-ffmpeg 编码,2-硬编码,3-直播推流,4-短视频录制
             2 -> native_init_muxer(muxerType)
         }
+        isInit = true
     }
+
     private var mNativePlayer:Long = 0L
     private var mNativeMuxer:Long = 0L
     private var mOnPreparedListener: OnPreparedListener? = null
@@ -44,6 +53,10 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
     private var mOnErrorListener: OnErrorListener? = null
     private var mOnDurationListener: OnDurationListener? = null
     private var mOnSurfaceCallListener: OnSurfaceCallListener? = null
+    private var mOnAvMergeListener: OnAvMergeListener? = null
+    fun setOnAvMergeListener(listener:OnAvMergeListener){
+        mOnAvMergeListener = listener
+    }
     fun setOnSurfaceCallListener(listener:OnSurfaceCallListener){
         mOnSurfaceCallListener = listener
     }
@@ -76,10 +89,14 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
                 MSG_COMPLETE -> mOnCompleteListener?.onComplete()
                 MSG_ERROR -> mOnErrorListener?.onError(msg.arg1,msg.obj.toString())
                 MSG_DURATION -> mOnDurationListener?.onDuration(msg.arg1,msg.arg2)
+                MSG_MERGE_AV -> {
+                    val str = msg.obj as String
+                    val items = str.split(" ")
+                    mOnAvMergeListener?.onMerge(items[0].toLong(),items[1],items[2])
+                }
             }
         }
     }
-
 
     private fun receivePlayerMsgFromJni(type:Int,arg1:Int,arg2:Int,msg:String){
         mHandler.obtainMessage(type,arg1,arg2,msg).sendToTarget()
@@ -105,6 +122,12 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
         native_OnSurfaceCreated()
     }
 
+    fun destroy(){
+        if (!isInit) return
+        native_OnDestroy()
+        isInit = false
+    }
+
     /***=================== Surface native function **************************/
 
     external fun nativeGetInfo():String
@@ -115,7 +138,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
 
     private external fun native_OnDrawFrame()
 
-    external fun native_OnDestroy()
+    private external fun native_OnDestroy()
 
     /****================ 播放器 player 播放 方法 ===========================**/
     external fun native_setDataUrl(url:String)

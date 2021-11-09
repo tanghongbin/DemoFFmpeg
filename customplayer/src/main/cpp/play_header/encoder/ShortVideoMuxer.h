@@ -2,8 +2,8 @@
 // Created by Admin on 2021/5/31.
 //
 
-#ifndef DEMOFFMPEG_HWMEDIAMUXER_H
-#define DEMOFFMPEG_HWMEDIAMUXER_H
+#ifndef DEMOFFMPEG_SVMUXER_H
+#define DEMOFFMPEG_SVMUXER_H
 
 
 #include <thread>
@@ -16,14 +16,17 @@
 #include <utils/SoundTouchHelper.h>
 
 /***
- * 硬编码录制
+ * 短视频录制
  */
-class HwMediaMuxer : public AbsMediaMuxer{
+class ShortVideoMuxer : public AbsMediaMuxer{
 private:
 
-    static HwMediaMuxer* instance;
+    static ShortVideoMuxer* instance;
     std::thread * thread;
     char mTargetFilePath[128];
+    FILE* mTargetFileA;
+    char* mTargetPathA;
+    char* mTargetPathV;
     BaseVideoRender* videoRender;
     NdkMediaMuxerHelper* mMuxerHelper;
     MediaCodecAudio* mediaCodecA;
@@ -40,7 +43,7 @@ private:
      * @param size
      */
     static void receiveSoundTouchData(short * data,int size);
-    HwMediaMuxer(){
+    ShortVideoMuxer(){
         soundTouchHelper = 0;
         audioTrackIndex = videoTrackIndex = 0;
         thread = 0;
@@ -50,6 +53,8 @@ private:
         mediaCodecA = 0;
         mediaCodecV = 0;
         cameraWidth = cameraHeight = 0;
+        mTargetPathA = mTargetPathV = 0;
+        mTargetFileA = 0;
     }
 public:
     bool isDestroyed;
@@ -57,9 +62,9 @@ public:
     int cameraWidth,cameraHeight;
     int init(const char * outFileName);
     void Destroy();
-     static HwMediaMuxer* getInstace(){
+    static ShortVideoMuxer* getInstance(){
         if (instance == nullptr){
-            instance = new HwMediaMuxer;
+            instance = new ShortVideoMuxer;
         }
         return instance;
     }
@@ -69,6 +74,8 @@ public:
     void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
     void OnDrawFrame();
     void OnAudioData(uint8_t *audioData, int length);
+
+    void addAtdsHeader(uint8_t* data, int32_t size);
 };
 
 #endif //DEMOFFMPEG_HWMEDIAMUXER_H

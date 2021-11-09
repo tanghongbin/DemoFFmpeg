@@ -45,5 +45,8 @@ class CustomPlayerListActivity : AppCompatActivity() {
         startLive.setOnClickListener {
             startActivity(Intent(this,RtmpGLESActivity::class.java))
         }
+        recordShortVideo.setOnClickListener {
+            startActivity(Intent(this,ShortVideoActivity::class.java))
+        }
     }
 }

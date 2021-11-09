@@ -28,4 +28,7 @@ interface OnSurfaceCallListener : GLSurfaceView.Renderer {
 
     }
 }
+interface OnAvMergeListener{
+    fun onMerge(duration:Long,audioPath:String?,videoPath:String?)
+}
 

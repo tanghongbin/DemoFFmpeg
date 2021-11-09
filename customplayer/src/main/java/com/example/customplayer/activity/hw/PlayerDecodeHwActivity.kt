@@ -58,7 +58,7 @@ class PlayerDecodeHwActivity : AppCompatActivity(), SurfaceHolder.Callback,
     }
 
     override fun onDestroy() {
-        mPlayer.native_OnDestroy()
+        mPlayer.destroy()
         super.onDestroy()
     }
 

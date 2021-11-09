@@ -484,6 +484,7 @@ const char *getRandomStr(const char *prefix, const char *suffix) {
     return getRandomStr(prefix, suffix, "");
 }
 
+
 const char *getRandomStr(const char *prefix, const char *suffix, const char *subDir) {
     long long start = GetSysCurrentTime();
     std::string dirs = "/storage/emulated/0/ffmpegtest/";

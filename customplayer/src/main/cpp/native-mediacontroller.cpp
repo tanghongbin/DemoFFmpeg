@@ -18,6 +18,7 @@
 #include "play_header/utils/CustomSafeBlockQueue.h"
 #include <MathFunctions.h>
 #include <encoder/RtmpLiveMuxer.h>
+#include <encoder/ShortVideoMuxer.h>
 
 #define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomMediaController"
 
@@ -78,8 +79,6 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         mediaMuxer->Destroy();
         delete mediaMuxer;
     }
-    JavaVmManager::destroyInstance(env);
-    MsgLoopHelper::destroyInstance();
     LOGCATE("destroy all over");
 }
 
@@ -98,7 +97,7 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
  *
  * @param env
  * @param instance
- * @param type  1-ffmpeg 编码，2- 硬编码 , 3 - 直播推流
+ * @param type  1-ffmpeg 编码，2- 硬编码 , 3 - 直播推流 , 4- 短视频录制
  */
 JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type) {
     JavaVmManager::setInstance(env,instance);
@@ -108,8 +107,12 @@ JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type
         mediaMuxer = FFmpegMediaMuxer::getInstace();
     } else if (type == 2) {
         mediaMuxer = HwMediaMuxer::getInstace();
-    } else {
+    } else if (type == 3){
         mediaMuxer = RtmpLiveMuxer::getInstance();
+    } else if (type == 4) {
+        mediaMuxer = ShortVideoMuxer::getInstance();
+    } else {
+        mediaMuxer = FFmpegMediaMuxer::getInstace();
     }
     setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
     LOGCATE("has enter env:%p instance:%p",env,instance);
@@ -294,9 +297,9 @@ extern "C" void JNI_OnUnload(JavaVM *jvm, void *p) {
     if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
         return;
     }
-
     UnregisterNativeMethods(env, NATIVE_RENDER_CLASS_);
-
+    JavaVmManager::destroyInstance(env);
+    MsgLoopHelper::destroyInstance();
 }
 
 #ifdef __cplusplus

@@ -21,4 +21,11 @@
 
 
 
+    <com.example.customplayer.view.RecordButton
+        android:layout_width="150dp"
+        android:id="@+id/mRecordButton"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_height="150dp"/>
+
+
 </FrameLayout>

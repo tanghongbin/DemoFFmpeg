@@ -56,7 +56,7 @@ class PlayerDecodeHwOpenGLESActivity : AppCompatActivity(), SurfaceHolder.Callba
     }
 
     override fun onDestroy() {
-        mPlayer.native_OnDestroy()
+        mPlayer.destroy()
         super.onDestroy()
     }
 

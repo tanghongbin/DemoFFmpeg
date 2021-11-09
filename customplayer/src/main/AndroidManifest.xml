@@ -14,6 +14,8 @@
         <activity android:name=".activity.ffmpeg.FFmpegMuxerActivity"></activity>
         <activity android:name=".activity.ffmpeg.FFmpegGLESMuxerActivity"></activity>
         <activity android:name=".activity.ffmpeg.RtmpGLESActivity"></activity>
+        <activity android:name=".activity.ffmpeg.ShortVideoActivity"></activity>
+
 
         <activity
             android:name=".activity.hw.PlayerMediaActivity"

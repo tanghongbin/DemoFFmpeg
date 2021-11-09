@@ -43,7 +43,7 @@ class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     override fun onDestroy() {
         mCameraHelpr.release()
-        mMuxer.native_OnDestroy()
+        mMuxer.destroy()
         super.onDestroy()
     }
 

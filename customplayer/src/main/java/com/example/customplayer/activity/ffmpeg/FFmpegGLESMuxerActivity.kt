@@ -44,7 +44,7 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
     override fun onDestroy() {
         mAudioRecorder.stopCapture()
         mCamera2Wrapper.stopCamera()
-        mMuxer.native_OnDestroy()
+        mMuxer.destroy()
         super.onDestroy()
     }
 
@@ -53,11 +53,11 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
     }
 
     override fun onCaptureFrame(data: ByteArray?, width: Int, height: Int) {
-        log("log onCaptureFrame data width:${width} height:${height} data:${data}")
+//        log("log onCaptureFrame data width:${width} height:${height} data:${data}")
     }
 
     override fun onPreviewFrame(data: ByteArray?, width: Int, height: Int) {
-        log("log onPreviewFrame data width:${width} height:${height} data:${data}")
+//        log("log onPreviewFrame data width:${width} height:${height} data:${data}")
         if (data == null) return
         mMuxer.native_onCameraFrameDataValible(2,data)
     }

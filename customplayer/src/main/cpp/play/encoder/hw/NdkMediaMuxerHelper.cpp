@@ -29,10 +29,11 @@ int NdkMediaMuxerHelper::addTrack(AMediaFormat* mediaFormat){
 void NdkMediaMuxerHelper::start(){
     LOGCATE("硬编码准备开始录制了");
     std::lock_guard<std::mutex> lockGuard(mMutex);
-    if (isStart || count < 2) return;
+    if (isStart) return;
+    if (muxType == MUX_TYPE_AV_ALL && count < 2) return;
+    if (muxType == MUX_TYPE_A_OR_V && count < 1) return;
     AMediaMuxer_start(mMuxer);
     isStart = true;
-
 }
 
 void NdkMediaMuxerHelper::stop(){

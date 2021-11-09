@@ -102,7 +102,7 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
 
     override fun onDestroy() {
 //        log("打印指针：${mPlayer.mNativePlayer}")
-        mPlayer.native_OnDestroy()
+        mPlayer.destroy()
         super.onDestroy()
     }
 

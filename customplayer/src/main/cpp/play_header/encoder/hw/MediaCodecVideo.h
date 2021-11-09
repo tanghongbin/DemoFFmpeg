@@ -28,14 +28,14 @@ private:
     CustomSafeQueue<NativeOpenGLImage*> videoQueue;
     OutputFmtChangedListener outputFmtChangedListener;
     OutputDataListener outputDataListener;
-    int64_t startNanoTime;
+    int64_t startNanoTime,totalTime;
 
     AMediaCodec * createVideoMediaCodec();
 
 public:
     MediaCodecVideo(){
         isRunning = false;
-        startNanoTime = 0LL;
+        startNanoTime = totalTime = 0LL;
         mMediaCodec = 0;
         mMediaFormat = 0;
         encodeThread = 0;
@@ -48,6 +48,7 @@ public:
     void destroy();
     void putData(NativeOpenGLImage* image);
     static void loopEncode(MediaCodecVideo* codecAudio);
+    int64_t getTotalTime();
 };
 
 #endif //DEMOFFMPEG_MEDIACODECVIDEO_H

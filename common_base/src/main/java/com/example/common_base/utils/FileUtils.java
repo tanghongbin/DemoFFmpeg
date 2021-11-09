@@ -76,6 +76,7 @@ public class FileUtils {
         return buffer;
     }
 
+
     public static void getFile(byte[] bfile, String filePath, String fileName) {
         BufferedOutputStream bos = null;
         FileOutputStream fos = null;

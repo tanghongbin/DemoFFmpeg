@@ -79,6 +79,11 @@ const char *getCharStrFromJstring(JNIEnv *jniEnv, jstring str);
 
 const char *getRandomStr(const char *prefix, const char *suffix);
 
+/***
+ * 删除文件夹 及其所有文件
+ */
+void removeFolders(const char * path);
+
 void yuvNv21To420p(uint8_t *nv21Data,uint8_t * i420RorateDst, int width,int height, libyuv::RotationMode mode);
 
 void yuvI420Rotate(uint8_t *nv21Data, uint8_t * i420RorateDst, int width, int height, libyuv::RotationMode mode,bool isMirror);
