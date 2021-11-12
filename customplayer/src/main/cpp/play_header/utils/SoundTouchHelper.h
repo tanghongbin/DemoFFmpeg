@@ -19,10 +19,10 @@ class SoundTouchHelper {
 private:
     ReceiveAudioData audioCallback;
     SAMPLETYPE * resultData;
+    bool isInit;
 public:
     SoundTouchHelper();
     void setAudioCallback(ReceiveAudioData audio);
-    double speed;
     void init();
     void setSpeed(double speed);
     /***

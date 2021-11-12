@@ -64,6 +64,7 @@ typedef void (*ConvertResult) (void * decoder,void * data);
 typedef void (*ReceiveOqData) (void * data);
 typedef void (*ReceiveAudioData) (void * data,int size);
 typedef void (*ReceiveOqTypeData) (int type,NativeOpenGLImage * data);
+typedef void (*OutputAvData) (int type,void * data,int size); // type : 1-音频，2-视频
 
 static std::string getModel3DPath(const char * fileName){
     std::string result = std::string (MODEL3D_ROOT_DIR) + std::string (fileName);

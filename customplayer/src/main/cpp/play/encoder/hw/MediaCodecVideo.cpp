@@ -119,7 +119,7 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
             int64_t timeStamp = (GetSysNanoTime() - codecVideo -> startNanoTime) / 1000;
             int64_t nowTimeStamp = (double)timeStamp / codecVideo -> speed;
             codecVideo -> totalTime = nowTimeStamp;
-            LOGCATE("打印结果视频 当前速度:%lf 打印时间戳微妙：%lld   时间s:%lf",codecVideo->speed,nowTimeStamp,nowTimeStamp/1000.0/1000.0);
+//            LOGCATE("打印结果视频 当前速度:%lf 打印时间戳微妙：%lld   时间s:%lf",codecVideo->speed,nowTimeStamp,nowTimeStamp/1000.0/1000.0);
             AMediaCodec_queueInputBuffer(codecVideo->mMediaCodec,inputIndex,0,i420Size,nowTimeStamp,0);
         }
         AMediaCodecBufferInfo bufferInfo;

@@ -55,7 +55,7 @@ class PlayerModule {
     )
 
     fun loadVideoList(block:(List<VideoInfo>) -> Unit){
-        runAsyncTask({
+        DemoApplication.getInstance().runAsyncTask({
             internalLoadVideoList()
         },{
             block(it)

@@ -27,40 +27,29 @@ private:
     FILE* mTargetFileA;
     char* mTargetPathA;
     char* mTargetPathV;
-    BaseVideoRender* videoRender;
     NdkMediaMuxerHelper* mMuxerHelper;
     MediaCodecAudio* mediaCodecA;
     MediaCodecVideo* mediaCodecV;
     int audioTrackIndex,videoTrackIndex;
-    SoundTouchHelper* soundTouchHelper;
     bool isStarted;
     static void receiveMediaCodecData(int type,AMediaCodecBufferInfo * bufferInfo, uint8_t* data);
     static void receiveCodecFmtChanged(int type,AMediaFormat* mediaFormat);
-    static void receivePixelData(int type,NativeOpenGLImage *pVoid);
-    /***
-     * 接受soundtouch 转换之后的数据
-     * @param data
-     * @param size
-     */
-    static void receiveSoundTouchData(short * data,int size);
+    static void receiveOriginalAvData(int type,void * pVoid,int size);
     ShortVideoMuxer(){
-        soundTouchHelper = 0;
         audioTrackIndex = videoTrackIndex = 0;
         thread = 0;
-        videoRender = 0;
         isDestroyed = false;
         isStarted = false;
         mediaCodecA = 0;
         mediaCodecV = 0;
-        cameraWidth = cameraHeight = 0;
         mTargetPathA = mTargetPathV = 0;
         mTargetFileA = 0;
     }
 public:
     bool isDestroyed;
     std::mutex runningMutex;
-    int cameraWidth,cameraHeight;
     int init(const char * outFileName);
+    void Stop();
     void Destroy();
     static ShortVideoMuxer* getInstance(){
         if (instance == nullptr){
@@ -68,12 +57,6 @@ public:
         }
         return instance;
     }
-
-    void OnSurfaceCreate();
-    void OnSurfaceChanged(int width,int height);
-    void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
-    void OnDrawFrame();
-    void OnAudioData(uint8_t *audioData, int length);
 
     void addAtdsHeader(uint8_t* data, int32_t size);
 };

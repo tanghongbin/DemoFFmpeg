@@ -3,5 +3,10 @@
 
     <color name="recordbutton_up_color">#A9EA445A</color>
     <color name="recordbutton_down_color">#ea445a</color>
+    <color name="alpha_40_black">#66000000</color>
+    <color name="button_bg">#171822</color>
+    <color name="alpha_95_white">#F2FFFFFF</color>
+    <color name="button_bg_select">#ffffff</color>
+
 
 </resources>

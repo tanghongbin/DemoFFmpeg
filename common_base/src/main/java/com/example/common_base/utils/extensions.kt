@@ -173,3 +173,15 @@ fun Context.toastSafe(str:String?){
 fun Activity.createIntent(clazz: Class<*>):Intent{
     return Intent(this,clazz)
 }
+
+fun goneViews(vararg views:View){
+    for (view:View in views) {
+        view.visibility = View.GONE
+    }
+}
+
+fun showViews(vararg views:View){
+    for (view:View in views) {
+        view.visibility = View.VISIBLE
+    }
+}

@@ -34,7 +34,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
         initByType(rootType, muxerType)
     }
 
-    fun initByType(rootType: Int, muxerType: Int) {
+    private fun initByType(rootType: Int, muxerType: Int) {
         if (isInit) return
         when (rootType) {
             1 -> native_init_player()
@@ -46,6 +46,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
 
     private var mNativePlayer:Long = 0L
     private var mNativeMuxer:Long = 0L
+    private var mNativeOutputHelper:Long = 0L
     private var mOnPreparedListener: OnPreparedListener? = null
     private var mOnVideoSizeChangeListener: OnVideoSizeChangeListener? = null
     private var mOnSeekProgressChangeListener: OnSeekProgressChangeListener? = null
@@ -164,6 +165,8 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
 
     // 1-开始录音
     external fun native_startEncode(path:String = getRamdowVideoPath())
+
+    external fun native_stopEncode()
 
     external fun native_audioData(byteArray: ByteArray,length:Int)
 

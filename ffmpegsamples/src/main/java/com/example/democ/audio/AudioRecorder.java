@@ -124,7 +124,7 @@ public class AudioRecorder {
                     if (mAudioFrameCapturedListener != null) {
                         mAudioFrameCapturedListener.onAudioFrameCaptured(buffer,ret);
                     }   
-                    Log.d(TAG , "OK, Captured "+ret+" bytes !");
+//                    Log.d(TAG , "OK, Captured "+ret+" bytes !");
                 }														
             }		
         }    

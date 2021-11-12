@@ -57,7 +57,7 @@ public:
     int cameraWidth,cameraHeight;
     int init(const char * outFileName);
     void Destroy();
-     static HwMediaMuxer* getInstace(){
+    static HwMediaMuxer* getInstace(){
         if (instance == nullptr){
             instance = new HwMediaMuxer;
         }

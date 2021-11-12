@@ -99,7 +99,7 @@ void MediaCodecAudio::loopEncode(MediaCodecAudio* codecAudio) {
                 codecAudio -> mStartTime = GetSysNanoTime();
             }
             int64_t resultPts = (GetSysNanoTime() - codecAudio->mStartTime) / 1000;
-            LOGCATE("打印每次音频:%lld",resultPts);
+//            LOGCATE("打印每次音频:%lld",resultPts);
             AMediaCodec_queueInputBuffer(codecAudio->mMediaCodec,inputIndex,0,audioBean->nb_samples,resultPts,0);
         }
         AMediaCodecBufferInfo bufferInfo;

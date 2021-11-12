@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ProgressView">
+        <attr name="pv_radius" format="dimension|reference"/>
+        <attr name="pv_bg_color" format="color|reference"/>
+        <attr name="pv_content_color" format="color|reference"/>
+        <attr name="pv_divider_color" format="color|reference"/>
+        <attr name="pv_divider_width" format="dimension|reference"/>
+    </declare-styleable>
+
+</resources>

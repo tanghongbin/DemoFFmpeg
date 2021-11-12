@@ -1,5 +1,6 @@
 package com.example.common_base.utils
 
+import android.app.Activity
 import android.content.Context
 import android.opengl.GLES20
 import android.view.View
@@ -176,7 +177,7 @@ fun array2Buffer(array: ShortArray): ShortBuffer {
 }
 
 
-fun <T>Any.runAsyncTask(asyncBlock:() -> T,mainBlock:(T) -> Unit = {}){
+fun <T>Context.runAsyncTask(asyncBlock:() -> T,mainBlock:(T) -> Unit = {}){
     val job = Job()
     val scope = CoroutineScope(job)
     scope.launch(Dispatchers.IO) {

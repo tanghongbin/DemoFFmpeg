@@ -156,28 +156,27 @@ static void setJniPointToJava(JNIEnv* env, const char * fieldName,const char * s
     env->SetLongField(instance, jfieldId, reinterpret_cast<jlong>(p));
 }
 
-static AbsCustomMediaPlayer* getJniPlayerFromJava(){
+static jlong getJniPointFromJava(const char * attributeName){
     bool isAttach;
     JNIEnv* env = JavaVmManager::GetEnv(&isAttach);
     jobject instance = JavaVmManager::getObjInstance();
-    if (!instance) return NULL;
-    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativePlayer","J");
+    if (!instance) return 0;
+    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),attributeName,"J");
     jlong point = env->GetLongField(instance,jfieldId);
-//    if (isAttach){
-//        JavaVmManager::detachCurrentThread();
-//    }
-    return reinterpret_cast<AbsCustomMediaPlayer *>(point);
+    if (point == 0L) return 0;
+    return point;
+}
+
+static AbsCustomMediaPlayer* getJniPlayerFromJava(){
+    jlong result = getJniPointFromJava("mNativePlayer");
+    if (result == 0) return nullptr;
+    return reinterpret_cast<AbsCustomMediaPlayer *>(result);
 }
 
 static AbsMediaMuxer* getJniMuxerFromJava(){
-    bool isAttach;
-    JNIEnv* env = JavaVmManager::GetEnv(&isAttach);
-    jobject instance = JavaVmManager::getObjInstance();
-    if (!instance) return nullptr;
-    jfieldID jfieldId = env->GetFieldID(env->GetObjectClass(instance),"mNativeMuxer","J");
-    jlong point = env->GetLongField(instance,jfieldId);
-    if (point == 0L) return nullptr;
-    return reinterpret_cast<AbsMediaMuxer *>(point);
+    jlong result = getJniPointFromJava("mNativeMuxer");
+    if (result == 0) return nullptr;
+    return reinterpret_cast<AbsMediaMuxer *>(result);
 }
 
 

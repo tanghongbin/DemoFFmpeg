@@ -21,15 +21,16 @@ public:
     virtual void test(int type){
 
     }
-    virtual void OnDrawFrame() = 0;
-    virtual void OnSurfaceCreate() = 0;
-    virtual void OnSurfaceChanged(int width,int height) = 0;
-    virtual void OnCameraFrameDataValible(int type,NativeOpenGLImage * data) = 0;
+    virtual void Stop() {};
+    virtual void OnDrawFrame() {  };
+    virtual void OnSurfaceCreate() {  };
+    virtual void OnSurfaceChanged(int width,int height) {  };
+    virtual void OnCameraFrameDataValible(int type,NativeOpenGLImage * data) {  };
 
     virtual void SetPeed(double sp) {
         this->speed = sp;
     }
-    virtual void OnAudioData(uint8_t *audioData, int length) = 0;
+    virtual void OnAudioData(uint8_t *audioData, int length) {  };
     virtual void configAudioPrams(int samHz,int chnns){
         this->sampleHz = samHz;
         this->channels = chnns;

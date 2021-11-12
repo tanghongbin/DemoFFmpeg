@@ -11,7 +11,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <com.example.customplayer.view.LineProgressView
+        android:layout_width="match_parent"
+        android:id="@+id/mProgressView"
+        android:layout_marginStart="@dimen/dimen_10dp"
+        android:layout_marginEnd="@dimen/dimen_10dp"
+        android:layout_marginTop="@dimen/dimen_10dp"
+        android:layout_height="@dimen/dimen_10dp"/>
+
     <Button
+
+        android:layout_marginTop="50dp"
         android:id="@+id/muxerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,12 +30,48 @@
         tools:layout_editor_absoluteY="64dp" />
 
 
+    <com.example.customplayer.view.CommonTabLayout
+        android:layout_marginLeft="@dimen/dimen_50dp"
+        android:layout_marginRight="@dimen/dimen_50dp"
+        android:id="@+id/douyin_button_speed_tab"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_35dp"
+        android:background="@color/alpha_40_black"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="150dp"
+        app:layout_constraintBottom_toTopOf="@+id/record_button"
+        app:tl_iconVisible="false"
+        android:layout_gravity="bottom"
+        app:tl_textSelectColor="@color/button_bg"
+        app:tl_indicator_style="BLOCK"
+        app:tl_indicator_corner_radius="0dp"
+        app:tl_indicator_height="@dimen/dimen_40dp"
+        app:tl_indicator_color="@color/alpha_95_white"
+        app:tl_indicator_margin_top="0dp"
+        app:tl_indicator_margin_bottom="0dp"
+        app:tl_textUnselectColor="@color/button_bg_select"
+        app:tl_textsize="@dimen/dimen_16sp"
+        tools:ignore="MissingConstraints"/>
+
+
+
+
 
     <com.example.customplayer.view.RecordButton
         android:layout_width="150dp"
         android:id="@+id/mRecordButton"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_height="150dp"/>
+
+    <Button
+        android:id="@+id/mContactVideo"
+        android:layout_marginEnd="@dimen/dimen_50dp"
+        android:layout_marginBottom="@dimen/dimen_50dp"
+        android:layout_gravity="bottom|end"
+        android:text="拼接"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 
 </FrameLayout>
