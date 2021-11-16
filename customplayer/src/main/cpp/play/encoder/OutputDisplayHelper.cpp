@@ -20,9 +20,7 @@ void OutputDisplayHelper::init(){
 }
 
 void OutputDisplayHelper::destroy(){
-    std::lock_guard<std::mutex> lockGuard(runningMutex);
     if (isDestroyed) return;
-    isDestroyed = true;
     if(videoRender){
         videoRender->Destroy();
         delete videoRender;
@@ -30,6 +28,7 @@ void OutputDisplayHelper::destroy(){
     }
     soundTouchHelper->destroy();
     delete soundTouchHelper;
+    isDestroyed = true;
 }
 
 void OutputDisplayHelper::setSpeed(float speed){

@@ -11,7 +11,7 @@
 #include "utils/SoundTouchUtils.h"
 #include "utils/SoundTouchEngine.h"
 #include "encoder/hw/AudioConfiguration.h"
-
+#include <map>
 /***
  * 音频速率改变帮助类
  */
@@ -19,6 +19,8 @@ class SoundTouchHelper {
 private:
     ReceiveAudioData audioCallback;
     SAMPLETYPE * resultData;
+    int currentSpeedIndex;
+    std::map<double,int> speedIndexMap;
     bool isInit;
 public:
     SoundTouchHelper();

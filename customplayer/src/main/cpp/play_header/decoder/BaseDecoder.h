@@ -32,6 +32,7 @@ protected:
 
 protected:
     virtual BaseDataCoverter * createConverter() = 0;
+    virtual int64_t getCurrentAudioPts() {};
 public:
     AVCodecContext* codeCtx;
     static void resolveConvertResult(void * decoder,void * data);

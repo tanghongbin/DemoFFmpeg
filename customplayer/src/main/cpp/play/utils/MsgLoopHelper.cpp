@@ -25,6 +25,7 @@ void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
             jstring result = env->NewStringUTF(message->msg.c_str());
 //            LOGCATE("current thread :%d",GetCurrent());
             env->CallVoidMethod(javaPlayerIns,methodId,message->type,message->arg1,message->arg2,result);
+//            env->CallStaticVoidMethod()
         }
         if (isAttach){
             JavaVmManager::detachCurrentThread();

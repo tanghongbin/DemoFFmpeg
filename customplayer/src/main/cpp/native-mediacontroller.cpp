@@ -97,6 +97,8 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         outputDisplayHelper->destroy();
         delete outputDisplayHelper;
     }
+    JavaVmManager::destroyInstance(env);
+    MsgLoopHelper::destroyInstance();
     LOGCATE("destroy all over");
 }
 
@@ -330,8 +332,6 @@ extern "C" void JNI_OnUnload(JavaVM *jvm, void *p) {
         return;
     }
     UnregisterNativeMethods(env, NATIVE_RENDER_CLASS_);
-    JavaVmManager::destroyInstance(env);
-    MsgLoopHelper::destroyInstance();
 }
 
 #ifdef __cplusplus

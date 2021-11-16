@@ -14,6 +14,8 @@
 #include <utils/utils.h>
 
 #include <queue>
+#include <map>
+#include <iterator>
 
 /**
  * 线程安全，并且为空会阻塞
@@ -148,6 +150,23 @@ public:
         return mQueue.size();
     }
 };
+
+//template<typename KEY,typename VALUE>
+//class CustomSafeHashMap{
+//private:
+//    std::map<KEY,VALUE> customMap;
+//    std::mutex customMutex;
+//public:
+//    void put(KEY key,VALUE value){
+//        std::lock_guard<std::mutex> lock(customMutex);
+//        customMap.insert(std::map<KEY,VALUE>::value_type(key,value));
+//    }
+//    VALUE get(KEY key){
+//        const std::map<KEY,VALUE>::iterator item = customMap.find(key);
+//        if (item == customMap.end()) return nullptr;
+//        return item.first;
+//    }
+//};
 
 
 #endif //DEMOC_CUSTOMSAFEQUEUE_H

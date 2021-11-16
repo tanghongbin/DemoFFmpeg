@@ -46,6 +46,7 @@ class CustomPlayerListActivity : AppCompatActivity() {
             startActivity(Intent(this,RtmpGLESActivity::class.java))
         }
         recordShortVideo.setOnClickListener {
+//            Test().test<String>()
             startActivity(Intent(this,ShortVideoActivity::class.java))
         }
     }

@@ -11,6 +11,20 @@
 #include <utils/SoundTouchHelper.h>
 
 /***
+ * //级慢
+    VERY_SLOW(0.25),
+    //慢
+    SLOW(0.5),
+    //正常
+    NORMAL(1.0),
+    //快
+    FAST(2.0),
+    //极快
+    VERY_FAST(3.0)
+ */
+
+
+/***
  * 输出，包括原生音频和渲染后从GPU 读取的视频-rgba,
  * 这里做一个开关
  */

@@ -1,6 +1,7 @@
 package com.example.customplayer.activity.ffmpeg
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -41,6 +42,7 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
     private val mCamera2Wrapper by lazy { Camera2Wrapper(this, this) }
     private val mAudioRecorder by lazy { AudioRecorder() }
     private val MAX_DURATION = 60 * 1000
+    private val MIN_DURATION = 3
     //当前录制的进度
     private var mCurrentRecordProgress = 0
     //当前录制的时间
@@ -58,6 +60,7 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
     //TAB 未选中的文字
     private val mUnSelectTextSize = 12f
     private val mCount = AtomicInteger(0)
+    private val TEMPPATH = "/storage/emulated/0/ffmpegtest/temp"
 
     /***
      * 转换完成的ts 目录
@@ -66,6 +69,8 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
     private val mMap = HashMap<String,Int>()
     private val MERGE_AV_TO_MP4 = 1 // 合成音 视频 为MP4
     private val CONVERT_MP4_TO_TS = 2
+    private val PLAY_MP4 = 3
+    private var mStartRecordTime = 0L
 
     private val mHandler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
@@ -76,6 +81,11 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
                 CONVERT_MP4_TO_TS -> {
                     val outputMixPath = msg.obj as String
                     convertMp4ToTs(outputMixPath)
+                }
+                PLAY_MP4 -> {
+                    startActivity(Intent(this@ShortVideoActivity, PlayerDecodeFFmpegActivity::class.java).apply {
+                        putExtra("url",msg.obj as String)
+                    })
                 }
             }
         }
@@ -93,12 +103,15 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
 //        ImageReader
         mCamera2Wrapper.startCamera()
 //        FFmpegCommand.setDebug(true)
-        mMuxer.native_setSpeed(1.0)
         mMuxer.setOnAvMergeListener(object : OnAvMergeListener {
             override fun onMerge(duration: Long, audioPath: String?, videoPath: String?) {
                 val resultTime = duration/1000/1000
-                log("打印时长:${resultTime}   音频地址：${audioPath}   视频地址：${videoPath}")
-                    log("合并音视频线程:${Thread.currentThread().name}")
+                if (System.currentTimeMillis() - mStartRecordTime < 3 * 1000) {
+                    toastSafe("录制时间过短")
+                    FileUtils.deleteFile(audioPath)
+                    FileUtils.deleteFile(videoPath)
+                    return
+                }
                     val outputMixPath = getRamdowVideoPath("merged")
                     runFFmpegCommand(getOutStr(resultTime, audioPath, videoPath,outputMixPath)) {
                         log("合并成功   complete 线程：${Thread.currentThread().name}")
@@ -112,9 +125,10 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
         mRecordButton.setOnGestureListener(object : RecordButton.OnGestureListener {
             override fun onDown() {
                 goneViews(douyin_button_speed_tab,mContactVideo)
-                mTimer.start((MAX_DURATION / mSpeed).toInt())
-                    mAudioRecorder.startCapture()
-                    mMuxer.native_startEncode()
+                mTimer.start((MAX_DURATION * mSpeed).toInt())
+                mAudioRecorder.startCapture()
+                mMuxer.native_startEncode()
+                mStartRecordTime = System.currentTimeMillis()
             }
 
             override fun onUp() {
@@ -136,7 +150,7 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
             if (!FileUtils.isFileExist(outputMixPath)){
                 File(outputMixPath).createNewFile()
             }
-            val tsFilesPath = "/storage/emulated/0/ffmpegtest/temp/tsFile.txt"
+            val tsFilesPath = "${TEMPPATH}/tsFile.txt"
             if (FileUtils.isFileExist(tsFilesPath)){
                 FileUtils.deleteFile(tsFilesPath)
             }
@@ -163,7 +177,9 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
                         FileUtils.deleteFile(it)
                     }
                     mWaitMergeTsList.clear()
+                    FileUtils.deleteFile(TEMPPATH)
                     mProgressView.clear()
+                    Message.obtain(mHandler,PLAY_MP4,outputMixPath).sendToTarget()
                 }
         }
         muxerButton.setOnClickListener {
@@ -173,6 +189,10 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
         initRecordSpeedTab()
 
     }
+
+
+
+
 
     private fun convertMp4ToTs(mergePath: String) {
         val tsDir = "/storage/emulated/0/ffmpegtest/temp/tsdir${System.currentTimeMillis()}"
@@ -273,38 +293,42 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
         for (title in mRecordSpeedTitles)
             mCustomTabEntity.add(TabEntity(title))
         douyin_button_speed_tab.setTabData(mCustomTabEntity)
-        douyin_button_speed_tab.currentTab = 2
         douyin_button_speed_tab.setTextsize(mSelectTextSize, mUnSelectTextSize)
-
+        douyin_button_speed_tab.currentTab = 2
+        selectTabPos(2)
         douyin_button_speed_tab.setOnTabSelectListener(object : OnTabSelectListener {
             override fun onTabSelect(position: Int) {
-                when (douyin_button_speed_tab.getTitleView(position).text) {
-                    mRecordSpeedTitles[0] -> {
-                        mSpeed = Speed.VERY_SLOW.value
-                    }
-                    mRecordSpeedTitles[1] -> {
-                        mSpeed = Speed.SLOW.value
-                    }
-                    mRecordSpeedTitles[2] -> {
-                        mSpeed = Speed.NORMAL.value
-                    }
-                    mRecordSpeedTitles[3] -> {
-                        mSpeed = Speed.FAST.value
-                    }
-                    mRecordSpeedTitles[4] -> {
-                        mSpeed = Speed.VERY_FAST.value
-                    }
-                    else -> {
-                        mSpeed = Speed.NORMAL.value
-                    }
-                }
-                mMuxer.native_setSpeed(mSpeed)
-                douyin_button_speed_tab.setTextsize(mSelectTextSize, mUnSelectTextSize)
+                selectTabPos(position)
             }
 
             override fun onTabReselect(position: Int) {
             }
         })
+
     }
 
+    private fun selectTabPos(position: Int) {
+        when (douyin_button_speed_tab.getTitleView(position).text) {
+            mRecordSpeedTitles[0] -> {
+                mSpeed = Speed.VERY_SLOW.value
+            }
+            mRecordSpeedTitles[1] -> {
+                mSpeed = Speed.SLOW.value
+            }
+            mRecordSpeedTitles[2] -> {
+                mSpeed = Speed.NORMAL.value
+            }
+            mRecordSpeedTitles[3] -> {
+                mSpeed = Speed.FAST.value
+            }
+            mRecordSpeedTitles[4] -> {
+                mSpeed = Speed.VERY_FAST.value
+            }
+            else -> {
+                mSpeed = Speed.NORMAL.value
+            }
+        }
+        mMuxer.native_setSpeed(mSpeed)
+        douyin_button_speed_tab.setTextsize(mSelectTextSize, mUnSelectTextSize)
+    }
 }
