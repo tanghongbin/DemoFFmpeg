@@ -7,7 +7,7 @@
 #include <render/VideoDataConverter.h>
 
 void FFmpegMediaPlayer::Init(){
-    audioDecoder = new AudioDecoder;
+    audioDecoder = AudioDecoder::getInstance();
     audioDecoder->call = prepareReady;
     audioDecoder->setMediaType(1);
     videoDecoder = new VideoDecoder;
@@ -42,7 +42,7 @@ void FFmpegMediaPlayer::OnDrawFrame() {
 
 void FFmpegMediaPlayer::Destroy() {
     audioDecoder->Destroy();
-    delete audioDecoder;
+    AudioDecoder::destroyInstance();
     audioDecoder = 0;
     videoDecoder->Destroy();
     delete videoDecoder;

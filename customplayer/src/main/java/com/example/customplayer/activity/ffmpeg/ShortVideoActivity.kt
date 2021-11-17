@@ -75,14 +75,13 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
     private val mHandler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when(msg.what){
-                MERGE_AV_TO_MP4 -> {
-
-                }
+                MERGE_AV_TO_MP4 -> {}
                 CONVERT_MP4_TO_TS -> {
                     val outputMixPath = msg.obj as String
                     convertMp4ToTs(outputMixPath)
                 }
                 PLAY_MP4 -> {
+                    log("打印合成之后的播放地址:${msg.obj}")
                     startActivity(Intent(this@ShortVideoActivity, PlayerDecodeFFmpegActivity::class.java).apply {
                         putExtra("url",msg.obj as String)
                     })
@@ -179,7 +178,9 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
                     mWaitMergeTsList.clear()
                     FileUtils.deleteFile(TEMPPATH)
                     mProgressView.clear()
-                    Message.obtain(mHandler,PLAY_MP4,outputMixPath).sendToTarget()
+                    val msg =  Message.obtain(mHandler,PLAY_MP4,outputMixPath)
+                    mHandler.sendMessageDelayed(msg,1500)
+                    finish()
                 }
         }
         muxerButton.setOnClickListener {

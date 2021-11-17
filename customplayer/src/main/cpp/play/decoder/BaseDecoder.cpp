@@ -125,6 +125,7 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
     baseDecoder -> mDataConverter ->Init(pCodecContext);
     int ret;
     call(reinterpret_cast<long>(getJniPlayerFromJava()));
+    int defaultSyncTimeType = 2; // 视频向音频同步
     while (isRunning){
         // pause
         std::unique_lock<std::mutex> uniqueLock(customMutex);
@@ -160,7 +161,10 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
         }
 
         if (packet->stream_index == stream_index){
-            if (!timeHelper->syncTime(true,packet,frame,pContext,stream_index)){
+            TimeSyncBean dtsBean;
+            dtsBean.type = defaultSyncTimeType;
+            dtsBean.currentAudioPts = getCurrentAudioPts();
+            if (!timeHelper->syncTime(true,packet,frame,pContext,stream_index,&dtsBean)){
                 continue;
             }
             ret = avcodec_send_packet(pCodecContext, packet);
@@ -173,13 +177,17 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
                 double currentDtsDuration =
                         packet->dts * av_q2d(pContext->streams[stream_index]->time_base);
                 int currentProgress = (int)currentDtsDuration;
+                currentAudioPts = packet->dts * av_q2d(pContext -> streams[stream_index]->time_base) * 1000;
 //                LOGCATE("current time:%d",currentProgress);
                 MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED,currentProgress,0));
             }
             while (avcodec_receive_frame(pCodecContext, frame) == 0){
 //                LOGCATE("avcodec_receive_frame receive success");
-                if (!timeHelper->syncTime(false,packet,frame,pContext,stream_index)){
-                    goto innerEnd;;
+                TimeSyncBean ptsBean;
+                ptsBean.type = defaultSyncTimeType;
+                ptsBean.currentAudioPts = getCurrentAudioPts();
+                if (!timeHelper->syncTime(false,packet,frame,pContext,stream_index,&ptsBean)){
+                    goto innerEnd;
                 }
                 baseDecoder -> mDataConverter ->covertData(frame);
             }
@@ -237,6 +245,7 @@ BaseDecoder::BaseDecoder(){
     videoRender = 0;
     mDataConverter = 0;
     mManualSeekPosition = -1;
+    currentAudioPts = 0LL;
 }
 
 void BaseDecoder::OnDecodeReady(AVFormatContext *pContext, int streamIndex) {

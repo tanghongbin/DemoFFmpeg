@@ -10,7 +10,16 @@
 #include <render/VideoRender.h>
 
 class AudioDecoder : public BaseDecoder{
+private:
+    AudioDecoder(){}
+    static AudioDecoder* instance;
+public:
     BaseDataCoverter * createConverter();
+    int64_t getCurrentAudioPts() {
+        return currentAudioPts;
+    }
+    static AudioDecoder* getInstance();
+    static void destroyInstance();
 };
 
 class VideoDecoder : public BaseDecoder{
@@ -25,6 +34,9 @@ public:
     void drawVideoFrame();
     void OnSurfaceChanged(int oreration,int width,int height);
     void OnSizeReady();
+    int64_t getCurrentAudioPts() {
+        return AudioDecoder::getInstance()->getCurrentAudioPts();
+    }
 };
 
 #endif //DEMOFFMPEG_IMLDECODER_H

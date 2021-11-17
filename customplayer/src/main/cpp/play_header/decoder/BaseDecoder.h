@@ -26,9 +26,11 @@ private:
     void decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i,
                     BaseDecoder *pDecoder);
     void OnDecodeReady(AVFormatContext *pContext, int i);
+
 protected:
     // 1-音频，2-视频
     int appointMediaType;
+    int64_t currentAudioPts;
 
 protected:
     virtual BaseDataCoverter * createConverter() = 0;

@@ -7,10 +7,25 @@
 #include <render/OpenGLFFmpegConverter.h>
 
 
+AudioDecoder* AudioDecoder::instance = nullptr;
+
 BaseDataCoverter *AudioDecoder::createConverter()  {
     return new AudioDataConverter;
 }
 
+AudioDecoder* AudioDecoder::getInstance(){
+    if (instance == nullptr){
+        instance = new AudioDecoder;
+    }
+    return instance;
+}
+
+void AudioDecoder::destroyInstance(){
+    if (instance != nullptr){
+        delete instance;
+        instance = nullptr;
+    }
+}
 
 BaseDataCoverter *VideoDecoder::createConverter()  {
     OpenGLFFmpegConverter* glfFmpegConverter = new OpenGLFFmpegConverter;
