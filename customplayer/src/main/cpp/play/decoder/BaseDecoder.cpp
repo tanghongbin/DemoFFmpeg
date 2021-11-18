@@ -152,8 +152,11 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
         ret = av_read_frame(pContext, packet);
         if (ret == AVERROR_EOF){
             LOGCATE("start to read AVERROR_EOF %d",ret);
-            MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_COMPLETE,0,0));
-            goto DecodeLoopEnd;
+            if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+                MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_COMPLETE,0,0));
+            }
+            Stop();
+            continue;
         }else if(ret < 0){
             LOGCATE("start to read error  %d",ret);
             MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_ERROR,ret,0,av_err2str(ret)));
@@ -235,6 +238,11 @@ void BaseDecoder::Stop(){
 void BaseDecoder::ManualSeekPosition(int position){
     std::lock_guard<std::mutex> lockGuard(customMutex);
     mManualSeekPosition = position;
+}
+
+void BaseDecoder::Replay(){
+    ManualSeekPosition(0);
+    Start();
 }
 
 BaseDecoder::BaseDecoder(){

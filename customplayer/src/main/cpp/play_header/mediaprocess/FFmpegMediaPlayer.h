@@ -24,6 +24,7 @@ public:
     void Start() ;
     void Stop() ;
     void SeekTo(int second) ;
+    void Replay();
 };
 
 #endif //DEMOFFMPEG_FFMPEGMEDIAPLAYER_H

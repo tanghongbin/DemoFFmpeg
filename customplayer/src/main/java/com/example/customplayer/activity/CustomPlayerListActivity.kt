@@ -28,7 +28,7 @@ class CustomPlayerListActivity : AppCompatActivity() {
         mRecyclePlayer.layoutManager = layoutManager
         val adapter = PlayerListAdapter()
         adapter.setOnItemClickListener { i, videoInfo ->
-            startActivity(Intent(this, PlayerDecodeFFmpegActivity::class.java).apply {
+            startActivity(Intent(this, AvEditorActivity::class.java).apply {
                 putExtra("url",videoInfo.data)
             })
         }

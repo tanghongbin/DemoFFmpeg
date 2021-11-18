@@ -26,6 +26,10 @@
             android:configChanges="screenSize|orientation"
             android:theme="@style/AppThemeNoActionBar"></activity>
         <activity
+            android:name=".activity.ffmpeg.AvEditorActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar"></activity>
+        <activity
             android:screenOrientation="portrait"
             android:name=".activity.ffmpeg.WebrtcActivity"
             android:configChanges="screenSize|orientation"

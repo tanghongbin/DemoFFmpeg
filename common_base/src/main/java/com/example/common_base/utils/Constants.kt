@@ -7,7 +7,8 @@ object Constants {
      * /storage/emulated/0/ffmpegtest/filterImg/test1.jpg
      */
     val FILD_DIR = "/ffmpegtest"
-    val FILD_VIDEO_DIR = "/ffmpegtest/videos"
+    val FILD_VIDEO_DIR =  "/ffmpegtest/videos"
+    val IMG_DIR =Environment.getExternalStorageDirectory().absolutePath + "/ffmpegtest/img"
     val FLV_ONLINE = "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
     val RTMP_WINDOW_PUSH = "rtmp://106.13.78.235:1935/demo/windowsPush"
     val RTMP_ANDROID_PUSH = "rtmp://106.13.78.235:1935/demo/androidRtmpPush"

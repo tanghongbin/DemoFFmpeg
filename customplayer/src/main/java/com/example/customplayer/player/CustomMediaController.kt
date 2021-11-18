@@ -154,6 +154,8 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1) : GLSurfaceView
 
     external fun native_init_player()
 
+    external fun native_replay()
+
     /**====================  编码器  encoder 方法 **********************/
 
     /**

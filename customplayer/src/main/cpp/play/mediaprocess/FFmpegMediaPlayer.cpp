@@ -69,3 +69,8 @@ void FFmpegMediaPlayer::SeekTo(int second) {
     audioDecoder->ManualSeekPosition(second);
     videoDecoder->ManualSeekPosition(second);
 }
+
+void FFmpegMediaPlayer::Replay(){
+    audioDecoder->Replay();
+    videoDecoder->Replay();
+}

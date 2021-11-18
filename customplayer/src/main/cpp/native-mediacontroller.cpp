@@ -246,6 +246,16 @@ JNIEXPORT void JNICALL native_setSpeed(JNIEnv *env, jobject instance,jdouble spe
 }
 
 
+JNIEXPORT void JNICALL native_replay(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer != NULL)
+        mediaPlayer->Replay();
+}
+
+
+
+
+
 /***
  *  ===================================   注释方法部分   ==================================
  */
@@ -271,6 +281,8 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_audioData",               "([BI)V",            (void *) (native_audioData)},
         {"native_configAudioParams",               "(II)V",            (void *) (native_configAudioParams)},
         {"native_setSpeed",               "(D)V",            (void *) (native_setSpeed)},
+        {"native_replay",               "()V",            (void *) (native_replay)},
+
 
 };
 

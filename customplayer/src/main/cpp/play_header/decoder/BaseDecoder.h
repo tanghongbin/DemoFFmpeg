@@ -53,6 +53,7 @@ public:
     void Start();
     void Stop();
     void ManualSeekPosition(int position);
+    void Replay();
     BaseDecoder();
 };
 

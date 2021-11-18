@@ -4,14 +4,23 @@ import android.content.pm.ActivityInfo
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
+import com.coder.ffmpeg.utils.FFmpegUtils
+import com.example.common_base.utils.Constants.IMG_DIR
+import com.example.common_base.utils.FileUtils
 import com.example.common_base.utils.log
+import com.example.common_base.utils.showViews
 import com.example.common_base.utils.toastSafe
 import com.example.customplayer.R
 import com.example.customplayer.interfaces.*
 import com.example.customplayer.player.CustomMediaController
+import com.example.customplayer.util.CustomFFmpegCmdUtils
+import com.example.customplayer.util.getRamdowVideoPath
+import com.example.customplayer.util.runFFmpegCommand
 import kotlinx.android.synthetic.main.activity_player_detail.*
+import java.io.File
 import kotlin.random.Random
 
 /***
@@ -40,6 +49,28 @@ class AvEditorActivity : AppCompatActivity(){
             }
             requestedOrientation = oreration
         }
+        showViews(mCutVideo,mWaterMask)
+        mWaterMask.setOnClickListener {
+            val picPath = "${IMG_DIR}/container.jpg"
+            val outputPath = getRamdowVideoPath("watermask")
+            if (!FileUtils.isFileExist(outputPath)){
+                File(outputPath).createNewFile()
+            }
+            val command = FFmpegUtils.addWaterMark(mUrl,picPath,outputPath)
+//            val command = "ffmpeg -i $mUrl -i $picPath -filter_complex overlay=600:15 -acodec copy -b:v 2500k $outputPath"
+            runFFmpegCommand(command){
+                log("添加水印成功")
+                convertSuccess(outputPath)
+            }
+        }
+        mCutVideo.setOnClickListener {
+            val outputPath = getRamdowVideoPath("cut")
+            FileUtils.createFileIfNotExist(outputPath)
+            val command = CustomFFmpegCmdUtils.cutVideo(mUrl,0,10,outputPath)
+            runFFmpegCommand(command) {
+                convertSuccess(outputPath)
+            }
+        }
         mPlayPause.setOnClickListener {
             isPlaying = !isPlaying
             if (isPlaying){
@@ -63,9 +94,12 @@ class AvEditorActivity : AppCompatActivity(){
 
         })
         setupListener()
-        mPlayer.native_setDataUrl(mUrl)
-        mPlayer.native_prepare()
         log("打印当前时间java:${System.currentTimeMillis()}")
+    }
+
+    private fun convertSuccess(outputPath: String) {
+        mPlayer.native_setDataUrl(outputPath)
+        mPlayer.native_prepare()
     }
 
     private fun setupListener() {
@@ -79,6 +113,7 @@ class AvEditorActivity : AppCompatActivity(){
         mPlayer.setOnCompleteListener(object : OnCompleteListener {
             override fun onComplete() {
                 log("播放完成")
+                mPlayer.native_replay()
             }
         })
         mPlayer.setOnErrorListener(object : OnErrorListener {

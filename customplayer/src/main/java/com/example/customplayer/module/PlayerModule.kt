@@ -19,6 +19,7 @@ import kotlin.collections.ArrayList
 class PlayerModule {
 
     private val tempPathDir by lazy { DemoApplication.getInstance().cacheDir.path + File.separator + "demoFFmpegThubm" }
+    private val mVideoList = mutableListOf<VideoInfo>()
 
     private val sLocalVideoColumns = arrayOf<String>(
         MediaStore.Video.Media._ID,  // 视频id
@@ -58,6 +59,7 @@ class PlayerModule {
         DemoApplication.getInstance().runAsyncTask({
             internalLoadVideoList()
         },{
+            mVideoList.addAll(it)
             block(it)
         })
     }

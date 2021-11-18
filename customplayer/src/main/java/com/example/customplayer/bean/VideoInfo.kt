@@ -1,6 +1,8 @@
 package com.example.customplayer.bean
 
-class VideoInfo {
+import java.io.Serializable
+
+class VideoInfo : Serializable {
      var id = 0
      var data: String? = null
      var size: Long = 0

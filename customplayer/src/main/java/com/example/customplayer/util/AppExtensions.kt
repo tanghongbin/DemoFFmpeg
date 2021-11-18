@@ -10,15 +10,22 @@ import com.example.common_base.utils.runAsyncTask
 
 
 fun runFFmpegCommand(command:String,success:() -> Unit){
+    runFFmpegCommand(command.split(" ").toTypedArray(),success)
+}
+
+fun runFFmpegCommand(command:Array<String?>,success:() -> Unit){
     FFmpegCommand.setDebug(true)
     DemoApplication.getInstance().runAsyncTask({
-        FFmpegCommand.runCmd(command.split(" ").toTypedArray(),object : SimpleFFmpegCallback() {
+        FFmpegCommand.runCmd(command,object : SimpleFFmpegCallback() {
             override fun onComplete() {
                 success()
             }
+
+            override fun onProgress(progress: Int, pts: Long) {
+                log("打印总进度:  ${progress}%")
+            }
         })
     })
-
 }
 
 
@@ -27,7 +34,8 @@ abstract class SimpleFFmpegCallback : IFFmpegCallBack {
       override fun onError(errorCode: Int, errorMsg: String?) {
           log("打印命令失败:${errorMsg}")
       }
-      override fun onProgress(progress: Int, pts: Long) {}
+      override fun onProgress(progress: Int, pts: Long) {
+      }
       override fun onStart() {}
 }
 

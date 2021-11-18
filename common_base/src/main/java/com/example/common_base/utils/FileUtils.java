@@ -568,6 +568,22 @@ public class FileUtils {
         File file = new File(filePath);
         return (file.exists() && file.isFile());
     }
+    public static boolean createFileIfNotExist(String path){
+        boolean isExist = isFileExist(path);
+        if (isExist) return true;
+        File file = new File(path);
+        if (!file.getParentFile().exists()){
+            //noinspection ResultOfMethodCallIgnored
+            file.getParentFile().mkdirs();
+        }
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 
     public static boolean isFolder(String filePath) {
         if (TextUtils.isEmpty(filePath)) {
