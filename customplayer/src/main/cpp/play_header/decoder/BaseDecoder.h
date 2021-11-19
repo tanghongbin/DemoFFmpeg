@@ -20,7 +20,7 @@ private:
 
     std::thread* readThread;
     const char * mUrl;
-    bool isRunning = true;
+    bool isRunning;
     bool isStarted;
     int mManualSeekPosition;
     void decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i,
@@ -36,9 +36,11 @@ protected:
     virtual BaseDataCoverter * createConverter() = 0;
     virtual int64_t getCurrentAudioPts() {};
 public:
+    BaseDecoder();
     AVCodecContext* codeCtx;
-    static void resolveConvertResult(void * decoder,void * data);
+    static void resolveConvertResult(void * decoder,void * data,int size);
     VideoRender* videoRender;
+    OpenSLESRender* audioRender;
     std::mutex customMutex;
     std::condition_variable condition;
     std::mutex createSurfaceMutex;
@@ -50,11 +52,11 @@ public:
     };
     void Init(const char * url);
     void Destroy();
+    void Reset();
     void Start();
     void Stop();
     void ManualSeekPosition(int position);
     void Replay();
-    BaseDecoder();
 };
 
 #endif //DEMOFFMPEG_BASEDECODER_H

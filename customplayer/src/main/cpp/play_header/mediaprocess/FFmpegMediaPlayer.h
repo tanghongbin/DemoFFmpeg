@@ -23,6 +23,7 @@ public:
     void Prepare() ;
     void Start() ;
     void Stop() ;
+    void Reset();
     void SeekTo(int second) ;
     void Replay();
 };

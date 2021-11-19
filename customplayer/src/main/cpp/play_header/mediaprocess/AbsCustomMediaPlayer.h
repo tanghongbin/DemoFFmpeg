@@ -17,7 +17,6 @@ class AbsCustomMediaPlayer{
 
 private:
     std::mutex absMutex;
-    int prepareCount;
 
 protected:
     char mUrl[1024];
@@ -30,6 +29,9 @@ protected:
             MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_PREPARED,0,0));
         }
     }
+
+protected:
+    int prepareCount;
 public:
     virtual void Init() = 0;
     virtual void OnSurfaceCreated() {  };
@@ -45,6 +47,7 @@ public:
     virtual void Start() = 0;
     virtual void Stop() = 0;
     virtual void SeekTo(int second) = 0;
+    virtual void Reset(){};
     AbsCustomMediaPlayer(){
         prepareCount = 0;
     }

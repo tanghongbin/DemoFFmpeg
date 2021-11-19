@@ -19,15 +19,22 @@ void BaseDecoder::Init(const char * url){
         LOGCATE("you must setup appoing type");
         exit(0);
     }
+    isRunning = true;
+    if (appointMediaType == 1 && !audioRender){
+        audioRender = new OpenSLESRender;
+        audioRender->Init();
+    }
     mUrl = url;
     readThread = new std::thread(BaseDecoder::createReadThread, this);
 }
 
-void BaseDecoder::resolveConvertResult(void * decoder,void * data){
+void BaseDecoder::resolveConvertResult(void * decoder,void * data,int size){
 //    LOGCATE("resolveConvertResult receive data");
-    BaseDecoder* baseDecoder = static_cast<BaseDecoder *>(decoder);
+    auto* baseDecoder = static_cast<BaseDecoder *>(decoder);
     if (baseDecoder->appointMediaType == 2 && baseDecoder->videoRender){
         baseDecoder->videoRender->copyImage(static_cast<NativeOpenGLImage *>(data));
+    } else if (baseDecoder->appointMediaType == 1 && baseDecoder->audioRender) {
+        baseDecoder->audioRender->RenderAudioFrame(static_cast<uint8_t *>(data), size);
     }
 }
 
@@ -98,7 +105,7 @@ void BaseDecoder::createReadThread(BaseDecoder *baseDecoder) {
     if (codeCtx){
         avcodec_free_context(&codeCtx);
     }
-    LOGCATE("all ctx are freed");
+    LOGCATE("all ctx are freed,the thread has end");
 }
 
 void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int stream_index,
@@ -116,12 +123,12 @@ void BaseDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecCo
            LOGCATE("after wait decodeLoop videoRender is null:%p",baseDecoder->videoRender);
        }
         uniqueLock.unlock();
-        baseDecoder->mDataConverter->convertResult = BaseDecoder::resolveConvertResult;
-        baseDecoder->mDataConverter->baseDecoder = this;
         auto* videoDecoder = dynamic_cast<VideoDecoder *>(baseDecoder);
         videoDecoder -> OnSizeReady();
        LOGCATE("decodeLoop set render success:%p",baseDecoder->videoRender);
     }
+    baseDecoder->mDataConverter->convertResult = BaseDecoder::resolveConvertResult;
+    baseDecoder->mDataConverter->baseDecoder = this;
     baseDecoder -> mDataConverter ->Init(pCodecContext);
     int ret;
     call(reinterpret_cast<long>(getJniPlayerFromJava()));
@@ -219,9 +226,27 @@ void BaseDecoder::Destroy(){
     }
     isRunning = false;
     condition.notify_one();
-    readThread->join();
-    delete readThread;
-    readThread = nullptr;
+    if (readThread) {
+        readThread->join();
+        delete readThread;
+        readThread = nullptr;
+    }
+    if (audioRender) {
+        audioRender->UnInit();
+        delete audioRender;
+        audioRender = 0;
+    }
+}
+
+void BaseDecoder::Reset(){
+    Stop();
+    isRunning = false;
+    condition.notify_one();
+    if (readThread) {
+        readThread->join();
+        delete readThread;
+        readThread = nullptr;
+    }
 }
 
 void BaseDecoder::Start(){
@@ -251,6 +276,7 @@ BaseDecoder::BaseDecoder(){
     isStarted = false;
     mDataConverter = 0;
     videoRender = 0;
+    audioRender = 0;
     mDataConverter = 0;
     mManualSeekPosition = -1;
     currentAudioPts = 0LL;

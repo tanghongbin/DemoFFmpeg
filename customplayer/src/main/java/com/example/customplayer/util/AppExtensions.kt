@@ -1,6 +1,7 @@
 package com.example.customplayer.util
 
 import android.app.Activity
+import android.os.Handler
 import android.widget.Toast
 import com.coder.ffmpeg.call.IFFmpegCallBack
 import com.coder.ffmpeg.jni.FFmpegCommand
@@ -18,7 +19,8 @@ fun runFFmpegCommand(command:Array<String?>,success:() -> Unit){
     DemoApplication.getInstance().runAsyncTask({
         FFmpegCommand.runCmd(command,object : SimpleFFmpegCallback() {
             override fun onComplete() {
-                success()
+                Handler(DemoApplication.getInstance().mainLooper).post { success() }
+                log("打印命令完成线程:${Thread.currentThread().name}")
             }
 
             override fun onProgress(progress: Int, pts: Long) {

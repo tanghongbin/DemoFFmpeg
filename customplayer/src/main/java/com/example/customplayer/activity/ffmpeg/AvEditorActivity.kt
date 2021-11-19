@@ -60,6 +60,7 @@ class AvEditorActivity : AppCompatActivity(){
 //            val command = "ffmpeg -i $mUrl -i $picPath -filter_complex overlay=600:15 -acodec copy -b:v 2500k $outputPath"
             runFFmpegCommand(command){
                 log("添加水印成功")
+                mPlayer.native_resetPlay()
                 convertSuccess(outputPath)
             }
         }
@@ -68,6 +69,7 @@ class AvEditorActivity : AppCompatActivity(){
             FileUtils.createFileIfNotExist(outputPath)
             val command = CustomFFmpegCmdUtils.cutVideo(mUrl,0,10,outputPath)
             runFFmpegCommand(command) {
+                mPlayer.native_resetPlay()
                 convertSuccess(outputPath)
             }
         }
@@ -94,6 +96,7 @@ class AvEditorActivity : AppCompatActivity(){
 
         })
         setupListener()
+        convertSuccess(mUrl)
         log("打印当前时间java:${System.currentTimeMillis()}")
     }
 

@@ -71,5 +71,5 @@ void OpenGLFFmpegConverter::covertData(AVFrame *frame) {
 //        image.ppPlane[0] = m_RGBAFrame->data[0];
     }
 //    LOGCATE("decode success");
-    convertResult(baseDecoder,&image);
+    convertResult(baseDecoder,&image,0);
 }

@@ -40,8 +40,6 @@ void AudioDataConverter::Init(AVCodecContext* codeCtx){
     m_BufferSize = av_samples_get_buffer_size(NULL, AUDIO_DST_CHANNEL_COUNTS, m_nbSamples,
                                               DST_SAMPLT_FORMAT, 1);
     m_AudioOutBuffer = (uint8_t *) malloc(m_BufferSize);
-    openSlesRender = new OpenSLESRender;
-    openSlesRender->Init();
 }
 
 void AudioDataConverter::covertData(AVFrame * pFrame){
@@ -51,14 +49,12 @@ void AudioDataConverter::covertData(AVFrame * pFrame){
 //    LOGCATE("resample result: %d",result);
 //    LOGCATE("当前音频时间戳:%jd", GLUtilC::master_audio_clock);
     if (result > 0) {
-        openSlesRender->RenderAudioFrame(m_AudioOutBuffer, m_BufferSize);
+        convertResult(baseDecoder,m_AudioOutBuffer,m_BufferSize);
     }
 
 }
 
 void AudioDataConverter::Destroy(){
     free(m_AudioOutBuffer);
-    openSlesRender->UnInit();
-    delete openSlesRender;
 }
 

@@ -159,6 +159,14 @@ JNIEXPORT void JNICALL native_stop(JNIEnv *env, jobject instance) {
     mediaPlayer->Stop();
 }
 
+JNIEXPORT void JNICALL native_resetPlay(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer == NULL) return;
+    mediaPlayer->Reset();
+}
+
+
+
 JNIEXPORT void JNICALL native_seekTo(JNIEnv *env, jobject instance,jint seekProgress) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer == NULL) return;
@@ -272,6 +280,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_prepare",               "()V",            (void *) (native_prepare)},
         {"native_start",               "()V",            (void *) (native_start)},
         {"native_stop",               "()V",            (void *) (native_stop)},
+        {"native_resetPlay",               "()V",            (void *) (native_resetPlay)},
         {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
         {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
 

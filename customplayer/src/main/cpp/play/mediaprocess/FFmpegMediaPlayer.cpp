@@ -51,6 +51,7 @@ void FFmpegMediaPlayer::Destroy() {
 
 void FFmpegMediaPlayer::Prepare() {
     LOGCATE("start FFmpegMediaPlayer prepare");
+    prepareCount = 0;
     audioDecoder->Init(mUrl);
     videoDecoder->Init(mUrl);
 }
@@ -63,6 +64,11 @@ void FFmpegMediaPlayer::Start() {
 void FFmpegMediaPlayer::Stop() {
     audioDecoder->Stop();
     videoDecoder->Stop();
+}
+
+void FFmpegMediaPlayer::Reset(){
+    audioDecoder->Reset();
+    videoDecoder->Reset();
 }
 
 void FFmpegMediaPlayer::SeekTo(int second) {

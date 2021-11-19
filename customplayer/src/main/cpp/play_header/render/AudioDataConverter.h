@@ -26,7 +26,6 @@ private:
     SwrContext *m_SwrContext;
     int m_BufferSize;
     uint8_t *m_AudioOutBuffer;
-    OpenSLESRender *openSlesRender;
 };
 
 #endif //DEMOFFMPEG_AUDIODATACONVERTER_H
