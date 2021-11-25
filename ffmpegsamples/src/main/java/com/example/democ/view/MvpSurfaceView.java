@@ -1,4 +1,4 @@
-package com.example.democ.view;
+package com.testthb.democ.view;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
-import com.example.democ.opengles.NativeRender;
+import com.testthb.democ.opengles.NativeRender;
 
 
 public class MvpSurfaceView extends GLSurfaceView implements ScaleGestureDetector.OnScaleGestureListener {

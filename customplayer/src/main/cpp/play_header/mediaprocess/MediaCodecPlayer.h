@@ -5,23 +5,29 @@
 #ifndef DEMOFFMPEG_MEDIACODECMEDIAPLAYER_H
 #define DEMOFFMPEG_MEDIACODECMEDIAPLAYER_H
 
-#include <decoder/BaseDecoder.h>
+#include <decoder/BaseFFmpegDecoder.h>
 #include <render/BaseRender.h>
+#include <decoder/hw/BaseHwDecoder.h>
 #include "AbsCustomMediaPlayer.h"
 
 class MediaCodecPlayer : public AbsCustomMediaPlayer{
 private:
-    BaseDecoder* audioDecoder;
-    BaseDecoder* videoDecoder;
-    BaseRender* audioRender;
-    BaseRender* videoRender;
+    BaseHwDecoder* audioDecoder;
+    BaseHwDecoder* videoDecoder;
 
 public:
+    MediaCodecPlayer();
     void Init();
     void OnSurfaceCreated();
-    void OnSurfaceChanged(int width,int height);
+    void OnSurfaceChanged(int oreration,int width,int height);
     void OnDrawFrame();
     void Destroy();
+    void Prepare() ;
+    void Start() ;
+    void Stop() ;
+    void Reset();
+    void SeekTo(int second) ;
+    void Replay();
 };
 
 #endif //DEMOFFMPEG_MEDIACODECMEDIAPLAYER_H

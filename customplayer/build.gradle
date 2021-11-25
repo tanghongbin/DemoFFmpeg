@@ -8,7 +8,7 @@ android {
     buildToolsVersion rootProject.ext.android.buildToolsVersion
     //默认的配置
     defaultConfig {
-        applicationId "com.example.customplayer"
+        applicationId "com.testthb.customplayer"
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
         versionCode rootProject.ext.android.versionCode

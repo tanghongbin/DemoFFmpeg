@@ -1,11 +1,11 @@
-package com.example.democ.hwencoder;
+package com.testthb.democ.hwencoder;
 
 import android.annotation.TargetApi;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 
-import com.example.democ.utils.LogUtils;
+import com.testthb.democ.utils.LogUtils;
 
 
 /**

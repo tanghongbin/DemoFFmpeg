@@ -1,4 +1,4 @@
-package com.example.camera.util;
+package com.testthb.camera.util;
 
 import android.app.Activity;
 import android.content.Context;

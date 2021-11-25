@@ -1,4 +1,4 @@
-package com.example.democ.rtmp.amf;
+package com.testthb.democ.rtmp.amf;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

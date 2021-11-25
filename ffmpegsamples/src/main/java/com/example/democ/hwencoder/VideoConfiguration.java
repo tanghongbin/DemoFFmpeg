@@ -1,4 +1,4 @@
-package com.example.democ.hwencoder;
+package com.testthb.democ.hwencoder;
 
 /**
  * @Title: VideoConfiguration

@@ -21,7 +21,8 @@
 #include <encoder/ShortVideoMuxer.h>
 #include <encoder/OutputDisplayHelper.h>
 
-#define NATIVE_RENDER_CLASS_ "com/example/customplayer/player/CustomMediaController"
+//com.testthb.customplayer.player
+#define NATIVE_RENDER_CLASS_ "com/testthb/customplayer/player/CustomMediaController"
 
 
 #ifdef __cplusplus
@@ -50,7 +51,7 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
     if (mediaMuxer) mediaMuxer->OnSurfaceCreate();
 
     auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (outputDisplayHelper) outputDisplayHelper->OnSurfaceCreate();
+    if (outputDisplayHelper && mediaMuxer) outputDisplayHelper->OnSurfaceCreate();
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint oretenation,jint width,jint height) {
@@ -61,7 +62,7 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jin
     if (mediaMuxer) mediaMuxer->OnSurfaceChanged(width,height);
 
     auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (outputDisplayHelper) outputDisplayHelper->OnSurfaceChanged(width,height);
+    if (outputDisplayHelper && mediaMuxer) outputDisplayHelper->OnSurfaceChanged(width,height);
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
@@ -72,7 +73,7 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
     if (mediaMuxer != NULL) mediaMuxer->OnDrawFrame();
 
     auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (outputDisplayHelper) outputDisplayHelper->OnDrawFrame();
+    if (outputDisplayHelper && mediaMuxer) outputDisplayHelper->OnDrawFrame();
 }
 
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
@@ -102,14 +103,17 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
     LOGCATE("destroy all over");
 }
 
-JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance) {
+JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance,jint playerType) {
     JavaVmManager::setInstance(env,instance);
     MsgLoopHelper::initMsgLoop();
-    FFmpegMediaPlayer *mediaPlayer = new FFmpegMediaPlayer;
+    AbsCustomMediaPlayer *mediaPlayer;
+    if (playerType == 1) {
+        mediaPlayer = new FFmpegMediaPlayer;
+    } else {
+        mediaPlayer = new MediaCodecPlayer;
+    }
     setJniPointToJava(env,"mNativePlayer","J", mediaPlayer);
     mediaPlayer->Init();
-    LOGCATE("has enter env:%p instance:%p  测试数字:%lf   文字:%s  nubmer:%d"
-            ,env,instance,mysqrt(592.32),getInfo(),computeFour(100));
 }
 
 
@@ -275,7 +279,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_OnDrawFrame",               "()V",            (void *) (native_OnDrawFrame)},
         {"native_OnDestroy",               "()V",            (void *) (native_OnDestroy)},
 
-        {"native_init_player",               "()V",            (void *) (native_init_player)},
+        {"native_init_player",               "(I)V",            (void *) (native_init_player)},
         {"native_init_muxer",               "(I)V",            (void *) (native_init_muxer)},
         {"native_prepare",               "()V",            (void *) (native_prepare)},
         {"native_start",               "()V",            (void *) (native_start)},

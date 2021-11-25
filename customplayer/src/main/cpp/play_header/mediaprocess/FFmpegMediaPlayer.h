@@ -5,14 +5,14 @@
 #ifndef DEMOFFMPEG_FFMPEGMEDIAPLAYER_H
 #define DEMOFFMPEG_FFMPEGMEDIAPLAYER_H
 
-#include <decoder/BaseDecoder.h>
+#include <decoder/BaseFFmpegDecoder.h>
 #include "AbsCustomMediaPlayer.h"
 
 class FFmpegMediaPlayer : public AbsCustomMediaPlayer{
 
 private:
-    BaseDecoder* audioDecoder = 0;
-    BaseDecoder* videoDecoder = 0;
+    BaseFFmpegDecoder* audioDecoder = 0;
+    BaseFFmpegDecoder* videoDecoder = 0;
 
 public:
     void Init();

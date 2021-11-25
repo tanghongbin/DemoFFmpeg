@@ -1,4 +1,4 @@
-package com.example.camera;
+package com.testthb.camera;
 
 /**
  * 作者：请叫我百米冲刺 on 2017/11/20 下午3:05

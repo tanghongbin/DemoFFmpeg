@@ -1,10 +1,10 @@
-package com.example.camera.util;
+package com.testthb.camera.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
 
-import com.example.common_base.DemoApplication;
+import com.testthb.common_base.DemoApplication;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

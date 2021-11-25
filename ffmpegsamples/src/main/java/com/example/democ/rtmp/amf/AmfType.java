@@ -1,4 +1,4 @@
-package com.example.democ.rtmp.amf;
+package com.testthb.democ.rtmp.amf;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.example.camera.manager;
+package com.testthb.camera.manager;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,12 +15,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-import com.example.camera.Contacts;
-import com.example.camera.listener.CameraPictureListener;
-import com.example.camera.listener.CameraYUVDataListener;
-import com.example.camera.util.CameraUtil;
-import com.example.camera.util.SPUtil;
-import com.example.common_base.DemoApplication;
+import com.testthb.camera.Contacts;
+import com.testthb.camera.listener.CameraPictureListener;
+import com.testthb.camera.listener.CameraYUVDataListener;
+import com.testthb.camera.util.CameraUtil;
+import com.testthb.camera.util.SPUtil;
+import com.testthb.common_base.DemoApplication;
 
 import java.io.ByteArrayOutputStream;
 

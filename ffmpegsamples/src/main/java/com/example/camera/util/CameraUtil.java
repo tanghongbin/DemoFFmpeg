@@ -1,4 +1,4 @@
-package com.example.camera.util;
+package com.testthb.camera.util;
 
 import android.app.Activity;
 import android.graphics.ImageFormat;
@@ -6,7 +6,7 @@ import android.hardware.Camera;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import com.example.camera.Contacts;
+import com.testthb.camera.Contacts;
 
 import java.io.IOException;
 import java.util.List;

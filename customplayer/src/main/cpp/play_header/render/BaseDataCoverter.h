@@ -14,6 +14,12 @@ extern "C" {
 #include <libavutil/frame.h>
 };
 
+typedef struct _data_convert_info {
+    uint8_t * data;
+    int size;
+    AVFrame * frameData;
+} DataConvertInfo;
+
 // 数据转换，yuv -> rgb,音频重采样等
 class BaseDataCoverter{
 protected:
@@ -22,7 +28,7 @@ public:
     ConvertResult convertResult;
     void * baseDecoder;
     virtual void Init(AVCodecContext* codecContext) = 0;
-    virtual void covertData(AVFrame *data) = 0;
+    virtual void covertData(DataConvertInfo *data) = 0;
     virtual void Destroy() = 0;
     virtual void drawVideoFrame() {};
     BaseDataCoverter(){

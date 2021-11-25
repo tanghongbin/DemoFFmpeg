@@ -1,11 +1,11 @@
-package com.example.democ.utils;
+package com.testthb.democ.utils;
 
 import android.annotation.TargetApi;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
-import com.example.democ.hwencoder.AudioConfiguration;
+import com.testthb.democ.hwencoder.AudioConfiguration;
 
 /**
  * @Title: AudioUtils

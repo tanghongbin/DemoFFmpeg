@@ -1,19 +1,19 @@
-package com.example.democ.rtmp.packer.rtmp;
+package com.testthb.democ.rtmp.packer.rtmp;
 
 import android.media.MediaCodec;
 
 
-import com.example.democ.rtmp.packer.AnnexbHelper;
-import com.example.democ.rtmp.packer.Packer;
-import com.example.democ.rtmp.packer.flv.FlvPackerHelper;
-import com.example.democ.utils.LogUtils;
+import com.testthb.democ.rtmp.packer.AnnexbHelper;
+import com.testthb.democ.rtmp.packer.Packer;
+import com.testthb.democ.rtmp.packer.flv.FlvPackerHelper;
+import com.testthb.democ.utils.LogUtils;
 
 import java.nio.ByteBuffer;
 
-import static com.example.democ.rtmp.packer.flv.FlvPackerHelper.AUDIO_HEADER_SIZE;
-import static com.example.democ.rtmp.packer.flv.FlvPackerHelper.AUDIO_SPECIFIC_CONFIG_SIZE;
-import static com.example.democ.rtmp.packer.flv.FlvPackerHelper.VIDEO_HEADER_SIZE;
-import static com.example.democ.rtmp.packer.flv.FlvPackerHelper.VIDEO_SPECIFIC_CONFIG_EXTEND_SIZE;
+import static com.testthb.democ.rtmp.packer.flv.FlvPackerHelper.AUDIO_HEADER_SIZE;
+import static com.testthb.democ.rtmp.packer.flv.FlvPackerHelper.AUDIO_SPECIFIC_CONFIG_SIZE;
+import static com.testthb.democ.rtmp.packer.flv.FlvPackerHelper.VIDEO_HEADER_SIZE;
+import static com.testthb.democ.rtmp.packer.flv.FlvPackerHelper.VIDEO_SPECIFIC_CONFIG_EXTEND_SIZE;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.example.democ.hwencoder;
+package com.testthb.democ.hwencoder;
 
 import android.annotation.TargetApi;
 import android.media.AudioFormat;
@@ -6,7 +6,7 @@ import android.media.AudioRecord;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 
-import com.example.democ.interfaces.SingleInterface;
+import com.testthb.democ.interfaces.SingleInterface;
 
 
 /**

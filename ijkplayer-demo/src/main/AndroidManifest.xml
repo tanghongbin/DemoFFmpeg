@@ -3,14 +3,14 @@
     package="com.example.ijkplayer_demo">
 
     <application
-        android:name="com.example.common_base.DemoApplication"
+        android:name="com.testthb.common_base.DemoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppThemeNoActionBar">
-        <activity android:name=".IjkSplashActivity">
+        <activity android:name="com.testthb.ijkplayer_demo.IjkSplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".FFmpegIjkPlayerActivity"
+            android:name="com.testthb.ijkplayer_demo.FFmpegIjkPlayerActivity"
             android:screenOrientation="portrait">
         </activity>
     </application>

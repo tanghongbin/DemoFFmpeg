@@ -1,4 +1,4 @@
-package com.example.camera.manager;
+package com.testthb.camera.manager;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -16,10 +16,10 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.example.camera.listener.CameraSurfaceListener;
-import com.example.camera.listener.CameraYUVDataListener;
-import com.example.camera.util.CameraUtil;
-import com.example.democ.R;
+import com.testthb.camera.listener.CameraSurfaceListener;
+import com.testthb.camera.listener.CameraYUVDataListener;
+import com.testthb.camera.util.CameraUtil;
+import com.testthb.democ.R;
 
 
 /**

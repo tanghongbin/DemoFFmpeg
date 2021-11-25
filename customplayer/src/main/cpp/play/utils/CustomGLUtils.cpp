@@ -451,6 +451,25 @@ void DeleteProgram(GLuint program) {
     }
 }
 
+size_t getFileSize(const char * filePath){
+    FILE* fp = fopen(filePath, "r+");
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    fclose(fp);
+    return size; //单位是：byte
+}
+
+bool startWith(const char * allStr,const char * prefix){
+    std::string resultAll = allStr;
+    std::string resultPrefix = prefix;
+    bool boolResult = resultAll.size() >= resultPrefix.size() &&
+                      resultAll.compare(0, resultPrefix.size(), prefix) == 0;
+    return boolResult;
+}
+
+bool endWith(const char * allStr,const char * prefix){
+    return 1;
+}
 
 std::thread *thread;
 

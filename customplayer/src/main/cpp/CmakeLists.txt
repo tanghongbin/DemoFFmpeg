@@ -22,6 +22,7 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/play/decoder/*.cpp
         ${CMAKE_SOURCE_DIR}/play/encoder/*.cpp
         ${CMAKE_SOURCE_DIR}/play/encoder/hw/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/decoder/hw/*.cpp
         ${CMAKE_SOURCE_DIR}/play/rtmp/*.cpp
         ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp
         ${CMAKE_SOURCE_DIR}/include/soundtouch/source/*.cpp

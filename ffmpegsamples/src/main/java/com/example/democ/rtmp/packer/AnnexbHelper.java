@@ -1,9 +1,9 @@
-package com.example.democ.rtmp.packer;
+package com.testthb.democ.rtmp.packer;
 
 import android.media.MediaCodec;
 
 
-import com.example.democ.utils.LogUtils;
+import com.testthb.democ.utils.LogUtils;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

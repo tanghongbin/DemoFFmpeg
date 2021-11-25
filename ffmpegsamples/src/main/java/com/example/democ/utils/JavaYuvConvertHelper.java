@@ -1,4 +1,4 @@
-package com.example.democ.utils;
+package com.testthb.democ.utils;
 
 import android.util.Log;
 

@@ -3,24 +3,24 @@
 //
 
 #include <mediaprocess/FFmpegMediaPlayer.h>
-#include <decoder/ImlDecoder.h>
-#include <render/VideoDataConverter.h>
+#include <decoder/ImlFFmpegDecoder.h>
+#include <render/FFmpegVideoToRgbConverter.h>
 
 void FFmpegMediaPlayer::Init(){
-    audioDecoder = AudioDecoder::getInstance();
+    audioDecoder = AudioFFmpegDecoder::getInstance();
     audioDecoder->call = prepareReady;
     audioDecoder->setMediaType(1);
-    videoDecoder = new VideoDecoder;
+    videoDecoder = new VideoFFmpegDecoder;
     videoDecoder->call = prepareReady;
     videoDecoder->setMediaType(2);
 }
 
 void FFmpegMediaPlayer::OnSurfaceCreated() {
-    VideoDecoder* videoResult = dynamic_cast<VideoDecoder *>(videoDecoder);
-    VideoRender *render = new VideoRender;
+    BaseDecoder* videoResult = videoDecoder;
+    auto *render = new VideoRender;
     render->Init();
-    videoResult->videoRender = render;
-    LOGCATE("OnSurfaceCreated create render success:%p videoResult:%p",render,videoResult->videoRender);
+    videoResult->setVideoRender(render);
+    LOGCATE("OnSurfaceCreated create render success:%p",render);
 }
 
 void FFmpegMediaPlayer::OnSurfaceChanged(int oreration,int width, int height)  {
@@ -28,21 +28,21 @@ void FFmpegMediaPlayer::OnSurfaceChanged(int oreration,int width, int height)  {
     videoDecoder->createSurfaceCondition.notify_one();
     uniqueLock.unlock();
     if (videoDecoder) {
-        VideoDecoder* videoResult = dynamic_cast<VideoDecoder *>(videoDecoder);
+        VideoFFmpegDecoder* videoResult = dynamic_cast<VideoFFmpegDecoder *>(videoDecoder);
         videoResult->OnSurfaceChanged(oreration,width,height);
     }
 }
 
 void FFmpegMediaPlayer::OnDrawFrame() {
     if (videoDecoder){
-        VideoDecoder* decoder = dynamic_cast<VideoDecoder *>(videoDecoder);
+        VideoFFmpegDecoder* decoder = dynamic_cast<VideoFFmpegDecoder *>(videoDecoder);
         decoder->drawVideoFrame();
     }
 }
 
 void FFmpegMediaPlayer::Destroy() {
     audioDecoder->Destroy();
-    AudioDecoder::destroyInstance();
+    AudioFFmpegDecoder::destroyInstance();
     audioDecoder = 0;
     videoDecoder->Destroy();
     delete videoDecoder;

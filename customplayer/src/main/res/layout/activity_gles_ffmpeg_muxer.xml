@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".activity.ffmpeg.FFmpegMuxerActivity">
 
-    <com.example.common_base.view.MyGLSurfaceView
+    <com.testthb.common_base.view.MyGLSurfaceView
         android:id="@+id/mGLESMuxerSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.example.customplayer.view.LineProgressView
+    <com.testthb.customplayer.view.LineProgressView
         android:layout_width="match_parent"
         android:id="@+id/mProgressView"
         android:layout_marginStart="@dimen/dimen_10dp"
@@ -30,7 +30,7 @@
         tools:layout_editor_absoluteY="64dp" />
 
 
-    <com.example.customplayer.view.CommonTabLayout
+    <com.testthb.customplayer.view.CommonTabLayout
         android:layout_marginLeft="@dimen/dimen_50dp"
         android:layout_marginRight="@dimen/dimen_50dp"
         android:id="@+id/douyin_button_speed_tab"
@@ -58,7 +58,7 @@
 
 
 
-    <com.example.customplayer.view.RecordButton
+    <com.testthb.customplayer.view.RecordButton
         android:layout_width="150dp"
         android:id="@+id/mRecordButton"
         android:layout_gravity="bottom|center_horizontal"

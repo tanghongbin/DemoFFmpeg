@@ -20,6 +20,7 @@ void JavaVmManager::initVm(JNIEnv *jniEnv)  {
 
 JNIEnv *JavaVmManager::GetEnv(bool *attach) {
     JNIEnv *jniEnv;
+    if (javaVm == nullptr) return nullptr;
     int status = javaVm->GetEnv(reinterpret_cast<void **>(&jniEnv), JNI_VERSION_1_6);
     if (status != JNI_OK) {
         status = javaVm->AttachCurrentThread(&jniEnv, nullptr);

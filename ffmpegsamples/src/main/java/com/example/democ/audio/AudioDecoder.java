@@ -11,7 +11,7 @@
  *  @author  Jhuster
  *  @date    2016/04/02
  */
-package com.example.democ.audio;
+package com.testthb.democ.audio;
 
 import android.annotation.TargetApi;
 import android.media.MediaCodec;

@@ -63,6 +63,12 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
 
 void DeleteProgram(GLuint program);
 
+size_t getFileSize(const char * filePath);
+
+bool startWith( const char * allStr,const char * prefix);
+
+bool endWith(const char * allStr,const char * suffix);
+
 void testLocalThread();
 
 long long GetSysCurrentTime();

@@ -11,7 +11,7 @@
  *  @author  Jhuster
  *  @date    2016/04/02
  */
-package com.example.democ.audio;
+package com.testthb.democ.audio;
 
 import android.annotation.TargetApi;
 import android.media.MediaCodec;
@@ -21,14 +21,14 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 
-import com.example.democ.MainActivity;
-import com.example.democ.hwencoder.AudioConfiguration;
-import com.example.democ.hwencoder.AudioMediaCodec;
-import com.example.democ.hwencoder.HwEncoderHelper;
-import com.example.democ.interfaces.CaptureDataListener;
-import com.example.democ.interfaces.OutputEncodedDataListener;
-import com.example.democ.interfaces.SingleInterface;
-import com.example.democ.utils.LogUtils;
+import com.testthb.democ.MainActivity;
+import com.testthb.democ.hwencoder.AudioConfiguration;
+import com.testthb.democ.hwencoder.AudioMediaCodec;
+import com.testthb.democ.hwencoder.HwEncoderHelper;
+import com.testthb.democ.interfaces.CaptureDataListener;
+import com.testthb.democ.interfaces.OutputEncodedDataListener;
+import com.testthb.democ.interfaces.SingleInterface;
+import com.testthb.democ.utils.LogUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
