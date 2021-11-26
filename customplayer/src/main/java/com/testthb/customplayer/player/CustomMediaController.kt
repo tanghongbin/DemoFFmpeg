@@ -124,6 +124,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
 
     fun destroy(){
         if (!isInit) return
+        log("开始销毁")
         native_OnDestroy()
         isInit = false
     }

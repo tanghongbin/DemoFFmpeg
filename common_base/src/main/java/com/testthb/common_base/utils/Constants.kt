@@ -30,6 +30,8 @@ object Constants {
     val TEST_JPG =  "$FILD_DIR/filterImg/test1.jpg"
     val TEST_PNG =  "$FILD_DIR/filterImg/test2.png"
 
+    val bugly_id = "0c9dacacfc"
+
 
     // =================== download -=====================================
     val MP4_DOWNLOAD_FUNNY_VIDEO =  "$FILD_DIR/funny_video.mp4"

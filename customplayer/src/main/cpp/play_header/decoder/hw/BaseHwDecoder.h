@@ -15,6 +15,7 @@
 #include <utils/utils.h>
 #include <encoder/hw/AudioConfiguration.h>
 #include <decoder/BaseDecoder.h>
+#include <utils/TimeSyncHelper.h>
 
 /***
  * 硬解码 基类
@@ -36,8 +37,10 @@ private:
     int mVideoHeight,mVideoWidth,mWindowWidth,mWindowHeight,oreration;
     AMediaExtractor *mMediaExtractor;
     AMediaCodec *mMediaCodec;
+    TimeSyncHelper* timeSyncHelper;
     void OnSizeReady();
 protected:
+    std::mutex audioPtsMutex;
     BaseDataCoverter * createConverter() {};
 public:
     virtual void setMediaType(int mediaType) {

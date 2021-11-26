@@ -104,6 +104,7 @@ class AvEditorActivity : AppCompatActivity(){
     private fun convertSuccess(outputPath: String) {
         mPlayer.native_setDataUrl(outputPath)
         mPlayer.native_prepare()
+        log("准备开始播放了")
     }
 
     private fun setupListener() {

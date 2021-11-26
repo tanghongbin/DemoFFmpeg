@@ -12,43 +12,43 @@ MediaCodecPlayer::MediaCodecPlayer(){
 }
 
 void MediaCodecPlayer::Init(){
-    audioDecoder = new HwAudioDecoder;
+    audioDecoder = HwAudioDecoder::getInstance();
     audioDecoder->setReadyCall(prepareReady);
     audioDecoder->setMediaType(1);
-//    videoDecoder = new HwVideoDecoder;
-//    videoDecoder->setReadyCall(prepareReady);
-//    videoDecoder->setMediaType(2);
+    videoDecoder = new HwVideoDecoder;
+    videoDecoder->setReadyCall(prepareReady);
+    videoDecoder->setMediaType(2);
 }
 
 void MediaCodecPlayer::OnSurfaceCreated() {
     if (!videoDecoder) return;
-//    BaseDecoder* videoResult = videoDecoder;
-//    auto *render = new VideoRender;
-//    render->Init();
-//    videoResult->setVideoRender(render);
+    BaseDecoder* videoResult = videoDecoder;
+    auto *render = new VideoRender;
+    render->Init();
+    videoResult->setVideoRender(render);
 }
 
 void MediaCodecPlayer::OnSurfaceChanged(int oretation,int width, int height)  {
-//    if (!videoDecoder) return;
-//    if (videoDecoder) {
-//        auto* videoResult = dynamic_cast<BaseHwDecoder *>(videoDecoder);
-//        videoResult->OnSurfaceChanged(oretation,width,height);
-//    }
-//    std::unique_lock<std::mutex> uniqueLock(videoDecoder->mCreateSurfaceMutex);
-//    videoDecoder->mSurfaceCondition.notify_one();
-//    uniqueLock.unlock();
+    if (!videoDecoder) return;
+    if (videoDecoder) {
+        auto* videoResult = dynamic_cast<BaseHwDecoder *>(videoDecoder);
+        videoResult->OnSurfaceChanged(oretation,width,height);
+    }
+    std::unique_lock<std::mutex> uniqueLock(videoDecoder->mCreateSurfaceMutex);
+    videoDecoder->mSurfaceCondition.notify_one();
+    uniqueLock.unlock();
 }
 
 void MediaCodecPlayer::OnDrawFrame() {
-//    if (videoDecoder && videoDecoder->videoRender){
-//        videoDecoder->videoRender->DrawFrame();
-//    }
+    if (videoDecoder && videoDecoder->videoRender){
+        videoDecoder->videoRender->DrawFrame();
+    }
 }
 
 void MediaCodecPlayer::Destroy() {
     if (audioDecoder) {
         audioDecoder->Destroy();
-        delete audioDecoder;
+        HwAudioDecoder::destroyInstance();
         audioDecoder = 0;
     }
     if (videoDecoder) {

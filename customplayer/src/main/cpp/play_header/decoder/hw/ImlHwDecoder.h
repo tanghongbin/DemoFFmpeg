@@ -8,6 +8,10 @@
 #include "BaseHwDecoder.h"
 
 class HwAudioDecoder : public BaseHwDecoder {
+private:
+    HwAudioDecoder() {};
+    static HwAudioDecoder* instance;
+public:
     char * getDecodeTypeStr() {
         return "audio";
     }
@@ -17,12 +21,29 @@ class HwAudioDecoder : public BaseHwDecoder {
         audioRender->Init();
         LOGCATE("音频渲染初始化完毕");
     }
+    static HwAudioDecoder* getInstance(){
+        if (instance == nullptr) {
+            instance = new HwAudioDecoder;
+        }
+        return instance;
+    }
+
+    static void destroyInstance(){
+        if (instance) {
+            delete instance;
+            instance = 0;
+        }
+    }
 
 };
 
 class HwVideoDecoder : public BaseHwDecoder {
     char * getDecodeTypeStr() {
         return "video";
+    }
+    int64_t getCurrentAudioPts(){
+        std::lock_guard<std::mutex> ptsMutex(audioPtsMutex);
+        return HwAudioDecoder::getInstance()->getCurrentAudioPts();
     }
 };
 

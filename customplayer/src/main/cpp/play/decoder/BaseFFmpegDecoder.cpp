@@ -132,7 +132,7 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
     baseDecoder -> mDataConverter ->Init(pCodecContext);
     int ret;
     call(reinterpret_cast<long>(getJniPlayerFromJava()));
-    int defaultSyncTimeType = 2; // 视频向音频同步
+    int defaultSyncTimeType = 1; // 视频向音频同步
     while (isRunning){
         // pause
         std::unique_lock<std::mutex> uniqueLock(customMutex);
@@ -172,7 +172,7 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
 
         if (packet->stream_index == stream_index){
             TimeSyncBean dtsBean;
-            dtsBean.type = defaultSyncTimeType;
+            dtsBean.syncType = defaultSyncTimeType;
             dtsBean.currentAudioPts = getCurrentAudioPts();
             if (!timeHelper->syncTime(true,packet,frame,pContext,stream_index,&dtsBean)){
                 continue;
@@ -194,7 +194,7 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
             while (avcodec_receive_frame(pCodecContext, frame) == 0){
 //                LOGCATE("avcodec_receive_frame receive success");
                 TimeSyncBean ptsBean;
-                ptsBean.type = defaultSyncTimeType;
+                ptsBean.syncType = defaultSyncTimeType;
                 ptsBean.currentAudioPts = getCurrentAudioPts();
                 if (!timeHelper->syncTime(false,packet,frame,pContext,stream_index,&ptsBean)){
                     goto innerEnd;

@@ -14,6 +14,7 @@ BaseHwDecoder::BaseHwDecoder(){
     isInit = false;
     mMediaCodec = 0;
     mMediaExtractor = 0;
+    timeSyncHelper = 0;
 }
 
 int64_t BaseHwDecoder::getCurrentAudioPts(){
@@ -28,6 +29,7 @@ void BaseHwDecoder::Init(const char * url) {
     mVideoWidth = mVideoHeight = mWindowWidth = mWindowHeight = oreration = 0;
     const char * testUrl = "http://freesaasofficedata.oss.aliyuncs.com/2222/20190930142639768.mp4";
     strcpy(mUrl,url);
+    timeSyncHelper = new TimeSyncHelper;
     mMediaExtractor = AMediaExtractor_new();
     media_status_t status;
     if (startWith(mUrl,"http") || startWith(mUrl,"https")){
@@ -39,6 +41,7 @@ void BaseHwDecoder::Init(const char * url) {
         FILE *avFile = fopen(mUrl, "rb+");
         int avFd = fileno(avFile);
         status = AMediaExtractor_setDataSourceFd(mMediaExtractor,avFd,offset,fileSize);
+        fclose(avFile);
         LOGCATE("打印资源文件大小:%lld",fileSize);
     }
     if (status != AMEDIA_OK) {
@@ -48,7 +51,7 @@ void BaseHwDecoder::Init(const char * url) {
     size_t trackCount = AMediaExtractor_getTrackCount(mMediaExtractor);
     for (int i = 0; i < trackCount; ++i) {
         AMediaFormat* trackFormat = AMediaExtractor_getTrackFormat(mMediaExtractor,i);
-        const char* mimeStr = new char[120];
+        const char* mimeStr;
         AMediaFormat_getString(trackFormat,AMEDIAFORMAT_KEY_MIME,&mimeStr);
         std::string result  = mimeStr;
         if (startWith(result.c_str(),getDecodeTypeStr())) {
@@ -67,8 +70,15 @@ void BaseHwDecoder::Init(const char * url) {
             AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_WIDTH,&mVideoWidth);
             AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_HEIGHT,&mVideoHeight);
         }
+        // 视音频发送时长
+        if (appointMediaType == 1 && startWith(result.c_str(),"audio")) {
+            int64_t duration;
+            AMediaFormat_getInt64(trackFormat,AMEDIAFORMAT_KEY_DURATION,&duration);
+            duration = duration / 1000 / 1000;
+            MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_DURATION,0,(int)duration));
+            LOGCATE("打印视频时长：%d",(int)duration);
+        }
         LOGCATE("打印视频   宽:高   %d:%d",mVideoWidth,mVideoHeight);
-        delete [] mimeStr;
         AMediaFormat_delete(trackFormat);
     }
     if (mMediaCodec == nullptr) {
@@ -89,8 +99,8 @@ void BaseHwDecoder::setReadyCall(PrepareCall call){
 void BaseHwDecoder::Destroy() {
     LOGCATE("start to destroy");
     isFinished = true;
-    isPaused = false;
     std::unique_lock<std::mutex> pauseLock(mPauseMutex);
+    isPaused = false;
     mPauseCondition.notify_all();
     pauseLock.unlock();
     LOGCATE("start to destroy1");
@@ -119,6 +129,7 @@ void BaseHwDecoder::Destroy() {
         delete videoRender;
         videoRender = 0;
     }
+    if (timeSyncHelper) delete timeSyncHelper;
     isInit = false;
     LOGCATE("has destroy all");
 }
@@ -175,25 +186,22 @@ void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t*
 }
 
 void BaseHwDecoder::createDecoderThread(const char * url){
-//    std::unique_lock<std::mutex> surfaceLock(mCreateSurfaceMutex,std::defer_lock);
-//    surfaceLock.lock();
-//    if (appointMediaType == 2 && !videoRender) {
-//        LOGCATE("videorender has not prepare");
-//        mSurfaceCondition.wait(surfaceLock);
-//    }
-//    surfaceLock.unlock();
-    LOGCATE("already parepare");
+    std::unique_lock<std::mutex> surfaceLock(mCreateSurfaceMutex,std::defer_lock);
+    surfaceLock.lock();
+    if (appointMediaType == 2 && !videoRender) {
+        LOGCATE("videorender has not prepare");
+        mSurfaceCondition.wait(surfaceLock);
+    }
+    surfaceLock.unlock();
     readyCall(reinterpret_cast<long>(getJniPlayerFromJava()));
-    while (true) {
+    // 发送时长
+    while (!isFinished) {
         std::unique_lock<std::mutex> uniqueLock(mPauseMutex,std::defer_lock);
         uniqueLock.lock();
         if (isPaused) {
             mPauseCondition.wait(uniqueLock);
         }
         uniqueLock.unlock();
-        if (isFinished) {
-            break;
-        }
         int inIndex = AMediaCodec_dequeueInputBuffer(mMediaCodec,2000);
         if (inIndex >= 0) {
             size_t capacity;
@@ -201,20 +209,41 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             size_t inputBufferSize = AMediaExtractor_readSampleData(mMediaExtractor,inputBuffer,capacity);
             int64_t sampleTime = AMediaExtractor_getSampleTime(mMediaExtractor);
             if (inputBufferSize > 0 && sampleTime > -1) {
+                std::unique_lock<std::mutex> ptsMutex(audioPtsMutex);
+                currentPts = sampleTime;
+                ptsMutex.unlock();
+                TimeSyncBean timeSyncBean;
+                timeSyncBean.syncType = 1;
+                timeSyncBean.currentAudioPts = getCurrentAudioPts() / 1000;
+                timeSyncBean.currentVideoPts = sampleTime / 1000;
+                if (!timeSyncHelper->hardwareSyncTime(appointMediaType == 1,&timeSyncBean)) {
+                    LOGCATE("当前慢了 开始跳步:%d",appointMediaType);
+                    AMediaCodec_flush(mMediaCodec);
+                    AMediaExtractor_advance(mMediaExtractor);
+                    continue;
+                }
                 AMediaCodec_queueInputBuffer(mMediaCodec,inIndex,0,inputBufferSize,sampleTime,0);
             } else {
                 continue;
             }
-            currentPts = sampleTime;
 //            LOGCATE("读取类型:%d  缓冲大小：%d   capacity:%d   时间戳：%lld",appointMediaType,inputBufferSize,capacity,sampleTime);
-            isPaused = !AMediaExtractor_advance(mMediaExtractor);
+            if (!AMediaExtractor_advance(mMediaExtractor)) {
+                isPaused = true;
+                if (appointMediaType == 2) {
+                    MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_COMPLETE,0,0));
+                }
+                continue;
+            }
         }
         AMediaCodecBufferInfo codecBufferInfo;
         ssize_t outStatus = AMediaCodec_dequeueOutputBuffer(mMediaCodec, &codecBufferInfo, 0);
         if (outStatus >= 0) {
             uint8_t *outputBuffer = AMediaCodec_getOutputBuffer(mMediaCodec, outStatus, 0);
             // 局部渲染
-//            LOGCATE("输出信息 时间戳：%lld   ", codecBufferInfo.presentationTimeUs);
+            if (appointMediaType == 1) {
+                int currentSec = codecBufferInfo.presentationTimeUs / (1000 * 1000);
+                MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED,currentSec,0));
+            }
             renderAv(appointMediaType,&codecBufferInfo,outputBuffer);
             AMediaCodec_releaseOutputBuffer(mMediaCodec,outStatus, false);
         } else if (outStatus == AMEDIACODEC_INFO_OUTPUT_BUFFERS_CHANGED) {
@@ -224,17 +253,18 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             LOGCATE("format changed to: %s", AMediaFormat_toString(format));
             AMediaFormat_delete(format);
         } else if (outStatus == AMEDIACODEC_INFO_TRY_AGAIN_LATER) {
-            LOGCATE("no output buffer right now");
+//            LOGCATE("no output buffer right now");
         } else {
             LOGCATE("unexpected info code: %zd", outStatus);
         }
-        LOGCATE("loop decode inputIndex:%d    outputIndex:%d",inIndex,outStatus);
+//        LOGCATE("loop decode inputIndex:%d    outputIndex:%d",inIndex,outStatus);
         std::unique_lock<std::mutex> progressLock(mPauseMutex,std::defer_lock);
         if (progressLock.try_lock()){
             if (seekProgress != -1){
                 LOGCATE("seekto ");
                 AMediaExtractor_seekTo(mMediaExtractor,seekProgress * 1000L * 1000L,AMEDIAEXTRACTOR_SEEK_PREVIOUS_SYNC );
                 AMediaCodec_flush(mMediaCodec);
+                timeSyncHelper->resetTime();
                 seekProgress = -1;
             }
             progressLock.unlock();
