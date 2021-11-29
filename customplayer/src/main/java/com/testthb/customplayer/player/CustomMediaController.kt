@@ -1,9 +1,11 @@
 package com.testthb.customplayer.player
 
+import android.media.MediaSync
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.view.SurfaceHolder
 import com.testthb.common_base.DemoApplication
 import com.testthb.common_base.utils.log
 import com.testthb.customplayer.interfaces.*
@@ -13,7 +15,8 @@ import javax.microedition.khronos.opengles.GL10
 
 @Suppress("KotlinJniMissingFunction", "FunctionName")
 // 1-播放器，2-muxer合成器
-class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val playerType: Int = 1) : GLSurfaceView.Renderer {
+class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val playerType: Int = 1) :
+        GLSurfaceView.Renderer,SurfaceHolder.Callback {
     companion object{
         // communicate code
         private const val MSG_PREPARED = 1
@@ -103,7 +106,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
     }
 
     /*******
-     * ====================  Surface  callback ================================
+     * --------------------- GLSurfaceView  callback START------------------------------
      */
     override fun onDrawFrame(gl: GL10?) {
         native_OnDrawFrame()
@@ -121,6 +124,31 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
         mOnSurfaceCallListener?.onSurfaceCreated(gl,config)
         native_OnSurfaceCreated()
     }
+
+    /*******
+     * ==================== GLSurfaceView  callback END ================================
+     */
+
+
+    /*******
+     * --------------------- SurfaceView  callback start ------------------------------
+     */
+
+    override fun surfaceCreated(holder: SurfaceHolder) {
+
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
+
+    }
+
+    /*******
+     * ==================== SurfaceView  callback end ================================
+     */
 
     fun destroy(){
         if (!isInit) return
@@ -186,5 +214,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
      * 录制速率
      */
     external fun native_setSpeed(speed:Double)
+
+
 
 }

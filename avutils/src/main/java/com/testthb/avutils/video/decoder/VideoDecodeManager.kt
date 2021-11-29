@@ -46,8 +46,6 @@ class VideoDecodeManager {
     }
 
     fun init(surface: Surface,videoPath:String) {
-        mediaCodec = MediaCodec.createDecoderByType("video/avc")
-        mediaFormat = MediaFormat.createVideoFormat("video/avc", 1280, 720)
 //        mediaFormat!!.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
         mediaExtractor = MediaExtractor()
         //MP4 文件存放位置
@@ -57,6 +55,7 @@ class VideoDecodeManager {
             val mime: String = trackFormat!!.getString(MediaFormat.KEY_MIME) ?: ""
             if (mime.startsWith("video")) {
                 mediaFormat = trackFormat
+                mediaCodec = MediaCodec.createDecoderByType(mediaFormat?.getString(MediaFormat.KEY_MIME) ?: "")
                 mediaExtractor!!.selectTrack(index)
             }
         }

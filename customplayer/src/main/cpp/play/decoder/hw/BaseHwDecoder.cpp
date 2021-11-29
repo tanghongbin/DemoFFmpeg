@@ -171,6 +171,7 @@ void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t*
     if (type == 1) {
         audioRender->RenderAudioFrame(data,bufferInfo->size);
     } else {
+//        LOGCATE("打印视频宽/高 %d/%d",mVideoWidth,mVideoHeight);
         NativeOpenGLImage openGlImage;
         openGlImage.width = mVideoWidth;
         openGlImage.height = mVideoHeight;
@@ -227,6 +228,7 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             uint8_t * inputBuffer = AMediaCodec_getInputBuffer(mMediaCodec,inIndex,&capacity);
             size_t inputBufferSize = AMediaExtractor_readSampleData(mMediaExtractor,inputBuffer,capacity);
 //            LOGCATE("打印解码完成-----------前的时间戳：%lld",sampleTime);
+            LOGCATE("容量:%d   实际大小:%d",capacity,inputBufferSize);
             if (inputBufferSize > 0) {
                 int64_t sampleTime = AMediaExtractor_getSampleTime(mMediaExtractor);
                 AMediaCodec_queueInputBuffer(mMediaCodec,inIndex,0,inputBufferSize,sampleTime,0);
@@ -267,19 +269,21 @@ void BaseHwDecoder::createDecoderThread(const char * url){
 //                LOGCATE("打印解码完成后的时间戳：%lld",codecBufferInfo.presentationTimeUs / 1000);
             }
             renderAv(appointMediaType,&codecBufferInfo,outputBuffer);
-            AMediaCodec_releaseOutputBuffer(mMediaCodec,outStatus, false);
+            AMediaCodec_releaseOutputBuffer(mMediaCodec,outStatus, true);
         } else if (outStatus == AMEDIACODEC_INFO_OUTPUT_BUFFERS_CHANGED) {
             LOGCATE("output buffers changed");
         } else if (outStatus == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
-            auto format = AMediaCodec_getOutputFormat(mMediaCodec);
-            AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_WIDTH,&mVideoWidth);
-            AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_HEIGHT,&mVideoHeight);
-            int colorFormat;
-            AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,&colorFormat);
-            LOGCATE("打印视频颜色格式:%d  视频宽高:%d - %d",colorFormat,mVideoWidth,mVideoHeight);
-            LOGCATE("format changed to: %s", AMediaFormat_toString(format));
-            AMediaFormat_delete(format);
-            OnSizeReady();
+            if (appointMediaType == 2) {
+                auto format = AMediaCodec_getOutputFormat(mMediaCodec);
+                AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_WIDTH,&mVideoWidth);
+                AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_HEIGHT,&mVideoHeight);
+                int colorFormat;
+                AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,&colorFormat);
+                LOGCATE("打印视频颜色格式:%d  视频宽高:%d - %d",colorFormat,mVideoWidth,mVideoHeight);
+                LOGCATE("format changed to: %s", AMediaFormat_toString(format));
+                AMediaFormat_delete(format);
+                OnSizeReady();
+            }
         } else if (outStatus == AMEDIACODEC_INFO_TRY_AGAIN_LATER) {
 //            LOGCATE("no output buffer right now");
         } else {

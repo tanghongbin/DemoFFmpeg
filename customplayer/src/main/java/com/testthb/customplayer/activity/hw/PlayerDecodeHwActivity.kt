@@ -2,19 +2,18 @@ package com.testthb.customplayer.activity.hw
 
 import android.content.pm.ActivityInfo
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.testthb.avutils.audio.decoder.AudioDecodeManager
 import com.testthb.avutils.video.decoder.OutputFormatChangeListener
 import com.testthb.avutils.video.decoder.VideoDecodeManager
 import com.testthb.common_base.utils.changeScreenSize
 import com.testthb.common_base.utils.log
 import com.testthb.customplayer.R
-import com.testthb.customplayer.player.CustomMediaController
-import kotlinx.android.synthetic.main.activity_player_detail.*
+import kotlinx.android.synthetic.main.activity_player_surface.*
 import java.util.concurrent.TimeUnit
 
 /***
@@ -26,7 +25,7 @@ class PlayerDecodeHwActivity : AppCompatActivity(), SurfaceHolder.Callback,
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_player_detail)
+        setContentView(R.layout.activity_player_surface)
         mGLSurface.holder.addCallback(this)
         button.setOnClickListener {
             var oreration = requestedOrientation

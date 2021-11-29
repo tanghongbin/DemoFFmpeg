@@ -30,7 +30,7 @@ class CustomPlayerListActivity : AppCompatActivity() {
         mRecyclePlayer.layoutManager = layoutManager
         val adapter = PlayerListAdapter()
         adapter.setOnItemClickListener { i, videoInfo ->
-//            val classes = PlayerDecodeHwOpenGLESActivity::class.java
+//            val classes = PlayerDecodeHwActivity::class.java
             val classes = AvEditorActivity::class.java
             startActivity(Intent(this, classes).apply {
                 putExtra("url",videoInfo.data)
