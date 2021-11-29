@@ -61,7 +61,11 @@ void BaseHwDecoder::Init(const char * url) {
             mMediaCodec = AMediaCodec_createDecoderByType(mimeStr);
             AMediaExtractor_selectTrack(mMediaExtractor,i);
             LOGCATE("本次选择结果:%s",AMediaFormat_toString(trackFormat));
-            media_status_t configResult = AMediaCodec_configure(mMediaCodec, trackFormat, nullptr,
+            ANativeWindow * window = nullptr;
+            if (appointMediaType == 2) {
+                window = nativeWindow;
+            }
+            media_status_t configResult = AMediaCodec_configure(mMediaCodec, trackFormat, window,
                                                                 nullptr, 0);
             if (configResult != AMEDIA_OK) {
                 LOGCATE("config error:%d",configResult);
@@ -188,13 +192,13 @@ void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t*
 }
 
 void BaseHwDecoder::createDecoderThread(const char * url){
-    std::unique_lock<std::mutex> surfaceLock(mCreateSurfaceMutex,std::defer_lock);
-    surfaceLock.lock();
-    if (appointMediaType == 2 && !videoRender) {
-        LOGCATE("videorender has not prepare");
-        mSurfaceCondition.wait(surfaceLock);
-    }
-    surfaceLock.unlock();
+//    std::unique_lock<std::mutex> surfaceLock(mCreateSurfaceMutex,std::defer_lock);
+//    surfaceLock.lock();
+//    if (appointMediaType == 2 && !videoRender) {
+//        LOGCATE("videorender has not prepare");
+//        mSurfaceCondition.wait(surfaceLock);
+//    }
+//    surfaceLock.unlock();
     readyCall(reinterpret_cast<long>(getJniPlayerFromJava()));
     // 发送时长
     while (!isFinished) {
@@ -259,7 +263,7 @@ void BaseHwDecoder::createDecoderThread(const char * url){
                 AMediaCodec_flush(mMediaCodec);
                 continue;
             }
-            uint8_t *outputBuffer = AMediaCodec_getOutputBuffer(mMediaCodec, outStatus, 0);
+//            uint8_t *outputBuffer = AMediaCodec_getOutputBuffer(mMediaCodec, outStatus, 0);
             // 局部渲染
             if (appointMediaType == 1) {
                 int currentSec = codecBufferInfo.presentationTimeUs / (1000 * 1000);
@@ -268,8 +272,8 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             } else {
 //                LOGCATE("打印解码完成后的时间戳：%lld",codecBufferInfo.presentationTimeUs / 1000);
             }
-            renderAv(appointMediaType,&codecBufferInfo,outputBuffer);
-            AMediaCodec_releaseOutputBuffer(mMediaCodec,outStatus, true);
+//            renderAv(appointMediaType,&codecBufferInfo,outputBuffer);
+            AMediaCodec_releaseOutputBuffer(mMediaCodec,outStatus, codecBufferInfo.size != 0);
         } else if (outStatus == AMEDIACODEC_INFO_OUTPUT_BUFFERS_CHANGED) {
             LOGCATE("output buffers changed");
         } else if (outStatus == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {

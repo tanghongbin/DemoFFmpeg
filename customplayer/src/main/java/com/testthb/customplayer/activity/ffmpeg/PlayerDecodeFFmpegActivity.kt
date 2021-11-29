@@ -28,7 +28,7 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player_detail)
-        mGLSurface.init(mPlayer)
+//        mGLSurface.init(mPlayer)
         button.setOnClickListener {
             mPlayer.nativeGetInfo()
             var oreration = requestedOrientation
@@ -88,6 +88,7 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
             }
         })
         mPlayer.setOnDurationListener(object : OnDurationListener{
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onDuration(min: Int, max: Int) {
                 mSeekbar.min = min
                 mSeekbar.max = max

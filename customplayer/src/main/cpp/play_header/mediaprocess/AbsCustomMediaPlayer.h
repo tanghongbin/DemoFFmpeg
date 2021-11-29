@@ -33,6 +33,8 @@ protected:
 protected:
     int prepareCount;
 public:
+    virtual void setNativeWindow(jobject obj) {};
+    virtual void deleteNativeWindow(){};
     virtual void Init() = 0;
     virtual void OnSurfaceCreated() {  };
     virtual void OnSurfaceChanged(int oreration,int width,int height) {  };

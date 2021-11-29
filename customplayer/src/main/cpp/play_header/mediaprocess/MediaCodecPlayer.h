@@ -9,11 +9,13 @@
 #include <render/BaseRender.h>
 #include <decoder/hw/BaseHwDecoder.h>
 #include "AbsCustomMediaPlayer.h"
+#include <android/native_window_jni.h>
 
 class MediaCodecPlayer : public AbsCustomMediaPlayer{
 private:
     BaseHwDecoder* audioDecoder;
     BaseHwDecoder* videoDecoder;
+    ANativeWindow* mNativeWindow;
 
 public:
     MediaCodecPlayer();
@@ -28,6 +30,8 @@ public:
     void Reset();
     void SeekTo(int second) ;
     void Replay();
+    void setNativeWindow(jobject surface);
+    void deleteNativeWindow();
 };
 
 #endif //DEMOFFMPEG_MEDIACODECMEDIAPLAYER_H

@@ -5,7 +5,6 @@ import androidx.collection.ArrayMap;
 public class Test {
 
     class A1{
-
     }
     class B extends A1 {
 

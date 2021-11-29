@@ -1,12 +1,13 @@
 package com.testthb.customplayer.activity.ffmpeg
 
 import android.content.pm.ActivityInfo
-import android.content.res.AssetFileDescriptor
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.view.SurfaceHolder
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.coder.ffmpeg.utils.FFmpegUtils
 import com.testthb.common_base.utils.Constants.IMG_DIR
 import com.testthb.common_base.utils.FileUtils
@@ -21,13 +22,12 @@ import com.testthb.customplayer.util.getRamdowVideoPath
 import com.testthb.customplayer.util.runFFmpegCommand
 import kotlinx.android.synthetic.main.activity_player_detail.*
 import java.io.File
-import java.io.FileDescriptor
 import kotlin.random.Random
 
 /***
  * 直接用mediaplayer播放
  */
-class AvEditorActivity : AppCompatActivity(){
+class AvEditorActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private val mUrl by lazy {
         intent.getStringExtra("url") ?: ""
 //        Constants.MP4_PLAY_PATH
@@ -38,7 +38,7 @@ class AvEditorActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player_detail)
-        mGLSurface.init(mPlayer)
+        mGLSurface.holder.addCallback(this)
         button.setOnClickListener {
             mPlayer.nativeGetInfo()
             var oreration = requestedOrientation
@@ -102,8 +102,10 @@ class AvEditorActivity : AppCompatActivity(){
     }
 
     private fun convertSuccess(outputPath: String) {
-        mPlayer.native_setDataUrl(outputPath)
-        mPlayer.native_prepare()
+        Handler().postDelayed({
+            mPlayer.native_setDataUrl(outputPath)
+            mPlayer.native_prepare()
+        },3000)
         log("准备开始播放了")
     }
 
@@ -128,6 +130,7 @@ class AvEditorActivity : AppCompatActivity(){
             }
         })
         mPlayer.setOnDurationListener(object : OnDurationListener{
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onDuration(min: Int, max: Int) {
                 mSeekbar.min = min
                 mSeekbar.max = max
@@ -144,6 +147,18 @@ class AvEditorActivity : AppCompatActivity(){
 //        log("打印指针：${mPlayer.mNativePlayer}")
         mPlayer.destroy()
         super.onDestroy()
+    }
+
+    override fun surfaceCreated(holder: SurfaceHolder) {
+        mPlayer.native_setNativeWindow(holder.surface)
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
+        mPlayer.native_deleteNativeWindow()
     }
 
 }

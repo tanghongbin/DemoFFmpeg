@@ -51,6 +51,7 @@ public:
     void setReadyCall(PrepareCall call);
     BaseHwDecoder();
     virtual char * getDecodeTypeStr() = 0;
+    ANativeWindow * nativeWindow;
     /***
      * 毫秒
      * @return

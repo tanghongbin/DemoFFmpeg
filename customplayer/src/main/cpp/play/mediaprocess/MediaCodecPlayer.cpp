@@ -9,12 +9,13 @@
 
 MediaCodecPlayer::MediaCodecPlayer(){
     audioDecoder =  videoDecoder = 0;
+    mNativeWindow = 0;
 }
 
 void MediaCodecPlayer::Init(){
-    audioDecoder = HwAudioDecoder::getInstance();
-    audioDecoder->setReadyCall(prepareReady);
-    audioDecoder->setMediaType(1);
+//    audioDecoder = HwAudioDecoder::getInstance();
+//    audioDecoder->setReadyCall(prepareReady);
+//    audioDecoder->setMediaType(1);
     videoDecoder = new HwVideoDecoder;
     videoDecoder->setReadyCall(prepareReady);
     videoDecoder->setMediaType(2);
@@ -22,6 +23,7 @@ void MediaCodecPlayer::Init(){
 
 void MediaCodecPlayer::OnSurfaceCreated() {
     if (!videoDecoder) return;
+    return;
     BaseDecoder* videoResult = videoDecoder;
     auto *render = new VideoRender;
     render->Init();
@@ -30,6 +32,7 @@ void MediaCodecPlayer::OnSurfaceCreated() {
 
 void MediaCodecPlayer::OnSurfaceChanged(int oretation,int width, int height)  {
     if (!videoDecoder) return;
+    return;
     if (videoDecoder) {
         auto* videoResult = dynamic_cast<BaseHwDecoder *>(videoDecoder);
         videoResult->OnSurfaceChanged(oretation,width,height);
@@ -78,8 +81,29 @@ void MediaCodecPlayer::SeekTo(int second) {
     if (audioDecoder) audioDecoder->ManualSeekPosition(second);
     if (videoDecoder)  videoDecoder->ManualSeekPosition(second);
 }
+
 void MediaCodecPlayer::Replay() {
     if (audioDecoder) audioDecoder->Replay();
     if (videoDecoder) videoDecoder->Replay();
+}
+
+void MediaCodecPlayer::setNativeWindow(jobject surface){
+    if (mNativeWindow) {
+        ANativeWindow_release(mNativeWindow);
+        mNativeWindow = 0;
+    }
+    bool isAttach;
+    mNativeWindow = ANativeWindow_fromSurface(JavaVmManager::GetEnv(&isAttach),surface);
+    videoDecoder->nativeWindow = mNativeWindow;
+//    if (isAttach) {
+//        JavaVmManager::detachCurrentThread();
+//    }
+}
+
+void MediaCodecPlayer::deleteNativeWindow(){
+    if (mNativeWindow) {
+        ANativeWindow_release(mNativeWindow);
+        mNativeWindow = 0;
+    }
 }
 

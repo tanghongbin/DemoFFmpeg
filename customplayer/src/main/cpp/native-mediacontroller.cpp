@@ -76,6 +76,18 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
     if (outputDisplayHelper && mediaMuxer) outputDisplayHelper->OnDrawFrame();
 }
 
+JNIEXPORT void JNICALL native_setNativeWindow(JNIEnv *env, jobject instance,jobject surface) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer != NULL) mediaPlayer->setNativeWindow(surface);
+}
+
+
+JNIEXPORT void JNICALL native_deleteNativeWindow(JNIEnv *env, jobject instance) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer != NULL) mediaPlayer->deleteNativeWindow();
+}
+
+
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer) {
@@ -295,6 +307,9 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_configAudioParams",               "(II)V",            (void *) (native_configAudioParams)},
         {"native_setSpeed",               "(D)V",            (void *) (native_setSpeed)},
         {"native_replay",               "()V",            (void *) (native_replay)},
+        {"native_setNativeWindow",               "(Landroid/view/Surface;)V",            (void *) (native_setNativeWindow)},
+        {"native_deleteNativeWindow",               "()V",            (void *) (native_deleteNativeWindow)},
+
 
 
 };

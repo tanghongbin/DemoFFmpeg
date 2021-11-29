@@ -5,6 +5,7 @@ import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.view.Surface
 import android.view.SurfaceHolder
 import com.testthb.common_base.DemoApplication
 import com.testthb.common_base.utils.log
@@ -16,7 +17,7 @@ import javax.microedition.khronos.opengles.GL10
 @Suppress("KotlinJniMissingFunction", "FunctionName")
 // 1-播放器，2-muxer合成器
 class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val playerType: Int = 1) :
-        GLSurfaceView.Renderer,SurfaceHolder.Callback {
+        GLSurfaceView.Renderer {
     companion object{
         // communicate code
         private const val MSG_PREPARED = 1
@@ -134,17 +135,9 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
      * --------------------- SurfaceView  callback start ------------------------------
      */
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
+    external fun native_setNativeWindow(surface: Surface)
 
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-
-    }
+    external fun native_deleteNativeWindow()
 
     /*******
      * ==================== SurfaceView  callback end ================================
