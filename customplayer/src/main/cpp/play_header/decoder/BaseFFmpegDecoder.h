@@ -9,6 +9,7 @@
 #include <render/BaseRender.h>
 #include <render/FFmpegAudioConverter.h>
 #include <render/VideoRender.h>
+#include <utils/TimeSyncHelper.h>
 #include "BaseDecoder.h"
 
 extern "C" {
@@ -27,6 +28,7 @@ private:
     bool isRunning;
     bool isStarted;
     int mManualSeekPosition;
+    TimeSyncHelper* timeSyncHelper;
     void decodeLoop(AVFormatContext *pContext, AVCodecContext *pCodecContext, int i,
                     BaseFFmpegDecoder *pDecoder);
     void OnDecodeReady(AVFormatContext *pContext, int i);
@@ -35,7 +37,7 @@ private:
 protected:
     int64_t currentAudioPts;
     virtual BaseDataCoverter * createConverter() = 0;
-    virtual int64_t getCurrentAudioPts() {};
+    virtual int64_t getCurrentAudioPtsUs() {};
 public:
     BaseFFmpegDecoder();
     AVCodecContext* codeCtx;

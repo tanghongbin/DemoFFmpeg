@@ -85,14 +85,14 @@ class AvEditorActivity : AppCompatActivity(){
         }
         mSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) mPlayer.native_seekTo(seekBar?.progress ?: 0)
+
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
+                mPlayer.native_seekTo(seekBar?.progress ?: 0)
             }
 
         })

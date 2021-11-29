@@ -41,9 +41,9 @@ class HwVideoDecoder : public BaseHwDecoder {
     char * getDecodeTypeStr() {
         return "video";
     }
-    int64_t getCurrentAudioPts(){
+    int64_t getCurrentAudioPtsUs(){
         std::lock_guard<std::mutex> ptsMutex(audioPtsMutex);
-        return HwAudioDecoder::getInstance()->getCurrentAudioPts();
+        return HwAudioDecoder::getInstance()->getCurrentAudioPtsUs();
     }
 };
 

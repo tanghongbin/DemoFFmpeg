@@ -7,6 +7,9 @@
 #include <string>
 //#include <StringUtils>
 
+// 视频向音频同步
+#define SYNC_TYPE_AV 2
+
 BaseHwDecoder::BaseHwDecoder(){
     decodeThread = 0;
     audioRender = 0;
@@ -17,8 +20,8 @@ BaseHwDecoder::BaseHwDecoder(){
     timeSyncHelper = 0;
 }
 
-int64_t BaseHwDecoder::getCurrentAudioPts(){
-    return currentPts;
+int64_t BaseHwDecoder::getCurrentAudioPtsUs(){
+    return currentPtsUs;
 }
 
 void BaseHwDecoder::Init(const char * url) {
@@ -65,10 +68,6 @@ void BaseHwDecoder::Init(const char * url) {
                 return;
             }
             AMediaCodec_start(mMediaCodec);
-        }
-        if (startWith(result.c_str(),"video")) {
-            AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_WIDTH,&mVideoWidth);
-            AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_HEIGHT,&mVideoHeight);
         }
         // 视音频发送时长
         if (appointMediaType == 1 && startWith(result.c_str(),"audio")) {
@@ -136,6 +135,7 @@ void BaseHwDecoder::Destroy() {
 void BaseHwDecoder::Start() {
     std::unique_lock<std::mutex> uniqueLock(mPauseMutex);
     isPaused = false;
+    timeSyncHelper->resetTime();
     mPauseCondition.notify_one();
 }
 void BaseHwDecoder::Reset() {
@@ -152,8 +152,8 @@ void BaseHwDecoder::Replay() {
 void BaseHwDecoder::Stop() {
     std::unique_lock<std::mutex> uniqueLock(mPauseMutex);
     isPaused = true;
-    mPauseCondition.notify_one();
 }
+
 void BaseHwDecoder::ManualSeekPosition(int progress) {
     std::unique_lock<std::mutex> uniqueLock(mPauseMutex);
     seekProgress = progress;
@@ -181,6 +181,7 @@ void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t*
         openGlImage.pLineSize[1]= mVideoWidth / 2;
         openGlImage.pLineSize[2]= mVideoWidth / 2;
         openGlImage.format = IMAGE_FORMAT_I420;
+//        LOGCATE("硬解码渲染的宽 高  %d  :   %d",mVideoWidth,mVideoHeight);
         if (videoRender) videoRender->copyImage(&openGlImage);
     }
 }
@@ -202,26 +203,32 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             mPauseCondition.wait(uniqueLock);
         }
         uniqueLock.unlock();
+        std::unique_lock<std::mutex> progressLock(mPauseMutex,std::defer_lock);
+        if (progressLock.try_lock()){
+            if (seekProgress != -1){
+                LOGCATE("seekto ");
+                media_status_t seekStatus = AMediaExtractor_seekTo(mMediaExtractor,
+                                                                   seekProgress * 1000L * 1000L,
+                                                                   AMEDIAEXTRACTOR_SEEK_PREVIOUS_SYNC);
+                if (seekStatus == AMEDIA_OK) {
+                    AMediaCodec_flush(mMediaCodec);
+                    timeSyncHelper->resetTime();
+                    seekProgress = -1;
+                } else {
+                    LOGCATE("seek error:%d",seekStatus);
+                }
+
+            }
+            progressLock.unlock();
+        }
         int inIndex = AMediaCodec_dequeueInputBuffer(mMediaCodec,2000);
         if (inIndex >= 0) {
             size_t capacity;
             uint8_t * inputBuffer = AMediaCodec_getInputBuffer(mMediaCodec,inIndex,&capacity);
             size_t inputBufferSize = AMediaExtractor_readSampleData(mMediaExtractor,inputBuffer,capacity);
-            int64_t sampleTime = AMediaExtractor_getSampleTime(mMediaExtractor);
-            if (inputBufferSize > 0 && sampleTime > -1) {
-                std::unique_lock<std::mutex> ptsMutex(audioPtsMutex);
-                currentPts = sampleTime;
-                ptsMutex.unlock();
-                TimeSyncBean timeSyncBean;
-                timeSyncBean.syncType = 1;
-                timeSyncBean.currentAudioPts = getCurrentAudioPts() / 1000;
-                timeSyncBean.currentVideoPts = sampleTime / 1000;
-                if (!timeSyncHelper->hardwareSyncTime(appointMediaType == 1,&timeSyncBean)) {
-                    LOGCATE("当前慢了 开始跳步:%d",appointMediaType);
-                    AMediaCodec_flush(mMediaCodec);
-                    AMediaExtractor_advance(mMediaExtractor);
-                    continue;
-                }
+//            LOGCATE("打印解码完成-----------前的时间戳：%lld",sampleTime);
+            if (inputBufferSize > 0) {
+                int64_t sampleTime = AMediaExtractor_getSampleTime(mMediaExtractor);
                 AMediaCodec_queueInputBuffer(mMediaCodec,inIndex,0,inputBufferSize,sampleTime,0);
             } else {
                 continue;
@@ -238,11 +245,26 @@ void BaseHwDecoder::createDecoderThread(const char * url){
         AMediaCodecBufferInfo codecBufferInfo;
         ssize_t outStatus = AMediaCodec_dequeueOutputBuffer(mMediaCodec, &codecBufferInfo, 0);
         if (outStatus >= 0) {
+            std::unique_lock<std::mutex> ptsMutex(audioPtsMutex);
+            currentPtsUs = codecBufferInfo.presentationTimeUs;
+            ptsMutex.unlock();
+            TimeSyncBean timeSyncBean;
+            timeSyncBean.syncType = SYNC_TYPE_AV;
+            timeSyncBean.currentAudioPtsMs = getCurrentAudioPtsUs() / 1000;
+            timeSyncBean.currentVideoPtsMs = codecBufferInfo.presentationTimeUs / 1000;
+            if (!timeSyncHelper->hardwareSyncTime(appointMediaType == 1,&timeSyncBean)) {
+                LOGCATE("当前慢了 开始跳步:%d",appointMediaType);
+                AMediaCodec_flush(mMediaCodec);
+                continue;
+            }
             uint8_t *outputBuffer = AMediaCodec_getOutputBuffer(mMediaCodec, outStatus, 0);
             // 局部渲染
             if (appointMediaType == 1) {
                 int currentSec = codecBufferInfo.presentationTimeUs / (1000 * 1000);
-                MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED,currentSec,0));
+                MsgLoopHelper::sendMsg(
+                        Message::obtain(JNI_COMMUNICATE_TYPE_SEEK_PROGRESS_CHANGED, currentSec, 0));
+            } else {
+//                LOGCATE("打印解码完成后的时间戳：%lld",codecBufferInfo.presentationTimeUs / 1000);
             }
             renderAv(appointMediaType,&codecBufferInfo,outputBuffer);
             AMediaCodec_releaseOutputBuffer(mMediaCodec,outStatus, false);
@@ -250,31 +272,27 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             LOGCATE("output buffers changed");
         } else if (outStatus == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
             auto format = AMediaCodec_getOutputFormat(mMediaCodec);
+            AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_WIDTH,&mVideoWidth);
+            AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_HEIGHT,&mVideoHeight);
+            int colorFormat;
+            AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,&colorFormat);
+            LOGCATE("打印视频颜色格式:%d  视频宽高:%d - %d",colorFormat,mVideoWidth,mVideoHeight);
             LOGCATE("format changed to: %s", AMediaFormat_toString(format));
             AMediaFormat_delete(format);
+            OnSizeReady();
         } else if (outStatus == AMEDIACODEC_INFO_TRY_AGAIN_LATER) {
 //            LOGCATE("no output buffer right now");
         } else {
             LOGCATE("unexpected info code: %zd", outStatus);
         }
 //        LOGCATE("loop decode inputIndex:%d    outputIndex:%d",inIndex,outStatus);
-        std::unique_lock<std::mutex> progressLock(mPauseMutex,std::defer_lock);
-        if (progressLock.try_lock()){
-            if (seekProgress != -1){
-                LOGCATE("seekto ");
-                AMediaExtractor_seekTo(mMediaExtractor,seekProgress * 1000L * 1000L,AMEDIAEXTRACTOR_SEEK_PREVIOUS_SYNC );
-                AMediaCodec_flush(mMediaCodec);
-                timeSyncHelper->resetTime();
-                seekProgress = -1;
-            }
-            progressLock.unlock();
-        }
     }
     LOGCATE("create thread has over ");
 }
 
 void BaseHwDecoder::OnSizeReady() {
-    if (mWindowWidth == 0 || mWindowHeight == 0 || videoRender == nullptr) return;
+    if (mWindowWidth == 0 || mWindowHeight == 0 || videoRender == nullptr ||
+    mVideoWidth == 0 || mVideoHeight == 0) return;
     int m_VideoWidth = mVideoWidth;
     int m_VideoHeight = mVideoHeight;
     int m_RenderWidth,m_RenderHeight;

@@ -17,7 +17,7 @@ void TimeSyncHelper::resetTime(){
 }
 
 TimeSyncHelper::TimeSyncHelper(){
-    startSysTime = pastDuration = 0L;
+    startSysTime = pastDuration = 0LL;
 }
 
 bool TimeSyncHelper::syncTime(bool isPkt,AVPacket* packet,AVFrame* frame,AVFormatContext* formatCtx,int streamIndex,
@@ -58,7 +58,7 @@ bool TimeSyncHelper::syncByAudio(bool isPkt, const AVPacket *packet, const AVFra
             avDuration = 0L;
         }
     }
-    int64_t sysDuration = syncBean->currentAudioPts;
+    int64_t sysDuration = syncBean->currentAudioPtsMs;
     // 统一以毫秒作计算单位
     if (avDuration != 0L) {
         int64_t waitSysTime = avDuration - sysDuration;
@@ -76,9 +76,9 @@ bool TimeSyncHelper::syncByAudio(bool isPkt, const AVPacket *packet, const AVFra
 
 bool TimeSyncHelper::hardwareSyncByAudio(bool isAudio,TimeSyncBean *syncBean) {
     if (isAudio) return true;
-    int64_t avDuration = syncBean->currentVideoPts;
+    int64_t avDuration = syncBean->currentVideoPtsMs;
     bool frameIsValid = true;
-    int64_t sysDuration = syncBean->currentAudioPts;
+    int64_t sysDuration = syncBean->currentAudioPtsMs;
     // 统一以毫秒作计算单位
     if (avDuration != 0L) {
         int64_t waitSysTime = avDuration - sysDuration;
@@ -113,11 +113,9 @@ bool TimeSyncHelper::syncBySysTime(bool isPkt, const AVPacket *packet, const AVF
         }
     }
     if (pastDuration == 0L){
-        pastDuration = avDuration;
-        startSysTime = GetSysCurrentTime() - pastDuration;
-    } else {
-        pastDuration = avDuration;
+        startSysTime = GetSysCurrentTime() - avDuration;
     }
+    pastDuration = avDuration;
     int64_t sysDuration = (GetSysCurrentTime() - startSysTime);
     // 统一以毫秒作计算单位
     if (avDuration != 0L) {
@@ -139,14 +137,13 @@ bool TimeSyncHelper::hardwareSyncBySysTime(bool isAudio,TimeSyncBean *syncBean) 
     if (isAudio) return true;
     if (startSysTime == 0L) startSysTime = GetSysCurrentTime();
 
-    int64_t avDuration = syncBean->currentVideoPts;
+    int64_t avDuration = syncBean->currentVideoPtsMs;
     bool frameIsValid = true;
     if (pastDuration == 0L){
-        pastDuration = avDuration;
-        startSysTime = GetSysCurrentTime() - pastDuration;
-    } else {
-        pastDuration = avDuration;
+        LOGCATE("时间戳被重新调整");
+        startSysTime = GetSysCurrentTime() - avDuration;
     }
+    pastDuration = avDuration;
     int64_t sysDuration = (GetSysCurrentTime() - startSysTime);
     // 统一以毫秒作计算单位
     if (avDuration != 0L) {
@@ -155,6 +152,7 @@ bool TimeSyncHelper::hardwareSyncBySysTime(bool isAudio,TimeSyncBean *syncBean) 
             waitSysTime = waitSysTime > MAX_WAIT_TIME ? MAX_WAIT_TIME : waitSysTime;
             av_usleep(waitSysTime * 1000);
         } else if (abs(waitSysTime) > MAX_WAIT_TIME) {
+            LOGCATE("打印等待时间:%lld 视频时间：%lld   过去的系统时间:%lld",waitSysTime,avDuration,sysDuration);
             frameIsValid = false;
         }
         pastDuration = avDuration;

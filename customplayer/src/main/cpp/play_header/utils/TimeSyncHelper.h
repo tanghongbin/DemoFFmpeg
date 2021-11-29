@@ -16,11 +16,11 @@ typedef struct _timesyncbean{
     /***
      * 这个音频是当作比较标准的,都是毫秒
      */
-    int64_t currentAudioPts;
+    int64_t currentAudioPtsMs;
     /**
      * 播放中的视频pts值，仅当硬解码有效,毫秒为单位
      */
-    int64_t currentVideoPts;
+    int64_t currentVideoPtsMs;
     int syncType; // 1- 系统时间戳，2-视频 -> 音频，视频对照音频同步
 } TimeSyncBean;
 

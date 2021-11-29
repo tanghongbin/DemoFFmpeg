@@ -31,7 +31,7 @@ private:
     std::mutex mPauseMutex;
     std::condition_variable mPauseCondition;
     int seekProgress;
-    int64_t currentPts;
+    int64_t currentPtsUs;
     PrepareCall readyCall;
     bool isInit;
     int mVideoHeight,mVideoWidth,mWindowWidth,mWindowHeight,oreration;
@@ -51,7 +51,11 @@ public:
     void setReadyCall(PrepareCall call);
     BaseHwDecoder();
     virtual char * getDecodeTypeStr() = 0;
-    int64_t getCurrentAudioPts();
+    /***
+     * 毫秒
+     * @return
+     */
+    int64_t getCurrentAudioPtsUs();
     void Init(const char * url) ;
     void Start();
     void Stop();

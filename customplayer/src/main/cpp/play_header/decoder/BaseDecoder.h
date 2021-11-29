@@ -16,7 +16,7 @@ protected:
     // 1-音频，2-视频
     int appointMediaType;
     virtual BaseDataCoverter * createConverter() = 0;
-    virtual int64_t getCurrentAudioPts() {};
+    virtual int64_t getCurrentAudioPtsUs() {};
 public:
     VideoRender* videoRender;
     OpenSLESRender* audioRender;

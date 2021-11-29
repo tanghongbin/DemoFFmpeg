@@ -15,7 +15,7 @@ private:
     static AudioFFmpegDecoder* instance;
 public:
     BaseDataCoverter * createConverter();
-    int64_t getCurrentAudioPts() {
+    int64_t getCurrentAudioPtsUs() {
         return currentAudioPts;
     }
     static AudioFFmpegDecoder* getInstance();
@@ -34,8 +34,8 @@ public:
     void drawVideoFrame();
     void OnSurfaceChanged(int oreration,int width,int height);
     void OnSizeReady();
-    int64_t getCurrentAudioPts() {
-        return AudioFFmpegDecoder::getInstance()->getCurrentAudioPts();
+    int64_t getCurrentAudioPtsUs() {
+        return AudioFFmpegDecoder::getInstance()->getCurrentAudioPtsUs();
     }
 };
 

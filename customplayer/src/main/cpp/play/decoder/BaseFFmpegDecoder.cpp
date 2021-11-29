@@ -11,7 +11,7 @@
 // Created by Admin on 2021/5/24.
 //
 
-
+#define SYNC_TYPE_FFMPEG_TIME 1 // 时间戳同步
 
 void BaseFFmpegDecoder::Init(const char * url){
     LOGCATE("base prepare decode");
@@ -32,7 +32,9 @@ void BaseFFmpegDecoder::resolveConvertResult(void * decoder, void * data, int si
 //    LOGCATE("resolveConvertResult receive data");
     auto* baseDecoder = static_cast<BaseFFmpegDecoder *>(decoder);
     if (baseDecoder->appointMediaType == 2 && baseDecoder->videoRender){
-        baseDecoder->videoRender->copyImage(static_cast<NativeOpenGLImage *>(data));
+        auto *resultData = static_cast<NativeOpenGLImage *>(data);
+        LOGCATE("打印ffmpeg 转换的宽高：%d : %d",resultData->width,resultData->height);
+        baseDecoder->videoRender->copyImage(resultData);
     } else if (baseDecoder->appointMediaType == 1 && baseDecoder->audioRender) {
         baseDecoder->audioRender->RenderAudioFrame(static_cast<uint8_t *>(data), size);
     }
@@ -113,7 +115,7 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
     // alloc packet,frame
     AVPacket *packet = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
-    auto* timeHelper = new TimeSyncHelper;
+    timeSyncHelper = new TimeSyncHelper;
     baseDecoder -> mDataConverter = createConverter();
     if (pContext->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
         std::unique_lock<std::mutex> uniqueLock(createSurfaceMutex);
@@ -132,7 +134,7 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
     baseDecoder -> mDataConverter ->Init(pCodecContext);
     int ret;
     call(reinterpret_cast<long>(getJniPlayerFromJava()));
-    int defaultSyncTimeType = 1; // 视频向音频同步
+    int defaultSyncTimeType = SYNC_TYPE_FFMPEG_TIME; // 视频向音频同步
     while (isRunning){
         // pause
         std::unique_lock<std::mutex> uniqueLock(customMutex);
@@ -149,7 +151,7 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
             ret = avformat_seek_file(pContext, -1, INT64_MIN, targetPosition, INT64_MAX, 0);
             if (ret == 0){
                 avcodec_flush_buffers(pCodecContext);
-                timeHelper->resetTime();
+                timeSyncHelper->resetTime();
             } else {
                 LOGCATE("error seek file:%s",av_err2str(ret));
             }
@@ -173,8 +175,8 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
         if (packet->stream_index == stream_index){
             TimeSyncBean dtsBean;
             dtsBean.syncType = defaultSyncTimeType;
-            dtsBean.currentAudioPts = getCurrentAudioPts();
-            if (!timeHelper->syncTime(true,packet,frame,pContext,stream_index,&dtsBean)){
+            dtsBean.currentAudioPtsMs = getCurrentAudioPtsUs();
+            if (!timeSyncHelper->syncTime(true,packet,frame,pContext,stream_index,&dtsBean)){
                 continue;
             }
             ret = avcodec_send_packet(pCodecContext, packet);
@@ -195,8 +197,8 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
 //                LOGCATE("avcodec_receive_frame receive success");
                 TimeSyncBean ptsBean;
                 ptsBean.syncType = defaultSyncTimeType;
-                ptsBean.currentAudioPts = getCurrentAudioPts();
-                if (!timeHelper->syncTime(false,packet,frame,pContext,stream_index,&ptsBean)){
+                ptsBean.currentAudioPtsMs = getCurrentAudioPtsUs();
+                if (!timeSyncHelper->syncTime(false,packet,frame,pContext,stream_index,&ptsBean)){
                     goto innerEnd;
                 }
                 DataConvertInfo dataConvertInfo;
@@ -210,8 +212,6 @@ void BaseFFmpegDecoder::decodeLoop(AVFormatContext *pContext, AVCodecContext *pC
 
     DecodeLoopEnd:
     LOGCATE("loop has end ret:%d errorStr:%s",ret,av_err2str(ret));
-    delete timeHelper;
-    timeHelper = nullptr;
     baseDecoder -> mDataConverter ->Destroy();
     delete baseDecoder -> mDataConverter;
     baseDecoder -> mDataConverter = nullptr;
@@ -238,6 +238,10 @@ void BaseFFmpegDecoder::Destroy(){
         delete audioRender;
         audioRender = 0;
     }
+    if (timeSyncHelper) {
+        delete timeSyncHelper;
+        timeSyncHelper = 0;
+    }
 }
 
 void BaseFFmpegDecoder::Reset(){
@@ -254,6 +258,7 @@ void BaseFFmpegDecoder::Reset(){
 void BaseFFmpegDecoder::Start(){
     std::lock_guard<std::mutex> lockGuard(customMutex);
     isStarted = true;
+    timeSyncHelper->resetTime();
     condition.notify_one();
 }
 
@@ -282,6 +287,7 @@ BaseFFmpegDecoder::BaseFFmpegDecoder(){
     mDataConverter = 0;
     mManualSeekPosition = -1;
     currentAudioPts = 0LL;
+    timeSyncHelper = 0;
 }
 
 void BaseFFmpegDecoder::OnDecodeReady(AVFormatContext *pContext, int streamIndex) {
