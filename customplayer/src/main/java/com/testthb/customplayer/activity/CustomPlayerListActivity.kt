@@ -25,6 +25,7 @@ class CustomPlayerListActivity : AppCompatActivity() {
         }
     }
 
+
     private fun init() {
         val layoutManager = GridLayoutManager(this, 2)
         mRecyclePlayer.layoutManager = layoutManager
