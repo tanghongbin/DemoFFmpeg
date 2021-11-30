@@ -102,6 +102,8 @@ void yuvRgbaToNv21(uint8_t *rgba, uint8_t * nv21Dst, int width, int height);
 
 void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeight,int dstWidth,int dstHeight);
 
+void yuvNv12ToI420(uint8_t* nv12src,uint8_t* i420Dst,int width,int height);
+
 /***
  * 创建目录，如果不存在
  * @param filePath

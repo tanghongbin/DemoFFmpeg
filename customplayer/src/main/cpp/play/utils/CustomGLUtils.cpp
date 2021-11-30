@@ -364,6 +364,14 @@ void yuvI420Scale(uint8_t *i420Src, uint8_t * i420Dst, int srcWidth, int srcHeig
             dstVData,dstWidth >> 1,dstWidth,dstHeight,libyuv::kFilterNone);
 }
 
+void yuvNv12ToI420(uint8_t* nv12src,uint8_t* i420Dst,int width,int height){
+    libyuv::NV12ToI420(nv12src,width,
+            nv12src + width * height,width,
+                       i420Dst,width,
+                       i420Dst + width * height,width >> 1,
+                       i420Dst + width * height * 5 / 4,width >> 1,width,height);
+}
+
 void createFolderIfNotExist(char * _f){
     bool isFolder = true;
     if (strstr(_f,".")){

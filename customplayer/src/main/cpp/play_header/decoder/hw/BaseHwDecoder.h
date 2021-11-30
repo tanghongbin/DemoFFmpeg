@@ -35,6 +35,7 @@ private:
     PrepareCall readyCall;
     bool isInit;
     int mVideoHeight,mVideoWidth,mWindowWidth,mWindowHeight,oreration;
+    uint8_t * i420dst;
     AMediaExtractor *mMediaExtractor;
     AMediaCodec *mMediaCodec;
     TimeSyncHelper* timeSyncHelper;

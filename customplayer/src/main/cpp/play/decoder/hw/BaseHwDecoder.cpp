@@ -18,6 +18,7 @@ BaseHwDecoder::BaseHwDecoder(){
     mMediaCodec = 0;
     mMediaExtractor = 0;
     timeSyncHelper = 0;
+    i420dst = 0;
 }
 
 int64_t BaseHwDecoder::getCurrentAudioPtsUs(){
@@ -128,6 +129,10 @@ void BaseHwDecoder::Destroy() {
         delete videoRender;
         videoRender = 0;
     }
+    if (i420dst) {
+        delete [] i420dst;
+        i420dst = 0;
+    }
     if (timeSyncHelper) delete timeSyncHelper;
     isInit = false;
     LOGCATE("has destroy all");
@@ -171,13 +176,20 @@ void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t*
     if (type == 1) {
         audioRender->RenderAudioFrame(data,bufferInfo->size);
     } else {
-//        LOGCATE("打印视频宽/高 %d/%d",mVideoWidth,mVideoHeight);
+//      mediacodec  输出的nv12 要转换一下
+        if (!i420dst) {
+            i420dst = new uint8_t [mVideoWidth * mVideoHeight * 3/2];
+        }
+        memset(i420dst,0x00,mVideoWidth * mVideoHeight * 3/2);
+        long long int start = GetSysCurrentTime();
+        yuvNv12ToI420(data,i420dst,mVideoWidth,mVideoHeight);
+        LOGCATE("nv12toi420 耗费时间:%lld",(GetSysCurrentTime() - start));
         NativeOpenGLImage openGlImage;
         openGlImage.width = mVideoWidth;
         openGlImage.height = mVideoHeight;
-        openGlImage.ppPlane[0] = data;
-        openGlImage.ppPlane[1] = data + mVideoWidth * mVideoHeight;
-        openGlImage.ppPlane[2] = data + mVideoWidth * mVideoHeight * 5 / 4;
+        openGlImage.ppPlane[0] = i420dst;
+        openGlImage.ppPlane[1] = i420dst + mVideoWidth * mVideoHeight;
+        openGlImage.ppPlane[2] = i420dst + mVideoWidth * mVideoHeight * 5 / 4;
         openGlImage.pLineSize[0]= mVideoWidth;
         openGlImage.pLineSize[1]= mVideoWidth / 2;
         openGlImage.pLineSize[2]= mVideoWidth / 2;
@@ -228,7 +240,6 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             uint8_t * inputBuffer = AMediaCodec_getInputBuffer(mMediaCodec,inIndex,&capacity);
             size_t inputBufferSize = AMediaExtractor_readSampleData(mMediaExtractor,inputBuffer,capacity);
 //            LOGCATE("打印解码完成-----------前的时间戳：%lld",sampleTime);
-            LOGCATE("容量:%d   实际大小:%d",capacity,inputBufferSize);
             if (inputBufferSize > 0) {
                 int64_t sampleTime = AMediaExtractor_getSampleTime(mMediaExtractor);
                 AMediaCodec_queueInputBuffer(mMediaCodec,inIndex,0,inputBufferSize,sampleTime,0);
