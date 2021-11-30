@@ -36,6 +36,9 @@ class CustomPlayerListActivity : AppCompatActivity() {
                 putExtra("url",videoInfo.data)
             })
         }
+        adapter.setOnItemLongClickListener { i, videoInfo ->
+
+        }
         mRecyclePlayer.adapter = adapter
         mModule.loadVideoList {
             adapter.addList(it)

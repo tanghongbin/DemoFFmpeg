@@ -13,6 +13,7 @@ import com.testthb.customplayer.bean.VideoInfo
 class PlayerListAdapter : RecyclerView.Adapter<PlayerListHolder>() {
     private val mList = arrayListOf<VideoInfo>()
     private var mBlock:((Int,VideoInfo) -> Unit)? = null
+    private var mLongBlock:((Int,VideoInfo) -> Unit)? = null
 
     fun addList(data:List<VideoInfo>){
         mList.addAll(data)
@@ -39,6 +40,9 @@ class PlayerListAdapter : RecyclerView.Adapter<PlayerListHolder>() {
 
     fun setOnItemClickListener(block:(Int,VideoInfo) -> Unit){
         mBlock = block
+    }
+    fun setOnItemLongClickListener(block:(Int,VideoInfo) -> Unit){
+        mLongBlock = block
     }
 
 }
