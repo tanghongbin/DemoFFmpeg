@@ -5,10 +5,12 @@
 #include <cstring>
 #include "../../../play_header/decoder/hw/BaseHwDecoder.h"
 #include <string>
+#include <render/VideoFboRender.h>
+#include <render/VideoSpecialEffortsRender.h>
 //#include <StringUtils>
 
-// 视频向音频同步
-#define SYNC_TYPE_AV 2
+// 2-视频向音频同步
+#define SYNC_TYPE 1
 
 BaseHwDecoder::BaseHwDecoder(){
     decodeThread = 0;
@@ -19,6 +21,11 @@ BaseHwDecoder::BaseHwDecoder(){
     mMediaExtractor = 0;
     timeSyncHelper = 0;
     i420dst = 0;
+    outputDataListener = 0;
+    readyCall = 0;
+    isNeedPauseWhenFinished = true;
+    isNeedRender = true;
+    onCompleteCall = 0;
 }
 
 int64_t BaseHwDecoder::getCurrentAudioPtsUs(){
@@ -27,6 +34,7 @@ int64_t BaseHwDecoder::getCurrentAudioPtsUs(){
 
 void BaseHwDecoder::Init(const char * url) {
     if (isInit) return;
+    LOGCATE("打印地址:%s",url);
     seekProgress = -1;
     isFinished = false;
     isPaused = true;
@@ -140,7 +148,7 @@ void BaseHwDecoder::Destroy() {
 void BaseHwDecoder::Start() {
     std::unique_lock<std::mutex> uniqueLock(mPauseMutex);
     isPaused = false;
-    timeSyncHelper->resetTime();
+    if (timeSyncHelper) timeSyncHelper->resetTime();
     mPauseCondition.notify_one();
 }
 void BaseHwDecoder::Reset() {
@@ -171,6 +179,13 @@ void BaseHwDecoder::OnSurfaceChanged(int oreration, int windowW, int windowH){
     OnSizeReady();
 }
 
+void BaseHwDecoder::setIfNeedRender(bool needRender){
+    this->isNeedRender = needRender;
+}
+
+void BaseHwDecoder::setIfNeedPauseWhenFinished(bool needRender){
+    this->isNeedPauseWhenFinished = needRender;
+}
 void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t* data){
 //    LOGCATE("开始渲染:%d",type);
     if (type == 1) {
@@ -183,7 +198,7 @@ void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t*
         memset(i420dst,0x00,mVideoWidth * mVideoHeight * 3/2);
         long long int start = GetSysCurrentTime();
         yuvNv12ToI420(data,i420dst,mVideoWidth,mVideoHeight);
-        LOGCATE("nv12toi420 耗费时间:%lld",(GetSysCurrentTime() - start));
+//        LOGCATE("nv12toi420 耗费时间:%lld",(GetSysCurrentTime() - start));
         NativeOpenGLImage openGlImage;
         openGlImage.width = mVideoWidth;
         openGlImage.height = mVideoHeight;
@@ -202,12 +217,14 @@ void BaseHwDecoder::renderAv(int type,AMediaCodecBufferInfo* bufferInfo,uint8_t*
 void BaseHwDecoder::createDecoderThread(const char * url){
     std::unique_lock<std::mutex> surfaceLock(mCreateSurfaceMutex,std::defer_lock);
     surfaceLock.lock();
-    if (appointMediaType == 2 && !videoRender) {
+    if (isNeedRender && appointMediaType == 2 && !videoRender) {
         LOGCATE("videorender has not prepare");
         mSurfaceCondition.wait(surfaceLock);
     }
     surfaceLock.unlock();
-    readyCall(reinterpret_cast<long>(getJniPlayerFromJava()));
+    if (readyCall) {
+        readyCall(reinterpret_cast<long>(getJniPlayerFromJava()));
+    }
     // 发送时长
     while (!isFinished) {
         std::unique_lock<std::mutex> uniqueLock(mPauseMutex,std::defer_lock);
@@ -248,11 +265,16 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             }
 //            LOGCATE("读取类型:%d  缓冲大小：%d   capacity:%d   时间戳：%lld",appointMediaType,inputBufferSize,capacity,sampleTime);
             if (!AMediaExtractor_advance(mMediaExtractor)) {
-                isPaused = true;
-                if (appointMediaType == 2) {
+                if (isNeedRender && appointMediaType == 2) {
                     MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_COMPLETE,0,0));
                 }
-                continue;
+                if (onCompleteCall) onCompleteCall->call();
+                if (isNeedPauseWhenFinished) {
+                    isPaused = true;
+                    continue;
+                } else {
+                    break;
+                }
             }
         }
         AMediaCodecBufferInfo codecBufferInfo;
@@ -262,7 +284,7 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             currentPtsUs = codecBufferInfo.presentationTimeUs;
             ptsMutex.unlock();
             TimeSyncBean timeSyncBean;
-            timeSyncBean.syncType = SYNC_TYPE_AV;
+            timeSyncBean.syncType = SYNC_TYPE;
             timeSyncBean.currentAudioPtsMs = getCurrentAudioPtsUs() / 1000;
             timeSyncBean.currentVideoPtsMs = codecBufferInfo.presentationTimeUs / 1000;
             if (!timeSyncHelper->hardwareSyncTime(appointMediaType == 1,&timeSyncBean)) {
@@ -279,7 +301,11 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             } else {
 //                LOGCATE("打印解码完成后的时间戳：%lld",codecBufferInfo.presentationTimeUs / 1000);
             }
-            renderAv(appointMediaType,&codecBufferInfo,outputBuffer);
+            if (outputDataListener) {
+                outputDataListener(appointMediaType,&codecBufferInfo,outputBuffer);
+            } else {
+                renderAv(appointMediaType,&codecBufferInfo,outputBuffer);
+            }
             AMediaCodec_releaseOutputBuffer(mMediaCodec,outStatus, true);
         } else if (outStatus == AMEDIACODEC_INFO_OUTPUT_BUFFERS_CHANGED) {
             LOGCATE("output buffers changed");
@@ -312,5 +338,6 @@ void BaseHwDecoder::OnSizeReady() {
     int m_VideoHeight = mVideoHeight;
     int m_RenderWidth,m_RenderHeight;
     setupRenderDimension(oreration,mWindowWidth,mWindowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
-    videoRender->OnRenderSizeChanged(mWindowWidth,mWindowHeight,m_RenderWidth,m_RenderHeight);
+    auto* render = dynamic_cast<VideoSpecialEffortsRender *>(videoRender);
+    render->OnRenderSizeChanged(mWindowWidth,mWindowHeight,m_RenderWidth,m_RenderHeight);
 }

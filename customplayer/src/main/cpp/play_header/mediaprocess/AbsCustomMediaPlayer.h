@@ -52,6 +52,8 @@ public:
         prepareCount = 0;
     }
     virtual void Replay(){};
+    // 添加特凶啊
+    virtual void ApplyEfforts(const char * url){};
 };
 
 #endif //DEMOFFMPEG_ABSCUSTOMMEDIAPLAYER_H

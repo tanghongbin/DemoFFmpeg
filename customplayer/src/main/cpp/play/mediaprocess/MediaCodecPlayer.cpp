@@ -6,9 +6,22 @@
 #include <render/VideoRender.h>
 #include <decoder/ImlFFmpegDecoder.h>
 #include <decoder/hw/ImlHwDecoder.h>
+#include <render/VideoFboRender.h>
+#include <render/VideoSpecialEffortsRender.h>
+
+MediaCodecPlayer* MediaCodecPlayer::instance = 0;
 
 MediaCodecPlayer::MediaCodecPlayer(){
-    audioDecoder =  videoDecoder = 0;
+    audioDecoder =  videoDecoder = specialEffortDecoder = 0;
+    
+}
+
+ 
+MediaCodecPlayer* MediaCodecPlayer::getInstance(){
+    if (instance == nullptr) {
+        instance = new MediaCodecPlayer;
+    }
+    return instance;
 }
 
 void MediaCodecPlayer::Init(){
@@ -23,7 +36,7 @@ void MediaCodecPlayer::Init(){
 void MediaCodecPlayer::OnSurfaceCreated() {
     if (!videoDecoder) return;
     BaseDecoder* videoResult = videoDecoder;
-    auto *render = new VideoRender;
+    auto *render = new VideoSpecialEffortsRender;
     render->Init();
     videoResult->setVideoRender(render);
 }
@@ -56,6 +69,12 @@ void MediaCodecPlayer::Destroy() {
         delete videoDecoder;
         videoDecoder = 0;
     }
+    if (specialEffortDecoder) {
+        specialEffortDecoder->Destroy();
+        delete specialEffortDecoder;
+        specialEffortDecoder = 0;
+    }
+    instance = nullptr;
 }
 
 void MediaCodecPlayer::Prepare() {
@@ -83,3 +102,56 @@ void MediaCodecPlayer::Replay() {
     if (videoDecoder) videoDecoder->Replay();
 }
 
+void MediaCodecPlayer::ApplyEfforts(const char * url){
+    if (specialEffortDecoder) {
+        specialEffortDecoder->Stop();
+        specialEffortDecoder->Destroy();
+        delete specialEffortDecoder;
+        specialEffortDecoder = 0;
+    }
+    specialEffortDecoder = new HwVideoDecoder;
+    specialEffortDecoder->setMediaType(2);
+    specialEffortDecoder->setIfNeedRender(false);
+    specialEffortDecoder->setIfNeedPauseWhenFinished(false);
+    specialEffortDecoder->setOutputDataListener(MediaCodecPlayer::receiveSpecialEffortsData);
+    specialEffortDecoder->setOnCompleteCall(this);
+    specialEffortDecoder->Init(url);
+    specialEffortDecoder->Start();
+    auto *videoRender = dynamic_cast<VideoSpecialEffortsRender *>(getInstance()->videoDecoder->videoRender);
+    videoRender->setReadResultListener(this);
+}
+
+/***
+ * 播放完成的回调
+ */
+void MediaCodecPlayer::call() {
+    auto *videoRender = dynamic_cast<VideoSpecialEffortsRender *>(videoDecoder->videoRender);
+    videoRender->destroySpecialEffortsImage();
+    LOGCATE("已经销毁特效");
+}
+
+void MediaCodecPlayer::readPixelResult(NativeOpenGLImage* data){
+
+}
+ 
+void MediaCodecPlayer::receiveSpecialEffortsData(int type,AMediaCodecBufferInfo* info,uint8_t* data){
+    if (type != 2) return;
+    int vWidth = getInstance()->specialEffortDecoder->mVideoWidth;
+    int vHeight =  getInstance()->specialEffortDecoder->mVideoHeight;
+    uint8_t * i420dst = new uint8_t [vWidth * vHeight *3/2];
+    yuvNv12ToI420(data,i420dst,vWidth,vHeight);
+//    LOGCATE("nv12toi420 耗费时间:%lld",(GetSysCurrentTime() - start));
+    NativeOpenGLImage openGlImage;
+    openGlImage.width = vWidth;
+    openGlImage.height = vHeight;
+    openGlImage.ppPlane[0] = i420dst;
+    openGlImage.ppPlane[1] = i420dst + vWidth * vHeight;
+    openGlImage.ppPlane[2] = i420dst + vWidth * vHeight * 5 / 4;
+    openGlImage.pLineSize[0]= vWidth;
+    openGlImage.pLineSize[1]= vWidth / 2;
+    openGlImage.pLineSize[2]= vWidth / 2;
+    openGlImage.format = IMAGE_FORMAT_I420;
+    auto *videoRender = dynamic_cast<VideoSpecialEffortsRender *>(getInstance()->videoDecoder->videoRender);
+    videoRender->copySpecialEffortsImage(&openGlImage);
+    delete [] i420dst;
+}

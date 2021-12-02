@@ -33,6 +33,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
+            android:id="@+id/mAddEfforts"
+            android:text="添加特效"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
             android:id="@+id/mCutVideo"
             android:text="剪切"
             android:visibility="invisible"

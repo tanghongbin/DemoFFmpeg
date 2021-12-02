@@ -16,6 +16,7 @@
 #include <encoder/hw/AudioConfiguration.h>
 #include <decoder/BaseDecoder.h>
 #include <utils/TimeSyncHelper.h>
+#include <utils/Callback.h>
 
 /***
  * 硬解码 基类
@@ -34,16 +35,27 @@ private:
     int64_t currentPtsUs;
     PrepareCall readyCall;
     bool isInit;
-    int mVideoHeight,mVideoWidth,mWindowWidth,mWindowHeight,oreration;
+    int mWindowWidth,mWindowHeight,oreration;
     uint8_t * i420dst;
     AMediaExtractor *mMediaExtractor;
     AMediaCodec *mMediaCodec;
     TimeSyncHelper* timeSyncHelper;
     void OnSizeReady();
+    bool isNeedRender; // 是否需要渲染，通常只用作解码使用
+    OutputDataListener outputDataListener;
+    bool isNeedPauseWhenFinished;
+    Callback* onCompleteCall;
 protected:
     std::mutex audioPtsMutex;
     BaseDataCoverter * createConverter() {};
 public:
+    int mVideoHeight,mVideoWidth;
+    void setOutputDataListener(OutputDataListener listener){
+        this->outputDataListener = listener;
+    }
+    void setOnCompleteCall(Callback* call) {
+        this->onCompleteCall = call;
+    }
     virtual void setMediaType(int mediaType) {
         this->appointMediaType = mediaType;
     }
@@ -65,6 +77,8 @@ public:
     void Reset();
     void Replay();
     void OnSurfaceChanged(int oreration,int width,int height);
+    void setIfNeedRender(bool needRender);
+    void setIfNeedPauseWhenFinished(bool needRender);
 
 };
 

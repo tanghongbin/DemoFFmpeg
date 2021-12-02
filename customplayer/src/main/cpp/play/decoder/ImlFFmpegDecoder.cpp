@@ -54,7 +54,8 @@ void VideoFFmpegDecoder::OnSizeReady() {
     int m_VideoHeight = codeCtx->height;
     int m_RenderWidth,m_RenderHeight;
     setupRenderDimension(mOreration,windowWidth,windowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
-    videoRender->OnRenderSizeChanged(windowWidth,windowHeight,m_RenderWidth,m_RenderHeight);
+    auto * render = dynamic_cast<VideoRender *>(videoRender);
+    render->OnRenderSizeChanged(windowWidth,windowHeight,m_RenderWidth,m_RenderHeight);
 }
 
 

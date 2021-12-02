@@ -8,11 +8,9 @@ import android.os.Bundle
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
 import com.coder.ffmpeg.utils.FFmpegUtils
+import com.testthb.common_base.utils.*
+import com.testthb.common_base.utils.Constants.FILD_DIR
 import com.testthb.common_base.utils.Constants.IMG_DIR
-import com.testthb.common_base.utils.FileUtils
-import com.testthb.common_base.utils.log
-import com.testthb.common_base.utils.showViews
-import com.testthb.common_base.utils.toastSafe
 import com.testthb.customplayer.R
 import com.testthb.customplayer.interfaces.*
 import com.testthb.customplayer.player.CustomMediaController
@@ -50,7 +48,7 @@ class AvEditorActivity : AppCompatActivity(){
             }
             requestedOrientation = oreration
         }
-        showViews(mCutVideo,mWaterMask)
+        showViews(mCutVideo,mWaterMask,mAddEfforts)
         mWaterMask.setOnClickListener {
             val picPath = "${IMG_DIR}/container.jpg"
             val outputPath = getRamdowVideoPath("watermask")
@@ -82,6 +80,10 @@ class AvEditorActivity : AppCompatActivity(){
                 mPlayer.native_stop()
             }
             mPlayPause.setImageResource(if (!isPlaying) R.mipmap.live_resume else R.mipmap.live_pause)
+        }
+        mAddEfforts.setOnClickListener {
+            val url = "${FILD_DIR}/special_efforts/star1.mp4"
+            mPlayer.native_applyEfforts(url)
         }
         mSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -118,7 +120,7 @@ class AvEditorActivity : AppCompatActivity(){
         mPlayer.setOnCompleteListener(object : OnCompleteListener {
             override fun onComplete() {
                 log("播放完成")
-                mPlayer.native_replay()
+//                mPlayer.native_replay()
             }
         })
         mPlayer.setOnErrorListener(object : OnErrorListener {
@@ -128,6 +130,7 @@ class AvEditorActivity : AppCompatActivity(){
             }
         })
         mPlayer.setOnDurationListener(object : OnDurationListener{
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onDuration(min: Int, max: Int) {
                 mSeekbar.min = min
                 mSeekbar.max = max

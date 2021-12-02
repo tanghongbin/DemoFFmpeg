@@ -185,6 +185,11 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
     external fun native_replay()
 
     /***
+     * 添加特效
+     */
+    external fun native_applyEfforts(url: String)
+
+    /***
      * 重置播放器
      */
     external fun native_resetPlay()

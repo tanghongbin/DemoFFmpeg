@@ -18,10 +18,10 @@ protected:
     virtual BaseDataCoverter * createConverter() = 0;
     virtual int64_t getCurrentAudioPtsUs() {};
 public:
-    VideoRender* videoRender;
+    BaseVideoRender* videoRender;
     OpenSLESRender* audioRender;
     BaseDecoder() {}
-    virtual void setVideoRender(VideoRender* render) {
+    virtual void setVideoRender(BaseVideoRender* render) {
         this->videoRender = render;
     }
     virtual void setMediaType(int mediaType) {

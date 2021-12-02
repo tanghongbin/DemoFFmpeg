@@ -110,7 +110,7 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance,jint pla
     if (playerType == 1) {
         mediaPlayer = new FFmpegMediaPlayer;
     } else {
-        mediaPlayer = new MediaCodecPlayer;
+        mediaPlayer = MediaCodecPlayer::getInstance();
     }
     setJniPointToJava(env,"mNativePlayer","J", mediaPlayer);
     mediaPlayer->Init();
@@ -265,6 +265,13 @@ JNIEXPORT void JNICALL native_replay(JNIEnv *env, jobject instance) {
 }
 
 
+JNIEXPORT void JNICALL native_applyEfforts(JNIEnv *env, jobject instance,jstring url) {
+    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
+    if (mediaPlayer != NULL)
+        mediaPlayer->ApplyEfforts(getCharStrFromJstring(env,url));
+}
+
+
 
 
 
@@ -295,6 +302,8 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_configAudioParams",               "(II)V",            (void *) (native_configAudioParams)},
         {"native_setSpeed",               "(D)V",            (void *) (native_setSpeed)},
         {"native_replay",               "()V",            (void *) (native_replay)},
+        {"native_applyEfforts",               "(Ljava/lang/String;)V",            (void *) (native_applyEfforts)},
+
 
 
 };
