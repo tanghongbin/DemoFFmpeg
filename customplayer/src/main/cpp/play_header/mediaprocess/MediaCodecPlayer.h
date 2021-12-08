@@ -9,6 +9,7 @@
 #include <render/BaseRender.h>
 #include <decoder/hw/BaseHwDecoder.h>
 #include <utils/Callback.h>
+#include <encoder/SpecialEffortsVideoMuxer.h>
 #include "AbsCustomMediaPlayer.h"
 
 class MediaCodecPlayer : public AbsCustomMediaPlayer, Callback,OnReadPixelListener {
@@ -16,6 +17,7 @@ private:
     BaseHwDecoder* audioDecoder;
     BaseHwDecoder* videoDecoder;
     BaseHwDecoder* specialEffortDecoder; // 特效视频
+    SpecialEffortsVideoMuxer* specialEffortsVideoMuxer;
     MediaCodecPlayer();
     static MediaCodecPlayer* instance;
     static void receiveSpecialEffortsData(int type,AMediaCodecBufferInfo* info,uint8_t* data);

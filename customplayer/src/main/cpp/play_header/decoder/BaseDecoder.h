@@ -10,6 +10,7 @@
 #include "../utils/utils.h"
 #include <mutex>
 #include <thread>
+#include <encoder/hw/VideoConfiguration.h>
 
 class BaseDecoder {
 protected:

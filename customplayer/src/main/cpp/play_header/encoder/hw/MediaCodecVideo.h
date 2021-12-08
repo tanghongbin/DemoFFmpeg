@@ -10,6 +10,7 @@
 #include <encoder/AbsMediaMuxer.h>
 #include <utils/utils.h>
 #include "AudioConfiguration.h"
+#include "VideoConfiguration.h"
 #include <utils/CustomSafeBlockQueue.h>
 
 /***
@@ -29,6 +30,7 @@ private:
     OutputFmtChangedListener outputFmtChangedListener;
     OutputDataListener outputDataListener;
     int64_t startNanoTime,totalTime;
+    VideoConfigInfo* videoConfigInfo;
 
     AMediaCodec * createVideoMediaCodec();
 
@@ -41,6 +43,7 @@ public:
         encodeThread = 0;
         videoQueue.setMax(3);
         speed = 1.0;
+        videoConfigInfo = 0;
     }
     void setSpeed(double speed);
     void setOutputDataListener(OutputFmtChangedListener changedListener,OutputDataListener dataListener);
@@ -49,6 +52,7 @@ public:
     void putData(NativeOpenGLImage* image);
     static void loopEncode(MediaCodecVideo* codecAudio);
     int64_t getTotalTime();
+    void setVideoConfigInfo(VideoConfigInfo* info);
 };
 
 #endif //DEMOFFMPEG_MEDIACODECVIDEO_H

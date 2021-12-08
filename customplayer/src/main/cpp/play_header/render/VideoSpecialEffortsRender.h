@@ -18,7 +18,7 @@ private:
     std::condition_variable renderCondition;
     int count = 0;
     bool renderIsFinish = false;
-    int renderWidth,renderHeight,widthOffset,heightOffset;
+    int widthOffset,heightOffset;
     OnReadPixelListener* onReadPixelListener;
     NativeOpenGLImage nativeOpenGlImage;
     NativeOpenGLImage specialEffortsImage;
@@ -27,6 +27,7 @@ private:
     void drawImage(NativeOpenGLImage *targetImg, float d);
 
 public:
+    int renderWidth,renderHeight;
     VideoSpecialEffortsRender(){
         onReadPixelListener = 0;
     }

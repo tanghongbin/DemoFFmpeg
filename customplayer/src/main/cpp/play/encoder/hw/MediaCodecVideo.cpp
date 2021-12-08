@@ -21,7 +21,6 @@ void MediaCodecVideo::startEncode(){
     if (isRunning) return;
     mMediaCodec = createVideoMediaCodec();
     if (mMediaCodec == nullptr) {
-        LOGCATE("video mediacodec create failed");
         return;
     }
     AMediaCodec_start(mMediaCodec);
@@ -35,14 +34,18 @@ void MediaCodecVideo::setSpeed(double sp){
 
 AMediaCodec * MediaCodecVideo::createVideoMediaCodec(){
     AMediaFormat *format = AMediaFormat_new();
-    const char * mine = DEFAULT_VIDEO_MIME
-    const char * videoMine = DEFAULT_VIDEO_MIME
-    int width = DEFAULT_VIDEO_WIDTH
-    int height = DEFAULT_VIDEO_HEIGHT
-    int maxBitRate =  1024 * DEFAULT_VIDEO_MAX_BPS
-    int fps = DEFAULT_VIDEO_FPS
-    fps = (int)(fps * speed);
-    int ivf = DEFAULT_VIDEO_IFI
+    if (!videoConfigInfo) {
+        videoConfigInfo = VideoConfigInfo::defaultBuild();
+    }
+    const char * videoMine = videoConfigInfo->videoMime;
+    int width = videoConfigInfo->width;
+    int height =  videoConfigInfo->height;
+    int maxBitRate =  1024 * videoConfigInfo->maxBps;
+    int fps = (int)(videoConfigInfo->fps * speed);
+    int ivf = videoConfigInfo->ifi;
+    int colorFormat = videoConfigInfo->colorFormat;
+    delete videoConfigInfo;
+    videoConfigInfo = nullptr;
     AMediaFormat_setString(format,AMEDIAFORMAT_KEY_MIME,videoMine);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_WIDTH,width);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_HEIGHT,height);
@@ -50,8 +53,8 @@ AMediaCodec * MediaCodecVideo::createVideoMediaCodec(){
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_FRAME_RATE,fps);
     AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_I_FRAME_INTERVAL,ivf);
     // yuv 420sp nv21 // 19 - i4205
-    AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,19);
-    AMediaCodec *mediaCodec = AMediaCodec_createEncoderByType(mine);
+    AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,colorFormat);
+    AMediaCodec *mediaCodec = AMediaCodec_createEncoderByType(videoMine);
     mMediaFormat = format;
     int ret = AMediaCodec_configure(mediaCodec,format, nullptr, nullptr,AMEDIACODEC_CONFIGURE_FLAG_ENCODE);
     if (ret != AMEDIA_OK){
@@ -65,8 +68,19 @@ int64_t MediaCodecVideo::getTotalTime(){
     return totalTime;
 }
 
+void MediaCodecVideo::setVideoConfigInfo(VideoConfigInfo* info){
+    if (!this->videoConfigInfo) {
+        this->videoConfigInfo = new VideoConfigInfo;
+        VideoConfigInfo::copy(videoConfigInfo,info);
+    }
+}
+
 void MediaCodecVideo::destroy() {
     isRunning = false;
+    if (videoConfigInfo) {
+        delete videoConfigInfo;
+        videoConfigInfo = 0;
+    }
     encodeThread->join();
     if (mMediaFormat){
         AMediaFormat_delete(mMediaFormat);

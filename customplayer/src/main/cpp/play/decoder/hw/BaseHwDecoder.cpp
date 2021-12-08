@@ -26,6 +26,7 @@ BaseHwDecoder::BaseHwDecoder(){
     isNeedPauseWhenFinished = true;
     isNeedRender = true;
     onCompleteCall = 0;
+    videoConfigInfo = 0;
 }
 
 int64_t BaseHwDecoder::getCurrentAudioPtsUs(){
@@ -85,6 +86,16 @@ void BaseHwDecoder::Init(const char * url) {
             duration = duration / 1000 / 1000;
             MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_DURATION,0,(int)duration));
             LOGCATE("打印视频时长：%d",(int)duration);
+        } else if (appointMediaType == 2 && startWith(result.c_str(),"video")) {
+            if (!videoConfigInfo) {
+                videoConfigInfo = new VideoConfigInfo ;
+                AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_WIDTH,&videoConfigInfo->width);
+                AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_HEIGHT,&videoConfigInfo->height);
+                AMediaFormat_getString(trackFormat,AMEDIAFORMAT_KEY_MIME,&videoConfigInfo->videoMime);
+                AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_FRAME_RATE,&videoConfigInfo->fps);
+                AMediaFormat_getInt32(trackFormat,AMEDIAFORMAT_KEY_BIT_RATE,&videoConfigInfo->maxBps);
+                videoConfigInfo->toString();
+            }
         }
         LOGCATE("打印视频   宽:高   %d:%d",mVideoWidth,mVideoHeight);
         AMediaFormat_delete(trackFormat);
@@ -140,6 +151,10 @@ void BaseHwDecoder::Destroy() {
     if (i420dst) {
         delete [] i420dst;
         i420dst = 0;
+    }
+    if (videoConfigInfo) {
+        delete videoConfigInfo;
+        videoConfigInfo = 0;
     }
     if (timeSyncHelper) delete timeSyncHelper;
     isInit = false;
@@ -318,6 +333,8 @@ void BaseHwDecoder::createDecoderThread(const char * url){
                 AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,&colorFormat);
                 LOGCATE("打印视频颜色格式:%d  视频宽高:%d - %d",colorFormat,mVideoWidth,mVideoHeight);
                 LOGCATE("format changed to: %s", AMediaFormat_toString(format));
+                AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_I_FRAME_INTERVAL,&videoConfigInfo->ifi);
+                AMediaFormat_getInt32(format,AMEDIAFORMAT_KEY_COLOR_FORMAT,&videoConfigInfo->colorFormat);
                 AMediaFormat_delete(format);
                 OnSizeReady();
             }

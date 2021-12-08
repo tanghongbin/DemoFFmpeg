@@ -45,6 +45,7 @@ private:
     OutputDataListener outputDataListener;
     bool isNeedPauseWhenFinished;
     Callback* onCompleteCall;
+    VideoConfigInfo* videoConfigInfo;
 protected:
     std::mutex audioPtsMutex;
     BaseDataCoverter * createConverter() {};
@@ -58,6 +59,9 @@ public:
     }
     virtual void setMediaType(int mediaType) {
         this->appointMediaType = mediaType;
+    }
+    VideoConfigInfo* getVideoConfigInfo(){
+        return videoConfigInfo;
     }
     std::mutex mCreateSurfaceMutex;
     std::condition_variable mSurfaceCondition;

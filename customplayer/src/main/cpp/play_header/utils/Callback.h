@@ -4,6 +4,8 @@
 
 #ifndef DEMOFFMPEG_CUSTOM_CALLBACK_H
 #define DEMOFFMPEG_CUSTOM_CALLBACK_H
+#include "../../play_header/utils/CustomGLUtils.h"
+
 class Callback {
 public:
    virtual void call() = 0;

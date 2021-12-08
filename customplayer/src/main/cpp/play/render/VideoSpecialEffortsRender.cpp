@@ -64,7 +64,7 @@ void VideoSpecialEffortsRender::DrawFrame() {
     long long int start = GetSysCurrentTime();
     glReadPixels(0,0,renderWidth,renderHeight,GL_RGBA,GL_UNSIGNED_BYTE,readResultImg.ppPlane[0]);
     if (onReadPixelListener) onReadPixelListener->readPixelResult(&readResultImg);
-    LOGCATE("总共读取时间:%lld",start);
+//    LOGCATE("总共读取时间:%lld",GetSysCurrentTime() - start);
 }
 
 void VideoSpecialEffortsRender::drawImage(NativeOpenGLImage *targetImg, float alpha) {
