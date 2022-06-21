@@ -20,11 +20,11 @@ void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
             jobject javaPlayerIns = JavaVmManager::getObjInstance();
 //        LOGCATE("check instance  instance:%p",);
             jclass jclass1 = env->GetObjectClass(JavaVmManager::getObjInstance());
-            jmethodID methodId = env->GetMethodID(jclass1,"receivePlayerMsgFromJni","(IIILjava/lang/String;)V");
+            jmethodID methodId = env->GetMethodID(jclass1,"receivePlayerMsgFromJni","(IIIJLjava/lang/String;)V");
             if (methodId){
                 jstring result = env->NewStringUTF(message->msg.c_str());
 //            LOGCATE("current thread :%d",GetCurrent());
-                env->CallVoidMethod(javaPlayerIns,methodId,message->type,message->arg1,message->arg2,result);
+                env->CallVoidMethod(javaPlayerIns,methodId,message->type,message->arg1,message->arg2,message->arg3,result);
 //            env->CallStaticVoidMethod()
             }
         } else {

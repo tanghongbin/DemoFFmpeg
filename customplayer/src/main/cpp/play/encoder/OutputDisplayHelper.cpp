@@ -3,6 +3,7 @@
 //
 #include <encoder/OutputDisplayHelper.h>
 #include <render/VideoFboRender.h>
+#include <render/VideoFboOESRender.h>
 
 OutputDisplayHelper* OutputDisplayHelper::instance = nullptr;
 
@@ -45,7 +46,7 @@ void OutputDisplayHelper::setOutputListener(OutputAvData outputAvData) {
 }
 
 void OutputDisplayHelper::OnSurfaceCreate() {
-    videoRender = new VideoFboRender;
+    videoRender = new VideoFboOESRender;
     videoRender->readPixelCall = OutputDisplayHelper::receivePixelData;
     videoRender->Init();
 }
@@ -143,5 +144,9 @@ void OutputDisplayHelper::receiveSoundTouchData(short * srcData,int size){
     if (getInstance()->outputAvData != nullptr) {
         getInstance() -> outputAvData(1,srcData,size);
     }
+}
+
+void OutputDisplayHelper::UpdateOESMartix(float *pDouble) {
+    if (videoRender) videoRender->UpdateOESMartix(pDouble);
 }
 

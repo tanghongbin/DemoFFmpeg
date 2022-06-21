@@ -58,7 +58,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     api project(path: ':common_base')
-    implementation project(path: ':ijkplayer-demo')
+//    implementation project(path: ':ijkplayer-demo')
 
 //    implementation project(path: ':libyuv-single')
 }

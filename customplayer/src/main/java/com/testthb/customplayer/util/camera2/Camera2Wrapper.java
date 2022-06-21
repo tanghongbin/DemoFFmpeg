@@ -28,7 +28,9 @@ import android.os.HandlerThread;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.util.Size;
+import android.util.SparseIntArray;
 import android.view.Surface;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -38,6 +40,9 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+/***
+ * camera 2 使用
+ */
 public class Camera2Wrapper {
     private static final String TAG = "Camera2Wrapper";
     private static final int DEFAULT_CAMERA_ID = 1;
@@ -379,16 +384,32 @@ public class Camera2Wrapper {
         }
     };
 
+    private static final SparseIntArray ORIENTATION = new SparseIntArray();
+
+    static {
+        ORIENTATION.append(Surface.ROTATION_0, 90);
+        ORIENTATION.append(Surface.ROTATION_90, 0);
+        ORIENTATION.append(Surface.ROTATION_180, 270);
+        ORIENTATION.append(Surface.ROTATION_270, 180);
+    }
+
     private CaptureRequest createPreviewRequest() {
         if (null == mCameraDevice || mPreviewSurface == null) return null;
         try {
             CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             builder.addTarget(mPreviewSurface);
+            int rotation = 3;
+            Log.d("DemoC", "DemoC: 方向类型"+rotation + "具体方向："+ORIENTATION.get(rotation));
+            builder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATION.get(rotation));
             return builder.build();
         } catch (CameraAccessException e) {
             Log.e(TAG, e.getMessage());
             return null;
         }
+    }
+
+    private WindowManager getCustomWindowManager(){
+        return (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
     }
 
     private void startBackgroundThread() {
@@ -439,7 +460,6 @@ public class Camera2Wrapper {
                 }
 
             };
-
             mCameraCaptureSession.stopRepeating();
             mCameraCaptureSession.abortCaptures();
             mCameraCaptureSession.capture(captureBuilder.build(), CaptureCallback, null);

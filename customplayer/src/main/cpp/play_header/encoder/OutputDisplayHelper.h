@@ -67,6 +67,8 @@ public:
     void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
     void OnDrawFrame();
     void OnAudioData(uint8_t *audioData, int length);
+
+    void UpdateOESMartix(float *pDouble);
 };
 
 #endif //DEMOFFMPEG_OUTPUTDISPLAYHELPER_H

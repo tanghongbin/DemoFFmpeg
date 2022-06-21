@@ -30,3 +30,10 @@ interface OnAvMergeListener{
     fun onMerge(duration:Long,audioPath:String?,videoPath:String?)
 }
 
+interface OnOESTextureListener{
+    fun onTextureCall(textureId:Int)
+}
+
+interface OnDrawListener{
+    fun onDraw()
+}

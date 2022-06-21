@@ -16,10 +16,21 @@ public:
     int type;
     int arg1;
     int arg2;
+    long arg3;
     std::string msg;
 
     ~Message(){
 //        LOGCATE("此消息已被删除");
+    }
+
+    static Message* obtain(int type,int arg1,int arg2,long arg3,std::string msg){
+        Message* obj = new Message;
+        obj->type =type;
+        obj->arg1 = arg1;
+        obj->arg2 = arg2;
+        obj->msg = msg;
+        obj->arg3 = arg3;
+        return obj;
     }
 
     static Message* obtain(int type,int arg1,int arg2,std::string msg){

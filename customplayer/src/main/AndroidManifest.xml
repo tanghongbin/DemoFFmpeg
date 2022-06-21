@@ -44,7 +44,8 @@
             android:name="com.testthb.customplayer.activity.hw.PlayerDecodeHwOpenGLESActivity"
             android:configChanges="screenSize|orientation"
             android:theme="@style/AppThemeNoActionBar"></activity>
-        <activity android:name="com.testthb.customplayer.activity.CustomPlayerListActivity">
+        <activity android:name="com.testthb.customplayer.activity.CustomPlayerListActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

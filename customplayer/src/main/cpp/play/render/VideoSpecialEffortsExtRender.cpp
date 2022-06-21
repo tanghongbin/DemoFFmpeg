@@ -2,12 +2,14 @@
 // Created by Admin on 2021/5/13.
 //
 
-#include "../../play_header/render/VideoSpecialEffortsRender.h"
+#include "../../play_header/render/VideoSpecialEffortsExtRender.h"
 #include "../../play_header/model/shader.h"
 #include "../../play_header/utils/CustomGLUtils.h"
+#include <GLES3/gl3ext.h>
+#include <GLES2/gl2ext.h>
 
 
-void VideoSpecialEffortsRender::Init(){
+void VideoSpecialEffortsExtRender::Init(){
     shader = new Shader(readGLSLStrFromFile("videospecialefforts/vetex.glsl").c_str(),
             readGLSLStrFromFile("videospecialefforts/fragment.glsl").c_str());
 
@@ -46,9 +48,18 @@ void VideoSpecialEffortsRender::Init(){
         glBindTexture(GL_TEXTURE_2D,0);
     }
 
+    //extTexture  用用扩展纹理
+    glGenTextures(1,&extTexture);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES,extTexture);
+    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES,0);
+
 }
 
-void VideoSpecialEffortsRender::DrawFrame() {
+void VideoSpecialEffortsExtRender::DrawFrame() {
 //    LOGCATE("im still draw");
 
     if (!shader || shader->ID == 0) return;
@@ -71,31 +82,17 @@ void VideoSpecialEffortsRender::DrawFrame() {
 //    LOGCATE("总共读取时间:%lld",GetSysCurrentTime() - start);
 }
 
-void VideoSpecialEffortsRender::drawImage(NativeOpenGLImage *targetImg, float alpha) {
+void VideoSpecialEffortsExtRender::drawImage(NativeOpenGLImage *targetImg, float alpha) {
 //    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);
 // draw
     std::__ndk1::unique_lock<std::mutex> uniqueLock(renderMutex, std::defer_lock);
     uniqueLock.lock();
     if (targetImg -> width != 0 && targetImg -> height != 0 && targetImg->ppPlane[0]){
-        glBindTexture(GL_TEXTURE_2D, textures[0]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, targetImg -> width,
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES,extTexture);
+        glTexImage2D(GL_TEXTURE_EXTERNAL_OES, 0, GL_LUMINANCE, targetImg -> width,
                      targetImg -> height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
                      targetImg -> ppPlane[0]);
-        glBindTexture(GL_TEXTURE_2D, GL_NONE);
-
-        //update U plane data
-        glBindTexture(GL_TEXTURE_2D, textures[1]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, targetImg -> width >> 1,
-                     targetImg -> height >> 1, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                     targetImg -> ppPlane[1]);
-        glBindTexture(GL_TEXTURE_2D, GL_NONE);
-
-        //update V plane data
-        glBindTexture(GL_TEXTURE_2D, textures[2]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, targetImg -> width >> 1,
-                     targetImg -> height >> 1, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                     targetImg -> ppPlane[2]);
-        glBindTexture(GL_TEXTURE_2D, GL_NONE);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES,0);
     } else {
         uniqueLock.unlock();
         return;
@@ -103,13 +100,9 @@ void VideoSpecialEffortsRender::drawImage(NativeOpenGLImage *targetImg, float al
     uniqueLock.unlock();
     shader->use();
     glBindVertexArray(vaoIds[0]);
-    for (int i = 0; i < TEXTURE_NUM; ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textures[i]);
-        char samplerName[64] = {0};
-        sprintf(samplerName, "s_TextureMap%d", i);
-        shader->setInt(samplerName, i);
-    }
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES, extTexture);
+    shader->setInt("yuvTexSampler", 0);
     shader->setInt("custom_type", 1);
     shader->setMat4("mMvpMatrix",createMvp(false));
     shader->setFloat("s_alpha",alpha);
@@ -117,7 +110,7 @@ void VideoSpecialEffortsRender::drawImage(NativeOpenGLImage *targetImg, float al
     glDrawArrays(GL_TRIANGLES,0,6);
 }
 
-void VideoSpecialEffortsRender::drawWaterMask() {
+void VideoSpecialEffortsExtRender::drawWaterMask() {
 //    LOGCATE("upload data success DrawFrame format:%d",nativeOpenGlImage.format);
 // draw
     shader->use();
@@ -133,25 +126,22 @@ void VideoSpecialEffortsRender::drawWaterMask() {
     glDrawArrays(GL_TRIANGLES,0,6);
 }
 
-void VideoSpecialEffortsRender::Destroy() {
+void VideoSpecialEffortsExtRender::Destroy() {
     std::lock_guard<std::mutex> lockGuard(renderMutex);
     renderIsFinish = true;
     shader->Destroy();
     glDeleteBuffers(4,vboIds);
     glDeleteVertexArrays(2,vaoIds);
     glDeleteTextures(4,textures);
+    glDeleteTextures(1,&extTexture);
     if (specialEffortsImage.ppPlane[0]) NativeOpenGLImageUtil::FreeNativeImage(&specialEffortsImage);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
     NativeOpenGLImageUtil::FreeNativeImage(&readResultImg);
     LOGCATE("delete video render is success");
 }
 
-VideoSpecialEffortsRender::~VideoSpecialEffortsRender(){
-    renderIsFinish = true;
-LOGCATE("VideoSpecialEffortsRender is destroyed");
-}
 
-void VideoSpecialEffortsRender::copyImage(NativeOpenGLImage *srcImage){
+void VideoSpecialEffortsExtRender::copyImage(NativeOpenGLImage *srcImage){
 //    LOGCATE("log image params width:%d height:%d format:%d data:%p",
 //            srcImage->width,srcImage->height,srcImage->format,srcImage->ppPlane[0]);
 //    LOGCATE("prepare lock and copyImage");
@@ -166,7 +156,7 @@ void VideoSpecialEffortsRender::copyImage(NativeOpenGLImage *srcImage){
     NativeOpenGLImageUtil::CopyNativeImage(srcImage,&nativeOpenGlImage);
 }
 
-void VideoSpecialEffortsRender::copySpecialEffortsImage(NativeOpenGLImage *special){
+void VideoSpecialEffortsExtRender::copySpecialEffortsImage(NativeOpenGLImage *special){
     std::lock_guard<std::mutex> lockGuard(renderMutex);
     if (renderIsFinish) return;
     if (specialEffortsImage.ppPlane[0] == nullptr){
@@ -178,14 +168,14 @@ void VideoSpecialEffortsRender::copySpecialEffortsImage(NativeOpenGLImage *speci
     NativeOpenGLImageUtil::CopyNativeImage(special,&specialEffortsImage);
 }
 
-void VideoSpecialEffortsRender::destroySpecialEffortsImage(){
+void VideoSpecialEffortsExtRender::destroySpecialEffortsImage(){
     std::lock_guard<std::mutex> lockGuard(renderMutex);
     if (specialEffortsImage.ppPlane[0]){
         NativeOpenGLImageUtil::FreeNativeImage(&specialEffortsImage);
     }
 }
 
-void VideoSpecialEffortsRender::OnRenderSizeChanged(int windowW,int windowH,int renderW,int renderH){
+void VideoSpecialEffortsExtRender::OnRenderSizeChanged(int windowW,int windowH,int renderW,int renderH){
     if (windowW < windowH) {
         // 竖屏
         if (renderW > renderH) {
@@ -216,7 +206,7 @@ void VideoSpecialEffortsRender::OnRenderSizeChanged(int windowW,int windowH,int 
             windowW,windowH,renderWidth,renderHeight);
 }
 
-glm::mat4 VideoSpecialEffortsRender::createMvp(bool isWaterMask) {
+glm::mat4 VideoSpecialEffortsExtRender::createMvp(bool isWaterMask) {
     glm::mat4 Projection = glm::perspective(45.0f, (float )renderWidth/(float )renderHeight, 0.1f, 100.f);
 
     // View matrix

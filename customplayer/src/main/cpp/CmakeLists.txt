@@ -141,6 +141,7 @@ target_link_libraries(${libName}
         OpenMAXAL
         EGL
         android
-        GLESv3)
+        GLESv3
+        GLESv2)
 
 

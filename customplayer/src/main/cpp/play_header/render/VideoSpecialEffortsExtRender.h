@@ -2,16 +2,20 @@
 // Created by Admin on 2021/5/13.
 //
 
-#ifndef DEMOFFMPEG_SPECIALEFFORTSRENDER_H
-#define DEMOFFMPEG_SPECIALEFFORTSRENDER_H
+#ifndef DEMOFFMPEG_EXT_SPECIALEFFORTSRENDER_H
+#define DEMOFFMPEG_EXT_SPECIALEFFORTSRENDER_H
 
+/***
+ * 扩展纹理
+ */
 #include <utils/Callback.h>
 #include "BaseRender.h"
 #define TEXTURE_NUM 4
 
-class VideoSpecialEffortsRender : public BaseVideoRender{
+class VideoSpecialEffortsExtRender : public BaseVideoRender{
 private:
     GLuint textures[TEXTURE_NUM];
+    GLuint extTexture;
     GLuint vboIds[4];
     GLuint vaoIds[2];
     std::mutex renderMutex;
@@ -30,7 +34,7 @@ private:
 
 public:
     int renderWidth,renderHeight;
-    VideoSpecialEffortsRender(){
+    VideoSpecialEffortsExtRender(){
         onReadPixelListener = 0;
     }
     void Init();
@@ -43,10 +47,9 @@ public:
     void setReadResultListener(OnReadPixelListener* listener){
         this->onReadPixelListener = listener;
     }
-    ~VideoSpecialEffortsRender();
 
 
     glm::mat4 createMvp(bool b);
 };
 
-#endif //DEMOFFMPEG_SPECIALEFFORTSRENDER_H
+#endif //DEMOFFMPEG_EXT_SPECIALEFFORTSRENDER_H

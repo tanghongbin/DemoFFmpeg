@@ -3,7 +3,6 @@ package com.testthb.common_base
 import android.app.Application
 import android.os.Environment
 import android.os.Process
-import com.squareup.leakcanary.LeakCanary
 import com.tencent.bugly.crashreport.CrashReport
 import com.tencent.bugly.crashreport.CrashReport.UserStrategy
 import com.testthb.common_base.utils.Constants.bugly_id
@@ -25,7 +24,6 @@ class DemoApplication : Application() {
         FileUtils.deleteFile(sdcardAssetsFolder)
         FileUtils.makeFolders(sdcardAssetsFolder)
         FileUtils.copyFilesFromAssets(this, "glsl", sdcardAssetsFolder)
-        LeakCanary.install(this)
         initBugly()
     }
 

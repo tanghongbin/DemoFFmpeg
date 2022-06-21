@@ -135,11 +135,11 @@ JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type
         mediaMuxer = RtmpLiveMuxer::getInstance();
     } else if (type == 4) {
         mediaMuxer = ShortVideoMuxer::getInstance();
-        OutputDisplayHelper::getInstance()->init();
-        setJniPointToJava( env,"mNativeOutputHelper","J" ,OutputDisplayHelper::getInstance());
     } else {
         mediaMuxer = FFmpegMediaMuxer::getInstace();
     }
+    OutputDisplayHelper::getInstance()->init();
+    setJniPointToJava( env,"mNativeOutputHelper","J" ,OutputDisplayHelper::getInstance());
     setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
     LOGCATE("has enter env:%p instance:%p",env,instance);
 }
@@ -204,12 +204,11 @@ JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject inst
     auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
     if (!outputDisplayHelper)
         return;
-
-//    LOGCATE("log native_onCameraFrameDataValible:%p",mediaMuxer);
+    // 如果是扩展纹理，不做处理
+    if (type == 5) return;
 
     jbyte *data = env->GetByteArrayElements(imageData, 0);
     if (!data) return;
-
     NativeOpenGLImage openGlImage;
     if (type == 2) {
         openGlImage.width = 1280;
@@ -223,7 +222,6 @@ JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject inst
         openGlImage.pLineSize[2] = openGlImage.width/2;
     }
     outputDisplayHelper->OnCameraFrameDataValible(type,&openGlImage);
-
     env->ReleaseByteArrayElements(imageData, data, 0);
 }
 
@@ -236,6 +234,17 @@ JNIEXPORT void JNICALL native_audioData(JNIEnv *env, jobject instance,jbyteArray
     if (!data) return;
     outputDisplayHelper ->OnAudioData(reinterpret_cast<uint8_t *>(data), length);
     env->ReleaseByteArrayElements(audioData, data, 0);
+}
+
+JNIEXPORT void JNICALL native_updateMatrix(JNIEnv *env, jobject instance,jfloatArray javadata) {
+    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
+    if (!outputDisplayHelper)
+        return;
+    jfloat *data = env->GetFloatArrayElements(javadata, 0);
+    LOGCATE("log float data is null:%p",data);
+    if (!data) return;
+    outputDisplayHelper ->UpdateOESMartix(reinterpret_cast<float *>(data));
+    env->ReleaseFloatArrayElements(javadata, data, 0);
 }
 
 JNIEXPORT void JNICALL native_configAudioParams(JNIEnv *env, jobject instance,jint sampleHz,jint channels) {
@@ -299,6 +308,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_stopEncode",               "()V",            (void *) (native_stopEncode)},
         {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
         {"native_audioData",               "([BI)V",            (void *) (native_audioData)},
+        {"native_updateMatrix",               "([F)V",            (void *) (native_updateMatrix)},
         {"native_configAudioParams",               "(II)V",            (void *) (native_configAudioParams)},
         {"native_setSpeed",               "(D)V",            (void *) (native_setSpeed)},
         {"native_replay",               "()V",            (void *) (native_replay)},

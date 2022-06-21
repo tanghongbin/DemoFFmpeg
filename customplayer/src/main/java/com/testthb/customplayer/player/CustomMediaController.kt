@@ -1,7 +1,7 @@
 package com.testthb.customplayer.player
 
-import android.media.MediaSync
 import android.opengl.GLSurfaceView
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -19,13 +19,14 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
         GLSurfaceView.Renderer,SurfaceHolder.Callback {
     companion object{
         // communicate code
-        private const val MSG_PREPARED = 1
-        private const val MSG_VIDEO_SIZE_CHANGED = 2
-        private const val MSG_SEEK_PROGRESS_CHANGED = 3
-        private const val MSG_COMPLETE = 4
-        private const val MSG_ERROR = 5
-        private const val MSG_DURATION = 6
-        private const val MSG_MERGE_AV = 7
+        private const val MSG_PREPARED = 1  // 准备完毕
+        private const val MSG_VIDEO_SIZE_CHANGED = 2 // 播放视频尺寸改变
+        private const val MSG_SEEK_PROGRESS_CHANGED = 3 // seek进度条改变
+        private const val MSG_COMPLETE = 4 // 播放完成
+        private const val MSG_ERROR = 5 // 播放错误
+        private const val MSG_DURATION = 6 // 时长回调通知
+        private const val MSG_MERGE_AV = 7 // 合并视频
+        private const val MSG_CREATE_OES_TEXTURE_SUCCESS = 8 // 创建扩展纹理成功
 
         init {
             System.loadLibrary("native-mediacontroller")
@@ -57,6 +58,14 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
     private var mOnDurationListener: OnDurationListener? = null
     private var mOnSurfaceCallListener: OnSurfaceCallListener? = null
     private var mOnAvMergeListener: OnAvMergeListener? = null
+    private var mOnOESTextureListener: OnOESTextureListener? = null
+    private var mOnDrawListener: OnDrawListener? = null
+    fun setOnDrawListener(listener:OnDrawListener){
+        mOnDrawListener = listener
+    }
+    fun setOnOESTextureListener(listener:OnOESTextureListener){
+        mOnOESTextureListener = listener
+    }
     fun setOnAvMergeListener(listener:OnAvMergeListener){
         mOnAvMergeListener = listener
     }
@@ -97,18 +106,26 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
                     val items = str.split(" ")
                     mOnAvMergeListener?.onMerge(items[0].toLong(),items[1],items[2])
                 }
+                MSG_CREATE_OES_TEXTURE_SUCCESS -> {
+                    mOnOESTextureListener?.onTextureCall(msg.arg1)
+                }
             }
         }
     }
 
-    private fun receivePlayerMsgFromJni(type:Int,arg1:Int,arg2:Int,msg:String){
-        mHandler.obtainMessage(type,arg1,arg2,msg).sendToTarget()
+    private fun receivePlayerMsgFromJni(type:Int,arg1:Int,arg2:Int,arg3:Long,msg:String){
+        val sendMsg = mHandler.obtainMessage(type,arg1,arg2,msg)
+        sendMsg.data = Bundle().apply {
+            putLong("arg3",arg3)
+        }
+        sendMsg.sendToTarget()
     }
 
     /*******
      * --------------------- GLSurfaceView  callback START------------------------------
      */
     override fun onDrawFrame(gl: GL10?) {
+        mOnDrawListener?.onDraw()
         native_OnDrawFrame()
     }
 
@@ -201,6 +218,10 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
      */
     external fun native_init_muxer(type:Int)
 
+    /***
+     * 1,2,3,4，5  目前只在用 2-yuv420p数据，  5 -oes 扩展纹理不做处理
+     *
+     * */
     external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 
     // 1-开始录音
@@ -220,6 +241,10 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
      */
     external fun native_setSpeed(speed:Double)
 
+    /***
+     * 更新oes纹理matrix
+     */
+    external fun native_updateMatrix(floatMatrix: FloatArray)
 
 
 }

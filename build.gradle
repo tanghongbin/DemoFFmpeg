@@ -2,20 +2,15 @@
 apply from: "$rootDir/config.gradle"
 
 buildscript {
-    ext.kotlin_version = '1.5.10'
+    ext.kotlin_version = '1.6.21'
     repositories {
-        maven {
-            url "https://maven.aliyun.com/repository/public"
-        }
-        maven {
-            url "https://maven.aliyun.com/repository/google"
-        }
-        maven { url 'https://jitpack.io' }
-        mavenCentral()
-
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url "https://maven.aliyun.com/repository/google" }
+        maven { url "https://maven.aliyun.com/repository/jcenter" }
+        maven { url "https://jitpack.io" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.2'
+        classpath 'com.android.tools.build:gradle:7.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -25,19 +20,18 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url "https://maven.aliyun.com/repository/public"
-        }
-        maven {
-            url "https://maven.aliyun.com/repository/google"
-        }
-        maven { url 'https://jitpack.io' }
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url "https://maven.aliyun.com/repository/google" }
+        maven { url "https://maven.aliyun.com/repository/jcenter" }
+        maven { url "https://jitpack.io" }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+
 
 //project.ext {
 //    useASAN = true

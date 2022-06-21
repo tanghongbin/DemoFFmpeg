@@ -85,16 +85,13 @@ android {
 }
 
 dependencies {
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-
     api project(path: ':common_base')
     implementation project(path: ':avutils')
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'io.socket:socket.io-client:1.0.0'
     implementation 'org.webrtc:google-webrtc:1.0.+'
 //    implementation 'com.github.yangfeng1994:FFmpeg-Android:v2.0.1'
-    implementation 'com.github.AnJoiner:FFmpegCommand:1.2.1'
+    implementation 'com.github.AnJoiner:FFmpegCommand:1.2.2'
     implementation "com.flyco.tablayout:FlycoTabLayout_Lib:2.1.2@aar"
 }

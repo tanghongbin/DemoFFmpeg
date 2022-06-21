@@ -29,6 +29,8 @@ public:
     ReceiveOqTypeData readPixelCall;
     virtual void copyImage(NativeOpenGLImage *openGlImage) = 0;
     virtual void OnSurfaceChanged(int width,int height) { };
+
+    virtual void UpdateOESMartix(float *pDouble) {}
 };
 
 #endif //DEMOFFMPEG_BASERENDER_H
