@@ -22,9 +22,9 @@
 #define IMAGE_FORMAT_I420           0x04
 
 #define IMAGE_FORMAT_RGBA_EXT       "RGB32"
-#define IMAGE_FORMAT_NV21_EXT       "NV21"
-#define IMAGE_FORMAT_NV12_EXT       "NV12"
-#define IMAGE_FORMAT_I420_EXT       "I420"
+#define IMAGE_FORMAT_NV21_EXT       "yuv"
+#define IMAGE_FORMAT_NV12_EXT       "yuv"
+#define IMAGE_FORMAT_I420_EXT       "yuv"
 
 typedef struct _tag_LoadImageInfo_{
 private:
@@ -299,6 +299,7 @@ public:
 
 		sprintf(imgPath, "%s/IMG_%dx%d_%s.%s", pPath, pSrcImg->width, pSrcImg->height, pFileName, pExt);
 
+		remove(imgPath);
 		FILE *fp = fopen(imgPath, "wb");
 
 		if(fp)

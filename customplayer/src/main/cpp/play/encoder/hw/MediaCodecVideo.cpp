@@ -119,14 +119,19 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
         int widthV = image->width;
         int heightV = image->height;
         int i420Size = widthV * heightV * 3/2;
-//        LOGCATE("打印loopEncode width:%d    height:%d",widthV,heightV);
-        auto* i420Data = new uint8_t [i420Size];
-        yuvRgbaToI420(image->ppPlane[0],i420Data,widthV,heightV);
+
+        uint8_t* localI420Data;
+        if (image->format == IMAGE_FORMAT_RGBA) {
+            localI420Data = new uint8_t [i420Size];
+            yuvRgbaToI420(image->ppPlane[0],localI420Data,widthV,heightV);
+        } else {
+            localI420Data = image->ppPlane[0];
+        }
         int inputIndex = AMediaCodec_dequeueInputBuffer(codecVideo->mMediaCodec,1000);
         if (inputIndex >= 0) {
             size_t inputBufferSize;
             uint8_t *inputData = AMediaCodec_getInputBuffer(codecVideo->mMediaCodec, inputIndex,&inputBufferSize);
-            memcpy(inputData,i420Data,i420Size);
+            memcpy(inputData,localI420Data,i420Size);
             if (codecVideo -> startNanoTime == 00L) {
                 codecVideo->startNanoTime = GetSysNanoTime();
             }
@@ -148,9 +153,9 @@ void MediaCodecVideo::loopEncode(MediaCodecVideo* codecVideo) {
         } else if (outIndex == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
             codecVideo -> outputFmtChangedListener(2,AMediaCodec_getOutputFormat(codecVideo->mMediaCodec));
         }
+        if (image->format == IMAGE_FORMAT_RGBA) delete [] localI420Data;
         NativeOpenGLImageUtil::FreeNativeImage(image);
         delete image;
-        delete [] i420Data;
     }
     LOGCATE("all video mediacode has over");
 }

@@ -27,6 +27,9 @@ public:
 class BaseVideoRender : public BaseRender{
 public:
     ReceiveOqTypeData readPixelCall;
+    BaseVideoRender(){
+        readPixelCall = 0;
+    }
     virtual void copyImage(NativeOpenGLImage *openGlImage) = 0;
     virtual void OnSurfaceChanged(int width,int height) { };
 

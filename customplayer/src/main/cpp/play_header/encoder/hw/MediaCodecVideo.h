@@ -44,6 +44,8 @@ public:
         videoQueue.setMax(3);
         speed = 1.0;
         videoConfigInfo = 0;
+        outputFmtChangedListener = 0;
+        outputDataListener = 0;
     }
     void setSpeed(double speed);
     void setOutputDataListener(OutputFmtChangedListener changedListener,OutputDataListener dataListener);

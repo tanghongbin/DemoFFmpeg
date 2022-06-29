@@ -6,6 +6,20 @@
 #define DEMOFFMPEG_FBORENDER_H
 
 #include "BaseRender.h"
+#include "../../play_header/render/VideoFboRender.h"
+#include "../../play_header/model/shader.h"
+#include "../../play_header/utils/CustomGLUtils.h"
+#include <GLES3/gl3ext.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <android/hardware_buffer.h>
+
+extern "C" {
+#include <libyuv/convert.h>
+#include <libyuv/scale.h>
+#include <libyuv/scale_argb.h>
+}
+
 #define TEXTURE_FBO_NUM 4
 #define VIDEO_W 720
 #define VIDEO_H 1280

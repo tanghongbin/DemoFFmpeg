@@ -26,15 +26,27 @@
         android:id="@+id/mseekbar"
         android:layout_height="@dimen/dimen_35dp"/>
 
-    <Button
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_marginTop="50dp"
+            android:id="@+id/muxerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点击合成视频"
+            tools:layout_editor_absoluteX="124dp"
+            tools:layout_editor_absoluteY="64dp" />
 
-        android:layout_marginTop="50dp"
-        android:id="@+id/muxerButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="点击合成视频"
-        tools:layout_editor_absoluteX="124dp"
-        tools:layout_editor_absoluteY="64dp" />
+        <Button
+            android:layout_marginTop="50dp"
+            android:id="@+id/mRotate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="旋转方向"
+            tools:layout_editor_absoluteX="124dp"
+            tools:layout_editor_absoluteY="64dp" />
+    </LinearLayout>
 
 
     <com.testthb.customplayer.view.CommonTabLayout

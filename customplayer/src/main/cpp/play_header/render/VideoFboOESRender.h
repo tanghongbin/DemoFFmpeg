@@ -16,52 +16,57 @@
 
 class VideoFboOESRender : public BaseVideoRender{
 private:
-    GLuint textures[TEXTURE_FBO_NUM],fboTextureId,testRgbaTextureId,lutTextureId,logoTextureId,extTexture;
-    GLuint filterTextures[TEXTURE_FBO_NUM];
-    GLuint vboIds[4],fboId;
+    GLuint fboYuv420TextureId,extTexture,fboRgbaTextureId,fboRgbaId;
+    GLuint vboIds[4],fboYuv420Id;
     GLuint vaoIds[2];
-    GLuint pboIds[2];
-    int currentPboId= 0;
-    int nextPboId= 0;
     std::mutex renderMutex;
-    std::condition_variable renderCondition;
     int count = 0;
-    bool renderIsFinish = false;
-    int renderWidth,renderHeight,u_offset;
-    float x_test_offset;
+    int renderWidth,renderHeight;
     float* oesMatrix;
-
+    Shader* rgbToYuvShader;
+    Shader* rgbShader;
 
 public:
      void Init();
      void DrawFrame();
      void Destroy();
      void OnSurfaceChanged(int windowWidth,int windowHeight);
-     void copyImage(NativeOpenGLImage *openGlImage);
      ~VideoFboOESRender();
 
     VideoFboOESRender(){
         oesMatrix = 0;
-        fboId = fboTextureId = lutTextureId = logoTextureId  = 0;
-        u_offset = 0;
-        x_test_offset = 0;
+        rgbToYuvShader = rgbShader = 0;
+        fboYuv420Id = fboRgbaTextureId = fboRgbaId = 0;
     }
+
+    void copyImage(NativeOpenGLImage *openGlImage){}
 
     void drawNormalImage();
 
+    void drawNormalRGBAImage();
+
     void UpdateOESMartix(float *pDouble);
 
-    void readImagePixel();
+    /***
+     * 读取yuv 像素
+     */
+    void readYuvImagePixel();
 
-    void createFbo();
+    void readRgbaImagePixel();
 
-    void createPbo();
+    /***
+     * yuv420p 720x1280的fbo
+     */
+    void createYuvFbo();
+
+    /***
+     * rgba 720x1280的fbo
+     */
+    void createRgbaFbo();
 
     void drawFboTexture();
 
-    void readImagePixelByPbo();
-
-    void drawLogo(GLuint currentVaoId);
+    void drawYuv420pTexture();
 };
 
 #endif //DEMOFFMPEG_FBORENDER_H

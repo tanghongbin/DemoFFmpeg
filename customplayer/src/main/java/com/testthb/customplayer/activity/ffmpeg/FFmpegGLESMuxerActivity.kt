@@ -1,9 +1,13 @@
 package com.testthb.customplayer.activity.ffmpeg
 
+import android.content.Context
+import android.graphics.Camera
 import android.graphics.SurfaceTexture
+import android.hardware.Camera.CameraInfo
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -12,8 +16,8 @@ import com.testthb.common_base.utils.log
 import com.testthb.common_base.utils.runAsyncTask
 import com.testthb.customplayer.R
 import com.testthb.customplayer.interfaces.OnDrawListener
+import com.testthb.customplayer.interfaces.OnErrorListener
 import com.testthb.customplayer.interfaces.OnOESTextureListener
-import com.testthb.customplayer.interfaces.OnSeekProgressChangeListener
 import com.testthb.customplayer.player.CustomMediaController
 import com.testthb.customplayer.util.camera2.Camera2FrameCallback
 import com.testthb.customplayer.util.camera2.Camera2Wrapper
@@ -40,6 +44,15 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
                 mMuxer.native_startEncode()
             })
         }
+
+        mRotate.setOnClickListener {
+            val info = CameraInfo()
+            info.orientation
+            android.hardware.Camera.getCameraInfo(0,info)
+            val rotation: Int = (getSystemService(Context.WINDOW_SERVICE)as WindowManager).getDefaultDisplay()
+                .getRotation()
+            log("查看camera方向:${info.orientation}  屏幕旋转方向:${rotation}")
+        }
         mAudioRecorder.setOnAudioFrameCapturedListener { audioData, ret ->
             mMuxer.native_audioData(audioData,ret)
         }
@@ -58,6 +71,11 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
                 mSurfaceTexture?.getTransformMatrix(floatMatrix)
 //                android.opengl.Matrix.rotateM(floatMatrix,0,mRorate.toFloat(),0f,0.0f,1.0f)
                 mMuxer.native_updateMatrix(floatMatrix)
+            }
+        })
+        mMuxer.setOnErrorListener(object : OnErrorListener{
+            override fun onError(code: Int, str: String) {
+                log("打印错误code:${code}  msg:${str}")
             }
         })
         mseekbar.min = 0

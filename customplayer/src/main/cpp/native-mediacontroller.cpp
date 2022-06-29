@@ -38,6 +38,11 @@ JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
     return env->NewStringUTF("你好吗，朋友");
 }
 
+OutputDisplayHelper* getJniOutputHelperFromJava(){
+    jlong result = getJniPointFromJava("mNativeOutputHelper");
+    if (result == 0) return nullptr;
+    return reinterpret_cast<OutputDisplayHelper *>(result);
+}
 
 /***
  *  ============================== 播放器 GL callback ===============================
@@ -47,33 +52,30 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer != NULL) mediaPlayer->OnSurfaceCreated();
 
-    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer) mediaMuxer->OnSurfaceCreate();
-
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (outputDisplayHelper && mediaMuxer) outputDisplayHelper->OnSurfaceCreate();
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
+    if (outputDisplayHelper) {
+        outputDisplayHelper->OnSurfaceCreate();
+    }
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint oretenation,jint width,jint height) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer) mediaPlayer->OnSurfaceChanged(oretenation,width,height);
 
-    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer) mediaMuxer->OnSurfaceChanged(width,height);
-
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (outputDisplayHelper && mediaMuxer) outputDisplayHelper->OnSurfaceChanged(width,height);
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
+    if (outputDisplayHelper) {
+        outputDisplayHelper->OnSurfaceChanged(width,height);
+    }
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
     if (mediaPlayer != NULL) mediaPlayer->OnDrawFrame();
 
-    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer != NULL) mediaMuxer->OnDrawFrame();
-
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (outputDisplayHelper && mediaMuxer) outputDisplayHelper->OnDrawFrame();
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
+    if (outputDisplayHelper) {
+        outputDisplayHelper->OnDrawFrame();
+    }
 }
 
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
@@ -90,14 +92,12 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         mediaMuxer->Destroy();
         delete mediaMuxer;
     }
-
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    LOGCATE("log outputDisplayHelper :%p",outputDisplayHelper);
-    if (outputDisplayHelper){
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
+    if (outputDisplayHelper) {
         setJniPointToJava(env,"mNativeOutputHelper","J", nullptr);
-        outputDisplayHelper->destroy();
         delete outputDisplayHelper;
     }
+
     JavaVmManager::destroyInstance(env);
     MsgLoopHelper::destroyInstance();
     LOGCATE("destroy all over");
@@ -191,6 +191,10 @@ JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance,jstring 
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer == NULL) return;
     const char* resultPath = getCharStrFromJstring(env,path);
+    ReceiveAvOriginalData receiveAvOriginalData;
+    mediaMuxer->getInAvDataFunc(&receiveAvOriginalData);
+    OutputDisplayHelper::getInstance()->setOutputAudioListener(receiveAvOriginalData.audioCall);
+    OutputDisplayHelper::getInstance()->setOutputVideoListener(receiveAvOriginalData.videoCall);
     mediaMuxer->init(resultPath);
 }
 
@@ -201,9 +205,9 @@ JNIEXPORT void JNICALL native_stopEncode(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject instance,jint type,jbyteArray imageData) {
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (!outputDisplayHelper)
-        return;
+    LOGCATE("still recive frame data");
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
+    if (!outputDisplayHelper) return;
     // 如果是扩展纹理，不做处理
     if (type == 5) return;
 
@@ -227,9 +231,9 @@ JNIEXPORT void JNICALL native_onCameraFrameDataValible(JNIEnv *env, jobject inst
 
 
 JNIEXPORT void JNICALL native_audioData(JNIEnv *env, jobject instance,jbyteArray audioData,jint length) {
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (!outputDisplayHelper)
-        return;
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
+    if (!outputDisplayHelper) return;
+
     jbyte *data = env->GetByteArrayElements(audioData, 0);
     if (!data) return;
     outputDisplayHelper ->OnAudioData(reinterpret_cast<uint8_t *>(data), length);
@@ -237,11 +241,10 @@ JNIEXPORT void JNICALL native_audioData(JNIEnv *env, jobject instance,jbyteArray
 }
 
 JNIEXPORT void JNICALL native_updateMatrix(JNIEnv *env, jobject instance,jfloatArray javadata) {
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
-    if (!outputDisplayHelper)
-        return;
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
+    if (!outputDisplayHelper) return;
+
     jfloat *data = env->GetFloatArrayElements(javadata, 0);
-    LOGCATE("log float data is null:%p",data);
     if (!data) return;
     outputDisplayHelper ->UpdateOESMartix(reinterpret_cast<float *>(data));
     env->ReleaseFloatArrayElements(javadata, data, 0);
@@ -260,7 +263,7 @@ JNIEXPORT void JNICALL native_setSpeed(JNIEnv *env, jobject instance,jdouble spe
         mediaMuxer->SetPeed(speed);
     }
 
-    auto *outputDisplayHelper = reinterpret_cast<OutputDisplayHelper *>(getJniPointFromJava("mNativeOutputHelper"));
+    auto *outputDisplayHelper = getJniOutputHelperFromJava();
     if (outputDisplayHelper) {
         outputDisplayHelper->setSpeed(speed);
     }

@@ -37,12 +37,16 @@ void NdkMediaMuxerHelper::start(){
 }
 
 void NdkMediaMuxerHelper::stop(){
+    if (!isStart) return;
     std::lock_guard<std::mutex> lockGuard(mMutex);
     isStart = false;
-    AMediaMuxer_stop(mMuxer);
+    if (mMuxer) AMediaMuxer_stop(mMuxer);
+    LOGCATE("NdkMediaMuxerHelper has stop");
 }
+
 void NdkMediaMuxerHelper::destroy(){
     std::lock_guard<std::mutex> lockGuard(mMutex);
     if (mMuxer) AMediaMuxer_delete(mMuxer);
     if (mFile) fclose(mFile);
+    instance = 0;
 }

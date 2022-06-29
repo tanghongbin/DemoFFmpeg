@@ -43,7 +43,7 @@ int ShortVideoMuxer::init(const char * fileName){
     mediaCodecV->startEncode();
     mediaCodecV->setOutputDataListener(ShortVideoMuxer::receiveCodecFmtChanged,ShortVideoMuxer::receiveMediaCodecData);
     isStarted = true;
-    OutputDisplayHelper::getInstance()->setOutputListener(ShortVideoMuxer::receiveOriginalAvData);
+//    OutputDisplayHelper::getInstance()->setOutputListener(ShortVideoMuxer::receiveOriginalAvData);
     return 0;
 }
 
@@ -98,7 +98,7 @@ void ShortVideoMuxer::receiveOriginalAvData(int type,void * pVoid,int size) {
 void ShortVideoMuxer::Stop() {
     if (!isStarted) return;
     // 清空所有缓存音频
-    OutputDisplayHelper::getInstance()->setOutputListener(nullptr);
+//    OutputDisplayHelper::getInstance()->setOutputListener(nullptr);
     std::unique_lock<std::mutex> uniqueLock(runningMutex,std::defer_lock);
     uniqueLock.lock();
     isDestroyed = true;

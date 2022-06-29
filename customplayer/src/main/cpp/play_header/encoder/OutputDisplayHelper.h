@@ -9,6 +9,9 @@
 #include <cstdint>
 #include <render/BaseRender.h>
 #include <utils/SoundTouchHelper.h>
+#include <encoder/OutputDisplayHelper.h>
+#include <render/VideoFboRender.h>
+#include <render/VideoFboOESRender.h>
 
 /***
  * //级慢
@@ -25,12 +28,16 @@
 
 
 /***
- * 输出，包括原生音频和渲染后从GPU 读取的视频-rgba,
- * 这里做一个开关
+ * in  视频-oes纹理处理，音频-pcm数据 OnAudioData
+ *
+ * out， receivePixelData 接受videorender渲染后的数据，  receiveSoundTouchData 接受soundtouch
+ * 处理后的数据
+ *
  */
 class OutputDisplayHelper {
 private:
-    OutputAvData outputAvData;
+    ReceiveAudioData audioCall;
+    ReceiveOqTypeData videoCall;
     BaseVideoRender* videoRender;
     static OutputDisplayHelper* instance;
     bool isDestroyed;
@@ -50,18 +57,20 @@ private:
     OutputDisplayHelper(){
         videoRender = 0;
         isDestroyed = false;
-        outputAvData = nullptr;
+        audioCall = nullptr;
+        videoCall = 0;
         cameraWidth = cameraHeight = 0;
         soundTouchHelper = 0;
         speed = 1.0f;
     }
 
 public:
+    ~OutputDisplayHelper();
     static OutputDisplayHelper * getInstance();
     void init();
-    void destroy();
     void setSpeed(float speed);
-    void setOutputListener(OutputAvData outputAvData);
+    void setOutputAudioListener(ReceiveAudioData outputAvData);
+    void setOutputVideoListener(ReceiveOqTypeData outputAvData);
     void OnSurfaceCreate();
     void OnSurfaceChanged(int width,int height);
     void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);

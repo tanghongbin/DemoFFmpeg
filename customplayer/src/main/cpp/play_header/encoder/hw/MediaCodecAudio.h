@@ -37,6 +37,8 @@ public:
         mMediaFormat = 0;
         encodeThread = 0;
         mStartTime = -1LL;
+        outputFmtChangedListener = 0;
+        outputDataListener = 0;
     }
     void setOutputDataListener(OutputFmtChangedListener changedListener,OutputDataListener dataListener);
     void startEncode();

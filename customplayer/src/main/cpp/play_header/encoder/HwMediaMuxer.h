@@ -24,7 +24,6 @@ private:
     static HwMediaMuxer* instance;
     std::thread * thread;
     char mTargetFilePath[128];
-    BaseVideoRender* videoRender;
     NdkMediaMuxerHelper* mMuxerHelper;
     MediaCodecAudio* mediaCodecA;
     MediaCodecVideo* mediaCodecV;
@@ -44,18 +43,19 @@ private:
         soundTouchHelper = 0;
         audioTrackIndex = videoTrackIndex = 0;
         thread = 0;
-        videoRender = 0;
         isDestroyed = false;
         isStarted = false;
         mediaCodecA = 0;
         mediaCodecV = 0;
         cameraWidth = cameraHeight = 0;
+        mMuxerHelper = 0;
     }
 public:
     bool isDestroyed;
     std::mutex runningMutex;
     int cameraWidth,cameraHeight;
     int init(const char * outFileName);
+    void getInAvDataFunc(ReceiveAvOriginalData* data);
     void Destroy();
     static HwMediaMuxer* getInstace(){
         if (instance == nullptr){
@@ -63,11 +63,6 @@ public:
         }
         return instance;
     }
-
-    void OnSurfaceCreate();
-    void OnSurfaceChanged(int width,int height);
-    void OnCameraFrameDataValible(int type,NativeOpenGLImage* data);
-    void OnDrawFrame();
     void OnAudioData(uint8_t *audioData, int length);
 };
 

@@ -69,7 +69,7 @@ void SpecialEffortsVideoMuxer::receiveOriginalAvData(int type,void * pVoid,int s
 void SpecialEffortsVideoMuxer::Stop() {
     if (!isStarted) return;
     // 清空所有缓存音频
-    OutputDisplayHelper::getInstance()->setOutputListener(nullptr);
+//    OutputDisplayHelper::getInstance()->setOutputListener(nullptr);
     std::unique_lock<std::mutex> uniqueLock(runningMutex,std::defer_lock);
     uniqueLock.lock();
     isDestroyed = true;

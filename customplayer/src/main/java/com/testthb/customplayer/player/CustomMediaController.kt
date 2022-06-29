@@ -28,6 +28,12 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
         private const val MSG_MERGE_AV = 7 // 合并视频
         private const val MSG_CREATE_OES_TEXTURE_SUCCESS = 8 // 创建扩展纹理成功
 
+        /**
+         * 是播放器还是视频合成
+         */
+        private const val ROOT_TYPE_PLAY = 1
+        private const val ROOT_TYPE_MUXER = 2
+
         init {
             System.loadLibrary("native-mediacontroller")
         }
@@ -99,7 +105,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
                 MSG_VIDEO_SIZE_CHANGED -> mOnVideoSizeChangeListener?.onVideoSize(msg.arg1,msg.arg2)
                 MSG_SEEK_PROGRESS_CHANGED -> mOnSeekProgressChangeListener?.onProgress(msg.arg1)
                 MSG_COMPLETE -> mOnCompleteListener?.onComplete()
-                MSG_ERROR -> mOnErrorListener?.onError(msg.arg1,msg.obj.toString())
+                MSG_ERROR -> mOnErrorListener?.onError(msg.arg1,msg.obj?.toString() ?: "")
                 MSG_DURATION -> mOnDurationListener?.onDuration(msg.arg1,msg.arg2)
                 MSG_MERGE_AV -> {
                     val str = msg.obj as String

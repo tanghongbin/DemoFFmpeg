@@ -2,20 +2,9 @@
 // Created by Admin on 2021/5/13.
 //
 
-#include "../../play_header/render/VideoFboRender.h"
-#include "../../play_header/model/shader.h"
-#include "../../play_header/utils/CustomGLUtils.h"
-#include <GLES3/gl3ext.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <android/hardware_buffer.h>
 
-extern "C" {
-#include <libyuv/convert.h>
-#include <libyuv/scale.h>
-#include <libyuv/scale_argb.h>
-}
 
+#include <render/VideoFboRender.h>
 
 void VideoFboRender::Init(){
     shader = new Shader(readGLSLStrFromFile("fboplay/vetex.glsl").c_str(),
