@@ -95,6 +95,7 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(), Camera2FrameCallback {
     override fun onDestroy() {
         mAudioRecorder.stopCapture()
         mCamera2Wrapper.stopCamera()
+        mSurfaceTexture?.release()
         mMuxer.destroy()
         super.onDestroy()
     }

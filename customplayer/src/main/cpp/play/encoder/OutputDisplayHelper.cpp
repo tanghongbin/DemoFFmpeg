@@ -8,6 +8,7 @@
 OutputDisplayHelper* OutputDisplayHelper::instance = nullptr;
 
 OutputDisplayHelper * OutputDisplayHelper::getInstance(){
+    LOGCATE("打印OutputDisplayHelper instance:%p",instance);
     if (instance == nullptr) {
         instance = new OutputDisplayHelper;
     }

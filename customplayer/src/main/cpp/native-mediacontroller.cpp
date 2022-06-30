@@ -40,7 +40,7 @@ JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
 
 OutputDisplayHelper* getJniOutputHelperFromJava(){
     jlong result = getJniPointFromJava("mNativeOutputHelper");
-    if (result == 0) return nullptr;
+    if (result == 0L) return nullptr;
     return reinterpret_cast<OutputDisplayHelper *>(result);
 }
 
