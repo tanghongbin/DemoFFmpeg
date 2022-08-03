@@ -15,40 +15,25 @@ import javax.microedition.khronos.opengles.GL10
 
 @Suppress("KotlinJniMissingFunction", "FunctionName")
 // 1-播放器，2-muxer合成器
-class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val playerType: Int = 1) :
+abstract class CustomMediaController :
         GLSurfaceView.Renderer,SurfaceHolder.Callback {
-    companion object{
-        // communicate code
-        private const val MSG_PREPARED = 1  // 准备完毕
-        private const val MSG_VIDEO_SIZE_CHANGED = 2 // 播放视频尺寸改变
-        private const val MSG_SEEK_PROGRESS_CHANGED = 3 // seek进度条改变
-        private const val MSG_COMPLETE = 4 // 播放完成
-        private const val MSG_ERROR = 5 // 播放错误
-        private const val MSG_DURATION = 6 // 时长回调通知
-        private const val MSG_MERGE_AV = 7 // 合并视频
-        private const val MSG_CREATE_OES_TEXTURE_SUCCESS = 8 // 创建扩展纹理成功
 
-        /**
-         * 是播放器还是视频合成
-         */
-        private const val ROOT_TYPE_PLAY = 1
-        private const val ROOT_TYPE_MUXER = 2
-
-        init {
-            System.loadLibrary("native-mediacontroller")
-        }
-    }
     private var isInit = false
     init {
-        initByType(rootType, muxerType)
+        initByType(getRootType(), getMuxerType())
     }
 
-    private fun initByType(rootType: Int, muxerType: Int) {
+    abstract fun getRootType():MediaConstantsEnum  // 播放器，录制视频
+    abstract fun getMuxerType():MediaConstantsEnum //  // 1-ffmpeg 编码,2-硬编码,3-直播推流,4-短视频录制
+    abstract fun getPlayerType():MediaConstantsEnum // ffmpeg 播放，硬解码
+
+    private fun initByType(rootType: MediaConstantsEnum, muxerType: MediaConstantsEnum) {
         if (isInit) return
         when (rootType) {
-            1 -> native_init_player(playerType) // 1- ffmpeg 播放，2 - 硬解码
-            // 1-ffmpeg 编码,2-硬编码,3-直播推流,4-短视频录制
-            2 -> native_init_muxer(muxerType)
+            MediaConstantsEnum.MEDIA_PLAYER -> native_init_player(getPlayerType().value) //  ffmpeg 播放， 硬解码
+            // ffmpeg 编码,硬编码,直播推流,短视频录制
+            MediaConstantsEnum.MEDIA_MUXER -> native_init_muxer(muxerType.value)
+            else -> log("not support type")
         }
         isInit = true
     }
@@ -228,6 +213,7 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
      * 1,2,3,4，5  目前只在用 2-yuv420p数据，  5 -oes 扩展纹理不做处理
      *
      * */
+    @Deprecated("用oes扩展纹理，这个不再使用")
     external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 
     // 1-开始录音
@@ -253,4 +239,25 @@ class CustomMediaController(rootType: Int = 1,muxerType:Int = 1,private val play
     external fun native_updateMatrix(floatMatrix: FloatArray)
 
 
+    companion object{
+        // communicate code
+        private const val MSG_PREPARED = 1  // 准备完毕
+        private const val MSG_VIDEO_SIZE_CHANGED = 2 // 播放视频尺寸改变
+        private const val MSG_SEEK_PROGRESS_CHANGED = 3 // seek进度条改变
+        private const val MSG_COMPLETE = 4 // 播放完成
+        private const val MSG_ERROR = 5 // 播放错误
+        private const val MSG_DURATION = 6 // 时长回调通知
+        private const val MSG_MERGE_AV = 7 // 合并视频
+        private const val MSG_CREATE_OES_TEXTURE_SUCCESS = 8 // 创建扩展纹理成功
+
+        /**
+         * 是播放器还是视频合成
+         */
+        private const val ROOT_TYPE_PLAY = 1
+        private const val ROOT_TYPE_MUXER = 2
+
+        init {
+            System.loadLibrary("native_test2")
+        }
+    }
 }

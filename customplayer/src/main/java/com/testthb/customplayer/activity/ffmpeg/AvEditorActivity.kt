@@ -1,25 +1,26 @@
 package com.testthb.customplayer.activity.ffmpeg
 
 import android.content.pm.ActivityInfo
-import android.content.res.AssetFileDescriptor
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.coder.ffmpeg.utils.FFmpegUtils
-import com.testthb.common_base.utils.*
 import com.testthb.common_base.utils.Constants.FILD_DIR
 import com.testthb.common_base.utils.Constants.IMG_DIR
+import com.testthb.common_base.utils.FileUtils
+import com.testthb.common_base.utils.log
+import com.testthb.common_base.utils.showViews
+import com.testthb.common_base.utils.toastSafe
 import com.testthb.customplayer.R
 import com.testthb.customplayer.interfaces.*
-import com.testthb.customplayer.player.CustomMediaController
+import com.testthb.customplayer.player.CustomMediaPlayer
 import com.testthb.customplayer.util.CustomFFmpegCmdUtils
 import com.testthb.customplayer.util.getRamdowVideoPath
 import com.testthb.customplayer.util.runFFmpegCommand
 import kotlinx.android.synthetic.main.activity_player_detail.*
 import java.io.File
-import java.io.FileDescriptor
 import kotlin.random.Random
 
 /***
@@ -31,7 +32,7 @@ class AvEditorActivity : AppCompatActivity(){
 //        Constants.MP4_PLAY_PATH
     }
     private var isPlaying = true
-    private val mPlayer by lazy { CustomMediaController(playerType = 2) }
+    private val mPlayer by lazy { CustomMediaPlayer() }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

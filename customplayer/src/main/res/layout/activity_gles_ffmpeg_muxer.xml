@@ -39,6 +39,7 @@
             tools:layout_editor_absoluteY="64dp" />
 
         <Button
+            android:visibility="gone"
             android:layout_marginTop="50dp"
             android:id="@+id/mRotate"
             android:layout_width="wrap_content"

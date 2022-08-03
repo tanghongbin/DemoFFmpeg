@@ -8,6 +8,12 @@ set(libName native-mediacontroller)
 #语音编码器
 set(faac ${CMAKE_SOURCE_DIR}/faac)
 
+#set(CMAKE_C_COMPILER   "xxxxxxx")
+#set(CMAKE_CXX_COMPILER   "xxxxxxx")
+message(WARNING "logCmake ${CMAKE_CXX_COMPILER}")
+message(WARNING "logCmake2 ${CMAKE_SYSTEM_NAME}")
+message(WARNING "logCmake3 ${CMAKE_C_COMPILER}")
+
 include_directories(
         include
         play_header
@@ -131,6 +137,27 @@ add_library( # Sets the name of the library.
 
         # Provides a relative path to your source file(s).
         ${src-files})
+
+add_library( # Sets the name of the library.
+        native_test2
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        ${src-files})
+
+target_link_libraries(native_test2
+        ${OpenSLES-lib}
+        ${log-lib}
+        ${third-party-libs}
+        #        ${third-party-libs-simple}
+        ${media}
+        OpenMAXAL
+        EGL
+        android
+        GLESv3
+        GLESv2)
 
 target_link_libraries(${libName}
         ${OpenSLES-lib}

@@ -2,18 +2,18 @@ package com.testthb.customplayer.activity.hw
 
 import android.content.pm.ActivityInfo
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.testthb.avutils.audio.decoder.AudioDecodeManager
 import com.testthb.avutils.video.decoder.OutputFormatChangeListener
 import com.testthb.avutils.video.decoder.VideoDecodeManager
 import com.testthb.common_base.utils.changeScreenSize
 import com.testthb.common_base.utils.log
 import com.testthb.customplayer.R
-import com.testthb.customplayer.player.CustomMediaController
+import com.testthb.customplayer.player.CustomMediaPlayer
 import kotlinx.android.synthetic.main.activity_player_detail.*
 import java.util.concurrent.TimeUnit
 
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 class PlayerDecodeHwOpenGLESActivity : AppCompatActivity(), SurfaceHolder.Callback,
     OutputFormatChangeListener {
     private val mUrl by lazy { intent.getStringExtra("url") ?: ""}
-    private val mPlayer by lazy { CustomMediaController() }
+    private val mPlayer by lazy { CustomMediaPlayer() }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

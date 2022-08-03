@@ -20,6 +20,7 @@
 #include <encoder/RtmpLiveMuxer.h>
 #include <encoder/ShortVideoMuxer.h>
 #include <encoder/OutputDisplayHelper.h>
+#include <utils/NativeMediaConstant.h>
 
 //com.testthb.customplayer.player
 #define NATIVE_RENDER_CLASS_ "com/testthb/customplayer/player/CustomMediaController"
@@ -107,7 +108,7 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance,jint pla
     JavaVmManager::setInstance(env,instance);
     MsgLoopHelper::initMsgLoop();
     AbsCustomMediaPlayer *mediaPlayer;
-    if (playerType == 1) {
+    if (playerType == PLAYER_FFMPEG) {
         mediaPlayer = new FFmpegMediaPlayer;
     } else {
         mediaPlayer = MediaCodecPlayer::getInstance();
@@ -121,19 +122,19 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance,jint pla
  *
  * @param env
  * @param instance
- * @param type  1-ffmpeg 编码，2- 硬编码 , 3 - 直播推流 , 4- 短视频录制
+ * @param type  11-ffmpeg 编码，12- 硬编码 , 13 - 直播推流 , 14- 短视频录制
  */
 JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type) {
     JavaVmManager::setInstance(env,instance);
     MsgLoopHelper::initMsgLoop();
     AbsMediaMuxer *mediaMuxer;
-    if (type == 1) {
+    if (type == MUXER_RECORD_FFMPEG) {
         mediaMuxer = FFmpegMediaMuxer::getInstace();
-    } else if (type == 2) {
+    } else if (type == MUXER_RECORD_HW) {
         mediaMuxer = HwMediaMuxer::getInstace();
-    } else if (type == 3){
+    } else if (type == MUXER_RTMP){
         mediaMuxer = RtmpLiveMuxer::getInstance();
-    } else if (type == 4) {
+    } else if (type == MUXER_SHORT_VIDEO) {
         mediaMuxer = ShortVideoMuxer::getInstance();
     } else {
         mediaMuxer = FFmpegMediaMuxer::getInstace();

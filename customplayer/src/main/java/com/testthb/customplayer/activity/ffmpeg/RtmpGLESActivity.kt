@@ -7,7 +7,8 @@ import com.testthb.avutils.audio.recoder.AudioRecorder
 import com.testthb.common_base.utils.keepScreenOn
 import com.testthb.common_base.utils.runAsyncTask
 import com.testthb.customplayer.R
-import com.testthb.customplayer.player.CustomMediaController
+import com.testthb.customplayer.player.CustomMediaMuxer
+import com.testthb.customplayer.player.MediaConstantsEnum
 import com.testthb.customplayer.util.camera2.Camera2FrameCallback
 import com.testthb.customplayer.util.camera2.Camera2Wrapper
 import kotlinx.android.synthetic.main.activity_gles_ffmpeg_muxer.*
@@ -16,7 +17,11 @@ import kotlinx.android.synthetic.main.activity_gles_ffmpeg_muxer.*
  * 用opengles 渲染camera数据,用x264 编码,用rtmp 推送流数据
  */
 class RtmpGLESActivity : AppCompatActivity(), Camera2FrameCallback {
-    private val mMuxer by lazy { CustomMediaController(2,3) }
+    private val mMuxer by lazy { object : CustomMediaMuxer(){
+        override fun getMuxerType(): MediaConstantsEnum {
+            return MediaConstantsEnum.MUXER_RTMP
+        }
+    } }
     private val mCamera2Wrapper by lazy { Camera2Wrapper(this,this) }
     private val mAudioRecorder by lazy { AudioRecorder() }
 

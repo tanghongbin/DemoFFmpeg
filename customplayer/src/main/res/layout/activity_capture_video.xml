@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.ffmpeg.FFmpegMuxerActivity">
+
+    <com.testthb.common_base.view.MyGLSurfaceView
+        android:id="@+id/mGLESMuxerSurface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_marginBottom="@dimen/dimen_50dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="45dp"
+            android:id="@+id/mRecordButton"
+            app:srcCompat="@mipmap/live_resume"
+            android:layout_height="45dp"/>
+
+        <TextView
+            android:id="@+id/time_text"
+            android:layout_marginStart="15dp"
+            android:layout_gravity="center"
+            tools:text="00:00"
+            android:textColor="@color/alpha_95_white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+</FrameLayout>

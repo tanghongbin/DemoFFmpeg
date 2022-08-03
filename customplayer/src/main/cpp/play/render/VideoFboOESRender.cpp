@@ -197,6 +197,7 @@ void VideoFboOESRender::readYuvImagePixel() {
     nativeImage->ppPlane[2] = nativeImage->ppPlane[1] + nativeImage->width * nativeImage->height / 4;
     int64_t startTime = GetSysCurrentTime();
     glReadPixels(0, 0, VIDEO_W/4, VIDEO_H*1.5, GL_RGBA, GL_UNSIGNED_BYTE, pBuffer);
+//    LOGCATE("读取花费时间:%lld ms",(GetSysCurrentTime() - startTime));
     readPixelCall(3,nativeImage);
 //保存 I420 格式的 YUV 图片
 //    std::string path = "/storage/emulated/0/ffmpegtest/filterImg";

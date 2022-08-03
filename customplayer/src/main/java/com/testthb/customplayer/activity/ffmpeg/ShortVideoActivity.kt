@@ -7,30 +7,28 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import androidx.appcompat.app.AppCompatActivity
+import com.flyco.tablayout.listener.CustomTabEntity
+import com.flyco.tablayout.listener.OnTabSelectListener
 import com.testthb.avutils.audio.recoder.AudioRecorder
 import com.testthb.common_base.utils.*
 import com.testthb.customplayer.R
 import com.testthb.customplayer.bean.Speed
 import com.testthb.customplayer.bean.TabEntity
 import com.testthb.customplayer.interfaces.OnAvMergeListener
-import com.testthb.customplayer.player.CustomMediaController
+import com.testthb.customplayer.player.CustomMediaMuxer
+import com.testthb.customplayer.player.MediaConstantsEnum
 import com.testthb.customplayer.util.TimerUtils
 import com.testthb.customplayer.util.camera2.Camera2FrameCallback
 import com.testthb.customplayer.util.camera2.Camera2Wrapper
 import com.testthb.customplayer.util.getRamdowVideoPath
 import com.testthb.customplayer.util.runFFmpegCommand
 import com.testthb.customplayer.view.RecordButton
-import com.flyco.tablayout.listener.CustomTabEntity
-import com.flyco.tablayout.listener.OnTabSelectListener
 import kotlinx.android.synthetic.main.activity_gles_ffmpeg_muxer.*
-import java.io.*
-import java.util.*
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.HashMap
-import kotlin.collections.List
-import kotlin.collections.forEach
-import kotlin.collections.forEachIndexed
-import kotlin.collections.isNotEmpty
 import kotlin.collections.set
 
 /**
@@ -38,7 +36,11 @@ import kotlin.collections.set
  */
 class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
     TimerUtils.OnTimerUtilsListener {
-    private val mMuxer by lazy { CustomMediaController(2, 4) }
+    private val mMuxer by lazy { object : CustomMediaMuxer() {
+        override fun getMuxerType(): MediaConstantsEnum {
+            return MediaConstantsEnum.MUXER_SHORT_VIDEO
+        }
+    } }
     private val mCamera2Wrapper by lazy { Camera2Wrapper(this, this) }
     private val mAudioRecorder by lazy { AudioRecorder() }
     private val MAX_DURATION = 60 * 1000

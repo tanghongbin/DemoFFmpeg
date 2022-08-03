@@ -2,15 +2,15 @@ package com.testthb.customplayer.activity.ffmpeg
 
 import android.content.pm.ActivityInfo
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.testthb.common_base.utils.log
 import com.testthb.common_base.utils.toastSafe
 import com.testthb.customplayer.R
 import com.testthb.customplayer.interfaces.*
-import com.testthb.customplayer.player.CustomMediaController
+import com.testthb.customplayer.player.CustomMediaPlayer
 import kotlinx.android.synthetic.main.activity_player_detail.*
 import kotlin.random.Random
 
@@ -23,7 +23,7 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
 //        Constants.MP4_PLAY_PATH
     }
     private var isPlaying = true
-    private val mPlayer by lazy { CustomMediaController() }
+    private val mPlayer by lazy { CustomMediaPlayer() }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
