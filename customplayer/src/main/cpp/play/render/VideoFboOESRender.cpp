@@ -92,13 +92,11 @@ void VideoFboOESRender::createRgbaFbo() {
     glBindFramebuffer(GL_FRAMEBUFFER, fboRgbaId);
     glBindTexture(GL_TEXTURE_2D, fboRgbaTextureId);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboRgbaTextureId, 0);
-    LOGCATE("log width:%d height:%d",VIDEO_W,VIDEO_H);
     GLenum  result;
     if ((result = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE){
         LOGCATE("log frame buffer is not complete %.2x",result);
         glCheckError("glCheckFramebufferStatus");
     } else {
-        LOGCATE("create buffer complete");
     }
     glBindTexture(GL_TEXTURE_2D,0);
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -118,13 +116,11 @@ void VideoFboOESRender::createYuvFbo() {
     glBindFramebuffer(GL_FRAMEBUFFER, fboYuv420Id);
     glBindTexture(GL_TEXTURE_2D, fboYuv420TextureId);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboYuv420TextureId, 0);
-    LOGCATE("log width:%d height:%d",VIDEO_W,VIDEO_H);
     GLenum  result;
     if ((result = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE){
         LOGCATE("log frame buffer is not complete %.2x",result);
         glCheckError("glCheckFramebufferStatus");
     } else {
-        LOGCATE("create buffer complete");
     }
     glBindTexture(GL_TEXTURE_2D,0);
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -300,7 +296,6 @@ void VideoFboOESRender::Destroy() {
     glDeleteFramebuffers(1,&fboRgbaId);
     glDeleteVertexArrays(2,vaoIds);
 //    NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
-    LOGCATE("delete video render is success");
 }
 
 VideoFboOESRender::~VideoFboOESRender(){
@@ -314,7 +309,6 @@ VideoFboOESRender::~VideoFboOESRender(){
         delete rgbShader;
         rgbShader = 0;
     }
-LOGCATE("VideoFboOESRender is destroyed");
 }
 
 void VideoFboOESRender::OnSurfaceChanged(int windowW,int windowH){

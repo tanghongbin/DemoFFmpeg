@@ -137,7 +137,6 @@ void VideoSpecialEffortsExtRender::Destroy() {
     if (specialEffortsImage.ppPlane[0]) NativeOpenGLImageUtil::FreeNativeImage(&specialEffortsImage);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
     NativeOpenGLImageUtil::FreeNativeImage(&readResultImg);
-    LOGCATE("delete video render is success");
 }
 
 

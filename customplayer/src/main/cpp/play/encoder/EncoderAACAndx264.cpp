@@ -47,8 +47,7 @@ void EncoderAACAndx264::loopEncodeAudio(EncoderAACAndx264* instance){
     while (instance->isRunning){
         AudioRecordItemInfo *audioItem = instance->mAudioQueue.popFirst();
         if (audioItem == nullptr){
-            usleep(5 * 1000);
-            continue;
+            break;
         }
         int byteLen = faacEncEncode(faacHandle, reinterpret_cast<int32_t *>(audioItem->data), mInputSamples, outputAudioBuffer, maxOutputBytes);
 //        LOGCATE("look encode audio success size:%d  inputSamples:%ld  maxOutputBytes:%ld",byteLen,mInputSamples,maxOutputBytes);
@@ -62,7 +61,6 @@ void EncoderAACAndx264::loopEncodeAudio(EncoderAACAndx264* instance){
     faacEncClose(faacHandle);
     delete [] outputAudioBuffer;
 
-    LOGCATE("loop is over");
 }
 
 
@@ -120,8 +118,7 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
     while (instance -> isRunning) {
         NativeOpenGLImage *videoItem = instance->mVideoQueue.popFirst();
         if (videoItem == nullptr) {
-            usleep(1000 * 10);
-            continue;
+            break;
         }
         // 假设这里的数据是yuv420p
         std::unique_lock<mutex> videoMutex(instance -> mAvMutex,std::defer_lock);
@@ -162,7 +159,6 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
     if (pic_in) {
         x264_picture_clean(pic_in);
     }
-    LOGCATE("loop is over");
 }
 
 void EncoderAACAndx264::destroy(){
@@ -177,28 +173,22 @@ void EncoderAACAndx264::destroy(){
         mEncodeThreadV->join();
         delete mEncodeThreadV;
     }
-
-    mVideoQueue.pushLast(nullptr);
-    mAudioQueue.pushLast(nullptr);
     do {
-        AudioRecordItemInfo *audioItem = mAudioQueue.popFirst();
+        AudioRecordItemInfo *audioItem = mAudioQueue.getFirst();
         if (audioItem) audioItem->recycle();
     } while (mAudioQueue.size() > 0);
-    LOGCATE("encode prepare delete all mAudioQueue");
     do {
-        NativeOpenGLImage *videoItem = mVideoQueue.popFirst();
+        NativeOpenGLImage *videoItem = mVideoQueue.getFirst();
         if (videoItem) { 
             NativeOpenGLImageUtil::FreeNativeImage(videoItem);
             delete videoItem;
         }
     } while (mVideoQueue.size() > 0);
-    LOGCATE("encode prepare delete all mVideoQueue");
     if (rtmpPushHelper){
         rtmpPushHelper->destroy();
         delete rtmpPushHelper;
         rtmpPushHelper = nullptr;
     }
-    LOGCATE("encode aac and h264 all over");
 }
 
 void EncoderAACAndx264::putVideoData(NativeOpenGLImage* data){

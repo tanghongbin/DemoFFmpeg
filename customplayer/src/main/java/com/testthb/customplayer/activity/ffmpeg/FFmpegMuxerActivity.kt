@@ -25,7 +25,7 @@ class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
         setContentView(R.layout.activity_f_fmpeg_muxer)
         muxerButton.setOnClickListener {
             runAsyncTask({
-                mMuxer.native_startEncode()
+                mMuxer.native_initEncode()
             })
         }
 //        mMuxerSurface.init(mMuxer)

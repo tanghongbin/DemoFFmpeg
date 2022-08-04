@@ -451,7 +451,6 @@ GLuint CreateProgram(const char *pVertexShaderSource, const char *pFragShaderSou
 }
 
 void DeleteProgram(GLuint program) {
-    LOGCATE("GLUtils::DeleteProgram");
     if (program) {
         glUseProgram(0);
         glDeleteProgram(program);

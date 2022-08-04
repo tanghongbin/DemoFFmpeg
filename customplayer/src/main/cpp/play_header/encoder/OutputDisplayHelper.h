@@ -41,7 +41,6 @@ private:
     BaseVideoRender* videoRender;
     static OutputDisplayHelper* instance;
     bool isDestroyed;
-    int cameraWidth,cameraHeight;
     std::mutex runningMutex;
     float speed;
     SoundTouchHelper* soundTouchHelper;
@@ -59,7 +58,6 @@ private:
         isDestroyed = false;
         audioCall = nullptr;
         videoCall = 0;
-        cameraWidth = cameraHeight = 0;
         soundTouchHelper = 0;
         speed = 1.0f;
     }

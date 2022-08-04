@@ -116,6 +116,7 @@ void HwMediaMuxer::OnAudioData(uint8_t *audioData, jint length) {
             getInstace()->mediaCodecA->putData(audioData,length);
         }
     }
+    LOGCATE("log mediacodea:%p",mediaCodecA);
 }
 
 

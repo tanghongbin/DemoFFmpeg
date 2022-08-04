@@ -102,7 +102,6 @@ void VideoRender::Destroy() {
     glDeleteVertexArrays(2,vaoIds);
     glDeleteTextures(4,textures);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
-    LOGCATE("delete video render is success");
 }
 
 VideoRender::~VideoRender(){

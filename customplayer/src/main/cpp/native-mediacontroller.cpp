@@ -87,7 +87,6 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         delete mediaPlayer;
     }
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    LOGCATE("log mediamuxer :%p",mediaMuxer);
     if (mediaMuxer){
         setJniPointToJava(env,"mNativeMuxer","J", nullptr);
         mediaMuxer->Destroy();
@@ -101,7 +100,6 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
 
     JavaVmManager::destroyInstance(env);
     MsgLoopHelper::destroyInstance();
-    LOGCATE("destroy all over");
 }
 
 JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance,jint playerType) {
@@ -117,33 +115,6 @@ JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance,jint pla
     mediaPlayer->Init();
 }
 
-
-/***
- *
- * @param env
- * @param instance
- * @param type  11-ffmpeg 编码，12- 硬编码 , 13 - 直播推流 , 14- 短视频录制
- */
-JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type) {
-    JavaVmManager::setInstance(env,instance);
-    MsgLoopHelper::initMsgLoop();
-    AbsMediaMuxer *mediaMuxer;
-    if (type == MUXER_RECORD_FFMPEG) {
-        mediaMuxer = FFmpegMediaMuxer::getInstace();
-    } else if (type == MUXER_RECORD_HW) {
-        mediaMuxer = HwMediaMuxer::getInstace();
-    } else if (type == MUXER_RTMP){
-        mediaMuxer = RtmpLiveMuxer::getInstance();
-    } else if (type == MUXER_SHORT_VIDEO) {
-        mediaMuxer = ShortVideoMuxer::getInstance();
-    } else {
-        mediaMuxer = FFmpegMediaMuxer::getInstace();
-    }
-    OutputDisplayHelper::getInstance()->init();
-    setJniPointToJava( env,"mNativeOutputHelper","J" ,OutputDisplayHelper::getInstance());
-    setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
-    LOGCATE("has enter env:%p instance:%p",env,instance);
-}
 
 JNIEXPORT void JNICALL native_prepare(JNIEnv *env, jobject instance) {
     AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
@@ -188,15 +159,50 @@ JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring u
  * ============================   编码视频，音频，合并部分  ==========================
  * *****/
 
-JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance,jstring path) {
+/***
+ *
+ * @param env
+ * @param instance
+ * @param type  11-ffmpeg 编码，12- 硬编码 , 13 - 直播推流 , 14- 短视频录制
+ */
+JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type) {
+    JavaVmManager::setInstance(env,instance);
+    MsgLoopHelper::initMsgLoop();
+    AbsMediaMuxer *mediaMuxer;
+    if (type == MUXER_RECORD_FFMPEG) {
+        mediaMuxer = FFmpegMediaMuxer::getInstace();
+    } else if (type == MUXER_RECORD_HW) {
+        mediaMuxer = HwMediaMuxer::getInstace();
+    } else if (type == MUXER_RTMP){
+        mediaMuxer = RtmpLiveMuxer::getInstance();
+    } else if (type == MUXER_SHORT_VIDEO) {
+        mediaMuxer = ShortVideoMuxer::getInstance();
+    } else {
+        mediaMuxer = FFmpegMediaMuxer::getInstace();
+    }
+    OutputDisplayHelper::getInstance()->init();
+    setJniPointToJava( env,"mNativeOutputHelper","J" ,OutputDisplayHelper::getInstance());
+    setJniPointToJava(env,"mNativeMuxer","J" ,mediaMuxer);
+}
+
+JNIEXPORT void JNICALL native_initEncode(JNIEnv *env, jobject instance, jstring path) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer == NULL) return;
     const char* resultPath = getCharStrFromJstring(env,path);
     ReceiveAvOriginalData receiveAvOriginalData;
+    receiveAvOriginalData.audioCall = nullptr;
+    receiveAvOriginalData.videoCall = nullptr;
     mediaMuxer->getInAvDataFunc(&receiveAvOriginalData);
     OutputDisplayHelper::getInstance()->setOutputAudioListener(receiveAvOriginalData.audioCall);
     OutputDisplayHelper::getInstance()->setOutputVideoListener(receiveAvOriginalData.videoCall);
     mediaMuxer->init(resultPath);
+}
+
+
+JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
+    AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
+    if (mediaMuxer == NULL) return;
+    mediaMuxer->Start();
 }
 
 JNIEXPORT void JNICALL native_stopEncode(JNIEnv *env, jobject instance) {
@@ -308,8 +314,9 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
         {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
 
-        {"native_startEncode",               "(Ljava/lang/String;)V",            (void *) (native_startEncode)},
+        {"native_initEncode",               "(Ljava/lang/String;)V",            (void *) (native_initEncode)},
         {"native_stopEncode",               "()V",            (void *) (native_stopEncode)},
+        {"native_startEncode",               "()V",            (void *) (native_startEncode)},
         {"native_onCameraFrameDataValible",               "(I[B)V",            (void *) (native_onCameraFrameDataValible)},
         {"native_audioData",               "([BI)V",            (void *) (native_audioData)},
         {"native_updateMatrix",               "([F)V",            (void *) (native_updateMatrix)},

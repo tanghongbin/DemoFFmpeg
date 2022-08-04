@@ -15,7 +15,6 @@ void JavaVmManager::detachCurrentThread() {
 
 void JavaVmManager::initVm(JNIEnv *jniEnv)  {
     if (javaVm == nullptr) jniEnv->GetJavaVM(&javaVm);
-    LOGCATE("init jvm success");
 }
 
 JNIEnv *JavaVmManager::GetEnv(bool *attach) {

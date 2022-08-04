@@ -37,7 +37,7 @@ class FFmpegGLESMuxerActivity : AppCompatActivity(){
                     buffer.append("").toString()
                     mAudioRecorder.startCapture()
                     mMuxer.native_setSpeed(1.0)
-                    mMuxer.native_startEncode()
+                    mMuxer.native_initEncode()
                 })
             }
             isStart = !isStart

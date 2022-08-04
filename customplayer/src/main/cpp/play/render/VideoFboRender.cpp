@@ -133,13 +133,11 @@ void VideoFboRender::createFbo() {
     glBindFramebuffer(GL_FRAMEBUFFER, fboId);
     glBindTexture(GL_TEXTURE_2D, fboTextureId);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureId, 0);
-    LOGCATE("log width:%d height:%d",VIDEO_W,VIDEO_H);
     GLenum  result;
     if ((result = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE){
         LOGCATE("log frame buffer is not complete %.2x",result);
         glCheckError("glCheckFramebufferStatus");
     } else {
-        LOGCATE("create buffer complete");
     }
     glBindTexture(GL_TEXTURE_2D,0);
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -318,7 +316,6 @@ void VideoFboRender::Destroy() {
     glDeleteVertexArrays(2,vaoIds);
     glDeleteBuffers(2,pboIds);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
-    LOGCATE("delete video render is success");
 }
 
 VideoFboRender::~VideoFboRender(){

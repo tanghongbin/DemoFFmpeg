@@ -82,7 +82,6 @@ void FFmpegEncodeVideo::init() {
     /* frames per second */
     codeCtx->time_base = (AVRational) {1, 25};
     codeCtx->framerate = (AVRational) {25, 1};
-    LOGCATE("log width:%d height:%d", codeCtx->width, codeCtx->height);
     codeCtx->gop_size = 1;
     codeCtx->max_b_frames = 1;
     codeCtx->pix_fmt = AV_PIX_FMT_YUV420P;

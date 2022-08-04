@@ -35,7 +35,6 @@ public:
 
     void setMax(int max){
         maxSize = max;
-        LOGCATE("log max Size:%d %d",max,maxSize);
     }
 
 
@@ -45,8 +44,6 @@ public:
     }
 
     ~CustomSafeBlockQueue<T>() {
-        // todo 自己清除
-        LOGCATE("total enter count:%d  outcount:%d",inCount,outCount);
     }
 
     T pushLast(T node) {
@@ -67,6 +64,17 @@ public:
         std::unique_lock<std::mutex> uniqueLock(tex);
         if (mQueue.size() == 0) {
             conditionVariable.wait(uniqueLock);
+        }
+        outCount++;
+        T bean = mQueue.front();
+        mQueue.pop();
+        return bean;
+    }
+
+    T getFirst() {
+        std::unique_lock<std::mutex> uniqueLock(tex);
+        if (mQueue.size() == 0) {
+            return nullptr;
         }
         outCount++;
         T bean = mQueue.front();
@@ -98,7 +106,6 @@ public:
     
     void setMax(int max){
         maxSize = max;
-        LOGCATE("log max Size:%d %d",max,maxSize);
     }
     
     CustomSafeQueue<T>() {
@@ -106,7 +113,6 @@ public:
     }
 
     ~CustomSafeQueue<T>() {
-        LOGCATE("total enter count:%d  outcount:%d",inCount,outCount);
         inCount = outCount = 0;
     }
 

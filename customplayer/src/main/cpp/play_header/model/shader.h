@@ -24,7 +24,6 @@ public:
     ~Shader()
     {
         //DEBUG_LOGCATE();
-        LOGCATE("log shader has been freed;");
     }
 
     void Destroy()

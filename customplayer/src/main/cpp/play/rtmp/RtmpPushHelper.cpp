@@ -11,7 +11,7 @@
 #include <x264/x264.h>
 #include <faac.h>
 #include <faaccfg.h>
-#define RTMPURL "rtmp://1.14.99.52:1935/live/androidPush"
+//#define RTMPURL "rtmp://1.14.99.52:1935/live/androidPush"
 
 
 void RtmpPushHelper::initPush(){
@@ -154,7 +154,9 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
     RTMP_Init(rtmp);
     RTMP_LogSetLevel(RTMP_LOGERROR);
     RTMP_LogSetCallback(log_rtmp_infos);
-    ret = RTMP_SetupURL(rtmp,RTMPURL);
+    LOGCATE("打印推流的地址:%s",Constants::rtmpPushUrl);
+    strcpy(instance ->rtmpUrl,Constants::rtmpPushUrl);
+    ret = RTMP_SetupURL(rtmp,instance ->rtmpUrl);
     rtmp->Link.timeout = 5;// 秒为单位
     RTMP_EnableWrite(rtmp);
     ret = RTMP_Connect(rtmp,0);
@@ -171,8 +173,7 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
     while (instance -> isPushing){
         RTMPPacket *packet = instance->packetQueue.popFirst();
         if (packet == nullptr) {
-            usleep(1000 * 5);
-            continue;
+            break;
         }
         packet->m_nInfoField2 = rtmp->m_stream_id;
         if (!RTMP_IsConnected(rtmp)){
@@ -186,7 +187,8 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
         // 先不判断，可能有延迟，推送不成功什么的
         if (!ret){
             errorMsg = "RTMP_SendPacket is failed";
-            break;
+            LOGCATE("log send result:%s",errorMsg);
+//            break;
         }
     }
 
@@ -198,7 +200,6 @@ void RtmpPushHelper::loopRtmpPush(RtmpPushHelper* instance){
         RTMP_Close(rtmp);
         RTMP_Free(rtmp);
     }
-    LOGCATE(" push rtmp is over");
 }
 void RtmpPushHelper::destroy(){
     isPushing = false;
@@ -207,15 +208,14 @@ void RtmpPushHelper::destroy(){
         rtmpThread->join();
         delete rtmpThread; 
     }
-    packetQueue.pushLast(nullptr);
     do {
-        RTMPPacket *item = packetQueue.popFirst();
+        RTMPPacket *item = packetQueue.getFirst();
         if (item){
             RTMPPacket_Free(item);
             delete item;
         }
     } while (packetQueue.size() > 0);
-    LOGCATE("rtmpPushHelper all destroy");
+    LOGCATE("rtmp destroy over");
 }
 
 void RtmpPushHelper::initTime() {

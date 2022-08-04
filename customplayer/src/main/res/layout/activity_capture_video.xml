@@ -19,10 +19,9 @@
         android:layout_marginBottom="@dimen/dimen_50dp"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_height="wrap_content">
-        <androidx.appcompat.widget.AppCompatImageView
+        <com.testthb.customplayer.view.StartRecordButton
             android:layout_width="45dp"
             android:id="@+id/mRecordButton"
-            app:srcCompat="@mipmap/live_resume"
             android:layout_height="45dp"/>
 
         <TextView

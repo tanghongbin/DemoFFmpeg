@@ -143,12 +143,10 @@ void VideoSpecialEffortsRender::Destroy() {
     if (specialEffortsImage.ppPlane[0]) NativeOpenGLImageUtil::FreeNativeImage(&specialEffortsImage);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
     NativeOpenGLImageUtil::FreeNativeImage(&readResultImg);
-    LOGCATE("delete video render is success");
 }
 
 VideoSpecialEffortsRender::~VideoSpecialEffortsRender(){
     renderIsFinish = true;
-LOGCATE("VideoSpecialEffortsRender is destroyed");
 }
 
 void VideoSpecialEffortsRender::copyImage(NativeOpenGLImage *srcImage){
@@ -212,8 +210,6 @@ void VideoSpecialEffortsRender::OnRenderSizeChanged(int windowW,int windowH,int 
             renderHeight = renderH;
         }
     }
-    LOGCATE("log offsetW:%d offsetH:%d windowW:%d windowH:%d renderW:%d renderH:%d",widthOffset,heightOffset,
-            windowW,windowH,renderWidth,renderHeight);
 }
 
 glm::mat4 VideoSpecialEffortsRender::createMvp(bool isWaterMask) {

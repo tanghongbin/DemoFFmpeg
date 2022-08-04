@@ -356,7 +356,6 @@ int FFmpegEncodeAVToLiveRtmp::initEncodeVideo() {
     /* frames per second */
     codeCtxV->time_base = (AVRational) {1, frameRate};
     codeCtxV->framerate = (AVRational) {frameRate, 1};
-    LOGCATE("log width:%d height:%d", codeCtxV->width, codeCtxV->height);
     codeCtxV->gop_size = frameRate;
     codeCtxV->max_b_frames = 1;
     codeCtxV->pix_fmt = AV_PIX_FMT_YUV420P;

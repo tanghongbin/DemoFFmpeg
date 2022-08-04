@@ -37,6 +37,7 @@ public:
     virtual void test(int type){
 
     }
+    virtual void Start() {}
     virtual void Stop() {};
     virtual void OnDrawFrame() {  };
     virtual void OnSurfaceCreate() {  };

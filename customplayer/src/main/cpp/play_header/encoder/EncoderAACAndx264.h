@@ -20,7 +20,6 @@ using std::mutex;
 class EncoderAACAndx264 {
 
 private:
-    int sampleHz,channels;
     RtmpPushHelper* rtmpPushHelper;
     thread* mEncodeThreadV;
     thread* mEncodeThreadA;
@@ -33,7 +32,6 @@ private:
 
 public:
     EncoderAACAndx264() {
-        sampleHz = channels = 0;
         isRunning = true;
         mEncodeThreadV = mEncodeThreadA =  0;
         rtmpPushHelper = 0;

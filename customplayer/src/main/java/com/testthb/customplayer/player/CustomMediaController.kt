@@ -217,7 +217,9 @@ abstract class CustomMediaController :
     external fun native_onCameraFrameDataValible(type:Int,byteArray: ByteArray)
 
     // 1-开始录音
-    external fun native_startEncode(path:String = getRamdowVideoPath())
+    external fun native_initEncode(path:String = getRamdowVideoPath())
+
+    external fun native_startEncode()
 
     external fun native_stopEncode()
 

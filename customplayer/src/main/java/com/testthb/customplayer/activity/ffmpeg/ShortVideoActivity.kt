@@ -128,7 +128,7 @@ class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
                 goneViews(douyin_button_speed_tab,mContactVideo)
                 mTimer.start((MAX_DURATION * mSpeed).toInt())
                 mAudioRecorder.startCapture()
-                mMuxer.native_startEncode()
+                mMuxer.native_initEncode()
                 mStartRecordTime = System.currentTimeMillis()
             }
 

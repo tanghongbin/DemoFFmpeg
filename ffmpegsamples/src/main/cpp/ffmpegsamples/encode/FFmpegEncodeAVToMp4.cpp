@@ -364,7 +364,6 @@ int FFmpegEncodeAVToMp4::initEncodeVideo() {
     /* frames per second */
     codeCtxV->time_base = (AVRational) {1, 20};
     codeCtxV->framerate = (AVRational) {20, 1};
-    LOGCATE("log width:%d height:%d", codeCtxV->width, codeCtxV->height);
     codeCtxV->gop_size = 7;
     codeCtxV->max_b_frames = 1;
     codeCtxV->pix_fmt = AV_PIX_FMT_YUV420P;

@@ -36,8 +36,8 @@ class Camera2SurfaceHelper(context: Context,private val mMuxer: CustomMediaContr
     }
 
     fun onDestroy(){
-        mSurfaceTexture?.release()
         mCamera2Wrapper.stopCamera()
+        mSurfaceTexture?.release()
     }
 
     override fun onPreviewFrame(data: ByteArray?, width: Int, height: Int) {

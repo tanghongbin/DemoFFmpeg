@@ -9,6 +9,7 @@
 #include <thread>
 #include <utils/CustomSafeBlockQueue.h>
 #include <rtmp/rtmp.h>
+#include <utils/Constants.h>
 
 using std::thread;
 
@@ -25,7 +26,7 @@ private:
     CustomSafeBlockQueue<RTMPPacket*> packetQueue;
     int64_t startTime;
     RTMP * mRtmp;
-
+    char rtmpUrl[128];
 
 public:
 
