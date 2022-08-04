@@ -32,7 +32,7 @@ public:
     }
     virtual void copyImage(NativeOpenGLImage *openGlImage) = 0;
     virtual void OnSurfaceChanged(int width,int height) { };
-
+    virtual void OnRenderSizeChanged(int windowWidth,int windowHeight,int renderW,int renderH){}
     virtual void UpdateOESMartix(float *pDouble) {}
 };
 

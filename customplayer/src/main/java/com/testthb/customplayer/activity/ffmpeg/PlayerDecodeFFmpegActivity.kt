@@ -30,7 +30,6 @@ class PlayerDecodeFFmpegActivity : AppCompatActivity(){
         setContentView(R.layout.activity_player_detail)
         mGLSurface.init(mPlayer)
         button.setOnClickListener {
-            mPlayer.nativeGetInfo()
             var oreration = requestedOrientation
             if (oreration == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ||
                     oreration == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {

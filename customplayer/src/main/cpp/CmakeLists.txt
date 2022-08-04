@@ -4,7 +4,8 @@ project(testFFmpeg VERSION 1.0)
 
 set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
-set(libName native-mediacontroller)
+set(libPlayer native-player)
+set(libMuxer native-mediacontroller)
 #语音编码器
 set(faac ${CMAKE_SOURCE_DIR}/faac)
 
@@ -20,8 +21,8 @@ include_directories(
         ${faac}/include)
 
 
-file(GLOB src-files
-        ${CMAKE_SOURCE_DIR}/${libName}.cpp
+file(GLOB player-srcfiles
+        ${CMAKE_SOURCE_DIR}/${libPlayer}.cpp
         ${CMAKE_SOURCE_DIR}/play/render/*.cpp
         ${CMAKE_SOURCE_DIR}/play/mediaprocess/*.cpp
         ${CMAKE_SOURCE_DIR}/play/utils/*.cpp
@@ -34,7 +35,19 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/include/soundtouch/source/*.cpp
         ${CMAKE_SOURCE_DIR}/include/ffmpegcommand/*.c)
 
-
+file(GLOB muxer-srcfiles
+        ${CMAKE_SOURCE_DIR}/${libMuxer}.cpp
+        ${CMAKE_SOURCE_DIR}/play/render/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/mediaprocess/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/utils/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/decoder/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/encoder/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/encoder/hw/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/decoder/hw/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/rtmp/*.cpp
+        ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp
+        ${CMAKE_SOURCE_DIR}/include/soundtouch/source/*.cpp
+        ${CMAKE_SOURCE_DIR}/include/ffmpegcommand/*.c)
 
 #指定 faac 静态库文件目录
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${faac}/libs/${CMAKE_ANDROID_ARCH_ABI}")
@@ -130,24 +143,15 @@ find_library(OpenSLES-lib OpenSLES)
 find_library(media mediandk)
 
 add_library( # Sets the name of the library.
-        ${libName}
+        ${libPlayer}
 
         # Sets the library as a shared library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        ${src-files})
+        ${player-srcfiles})
 
-add_library( # Sets the name of the library.
-        native_test2
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-        ${src-files})
-
-target_link_libraries(native_test2
+target_link_libraries(${libPlayer}
         ${OpenSLES-lib}
         ${log-lib}
         ${third-party-libs}
@@ -159,7 +163,16 @@ target_link_libraries(native_test2
         GLESv3
         GLESv2)
 
-target_link_libraries(${libName}
+add_library( # Sets the name of the library.
+        ${libMuxer}
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        ${muxer-srcfiles})
+
+target_link_libraries(${libMuxer}
         ${OpenSLES-lib}
         ${log-lib}
         ${third-party-libs}

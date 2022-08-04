@@ -355,6 +355,6 @@ void BaseHwDecoder::OnSizeReady() {
     int m_VideoHeight = mVideoHeight;
     int m_RenderWidth,m_RenderHeight;
     setupRenderDimension(oreration,mWindowWidth,mWindowHeight,m_VideoWidth,m_VideoHeight,&m_RenderWidth,&m_RenderHeight);
-    auto* render = dynamic_cast<VideoSpecialEffortsRender *>(videoRender);
+    auto* render = dynamic_cast<BaseVideoRender *>(videoRender);
     render->OnRenderSizeChanged(mWindowWidth,mWindowHeight,m_RenderWidth,m_RenderHeight);
 }

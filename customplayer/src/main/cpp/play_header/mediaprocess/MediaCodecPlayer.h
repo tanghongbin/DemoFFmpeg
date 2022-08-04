@@ -17,7 +17,6 @@ private:
     BaseHwDecoder* audioDecoder;
     BaseHwDecoder* videoDecoder;
     BaseHwDecoder* specialEffortDecoder; // 特效视频
-    SpecialEffortsVideoMuxer* specialEffortsVideoMuxer;
     MediaCodecPlayer();
     static MediaCodecPlayer* instance;
     static void receiveSpecialEffortsData(int type,AMediaCodecBufferInfo* info,uint8_t* data);

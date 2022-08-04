@@ -31,6 +31,9 @@ public:
         env->DeleteGlobalRef(instance);
         instance = nullptr;
     }
+    static JavaVM* getJavaVM(){
+        return javaVm;
+    }
     
 };
 

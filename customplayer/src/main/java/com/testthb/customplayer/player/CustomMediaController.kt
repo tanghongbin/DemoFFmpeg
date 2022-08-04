@@ -259,7 +259,7 @@ abstract class CustomMediaController :
         private const val ROOT_TYPE_MUXER = 2
 
         init {
-            System.loadLibrary("native_test2")
+            System.loadLibrary("native-mediacontroller")
         }
     }
 }

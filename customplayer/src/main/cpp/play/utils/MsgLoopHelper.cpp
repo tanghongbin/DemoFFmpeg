@@ -9,10 +9,9 @@
 MsgLoopHelper* MsgLoopHelper::instance = nullptr;
 
 void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
-    for (;;) {
-        if (!player->isLoop) break;
-        Message*  message = player->safeQueue.popFirst();
-        if (message == nullptr) continue;
+    while (player->isLoop) {
+        Message* message = player->safeQueue.popFirst();
+        if (message == nullptr) break;
         bool isAttach;
         JNIEnv *env = JavaVmManager::GetEnv(&isAttach);
         if (env != nullptr) {

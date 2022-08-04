@@ -3,7 +3,7 @@
 //
 
 
-// 测试ffmpeg的编解码，格式转换，混合和解混合，推拉流
+// 视频录制功能,ffmpeg,hw
 
 #include <jni.h>
 #include <mediaprocess/MediaCodecPlayer.h>
@@ -23,7 +23,7 @@
 #include <utils/NativeMediaConstant.h>
 
 //com.testthb.customplayer.player
-#define NATIVE_RENDER_CLASS_ "com/testthb/customplayer/player/CustomMediaController"
+#define _NATIVE_PLAYER_CLASS "com/testthb/customplayer/player/CustomMediaController"
 
 
 #ifdef __cplusplus
@@ -363,7 +363,7 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p) {
     }
 
 
-    jint regRet = RegisterNativeMethods(env, NATIVE_RENDER_CLASS_, g_RenderMethods,
+    jint regRet = RegisterNativeMethods(env, _NATIVE_PLAYER_CLASS, g_RenderMethods,
                                         sizeof(g_RenderMethods) /
                                         sizeof(g_RenderMethods[0]));
     if (regRet != JNI_TRUE) {
@@ -386,7 +386,7 @@ extern "C" void JNI_OnUnload(JavaVM *jvm, void *p) {
     if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
         return;
     }
-    UnregisterNativeMethods(env, NATIVE_RENDER_CLASS_);
+    UnregisterNativeMethods(env, _NATIVE_PLAYER_CLASS);
 }
 
 #ifdef __cplusplus

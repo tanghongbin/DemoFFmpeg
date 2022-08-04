@@ -140,7 +140,6 @@ bool TimeSyncHelper::hardwareSyncBySysTime(bool isAudio,TimeSyncBean *syncBean) 
     int64_t avDuration = syncBean->currentVideoPtsMs;
     bool frameIsValid = true;
     if (pastDuration == 0L){
-        LOGCATE("时间戳被重新调整");
         startSysTime = GetSysCurrentTime() - avDuration;
     }
     pastDuration = avDuration;

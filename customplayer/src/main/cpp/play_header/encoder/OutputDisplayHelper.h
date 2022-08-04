@@ -28,6 +28,7 @@
 
 
 /***
+ * 视频录制帮助类，通过回调输出改频后的音频和oes纹理数据
  * in  视频-oes纹理处理，音频-pcm数据 OnAudioData
  *
  * out， receivePixelData 接受videorender渲染后的数据，  receiveSoundTouchData 接受soundtouch

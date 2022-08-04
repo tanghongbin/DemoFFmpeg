@@ -8,6 +8,9 @@
 #include "BaseRender.h"
 #define TEXTURE_NUM 4
 
+/***
+ * 播放器 render 普通渲染
+ */
 class VideoRender : public BaseVideoRender{
 private:
     GLuint textures[TEXTURE_NUM];

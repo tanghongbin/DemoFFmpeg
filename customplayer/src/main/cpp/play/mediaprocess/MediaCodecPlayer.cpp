@@ -13,7 +13,6 @@ MediaCodecPlayer* MediaCodecPlayer::instance = 0;
 
 MediaCodecPlayer::MediaCodecPlayer(){
     audioDecoder =  videoDecoder = specialEffortDecoder = 0;
-    specialEffortsVideoMuxer = 0;
 }
 
  
@@ -36,7 +35,7 @@ void MediaCodecPlayer::Init(){
 void MediaCodecPlayer::OnSurfaceCreated() {
     if (!videoDecoder) return;
     BaseDecoder* videoResult = videoDecoder;
-    auto *render = new VideoSpecialEffortsRender;
+    auto *render = new VideoRender;
     render->Init();
     videoResult->setVideoRender(render);
 }
@@ -109,15 +108,6 @@ void MediaCodecPlayer::ApplyEfforts(const char * url){
         delete specialEffortDecoder;
         specialEffortDecoder = 0;
     }
-    if (!specialEffortsVideoMuxer) {
-        specialEffortsVideoMuxer = SpecialEffortsVideoMuxer::getInstance();
-        auto *videoRender = dynamic_cast<VideoSpecialEffortsRender *>(videoDecoder->videoRender);
-        VideoConfigInfo *info = videoDecoder->getVideoConfigInfo();
-        info->width = videoRender->renderWidth;
-        info->height = videoRender->renderHeight;
-        specialEffortsVideoMuxer->setVideoConfigInfo(info);
-        specialEffortsVideoMuxer->init("");
-    }
     specialEffortDecoder = new HwVideoDecoder;
     specialEffortDecoder->setMediaType(2);
     specialEffortDecoder->setIfNeedRender(false);
@@ -136,32 +126,11 @@ void MediaCodecPlayer::ApplyEfforts(const char * url){
 void MediaCodecPlayer::call() {
     auto *videoRender = dynamic_cast<VideoSpecialEffortsRender *>(videoDecoder->videoRender);
     videoRender->destroySpecialEffortsImage();
-    if (specialEffortsVideoMuxer) {
-        SpecialEffortsVideoMuxer *muxer = specialEffortsVideoMuxer;
-        specialEffortsVideoMuxer = 0;
-        muxer->Stop();
-        muxer->Destroy();
-        delete muxer;
-    }
     LOGCATE("已经销毁特效");
 }
 
 void MediaCodecPlayer::readPixelResult(NativeOpenGLImage* data){
-    if (specialEffortsVideoMuxer) {
-        // 这里要转换一下
-        auto * dst = new uint8_t [data->width * data->height * 3/2];
-        yuvRgbaToI420(data->ppPlane[0],dst,data->width,data->height);
-        auto* dstImg = new NativeOpenGLImage ;
-        dstImg-> width = data->width;
-        dstImg-> height = data->height;
-        dstImg-> pLineSize[0] = data->width;
-        dstImg-> pLineSize[1] = data->width >> 1;
-        dstImg-> pLineSize[2] = data->width >> 1;
-        dstImg-> ppPlane[0] = dst;
-        dstImg-> ppPlane[1] = dst + data->width * data->height;
-        dstImg-> ppPlane[2] = dst + data->width * data->height * 5/4;
-        SpecialEffortsVideoMuxer::receiveOriginalAvData(2,dstImg,0);
-    }
+
 }
  
 void MediaCodecPlayer::receiveSpecialEffortsData(int type,AMediaCodecBufferInfo* info,uint8_t* data){

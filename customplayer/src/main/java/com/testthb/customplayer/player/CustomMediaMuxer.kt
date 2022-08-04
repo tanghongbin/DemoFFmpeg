@@ -12,5 +12,4 @@ open class CustomMediaMuxer : CustomMediaController() {
     override fun getPlayerType(): MediaConstantsEnum {
         return MediaConstantsEnum.NONE
     }
-
 }
