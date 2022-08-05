@@ -192,20 +192,22 @@ void VideoFboRender::DrawFrame() {
 }
 
 void VideoFboRender::readImagePixel() {
-    auto * openGlImage = new NativeOpenGLImage;
-    openGlImage->width = VIDEO_W;
-    openGlImage->height = VIDEO_H;
-    openGlImage->format = IMAGE_FORMAT_RGBA;
-    NativeOpenGLImageUtil::AllocNativeImage(openGlImage);
     int64_t startTime = GetSysCurrentTime();
-    glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, openGlImage->ppPlane[0]);
+    if (!outputImg) {
+        outputImg = new NativeOpenGLImage ;
+        outputImg->width = VIDEO_W;
+        outputImg->height = VIDEO_H;
+        outputImg->format = IMAGE_FORMAT_I420;
+        NativeOpenGLImageUtil::AllocNativeImage(outputImg);
+    }
+    glReadPixels(0, 0, VIDEO_W, VIDEO_H, GL_RGBA, GL_UNSIGNED_BYTE, outputImg->ppPlane[0]);
 //    LOGCATE("打印读取时间：%lld",GetSysCurrentTime() - startTime);
 //    glBindTexture(GL_TEXTURE_2D,testRgbaTextureId);
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIDEO_W, VIDEO_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
 //    glBindTexture(GL_TEXTURE_2D,0);
 //    delete [] rgbaData;
     // 测试读取显示
-    readPixelCall(3,openGlImage);
+    readPixelCall(3,outputImg);
 }
 
 void VideoFboRender::drawNormalImage() {
@@ -316,6 +318,12 @@ void VideoFboRender::Destroy() {
     glDeleteVertexArrays(2,vaoIds);
     glDeleteBuffers(2,pboIds);
     NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
+
+    if (outputImg) {
+        NativeOpenGLImageUtil::FreeNativeImage(outputImg);
+        delete outputImg;
+        outputImg = nullptr;
+    }
 }
 
 VideoFboRender::~VideoFboRender(){

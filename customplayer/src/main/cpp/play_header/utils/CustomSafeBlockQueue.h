@@ -71,6 +71,15 @@ public:
         return bean;
     }
 
+    /***
+     * 是否到达最大容量
+     * @return
+     */
+    bool isFull(){
+        std::unique_lock<std::mutex> lockGuard(tex);
+        return mQueue.size() >= maxSize;
+    }
+
     T getFirst() {
         std::unique_lock<std::mutex> uniqueLock(tex);
         if (mQueue.size() == 0) {
@@ -128,6 +137,15 @@ public:
         inCount++;
 //        LOGCATE("totalSize:%d max:%d",mQueue.size(),maxSize);
         return last;
+    }
+
+    /***
+     * 是否到达最大容量
+     * @return
+     */
+    bool isFull(){
+        std::unique_lock<std::mutex> lockGuard(tex);
+        return mQueue.size() >= maxSize;
     }
 
     T popFirst() {

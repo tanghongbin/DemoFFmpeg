@@ -32,6 +32,7 @@ public:
     AbsMediaMuxer(){
         callback = 0;
     }
+    virtual ~AbsMediaMuxer(){}
     virtual int init(const char * outFileName) = 0;
     virtual void Destroy() = 0;
     virtual void test(int type){

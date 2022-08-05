@@ -8,12 +8,12 @@ import com.testthb.common_base.utils.log
 import com.testthb.common_base.utils.runAsyncTask
 import com.testthb.customplayer.R
 import com.testthb.customplayer.camera.CameraHelpr
-import com.testthb.customplayer.player.CustomMediaMuxer
+import com.testthb.customplayer.player.CustomMediaRecorder
 import com.testthb.customplayer.player.MediaConstantsEnum
 import kotlinx.android.synthetic.main.activity_f_fmpeg_muxer.*
 
 class FFmpegMuxerActivity : AppCompatActivity(), SurfaceHolder.Callback {
-    private val mMuxer by lazy { object : CustomMediaMuxer(){
+    private val mMuxer by lazy { object : CustomMediaRecorder(){
         override fun getMuxerType(): MediaConstantsEnum {
             return MediaConstantsEnum.MUXER_RECORD_FFMPEG
         }

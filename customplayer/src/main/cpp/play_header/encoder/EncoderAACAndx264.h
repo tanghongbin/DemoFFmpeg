@@ -31,15 +31,8 @@ private:
     CustomSafeBlockQueue<AudioRecordItemInfo *>mAudioQueue;
 
 public:
-    EncoderAACAndx264() {
-        isRunning = true;
-        mEncodeThreadV = mEncodeThreadA =  0;
-        rtmpPushHelper = 0;
-        mVideoQueue.setMax(3);
-    }
-    ~EncoderAACAndx264() {
-
-    }
+    EncoderAACAndx264();
+    ~EncoderAACAndx264();
 
     void init();
     void destroy();

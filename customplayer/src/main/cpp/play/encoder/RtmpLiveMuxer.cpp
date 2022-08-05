@@ -42,6 +42,7 @@ int RtmpLiveMuxer::init(const char * fileName){
 
 void RtmpLiveMuxer::Start() {
     isStartEncode = true;
+    LOGCATE("start rtmp push");
 }
 
 void RtmpLiveMuxer::Stop() {
@@ -50,27 +51,17 @@ void RtmpLiveMuxer::Stop() {
 
 
 void RtmpLiveMuxer::receivePixelData(int type,NativeOpenGLImage *src){
-    if (!getInstance()->isStartEncode) {
-        NativeOpenGLImageUtil::FreeNativeImage(src);
-        delete src;
+    if (!getInstance()->isStartEncode || !getInstance()->mAvEncoder) {
         return;
     }
     getInstance() -> mAvEncoder->putVideoData(src);
 }
 
 void RtmpLiveMuxer::receiveAudioData(short *audioData, int length){
-    if (!getInstance() ->isStartEncode) return;
-    std::unique_lock<std::mutex> uniqueLock(RtmpLiveMuxer::getInstance() -> runningMutex,std::defer_lock);
-    uniqueLock.lock();
-    if (getInstance() ->isDestroyed){
-        uniqueLock.unlock();
+    if (!getInstance() ->isStartEncode || getInstance() ->isDestroyed || !getInstance()->mAvEncoder) {
         return;
     }
-    uniqueLock.unlock();
-
-    auto * data = new uint8_t [length];
-    memcpy(data,audioData,length);
-    getInstance() ->mAvEncoder->putAudioData(data, length);
+    getInstance() ->mAvEncoder->putAudioData(reinterpret_cast<uint8_t *>(audioData), length);
     // 处理数据
 }
 
@@ -86,15 +77,11 @@ void RtmpLiveMuxer::getInAvDataFunc(ReceiveAvOriginalData* data) {
 
 void RtmpLiveMuxer::Destroy(){
     // 清空所有缓存音频
-    std::unique_lock<std::mutex> uniqueLock(runningMutex,std::defer_lock);
-    uniqueLock.lock();
     isDestroyed = true;
-    uniqueLock.unlock();
     if (mAvEncoder){
         mAvEncoder->destroy();
         delete mAvEncoder;
     }
-    delete instance;
-    instance = 0;
+    instance = nullptr;
     LOGCATE("rtmplivemuxer destroy over");
 }

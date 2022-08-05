@@ -5,17 +5,18 @@ import android.graphics.SurfaceTexture
 import com.testthb.common_base.utils.log
 import com.testthb.customplayer.interfaces.OnDrawListener
 import com.testthb.customplayer.interfaces.OnOESTextureListener
-import com.testthb.customplayer.player.CustomMediaController
+import com.testthb.customplayer.player.CustomMediaRecorder
 import com.testthb.customplayer.util.camera2.Camera2FrameCallback
 import com.testthb.customplayer.util.camera2.Camera2Wrapper
 
 /***
  * 简化surfacetexture的生成与调用
  */
-class Camera2SurfaceHelper(context: Context,private val mMuxer: CustomMediaController) :
+class Camera2SurfaceHelper(context: Context,private val mMuxer: CustomMediaRecorder) :
     Camera2FrameCallback {
     private var mSurfaceTexture:SurfaceTexture? = null
     private val mCamera2Wrapper by lazy { Camera2Wrapper(context,this) }
+    private var isDestroyed = false
     fun init() {
         mMuxer.setOnOESTextureListener(object : OnOESTextureListener {
             override fun onTextureCall(textureId: Int) {
@@ -26,6 +27,7 @@ class Camera2SurfaceHelper(context: Context,private val mMuxer: CustomMediaContr
         })
         mMuxer.setOnDrawListener(object : OnDrawListener {
             override fun onDraw() {
+                if (isDestroyed) return
                 mSurfaceTexture?.updateTexImage()
                 val floatMatrix = FloatArray(16)
                 mSurfaceTexture?.getTransformMatrix(floatMatrix)
@@ -36,8 +38,13 @@ class Camera2SurfaceHelper(context: Context,private val mMuxer: CustomMediaContr
     }
 
     fun onDestroy(){
+        isDestroyed = true
         mCamera2Wrapper.stopCamera()
-        mSurfaceTexture?.release()
+    }
+
+    fun release(){
+//        mSurfaceTexture?.release()
+//        mSurfaceTexture = null
     }
 
     override fun onPreviewFrame(data: ByteArray?, width: Int, height: Int) {

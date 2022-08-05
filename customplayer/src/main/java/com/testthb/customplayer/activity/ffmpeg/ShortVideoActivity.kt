@@ -15,7 +15,7 @@ import com.testthb.customplayer.R
 import com.testthb.customplayer.bean.Speed
 import com.testthb.customplayer.bean.TabEntity
 import com.testthb.customplayer.interfaces.OnAvMergeListener
-import com.testthb.customplayer.player.CustomMediaMuxer
+import com.testthb.customplayer.player.CustomMediaRecorder
 import com.testthb.customplayer.player.MediaConstantsEnum
 import com.testthb.customplayer.util.TimerUtils
 import com.testthb.customplayer.util.camera2.Camera2FrameCallback
@@ -36,7 +36,7 @@ import kotlin.collections.set
  */
 class ShortVideoActivity : AppCompatActivity(), Camera2FrameCallback,
     TimerUtils.OnTimerUtilsListener {
-    private val mMuxer by lazy { object : CustomMediaMuxer() {
+    private val mMuxer by lazy { object : CustomMediaRecorder() {
         override fun getMuxerType(): MediaConstantsEnum {
             return MediaConstantsEnum.MUXER_SHORT_VIDEO
         }

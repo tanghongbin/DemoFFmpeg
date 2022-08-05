@@ -34,6 +34,8 @@
  * out， receivePixelData 接受videorender渲染后的数据，  receiveSoundTouchData 接受soundtouch
  * 处理后的数据
  *
+ * 约定 最后处理数据的一方进行拷贝，中间不做处理
+ *
  */
 class OutputDisplayHelper {
 private:

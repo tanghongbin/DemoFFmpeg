@@ -182,24 +182,15 @@ void VideoFboOESRender::drawFboTexture() {
 }
 
 void VideoFboOESRender::readYuvImagePixel() {
-    uint8_t *pBuffer = new uint8_t[VIDEO_W * VIDEO_H*3/2];
-
-    auto* nativeImage = new NativeOpenGLImage;
-    nativeImage->width = VIDEO_W;
-    nativeImage->height = VIDEO_H;
-    nativeImage->format = IMAGE_FORMAT_I420;
-    nativeImage->ppPlane[0] = pBuffer;
-    nativeImage->ppPlane[1] = pBuffer + nativeImage->width * nativeImage->height;
-    nativeImage->ppPlane[2] = nativeImage->ppPlane[1] + nativeImage->width * nativeImage->height / 4;
-    int64_t startTime = GetSysCurrentTime();
-    glReadPixels(0, 0, VIDEO_W/4, VIDEO_H*1.5, GL_RGBA, GL_UNSIGNED_BYTE, pBuffer);
-//    LOGCATE("读取花费时间:%lld ms",(GetSysCurrentTime() - startTime));
-    readPixelCall(3,nativeImage);
-//保存 I420 格式的 YUV 图片
-//    std::string path = "/storage/emulated/0/ffmpegtest/filterImg";
-//    NativeOpenGLImageUtil::DumpNativeImage(nativeImage, path.c_str(), "RGB2I420");
-//    NativeOpenGLImageUtil::FreeNativeImage(nativeImage);
-//    delete nativeImage;
+    if (!outputImg) {
+        outputImg = new NativeOpenGLImage ;
+        outputImg->width = VIDEO_W;
+        outputImg->height = VIDEO_H;
+        outputImg->format = IMAGE_FORMAT_I420;
+        NativeOpenGLImageUtil::AllocNativeImage(outputImg);
+    }
+    glReadPixels(0, 0, VIDEO_W/4, VIDEO_H*1.5, GL_RGBA, GL_UNSIGNED_BYTE, outputImg->ppPlane[0]);
+    readPixelCall(3,outputImg);
 }
 
 void VideoFboOESRender::readRgbaImagePixel() {
@@ -295,6 +286,11 @@ void VideoFboOESRender::Destroy() {
     glDeleteFramebuffers(1,&fboYuv420Id);
     glDeleteFramebuffers(1,&fboRgbaId);
     glDeleteVertexArrays(2,vaoIds);
+    if (outputImg) {
+        NativeOpenGLImageUtil::FreeNativeImage(outputImg);
+        delete outputImg;
+        outputImg = nullptr;
+    }
 //    NativeOpenGLImageUtil::FreeNativeImage(&nativeOpenGlImage);
 }
 

@@ -25,6 +25,7 @@ private:
     float* oesMatrix;
     Shader* rgbToYuvShader;
     Shader* rgbShader;
+    NativeOpenGLImage* outputImg;
 
 public:
      void Init();
@@ -37,6 +38,7 @@ public:
         oesMatrix = 0;
         rgbToYuvShader = rgbShader = 0;
         fboYuv420Id = fboRgbaTextureId = fboRgbaId = 0;
+        outputImg = 0;
     }
 
     void copyImage(NativeOpenGLImage *openGlImage){}

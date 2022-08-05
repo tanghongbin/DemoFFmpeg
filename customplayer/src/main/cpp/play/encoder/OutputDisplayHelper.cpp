@@ -40,11 +40,14 @@ void OutputDisplayHelper::setSpeed(float speed){
     soundTouchHelper->setSpeed(speed);
 }
 
+/***
+ * 最终处理数据的一方进行拷贝
+ * @param type
+ * @param srcData
+ */
 void OutputDisplayHelper::receivePixelData(int type,NativeOpenGLImage *srcData){
     // 3-rgba放进队列
     if (getInstance()->videoCall == nullptr) {
-        NativeOpenGLImageUtil::FreeNativeImage(srcData);
-        delete srcData;
         return;
     }
     getInstance()->videoCall(2,srcData);

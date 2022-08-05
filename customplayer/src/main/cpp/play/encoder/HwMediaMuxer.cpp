@@ -47,9 +47,6 @@ void HwMediaMuxer::receivePixelData(int type,NativeOpenGLImage *srcData){
     // glreadypixel 后转换成720分辨率的420p的画面,可以直接使用
     if (getInstace()->mediaCodecV) {
         getInstace()->mediaCodecV->putData(srcData);
-    } else {
-        NativeOpenGLImageUtil::FreeNativeImage(srcData);
-        delete srcData;
     }
 }
 
@@ -147,6 +144,5 @@ void HwMediaMuxer::Destroy(){
         mMuxerHelper->destroy();
         delete mMuxerHelper;
     }
-    delete instance;
     instance = 0;
 }

@@ -868,6 +868,5 @@ void FFmpegMediaMuxer::Destroy(){
             delete data;
         }
     }
-    delete instance;
     instance = 0;
 }

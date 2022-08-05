@@ -100,11 +100,15 @@ void MediaCodecVideo::destroy() {
     delete encodeThread;
 }
 
-void MediaCodecVideo::putData(NativeOpenGLImage* image) {
-    auto overItem = videoQueue.pushLast(image);
-    if (overItem) {
-        NativeOpenGLImageUtil::FreeNativeImage(overItem);
-        delete overItem;
+void MediaCodecVideo::putData(NativeOpenGLImage* src) {
+    if (!videoQueue.isFull()) {
+        auto* dstImg = new NativeOpenGLImage;
+        dstImg->width = src->width;
+        dstImg->height = src->height;
+        dstImg->format = src->format;
+        NativeOpenGLImageUtil::AllocNativeImage(dstImg);
+        NativeOpenGLImageUtil::CopyNativeImage(src,dstImg);
+        videoQueue.pushLast(dstImg);
     }
 }
 

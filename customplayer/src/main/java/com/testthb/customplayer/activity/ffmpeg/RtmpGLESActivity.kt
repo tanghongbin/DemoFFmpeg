@@ -7,7 +7,7 @@ import com.testthb.avutils.audio.recoder.AudioRecorder
 import com.testthb.common_base.utils.keepScreenOn
 import com.testthb.common_base.utils.runAsyncTask
 import com.testthb.customplayer.R
-import com.testthb.customplayer.player.CustomMediaMuxer
+import com.testthb.customplayer.player.CustomMediaRecorder
 import com.testthb.customplayer.player.MediaConstantsEnum
 import kotlinx.android.synthetic.main.activity_capture_video.*
 
@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.activity_capture_video.*
  * 用opengles 渲染camera数据,用x264 编码,用rtmp 推送流数据
  */
 class RtmpGLESActivity : AppCompatActivity(){
-    private val mMuxer by lazy { object : CustomMediaMuxer(){
+    private val mMuxer by lazy { object : CustomMediaRecorder(){
         override fun getMuxerType(): MediaConstantsEnum {
             return MediaConstantsEnum.MUXER_RTMP
         }
@@ -39,18 +39,18 @@ class RtmpGLESActivity : AppCompatActivity(){
         }
         mGLESMuxerSurface.init(mMuxer,true)
         cameraSurfaceHelper.init()
-        runAsyncTask({
-            val liveRtmpUrl = "rtmp://1.14.99.52:1935/live/windowsPush"
-            mAudioRecorder.startCapture()
-            mMuxer.native_configAudioParams(AudioConfiguration.DEFAULT_FREQUENCY,AudioConfiguration.DEFAULT_CHANNEL_COUNT)
-            mMuxer.native_initEncode(liveRtmpUrl)
-        })
+
+        val liveRtmpUrl = "rtmp://1.14.99.52:1935/live/windowsPush"
+        mAudioRecorder.startCapture()
+        mMuxer.native_configAudioParams(AudioConfiguration.DEFAULT_FREQUENCY,AudioConfiguration.DEFAULT_CHANNEL_COUNT)
+        mMuxer.native_initEncode(liveRtmpUrl)
     }
 
     override fun onDestroy() {
         mAudioRecorder.stopCapture()
         cameraSurfaceHelper.onDestroy()
         mMuxer.destroy()
+        cameraSurfaceHelper.release()
         super.onDestroy()
     }
 

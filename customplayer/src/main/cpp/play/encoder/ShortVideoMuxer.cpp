@@ -132,7 +132,6 @@ void ShortVideoMuxer::Destroy(){
     if (isStarted) {
         Stop();
     }
-    delete instance;
     instance = 0;
 }
 

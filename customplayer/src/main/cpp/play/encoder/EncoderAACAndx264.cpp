@@ -14,6 +14,15 @@
 #define FAAC_DEFAUTE_SAMPLE_CHANNEL 2
 
 
+ EncoderAACAndx264::EncoderAACAndx264(){
+     isRunning = true;
+     mEncodeThreadV = mEncodeThreadA =  0;
+     rtmpPushHelper = 0;
+     mVideoQueue.setMax(3);
+}
+
+EncoderAACAndx264::~EncoderAACAndx264()= default;
+
 void EncoderAACAndx264::init(){
     rtmpPushHelper = new RtmpPushHelper();
     rtmpPushHelper->initPush();
@@ -60,7 +69,7 @@ void EncoderAACAndx264::loopEncodeAudio(EncoderAACAndx264* instance){
     LoopAudioEnd:
     faacEncClose(faacHandle);
     delete [] outputAudioBuffer;
-
+    LOGCATE("encode audio is over");
 }
 
 
@@ -159,6 +168,7 @@ void EncoderAACAndx264::loopEncodeVideo(EncoderAACAndx264* instance){
     if (pic_in) {
         x264_picture_clean(pic_in);
     }
+    LOGCATE("encode video is over");
 }
 
 void EncoderAACAndx264::destroy(){
@@ -189,17 +199,31 @@ void EncoderAACAndx264::destroy(){
         delete rtmpPushHelper;
         rtmpPushHelper = nullptr;
     }
+    LOGCATE("encode all has over");
 }
 
-void EncoderAACAndx264::putVideoData(NativeOpenGLImage* data){
-    if (!isRunning) return;
-    mVideoQueue.pushLast(data);
+void EncoderAACAndx264::putVideoData(NativeOpenGLImage* src){
+    if (!isRunning || mVideoQueue.isFull()) {
+        return;
+    }
+    auto* dstImg = new NativeOpenGLImage;
+    dstImg->width = src->width;
+    dstImg->height = src->height;
+    dstImg->format = src->format;
+    NativeOpenGLImageUtil::AllocNativeImage(dstImg);
+    NativeOpenGLImageUtil::CopyNativeImage(src,dstImg);
+    mVideoQueue.pushLast(dstImg);
 }
 
-void EncoderAACAndx264::putAudioData(uint8_t *data, jint len) {
-    if (!isRunning) return;
+void EncoderAACAndx264::putAudioData(uint8_t *srcData, jint len) {
+    if (!isRunning) {
+        return;
+    }
+    auto * dstData = new uint8_t [len];
+    memcpy(dstData,srcData,len);
+
     auto* item = new AudioRecordItemInfo;
-    item->data = data;
+    item->data = dstData;
     item->nb_samples = len;
     mAudioQueue.pushLast(item);
 //    LOGCATE("audio item has putted into packet");

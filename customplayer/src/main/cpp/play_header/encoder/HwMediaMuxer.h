@@ -63,6 +63,7 @@ public:
         }
         return instance;
     }
+
     void OnAudioData(uint8_t *audioData, int length);
 };
 

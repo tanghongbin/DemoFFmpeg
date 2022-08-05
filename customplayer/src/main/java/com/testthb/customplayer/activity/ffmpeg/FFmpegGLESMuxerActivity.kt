@@ -9,14 +9,14 @@ import com.testthb.common_base.utils.log
 import com.testthb.common_base.utils.runAsyncTask
 import com.testthb.customplayer.R
 import com.testthb.customplayer.interfaces.OnErrorListener
-import com.testthb.customplayer.player.CustomMediaMuxer
+import com.testthb.customplayer.player.CustomMediaRecorder
 import kotlinx.android.synthetic.main.activity_capture_video.*
 
 /**
  * 用opengles 渲染camera数据
  */
 class FFmpegGLESMuxerActivity : AppCompatActivity(){
-    private val mMuxer by lazy { CustomMediaMuxer() }
+    private val mMuxer by lazy { CustomMediaRecorder() }
     private val cameraSurfaceHelper by lazy { Camera2SurfaceHelper(this,mMuxer) }
     private val mAudioRecorder by lazy { AudioRecorder() }
     private var isStart = false

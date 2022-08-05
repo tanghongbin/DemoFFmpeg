@@ -23,7 +23,7 @@
 #include <utils/NativeMediaConstant.h>
 
 //com.testthb.customplayer.player
-#define _NATIVE_PLAYER_CLASS "com/testthb/customplayer/player/CustomMediaController"
+#define _NATIVE_MUXER_CLASS "com/testthb/customplayer/player/CustomMediaRecorder"
 
 
 #ifdef __cplusplus
@@ -33,11 +33,6 @@ extern "C" {
 #endif
 
 #include <libavcodec/jni.h>
-
-JNIEXPORT jstring JNICALL nativeGetInfo(JNIEnv *env, jobject instance) {
-    MsgLoopHelper::sendMsg(Message::obtain(5,2,3));
-    return env->NewStringUTF("你好吗，朋友");
-}
 
 OutputDisplayHelper* getJniOutputHelperFromJava(){
     jlong result = getJniPointFromJava("mNativeOutputHelper");
@@ -50,9 +45,6 @@ OutputDisplayHelper* getJniOutputHelperFromJava(){
  */
 
 JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL) mediaPlayer->OnSurfaceCreated();
-
     auto *outputDisplayHelper = getJniOutputHelperFromJava();
     if (outputDisplayHelper) {
         outputDisplayHelper->OnSurfaceCreate();
@@ -60,9 +52,6 @@ JNIEXPORT void JNICALL native_OnSurfaceCreated(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jint oretenation,jint width,jint height) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer) mediaPlayer->OnSurfaceChanged(oretenation,width,height);
-
     auto *outputDisplayHelper = getJniOutputHelperFromJava();
     if (outputDisplayHelper) {
         outputDisplayHelper->OnSurfaceChanged(width,height);
@@ -70,9 +59,6 @@ JNIEXPORT void JNICALL native_OnSurfaceChanged(JNIEnv *env, jobject instance,jin
 }
 
 JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL) mediaPlayer->OnDrawFrame();
-
     auto *outputDisplayHelper = getJniOutputHelperFromJava();
     if (outputDisplayHelper) {
         outputDisplayHelper->OnDrawFrame();
@@ -80,12 +66,6 @@ JNIEXPORT void JNICALL native_OnDrawFrame(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer) {
-        setJniPointToJava(env,"mNativePlayer","J", nullptr);
-        mediaPlayer->Destroy();
-        delete mediaPlayer;
-    }
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer){
         setJniPointToJava(env,"mNativeMuxer","J", nullptr);
@@ -97,62 +77,9 @@ JNIEXPORT void JNICALL native_OnDestroy(JNIEnv *env, jobject instance) {
         setJniPointToJava(env,"mNativeOutputHelper","J", nullptr);
         delete outputDisplayHelper;
     }
-
     JavaVmManager::destroyInstance(env);
     MsgLoopHelper::destroyInstance();
-}
-
-JNIEXPORT void JNICALL native_init_player(JNIEnv *env, jobject instance,jint playerType) {
-    JavaVmManager::setInstance(env,instance);
-    MsgLoopHelper::initMsgLoop();
-    AbsCustomMediaPlayer *mediaPlayer;
-    if (playerType == PLAYER_FFMPEG) {
-        mediaPlayer = new FFmpegMediaPlayer;
-    } else {
-        mediaPlayer = MediaCodecPlayer::getInstance();
-    }
-    setJniPointToJava(env,"mNativePlayer","J", mediaPlayer);
-    mediaPlayer->Init();
-}
-
-
-JNIEXPORT void JNICALL native_prepare(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    LOGCATE("native_prepare:%p",mediaPlayer);
-    if (mediaPlayer == NULL) return;
-    mediaPlayer->Prepare();
-}
-
-JNIEXPORT void JNICALL native_start(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer == NULL) return;
-    mediaPlayer->Start();
-}
-
-JNIEXPORT void JNICALL native_stop(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer == NULL) return;
-    mediaPlayer->Stop();
-}
-
-JNIEXPORT void JNICALL native_resetPlay(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer == NULL) return;
-    mediaPlayer->Reset();
-}
-
-
-
-JNIEXPORT void JNICALL native_seekTo(JNIEnv *env, jobject instance,jint seekProgress) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer == NULL) return;
-    mediaPlayer->SeekTo(seekProgress);
-}
-
-JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring url) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL)
-        mediaPlayer->SetDataUrl(getCharStrFromJstring(env,url));
+    LOGCATE("native_OnDestroy destroy all");
 }
 
 /****
@@ -166,9 +93,17 @@ JNIEXPORT void JNICALL native_setDataUrl(JNIEnv *env, jobject instance,jstring u
  * @param type  11-ffmpeg 编码，12- 硬编码 , 13 - 直播推流 , 14- 短视频录制
  */
 JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type) {
+    JavaVmManager::initVm(env);
     JavaVmManager::setInstance(env,instance);
+    if (av_jni_set_java_vm(JavaVmManager::getJavaVM(), NULL) < 0) {
+        LOGCATE("get javavm error");
+    }
+    if (ENABLE_FFMPEG_LOG) {
+        LOGCATE("system log has been init");
+        sys_log_init();
+    }
     MsgLoopHelper::initMsgLoop();
-    AbsMediaMuxer *mediaMuxer;
+    AbsMediaMuxer *mediaMuxer = nullptr;
     if (type == MUXER_RECORD_FFMPEG) {
         mediaMuxer = FFmpegMediaMuxer::getInstace();
     } else if (type == MUXER_RECORD_HW) {
@@ -187,7 +122,7 @@ JNIEXPORT void JNICALL native_init_muxer(JNIEnv *env, jobject instance,jint type
 
 JNIEXPORT void JNICALL native_initEncode(JNIEnv *env, jobject instance, jstring path) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer == NULL) return;
+    if (mediaMuxer == nullptr) return;
     const char* resultPath = getCharStrFromJstring(env,path);
     ReceiveAvOriginalData receiveAvOriginalData;
     receiveAvOriginalData.audioCall = nullptr;
@@ -196,18 +131,19 @@ JNIEXPORT void JNICALL native_initEncode(JNIEnv *env, jobject instance, jstring 
     OutputDisplayHelper::getInstance()->setOutputAudioListener(receiveAvOriginalData.audioCall);
     OutputDisplayHelper::getInstance()->setOutputVideoListener(receiveAvOriginalData.videoCall);
     mediaMuxer->init(resultPath);
+    LOGCATE(" init native_initEncode");
 }
 
 
 JNIEXPORT void JNICALL native_startEncode(JNIEnv *env, jobject instance) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer == NULL) return;
+    if (mediaMuxer == nullptr) return;
     mediaMuxer->Start();
 }
 
 JNIEXPORT void JNICALL native_stopEncode(JNIEnv *env, jobject instance) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
-    if (mediaMuxer == NULL) return;
+    if (mediaMuxer == nullptr) return;
     mediaMuxer->Stop();
 }
 
@@ -264,6 +200,7 @@ JNIEXPORT void JNICALL native_configAudioParams(JNIEnv *env, jobject instance,ji
     mediaMuxer->configAudioPrams(sampleHz,channels);
 }
 
+
 JNIEXPORT void JNICALL native_setSpeed(JNIEnv *env, jobject instance,jdouble speed) {
     AbsMediaMuxer *mediaMuxer = getJniMuxerFromJava();
     if (mediaMuxer) {
@@ -277,21 +214,6 @@ JNIEXPORT void JNICALL native_setSpeed(JNIEnv *env, jobject instance,jdouble spe
 }
 
 
-JNIEXPORT void JNICALL native_replay(JNIEnv *env, jobject instance) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL)
-        mediaPlayer->Replay();
-}
-
-
-JNIEXPORT void JNICALL native_applyEfforts(JNIEnv *env, jobject instance,jstring url) {
-    AbsCustomMediaPlayer *mediaPlayer = getJniPlayerFromJava();
-    if (mediaPlayer != NULL)
-        mediaPlayer->ApplyEfforts(getCharStrFromJstring(env,url));
-}
-
-
-
 
 
 /***
@@ -299,20 +221,11 @@ JNIEXPORT void JNICALL native_applyEfforts(JNIEnv *env, jobject instance,jstring
  */
 
 static JNINativeMethod g_RenderMethods[] = {
-        {"nativeGetInfo",               "()Ljava/lang/String;",            (void *) (nativeGetInfo)},
         {"native_OnSurfaceCreated",               "()V",            (void *) (native_OnSurfaceCreated)},
         {"native_OnSurfaceChanged",               "(III)V",            (void *) (native_OnSurfaceChanged)},
         {"native_OnDrawFrame",               "()V",            (void *) (native_OnDrawFrame)},
         {"native_OnDestroy",               "()V",            (void *) (native_OnDestroy)},
-
-        {"native_init_player",               "(I)V",            (void *) (native_init_player)},
         {"native_init_muxer",               "(I)V",            (void *) (native_init_muxer)},
-        {"native_prepare",               "()V",            (void *) (native_prepare)},
-        {"native_start",               "()V",            (void *) (native_start)},
-        {"native_stop",               "()V",            (void *) (native_stop)},
-        {"native_resetPlay",               "()V",            (void *) (native_resetPlay)},
-        {"native_seekTo",               "(I)V",            (void *) (native_seekTo)},
-        {"native_setDataUrl",               "(Ljava/lang/String;)V",            (void *) (native_setDataUrl)},
 
         {"native_initEncode",               "(Ljava/lang/String;)V",            (void *) (native_initEncode)},
         {"native_stopEncode",               "()V",            (void *) (native_stopEncode)},
@@ -322,9 +235,6 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_updateMatrix",               "([F)V",            (void *) (native_updateMatrix)},
         {"native_configAudioParams",               "(II)V",            (void *) (native_configAudioParams)},
         {"native_setSpeed",               "(D)V",            (void *) (native_setSpeed)},
-        {"native_replay",               "()V",            (void *) (native_replay)},
-        {"native_applyEfforts",               "(Ljava/lang/String;)V",            (void *) (native_applyEfforts)},
-
 
 
 };
@@ -363,19 +273,11 @@ extern "C" jint JNI_OnLoad(JavaVM *jvm, void *p) {
     }
 
 
-    jint regRet = RegisterNativeMethods(env, _NATIVE_PLAYER_CLASS, g_RenderMethods,
+    jint regRet = RegisterNativeMethods(env, _NATIVE_MUXER_CLASS, g_RenderMethods,
                                         sizeof(g_RenderMethods) /
                                         sizeof(g_RenderMethods[0]));
     if (regRet != JNI_TRUE) {
         return JNI_ERR;
-    }
-    JavaVmManager::initVm(env);
-    if (av_jni_set_java_vm(jvm, NULL) < 0) {
-        return JNI_ERR;
-    }
-    if (ENABLE_FFMPEG_LOG) {
-        LOGCATE("system log has been init");
-        sys_log_init();
     }
     return JNI_VERSION_1_6;
 }
@@ -386,7 +288,7 @@ extern "C" void JNI_OnUnload(JavaVM *jvm, void *p) {
     if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
         return;
     }
-    UnregisterNativeMethods(env, _NATIVE_PLAYER_CLASS);
+    UnregisterNativeMethods(env, _NATIVE_MUXER_CLASS);
 }
 
 #ifdef __cplusplus

@@ -39,7 +39,7 @@ private:
     bool renderIsFinish = false;
     int renderWidth,renderHeight,u_offset;
     float x_test_offset;
-
+    NativeOpenGLImage* outputImg;
 
 public:
     NativeOpenGLImage nativeOpenGlImage;
@@ -54,6 +54,7 @@ public:
         fboId = fboTextureId = lutTextureId = logoTextureId  = 0;
         u_offset = 0;
         x_test_offset = 0;
+        outputImg = 0;
     }
 
     void drawNormalImage();
