@@ -25,7 +25,7 @@ void BaseFFmpegDecoder::Init(const char * url){
         audioRender->Init();
     }
     mUrl = url;
-    readThread = new std::thread(BaseFFmpegDecoder::createReadThread, this);
+    readThread = new std::thread(&BaseFFmpegDecoder::createReadThread, this);
 }
 
 void BaseFFmpegDecoder::resolveConvertResult(void * decoder, void * data, int size){

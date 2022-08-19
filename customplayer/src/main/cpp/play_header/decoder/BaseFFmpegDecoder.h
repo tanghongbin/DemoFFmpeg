@@ -21,7 +21,7 @@ extern "C" {
  */
 class BaseFFmpegDecoder : public BaseDecoder{
 private:
-    static void createReadThread(BaseFFmpegDecoder* baseDecoder);
+    void createReadThread(BaseFFmpegDecoder* baseDecoder);
 
     std::thread* readThread;
     const char * mUrl;

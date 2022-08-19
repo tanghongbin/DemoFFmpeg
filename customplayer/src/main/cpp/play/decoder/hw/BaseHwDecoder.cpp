@@ -81,11 +81,11 @@ void BaseHwDecoder::Init(const char * url) {
         }
         // 视音频发送时长
         if (appointMediaType == 1 && startWith(result.c_str(),"audio")) {
-            int64_t duration;
-            AMediaFormat_getInt64(trackFormat,AMEDIAFORMAT_KEY_DURATION,&duration);
-            duration = duration / 1000 / 1000;
-            MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_DURATION,0,(int)duration));
-            LOGCATE("打印视频时长：%d",(int)duration);
+            int64_t duration64;
+            AMediaFormat_getInt64(trackFormat,AMEDIAFORMAT_KEY_DURATION,&duration64);
+            int durationInt = duration64 / 1000 / 1000;
+            MsgLoopHelper::sendMsg(Message::obtain(JNI_COMMUNICATE_TYPE_DURATION,0,durationInt));
+            LOGCATE("打印视频时长：%d  int64:%lld", durationInt,duration64);
         } else if (appointMediaType == 2 && startWith(result.c_str(),"video")) {
             if (!videoConfigInfo) {
                 videoConfigInfo = new VideoConfigInfo ;
@@ -251,10 +251,10 @@ void BaseHwDecoder::createDecoderThread(const char * url){
         std::unique_lock<std::mutex> progressLock(mPauseMutex,std::defer_lock);
         if (progressLock.try_lock()){
             if (seekProgress != -1){
-                LOGCATE("seekto ");
-                media_status_t seekStatus = AMediaExtractor_seekTo(mMediaExtractor,
-                                                                   seekProgress * 1000L * 1000L,
-                                                                   AMEDIAEXTRACTOR_SEEK_PREVIOUS_SYNC);
+                int64_t seekResult = (int64_t)seekProgress * 1000L * 1000L;
+//                LOGCATE("seekto %d   int64:%lld,seekProgress,seekResult);
+                media_status_t seekStatus = AMediaExtractor_seekTo(mMediaExtractor,seekResult,
+                                                                   AMEDIAEXTRACTOR_SEEK_CLOSEST_SYNC);
                 if (seekStatus == AMEDIA_OK) {
                     AMediaCodec_flush(mMediaCodec);
                     timeSyncHelper->resetTime();
@@ -275,6 +275,7 @@ void BaseHwDecoder::createDecoderThread(const char * url){
             if (inputBufferSize > 0) {
                 int64_t sampleTime = AMediaExtractor_getSampleTime(mMediaExtractor);
                 AMediaCodec_queueInputBuffer(mMediaCodec,inIndex,0,inputBufferSize,sampleTime,0);
+//                LOGCATE("打印sampletime：%lld  ",sampleTime);
             } else {
                 continue;
             }
@@ -347,6 +348,10 @@ void BaseHwDecoder::createDecoderThread(const char * url){
     }
     LOGCATE("create thread has over ");
 }
+
+BaseHwDecoder::~BaseHwDecoder(){
+
+};
 
 void BaseHwDecoder::OnSizeReady() {
     if (mWindowWidth == 0 || mWindowHeight == 0 || videoRender == nullptr ||

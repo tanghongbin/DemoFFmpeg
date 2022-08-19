@@ -1,0 +1,10 @@
+syntax = "proto3";
+package tutorial;
+import "google/protobuf/timestamp.proto";
+message AddressBook{
+  string name = 1;
+  int32 id = 2;
+  string desc = 3;
+  int64 order = 4;
+  double price = 5;
+}

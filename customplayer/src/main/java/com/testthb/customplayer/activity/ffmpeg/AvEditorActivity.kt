@@ -20,6 +20,7 @@ import com.testthb.customplayer.util.CustomFFmpegCmdUtils
 import com.testthb.customplayer.util.getRamdowVideoPath
 import com.testthb.customplayer.util.runFFmpegCommand
 import kotlinx.android.synthetic.main.activity_player_detail.*
+import tutorial.AddressBookOuterClass
 import java.io.File
 import kotlin.random.Random
 
@@ -29,7 +30,7 @@ import kotlin.random.Random
 class AvEditorActivity : AppCompatActivity(){
     private val mUrl by lazy {
         intent.getStringExtra("url") ?: ""
-//        Constants.MP4_PLAY_PATH
+//        Constants.MP4_PLAY_PATH00
     }
     private var isPlaying = true
     private val mPlayer by lazy { CustomMediaPlayer() }
@@ -38,6 +39,9 @@ class AvEditorActivity : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player_detail)
         mGLSurface.init(mPlayer)
+        AddressBookOuterClass.AddressBook.newBuilder()
+            .setPrice(1.0)
+            .build()
         button.setOnClickListener {
             var oreration = requestedOrientation
             if (oreration == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ||
@@ -94,6 +98,7 @@ class AvEditorActivity : AppCompatActivity(){
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                log("打印progress:${seekBar?.progress}")
                 mPlayer.native_seekTo(seekBar?.progress ?: 0)
             }
 

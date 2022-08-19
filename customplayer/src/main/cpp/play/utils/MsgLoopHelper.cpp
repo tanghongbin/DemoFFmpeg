@@ -26,14 +26,12 @@ void MsgLoopHelper::prepareMsgLoop(MsgLoopHelper* player){
 //            env->CallStaticVoidMethod()
             }
         } else {
-            LOGCATE("send msg error because evn is null");
         }
         if (isAttach){
             JavaVmManager::detachCurrentThread();
         }
         message->recycle();
     }
-    LOGCATE("loop msg has end");
 }
 void MsgLoopHelper::initMsgLoop(){
     if (getInstance()->msgThread == nullptr) getInstance()->msgThread = new std::thread(prepareMsgLoop,getInstance());
@@ -43,14 +41,12 @@ void MsgLoopHelper::sendMsg(Message *msg){
     getInstance()->safeQueue.pushLast(msg);
 }
 
-void MsgLoopHelper::destroyMsgLoop(){
+void MsgLoopHelper::stopLoop(){
     isLoop = false;
     safeQueue.pushLast(nullptr);
     if (msgThread) {
         msgThread->join();
         delete msgThread;
+        msgThread = nullptr;
     }
-    msgThread = nullptr;
-    if (instance) delete instance;
-    instance = nullptr;
 }

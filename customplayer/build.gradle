@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.protobuf'
 
 android {
     //构建版本
@@ -85,8 +86,15 @@ android {
     sourceSets {
         main {
             jniLibs.srcDirs = ['libs']
+            proto {
+                srcDir 'src/main/proto'
+                include '*.proto'
+            }
         }
     }
+
+
+
 }
 
 dependencies {
@@ -102,6 +110,32 @@ dependencies {
     implementation 'com.tencent.bugly:crashreport:latest.release'
     implementation 'com.google.android.material:material:1.4.0'
     implementation "io.reactivex.rxjava3:rxjava:3.1.5"
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如4.0.3
+    implementation "com.google.protobuf:protobuf-java:3.5.1"
+    implementation 'com.google.protobuf:protoc:3.5.1'
+//    api 'com.google.protobuf:protobuf-java-util:3.5.1'
+}
 
+
+//构建task
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.5.1'
+    }
+
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                remove java
+            }
+            task.builtins {
+                java {}
+                // Add cpp output without any option.
+                // DO NOT omit the braces if you want this builtin to be added.
+            }
+        }
+    }
+    //生成目录
+    generatedFilesBaseDir = "$projectDir/src/generated"
 }

@@ -50,6 +50,7 @@ protected:
     std::mutex audioPtsMutex;
     BaseDataCoverter * createConverter() {};
 public:
+    virtual ~BaseHwDecoder();
     int mVideoHeight,mVideoWidth;
     void setOutputDataListener(OutputDataListener listener){
         this->outputDataListener = listener;

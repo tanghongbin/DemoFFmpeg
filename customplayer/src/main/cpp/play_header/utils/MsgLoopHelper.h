@@ -19,7 +19,7 @@ private:
 
     static void prepareMsgLoop(MsgLoopHelper* player);
 
-    void destroyMsgLoop();
+    void stopLoop();
 
     static MsgLoopHelper* getInstance(){
         if (instance == nullptr) instance = new MsgLoopHelper;
@@ -36,7 +36,7 @@ private:
 public:
     static void destroyInstance(){
         if (instance == nullptr) return;
-        getInstance()->destroyMsgLoop();
+        getInstance()->stopLoop();
         delete instance;
         instance = nullptr;
     }

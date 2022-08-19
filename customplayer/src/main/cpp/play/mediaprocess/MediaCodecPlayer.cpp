@@ -42,10 +42,8 @@ void MediaCodecPlayer::OnSurfaceCreated() {
 
 void MediaCodecPlayer::OnSurfaceChanged(int oretation,int width, int height)  {
     if (!videoDecoder) return;
-    if (videoDecoder) {
-        auto* videoResult = dynamic_cast<BaseHwDecoder *>(videoDecoder);
-        videoResult->OnSurfaceChanged(oretation,width,height);
-    }
+    auto* videoResult = dynamic_cast<BaseHwDecoder *>(videoDecoder);
+    videoResult->OnSurfaceChanged(oretation,width,height);
     std::unique_lock<std::mutex> uniqueLock(videoDecoder->mCreateSurfaceMutex);
     videoDecoder->mSurfaceCondition.notify_one();
     uniqueLock.unlock();
