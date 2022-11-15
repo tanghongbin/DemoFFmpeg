@@ -36,6 +36,7 @@ public:
     void ApplyEfforts(const char * url);
     void call();
     void readPixelResult(NativeOpenGLImage* data);
+    void test(void (MediaCodecPlayer::*nonstatic)());
 };
 
 #endif //DEMOFFMPEG_MEDIACODECMEDIAPLAYER_H

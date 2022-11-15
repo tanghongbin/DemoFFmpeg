@@ -23,6 +23,10 @@ MediaCodecPlayer* MediaCodecPlayer::getInstance(){
     return instance;
 }
 
+void MediaCodecPlayer::test(void (MediaCodecPlayer::*nonstatic)()){
+    (this->*nonstatic)();
+}
+
 void MediaCodecPlayer::Init(){
     audioDecoder = HwAudioDecoder::getInstance();
     audioDecoder->setReadyCall(prepareReady);
