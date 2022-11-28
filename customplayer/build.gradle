@@ -45,6 +45,7 @@ android {
             pickFirst '**/libopencv_java3.so'
             pickFirst '**/libcurl.so'
             pickFirst '**/libMathFunctions.so'
+            pickFirst '**/libopus.so'
         }
 
         ndk {
@@ -115,6 +116,15 @@ dependencies {
     implementation "com.google.protobuf:protobuf-java:3.5.1"
     implementation 'com.google.protobuf:protoc:3.5.1'
 //    api 'com.google.protobuf:protobuf-java-util:3.5.1'
+    // camerax
+    def camerax_version = "1.1.0-beta01"
+    implementation "androidx.camera:camera-core:${camerax_version}"
+    implementation "androidx.camera:camera-camera2:${camerax_version}"
+    implementation "androidx.camera:camera-lifecycle:${camerax_version}"
+    implementation "androidx.camera:camera-video:${camerax_version}"
+
+    implementation "androidx.camera:camera-view:${camerax_version}"
+    implementation "androidx.camera:camera-extensions:${camerax_version}"
 }
 
 

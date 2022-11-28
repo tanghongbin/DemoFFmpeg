@@ -6,6 +6,7 @@ set(jnilibs ${CMAKE_SOURCE_DIR}/../../../libs)
 # ffmpegrender player render
 set(libPlayer native-player)
 set(libMuxer native-mediamuxer)
+set(libOpus native-opus)
 #语音编码器
 set(faac ${CMAKE_SOURCE_DIR}/faac)
 
@@ -37,6 +38,21 @@ file(GLOB player-srcfiles
 
 file(GLOB muxer-srcfiles
         ${CMAKE_SOURCE_DIR}/${libMuxer}.cpp
+        ${CMAKE_SOURCE_DIR}/play/render/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/mediaprocess/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/utils/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/decoder/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/encoder/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/encoder/hw/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/decoder/hw/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/rtmp/*.cpp
+        ${CMAKE_SOURCE_DIR}/play_header/media/*.cpp
+        ${CMAKE_SOURCE_DIR}/include/soundtouch/source/*.cpp
+        ${CMAKE_SOURCE_DIR}/include/ffmpegcommand/*.c)
+
+file(GLOB opus-srcfiles
+        ${CMAKE_SOURCE_DIR}/${libOpus}.cpp
+        ${CMAKE_SOURCE_DIR}/play/opus_util/*.cpp
         ${CMAKE_SOURCE_DIR}/play/render/*.cpp
         ${CMAKE_SOURCE_DIR}/play/mediaprocess/*.cpp
         ${CMAKE_SOURCE_DIR}/play/utils/*.cpp
@@ -100,6 +116,8 @@ add_library(testMath SHARED IMPORTED )
 set_target_properties(testMath PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libMathFunctions.so)
 add_library(x264 SHARED IMPORTED )
 set_target_properties(x264 PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libx264.so)
+add_library(opus SHARED IMPORTED )
+set_target_properties(opus PROPERTIES IMPORTED_LOCATION ${jnilibs}/${ANDROID_ABI}/libopus.so)
 
 #静态库
 add_library(rtmp STATIC IMPORTED )
@@ -119,6 +137,7 @@ set(third-party-libs
         swscale
         mp3
         x264
+        opus
         libyuv
         ass
         crypto
@@ -142,6 +161,7 @@ find_library(OpenSLES-lib OpenSLES)
 
 find_library(media mediandk)
 
+###############   播放器  #######################
 add_library( # Sets the name of the library.
         ${libPlayer}
 
@@ -163,6 +183,8 @@ target_link_libraries(${libPlayer}
         GLESv3
         GLESv2)
 
+
+###############   混合器  #######################
 add_library( # Sets the name of the library.
         ${libMuxer}
 
@@ -185,3 +207,24 @@ target_link_libraries(${libMuxer}
         GLESv2)
 
 
+###############   opus  #######################
+add_library( # Sets the name of the library.
+        ${libOpus}
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        ${opus-srcfiles})
+
+target_link_libraries(${libOpus}
+        ${OpenSLES-lib}
+        ${log-lib}
+        ${third-party-libs}
+        #        ${third-party-libs-simple}
+        ${media}
+        OpenMAXAL
+        EGL
+        android
+        GLESv3
+        GLESv2)

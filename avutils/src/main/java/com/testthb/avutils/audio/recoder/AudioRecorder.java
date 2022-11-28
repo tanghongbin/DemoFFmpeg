@@ -17,7 +17,7 @@ import android.util.Log;
 
 public class AudioRecorder {
 
-    private static final String TAG = "AudioRecorder";
+    private static final String TAG = "AudioDemo-JNI";
 
     private AudioRecord mAudioRecord;
 

@@ -187,6 +187,23 @@ static AbsMediaMuxer* getJniMuxerFromJava(){
     return reinterpret_cast<AbsMediaMuxer *>(result);
 }
 
+static void uInt8ToUInt16(uint8_t* srcData,uint16_t* dstData,int uInt16Size){
+    //uint8_t 转 uint16_t
+    for (int i = 0; i < uInt16Size; i++) {
+        dstData[i] = srcData[i * 2] | (srcData[i * 2 + 1] << 8);
+    }
+//    LOGCATE("log int8to16 size:%d",uInt16Size);
+}
+
+static void uInt16ToUInt8(uint16_t* srcData,uint8_t* dstData,int uInt16Size){
+    //uint16_t 转 uint8_t
+    for (int i = 0; i < uInt16Size; i++) {
+        dstData[i * 2] = srcData[i];
+        dstData[i * 2 + 1] = srcData[i] >> 8;
+        //%c
+//        LOGI("dec_data1 :%d dec_data2 :%d", nsrc_data[i * 2], nsrc_data[i * 2 + 1]);
+    }
+}
 
 static void setBool(GLuint programId, const std::string &name, bool value) {
     glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);
@@ -239,5 +256,7 @@ static void setMat4(GLuint programId, const std::string &name, const glm::mat4 &
 static glm::vec3 texCoordToVertexCoord(glm::vec2 texCoord) {
     return glm::vec3(2 * texCoord.x - 1, 1 - 2 * texCoord.y, 0);
 }
+
+
 
 #endif //DEMOC_GLUTILS_H

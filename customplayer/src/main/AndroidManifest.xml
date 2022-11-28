@@ -17,7 +17,12 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".activity.TestActivity"/>
+            android:name=".OpusOperationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CameraLearnActivity"
+            android:exported="false" />
+        <activity android:name=".activity.TestActivity" />
         <activity android:name=".activity.ffmpeg.FFmpegMuxerActivity" />
         <activity
             android:name=".activity.ffmpeg.FFmpegGLESMuxerActivity"
@@ -47,6 +52,14 @@
             android:theme="@style/AppThemeNoActionBar" />
         <activity
             android:name=".activity.hw.PlayerDecodeHwOpenGLESActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar" />
+        <activity
+            android:name=".activity.cameralearn.CameraLearnActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/AppThemeNoActionBar" />
+        <activity
+            android:name=".opus.OpusOperationActivity"
             android:configChanges="screenSize|orientation"
             android:theme="@style/AppThemeNoActionBar" />
         <activity

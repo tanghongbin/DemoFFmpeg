@@ -16,17 +16,20 @@ AudioRecordPlayHelper *AudioRecordPlayHelper::instance = nullptr;
 #define TEST_RECORD_FILE false
 
 void AudioRecordPlayHelper::startCapture(RecordCall  encodeInstance) {
+    startCapture(encodeInstance,SAMPLERATE,CHANNELS,FRAME_SIZE);
+}
 
+void AudioRecordPlayHelper::startCapture(RecordCall encodeInstance,int sampleRate,int channels,int frameSize){
 #if TEST_RECORD_FILE
     long long int startTime = GetSysCurrentTime();
-    FILE *fp = fopen(TEST_CAPTURE_FILE_PATH, "wb");
+    FILE *fp = fopen(TEST_CAPTURE_FILE_PATH, "wb+");
     if (fp == NULL) {
         LOGCATE("cannot open file (%s) !\n", TEST_CAPTURE_FILE_PATH);
         return;
     }
 #endif
-    OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(SAMPLERATE, CHANNELS, CHANNELS,
-                                                               FRAME_SIZE);
+    OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(sampleRate, channels, channels,
+                                                               frameSize);
     int samples;
     uint8_t buffer[BUFFER_SIZE];
     g_loop_exit = 0;
@@ -41,12 +44,16 @@ void AudioRecordPlayHelper::startCapture(RecordCall  encodeInstance) {
             break;
         }
         LOGCATE("数量:%d",samples);
-        if (fwrite((unsigned char *) buffer, BUFFER_SIZE, 1, fp) != 1) {
+        uint16_t convertBuffer[BUFFER_SIZE/2];
+        uInt8ToUInt16(buffer,convertBuffer,BUFFER_SIZE/2);
+        uint8_t resultBackUInt8Buffer[BUFFER_SIZE];
+        uInt16ToUInt8(convertBuffer,resultBackUInt8Buffer,BUFFER_SIZE/2);
+        if (fwrite((unsigned char *) resultBackUInt8Buffer, BUFFER_SIZE, 1, fp) != 1) {
             LOGCATE("failed to save captured data !\n ");
             break;
         }
 #else
-            encodeInstance(buffer, samples);
+        encodeInstance(buffer, samples);
 #endif
 //        LOGCATE("capture %d samples !\n", samples);
     }
@@ -73,15 +80,23 @@ int AudioRecordPlayHelper::getBufferSize() {
     return 0;
 }
 
-void AudioRecordPlayHelper::startPlayBack() {
-    FILE *fp = fopen(TEST_CAPTURE_FILE_PATH, "rb");
+void AudioRecordPlayHelper::startPlayBack(){
+    startPlayBack(SAMPLERATE, CHANNELS,FRAME_SIZE);
+}
+
+void AudioRecordPlayHelper::startPlayBack(int sampleRate,int channels,int frameSize){
+    startPlayBack(TEST_CAPTURE_FILE_PATH,sampleRate, channels,frameSize);
+}
+
+void AudioRecordPlayHelper::startPlayBack(const char * path,int sampleRate,int channels,int frameSize) {
+    FILE *fp = fopen(path, "rb");
     if (fp == NULL) {
-        LOGCATE("cannot open file (%s) !\n", TEST_CAPTURE_FILE_PATH);
+        LOGCATE("cannot open file (%s) !\n", path);
         return;
     }
 
-    OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(SAMPLERATE, CHANNELS, CHANNELS,
-                                                               FRAME_SIZE);
+    OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(sampleRate, channels, channels,
+                                                               frameSize);
     if (stream == NULL) {
         fclose(fp);
         LOGCATE("failed to open audio device ! \n");

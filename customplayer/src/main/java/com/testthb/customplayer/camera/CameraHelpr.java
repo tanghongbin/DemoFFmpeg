@@ -16,6 +16,10 @@ import java.util.List;
  * Created by zhaoshuang on 2018/7/20.
  */
 
+/***
+ * camera1 现在基本已经废弃了
+ */
+@Deprecated()
 public class CameraHelpr {
 
     //默认录制大小

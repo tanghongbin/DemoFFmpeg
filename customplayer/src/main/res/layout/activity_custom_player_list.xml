@@ -9,6 +9,10 @@
     android:paddingStart="10dp"
     android:paddingTop="10dp"
     tools:context=".activity.CustomPlayerListActivity">
+    <HorizontalScrollView
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_50dp">
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -20,6 +24,7 @@
             android:layout_height="wrap_content"/>
 
         <Button
+            android:visibility="gone"
             android:id="@+id/startWebrtc"
             android:text="webrtc"
             android:layout_width="wrap_content"
@@ -30,11 +35,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
+            android:visibility="gone"
             android:id="@+id/recordShortVideo"
             android:text="短视频"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+        <Button
+            android:visibility="gone"
+            android:id="@+id/camera2Learn"
+            android:text="camera2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:visibility="gone"
+            android:id="@+id/opus"
+            android:text="opus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
+    </HorizontalScrollView>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:id="@+id/mRecyclePlayer"
