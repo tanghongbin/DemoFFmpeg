@@ -10,6 +10,7 @@ import top.oply.opuslib.Utils
 
 class SplashActivity : AppCompatActivity() {
     val fileName = "/storage/emulated/0/ffmpegtest/opus/test_valid.ops"
+    var isRecording = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
@@ -21,6 +22,18 @@ class SplashActivity : AppCompatActivity() {
                     val result = Utils.isFileExist(fileName)
                     OpusService.play(this,fileName)
                 }
+        }
+        clickRecord.setOnClickListener {
+            isRecording = !isRecording
+            clickRecord.text = if (isRecording) "停止录制" else "开始录制"
+            if (isRecording) {
+                OpusService.record(this,fileName)
+            } else {
+                OpusService.stopRecording(this)
+            }
+        }
+        playPcm.setOnClickListener {
+
         }
     }
 }

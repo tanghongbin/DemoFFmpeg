@@ -19,11 +19,13 @@ private:
     static void realStartCapture();
     static void realStartDecode();
     FILE* file;
+    FILE* tempPcmFile;
     OpusEncoder* opusEncoder;
     std::thread* encodeThread;
     std::thread* decodeThread;
     int64_t startTime;
     const char * opusPath;
+    const char * tempPcmPath;
 public:
     NativeOpusHelper();
     ~NativeOpusHelper();
@@ -31,6 +33,7 @@ public:
     void startEncode();
     void stopEncode();
     void startPlay();
+    void playPcm();
     void destroy();
 };
 

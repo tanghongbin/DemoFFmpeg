@@ -19,7 +19,11 @@ void AudioRecordPlayHelper::startCapture(RecordCall  encodeInstance) {
     startCapture(encodeInstance,SAMPLERATE,CHANNELS,FRAME_SIZE);
 }
 
-void AudioRecordPlayHelper::startCapture(RecordCall encodeInstance,int sampleRate,int channels,int frameSize){
+void AudioRecordPlayHelper::startCapture(RecordCall encodeInstance,int sampleRate,int channels,int frameSize) {
+    startCapture(encodeInstance,sampleRate,channels,frameSize,BUFFER_SIZE);
+}
+
+void AudioRecordPlayHelper::startCapture(RecordCall encodeInstance,int sampleRate,int channels,int frameSize,int bufferSize){
 #if TEST_RECORD_FILE
     long long int startTime = GetSysCurrentTime();
     FILE *fp = fopen(TEST_CAPTURE_FILE_PATH, "wb+");
@@ -29,13 +33,13 @@ void AudioRecordPlayHelper::startCapture(RecordCall encodeInstance,int sampleRat
     }
 #endif
     OPENSL_STREAM *stream = OpenSL_IO::android_OpenAudioDevice(sampleRate, channels, channels,
-                                                               frameSize);
-    int samples;
-    uint8_t buffer[BUFFER_SIZE];
+                                                               bufferSize);
+    int audioOutBufferSize; // 音频输出的bytes字节数
+    uint8_t buffer[bufferSize];
     g_loop_exit = 0;
     while (!g_loop_exit) {
-        samples = OpenSL_IO::android_AudioIn(stream, buffer, BUFFER_SIZE);
-        if (samples < 0) {
+        audioOutBufferSize = OpenSL_IO::android_AudioIn(stream, buffer, bufferSize);
+        if (audioOutBufferSize < 0) {
             LOGCATE("android_AudioIn failed !\n");
             break;
         }
@@ -44,16 +48,17 @@ void AudioRecordPlayHelper::startCapture(RecordCall encodeInstance,int sampleRat
             break;
         }
         LOGCATE("数量:%d",samples);
-        uint16_t convertBuffer[BUFFER_SIZE/2];
-        uInt8ToUInt16(buffer,convertBuffer,BUFFER_SIZE/2);
-        uint8_t resultBackUInt8Buffer[BUFFER_SIZE];
-        uInt16ToUInt8(convertBuffer,resultBackUInt8Buffer,BUFFER_SIZE/2);
-        if (fwrite((unsigned char *) resultBackUInt8Buffer, BUFFER_SIZE, 1, fp) != 1) {
+        uint16_t convertBuffer[bufferSize/2];
+        uInt8ToUInt16(buffer,convertBuffer,bufferSize/2);
+        uint8_t resultBackUInt8Buffer[bufferSize];
+        uInt16ToUInt8(convertBuffer,resultBackUInt8Buffer,bufferSize/2);
+        if (fwrite((unsigned char *) resultBackUInt8Buffer, bufferSize, 1, fp) != 1) {
             LOGCATE("failed to save captured data !\n ");
             break;
         }
 #else
-        encodeInstance(buffer, samples);
+
+        encodeInstance(buffer, audioOutBufferSize);
 #endif
 //        LOGCATE("capture %d samples !\n", samples);
     }
@@ -88,7 +93,12 @@ void AudioRecordPlayHelper::startPlayBack(int sampleRate,int channels,int frameS
     startPlayBack(TEST_CAPTURE_FILE_PATH,sampleRate, channels,frameSize);
 }
 
+
 void AudioRecordPlayHelper::startPlayBack(const char * path,int sampleRate,int channels,int frameSize) {
+    startPlayBack(path,sampleRate, channels,frameSize,BUFFER_SIZE);
+}
+
+void AudioRecordPlayHelper::startPlayBack(const char * path,int sampleRate,int channels,int frameSize,int bufferSize) {
     FILE *fp = fopen(path, "rb");
     if (fp == NULL) {
         LOGCATE("cannot open file (%s) !\n", path);
@@ -104,15 +114,15 @@ void AudioRecordPlayHelper::startPlayBack(const char * path,int sampleRate,int c
     }
 
     int samples;
-    uint8_t buffer[BUFFER_SIZE];
+    uint8_t buffer[bufferSize];
     g_loop_exit = 0;
     while (!g_loop_exit && !feof(fp)) {
         // todo there is something error
-        if (fread((uint8_t *) buffer, BUFFER_SIZE, 1, fp) != 1) {
+        if (fread((uint8_t *) buffer, bufferSize, 1, fp) != 1) {
             LOGCATE("failed to read data \n ");
             break;
         }
-        samples = OpenSL_IO::android_AudioOut(stream, buffer, BUFFER_SIZE);
+        samples = OpenSL_IO::android_AudioOut(stream, buffer, bufferSize);
         if (samples < 0) {
             LOGCATE("android_AudioOut failed !\n");
         }

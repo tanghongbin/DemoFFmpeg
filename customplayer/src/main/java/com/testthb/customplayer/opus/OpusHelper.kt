@@ -28,13 +28,21 @@ class OpusHelper {
         native_startPlayOpus()
     }
 
+    fun playPcm() {
+        native_playPcm()
+    }
+
+
     fun destroy(){
         native_destroyOpus()
     }
+
+
 
     private external fun native_initOpus(type:Int)
     private external fun native_startEncode()
     private external fun native_stopEncode()
     private external fun native_startPlayOpus()
     private external fun native_destroyOpus()
+    private external fun native_playPcm()
 }

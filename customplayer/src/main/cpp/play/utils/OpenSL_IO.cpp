@@ -280,7 +280,7 @@ SLresult OpenSL_IO::openSLPlayOpen(OPENSL_STREAM *p)
 }
 
 // open the android audio device for input and/or output
-OPENSL_STREAM * OpenSL_IO::android_OpenAudioDevice(int sr, int inchannels, int outchannels, int bufferframes)
+OPENSL_STREAM * OpenSL_IO::android_OpenAudioDevice(int sr, int inchannels, int outchannels, int buffersize)
 {
     OPENSL_STREAM *p;
     p = (OPENSL_STREAM *) calloc(sizeof(OPENSL_STREAM),1);
@@ -291,7 +291,7 @@ OPENSL_STREAM * OpenSL_IO::android_OpenAudioDevice(int sr, int inchannels, int o
     p->inlock = createThreadLock();
     p->outlock = createThreadLock();
 
-    if((p->outBufSamples = bufferframes*outchannels) != 0) {
+    if((p->outBufSamples = buffersize*outchannels) != 0) {
         if((p->outputBuffer[0] = (uint8_t *) calloc(p->outBufSamples, sizeof(uint8_t))) == NULL ||
            (p->outputBuffer[1] = (uint8_t *) calloc(p->outBufSamples, sizeof(uint8_t))) == NULL) {
             android_CloseAudioDevice(p);
@@ -299,7 +299,7 @@ OPENSL_STREAM * OpenSL_IO::android_OpenAudioDevice(int sr, int inchannels, int o
         }
     }
 
-    if((p->inBufSamples = bufferframes*inchannels) != 0){
+    if((p->inBufSamples = buffersize*inchannels) != 0){
         if((p->inputBuffer[0] = (uint8_t *) calloc(p->inBufSamples, sizeof(uint8_t))) == NULL ||
            (p->inputBuffer[1] = (uint8_t *) calloc(p->inBufSamples, sizeof(uint8_t))) == NULL){
             android_CloseAudioDevice(p);

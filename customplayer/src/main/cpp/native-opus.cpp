@@ -61,6 +61,12 @@ JNIEXPORT void JNICALL native_startPlayOpus(JNIEnv *env, jobject instance) {
 }
 
 
+JNIEXPORT void JNICALL native_playPcm(JNIEnv *env, jobject instance) {
+    NativeOpusHelper* opusHelper = getJniOpusPointFromJava();
+    if (opusHelper )opusHelper->playPcm();
+}
+
+
 JNIEXPORT void JNICALL native_destroyOpus(JNIEnv *env, jobject instance) {
     NativeOpusHelper* opusHelper = getJniOpusPointFromJava();
     if (opusHelper ) opusHelper->destroy();
@@ -80,6 +86,7 @@ static JNINativeMethod g_RenderMethods[] = {
         {"native_stopEncode",               "()V",            (void *) (native_stopEncode)},
         {"native_startPlayOpus",               "()V",            (void *) (native_startPlayOpus)},
         {"native_destroyOpus",               "()V",            (void *) (native_destroyOpus)},
+        {"native_playPcm",               "()V",            (void *) (native_playPcm)},
 };
 
 

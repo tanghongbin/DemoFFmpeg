@@ -7,8 +7,19 @@
     tools:context=".activity.SplashActivity">
 
     <Button
+        android:id="@+id/clickRecord"
+        android:text="点击录制"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Button
         android:id="@+id/clickDecode"
-        android:text="点击解码"
+        android:text="点击播放"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/playPcm"
+        android:text="播放录制得pcm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </androidx.appcompat.widget.LinearLayoutCompat>

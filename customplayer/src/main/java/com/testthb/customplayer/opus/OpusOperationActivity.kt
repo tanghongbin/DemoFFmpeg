@@ -36,6 +36,11 @@ class OpusOperationActivity : AppCompatActivity() {
         startPlay.setOnClickListener {
             opusHelper.startPlayOpus()
         }
+        playPcm.setOnClickListener {
+            Thread {
+                opusHelper.playPcm()
+            }.start()
+        }
     }
 
     override fun onDestroy() {

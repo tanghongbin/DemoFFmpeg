@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
-            android:visibility="gone"
+            android:visibility="visible"
             android:id="@+id/opus"
             android:text="opus"
             android:layout_width="wrap_content"

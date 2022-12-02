@@ -33,6 +33,8 @@ public:
 
     void startCapture(RecordCall);
 
+    void startCapture(RecordCall,int sampleRate,int channels,int frameSize,int bufferSize);
+
     void startCapture(RecordCall,int sampleRate,int channels,int frameSize);
 
     void stopCapture();
@@ -42,6 +44,8 @@ public:
     void startPlayBack(int sampleRate,int channels,int frameSize);
 
     void startPlayBack(const char * path,int sampleRate,int channels,int frameSize);
+
+    void startPlayBack(const char * path,int sampleRate,int channels,int frameSize,int bufferSize);
 
     void notify_weak();
 
